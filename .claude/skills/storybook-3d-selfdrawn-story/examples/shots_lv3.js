@@ -81,6 +81,9 @@ function coverage(sh, ltR) { return; /* v4.30 off: the mid-shot close-up cut sti
   const dir = new THREE.Vector3(back.x * ca - back.z * sa, 0, back.x * sa + back.z * ca), nd = Math.max(1.25, dist * .45);
   const tgt = best.clone().add(V(0, -.18, 0)); /* just below the face centre: face in the upper third */ camera.position.copy(tgt).addScaledVector(dir, nd).add(V(0, .06, 0)); camera.lookAt(tgt); camera.updateMatrixWorld(); POST.focus = camera.position.distanceTo(tgt); }
 const S = (id, t0, tr, fn, o = {}) => { const sh = { id, t0, tr, ...o }; sh.fn = (lt, t) => { fn(lt * SP, t * SP); coverage(sh, (globalThis.FRAME_T ?? t) - sh.t0); Wd.ambientAt(t, o.amb ?? AMBK()); Wd.clothAt(t); Wd.flamesAt(t); }; SHOTS.push(sh); };
+/* v4.32 perform(lt, [[t, ex], ...]): expression changes happen behind a blink (eyes shut ~4 frames around the swap) with a small head dip, never a hard cut */
+function pf(lt, keys) { let i = 0; for (let k = 0; k < keys.length; k++) if (lt >= keys[k][0]) i = k; const o = { ex: keys[i][1] };
+  for (let k = 1; k < keys.length; k++) { const d = lt - keys[k][0]; if (d > -.06 && d < .1) o.blink = true; if (d >= 0 && d < .32) o.head = [7 * Math.sin(Math.PI * d / .32), 0, 0]; } return o; }
 // ===================== EP3 (finale) set pieces =====================
 const K2_ = () => CHARS.kael2;   // Kael (the reborn body that vanished in ZERO)
 const PR = Wd.PROP;
@@ -146,7 +149,7 @@ E3('S06', 7.62, 'cut', (lt, t) => { // "และเก้าอี้ว่า�
 E3('S07', 9.58, 'dis', (lt, t) => { // "เพราะวันนี้ คือวันที่เธอกับเคลเคยสัญญาว่าจะแต่งงานกัน" - the promise, 100+ years ago
   moonLight(); BALC.visible = true; past(); POST.sat = .55; burnAt(.5 + .1 * Math.sin(t * 2));
   put(K(), BALC, { p: [.25, 0, -1.6], ry: -70, ex: 'happy', blink: blinkAt(t, 1), hL: [-.32, .45, .35], pL: [-1, -.3, 0] }); put(E_(), BALC, { p: [-.55, 0, -1.55], ry: 70, ex: 'happy', blink: blinkAt(t, 2), hR: [.32, .45, .35], pR: [1, -.3, 0] });
-  camB([-.2, 1.5, 2.6], [-.15, 1.5, -1.6], [-.15, 1.6, 1.0], [-.15, 1.55, -1.6], U(lt, 4.4, eIO), 44); }, { noCut: true });
+  camB([-.2, 1.5, 2.6], [-.15, 1.5, -1.6], [-.15, 1.6, 1.4], [-.15, 1.55, -1.6], U(lt, 4.4, eIO), 48); }, { noCut: true });
 E3('S08', 14.12, 'blur', (lt, t) => { // "ทั้งเมืองบอกว่าเขาตายไปแล้ว" - the town square, villagers gossip
   villNight({ hemiI: 1.4 }); VILL.visible = true;
   put(KN(1), VILL, { p: [3.6, 0, 5.4], ry: 60, ex: 'frown', talk: talkAt(t) }); put(KN(2), VILL, { p: [4.6, 0, 6.1], ry: -110, ex: 'sly' }); put(K2_(), VILL, { p: [99, 0, 99], visible: false });
@@ -156,10 +159,10 @@ E3('S09', 16.25, 'blur', (lt, t) => { // "แต่เอเลน่าไม�
   camH([-.4, 2.1, -9.0], [-1.1, 2.0, -10.85], [-.6, 2.08, -9.5], [-1.1, 2.0, -10.85], U(lt, 1.8, eOut), 40); });
 const yearShot = (i, webs, wilt, lit) => (lt, t) => { wedNight(); Wd.hallAt(t); YEAR[i].visible = true; nookAt({ webs, lit }); tintAt(['#0a1020', '#20140a', '#0a0a10'][i], .12 + .06 * Math.sin(t * 9));
   EL({ p: [-.75, .9, -10.3], ry: 15, ex: i === 2 ? 'sad' : 'calm', tears: i === 2 ? .45 : 0, gloom: i === 2 ? .5 : 0, hL: [-.12, .45, .35], hR: [.12, .45, .35], pL: [-1, -.3, 0], pR: [1, -.3, 0], hold: { R: { obj: bq(wilt), off: [-.06, .05, .05], rot: [0, 0, 0] } } });
-  const k = eIO(lt / 1.8); camH([.5 - k * .3, 2.2, -5.4 + k * .6], [.5, 1.85, -10.4], [.5 - k * .3, 2.2, -5.4 + k * .6], [.5, 1.85, -10.4], 0, 56); };
+  const k = eIO(lt / 1.8); camH([.1 - k * .3, 2.2, -5.2 + k * .6], [.15, 1.85, -10.4], [.1 - k * .3, 2.2, -5.2 + k * .6], [.15, 1.85, -10.4], 0, 58); };
 E3('S10', 18.06, 'cut', yearShot(0, 0, 0, 7), { noCut: true });       // "10 ปีผ่านไป"
-E3('S11', 19.84, 'cut', yearShot(1, 2, .5, 5), { noCut: true });      // "50 ปีผ่านไป"
-E3('S12', 21.60, 'cut', yearShot(2, 3, 1, 3), { noCut: true });       // "จนครบ 100 ปี"
+E3('S11', 19.84, 'dis', yearShot(1, 2, .5, 5), { noCut: true });      // "50 ปีผ่านไป"
+E3('S12', 21.60, 'dis', yearShot(2, 3, 1, 3), { noCut: true });       // "จนครบ 100 ปี"
 E3('S13', 23.68, 'cut', (lt, t) => { MIND = 0; // "คืนนั้นเธอถอดแหวน วางลงบนโต๊ะ" - close on the hand and the table
   wedNight(); Wd.hallAt(t); nookAt({ webs: 3, lit: 3, ring1: lt > 2.2 }); const k = sstep(.6, 2.2, lt);
   EL({ p: [-.55, .9, -10.6], ry: 40, ex: 'sad', tears: .6, hR: lp([.1, .55, .35], [.32, .48, .5], k), pR: [1, -.3, -.3], hL: [-.25, .35, .2], pL: [-1, 0, -.5] });
@@ -167,7 +170,7 @@ E3('S13', 23.68, 'cut', (lt, t) => { MIND = 0; // "คืนนั้นเธ�
   camH([.3, 2.9, -9.0], [.1, 1.7, -10.9], [.25, 2.7, -9.4], [.15, 1.72, -10.9], U(lt, 3.0, eOut), 42); }, { noCut: true });
 E3('S14', 26.76, 'cut', (lt, t) => { // "พอแล้ว! ฉันรอมามากพอแล้ว!" - she breaks
   wedNight(); Wd.hallAt(t); nookAt({ webs: 3, lit: 3 }); SH.a = .25; SH.t = t;
-  EL({ p: [-.55, .9, -10.6], ry: 20, ex: lt < 1.0 ? 'angry' : 'sad', tears: 1, talk: talkAt(t), pop: popAt(lt, .05, .12), hL: [-.32, .6, .4], hR: [.32, .6, .4], pL: [-1, -.3, -.3], pR: [1, -.3, -.3] });
+  EL({ p: [-.55, .9, -10.6], ry: 20, ...pf(lt, [[0, 'angry'], [1.0, 'sad']]), tears: 1, talk: talkAt(t), pop: popAt(lt, .05, .12), hL: [-.32, .6, .4], hR: [.32, .6, .4], pL: [-1, -.3, -.3], pR: [1, -.3, -.3] });
   camH([.2, 2.05, -8.9], [-.55, 2.0, -10.6], [-.1, 2.0, -9.4], [-.55, 2.0, -10.6], U(lt, 2.7, eOut), 40, -6); });
 E3('S15', 29.54, 'cut', (lt, t) => { MIND = 0; // "เธอเป่าเทียนเล่มสุดท้าย" - the last flame goes out
   hallLight({ hemiI: lerp(1.25, .7, sstep(.6, 1.2, lt)), sunI: .3, hemiS: '#7a70b0', fog: '#141022' }); Wd.hallAt(t); nookAt({ webs: 3, lit: lt < .8 ? 1 : 0 });
@@ -188,16 +191,16 @@ E3('S19', 35.60, 'cut', (lt, t) => { // "ก็ถูกผลักออก" -
   camH([0, 1.8, 1.2], [0, 2.5, 8.6], [0, 1.7, 2.2], [0, 2.5, 8.6], U(lt, 1.15, eOut), 52); });
 E3('S20', 36.75, 'cut', (lt, t) => { // "ชายคนหนึ่งยืนอยู่ตรงนั้น" - a silhouette in the light
   hallLight({ hemiI: .9 }); Wd.hallAt(t); doorAt(1); Wd.raysAt(HALL.localToWorld(V(0, 0, 8.2)), 1, t, '#fff2c0'); Wd.fogAt(HALL.localToWorld(V(0, 0, 7.6)), t, .8, '#fff0d0', 3);
-  put(K2_(), HALL, { p: [0, 0, 8.3], ry: 180, ex: 'calm', blink: blinkAt(t, 1) }); EL({ p: [-1.0, 0, 4.6], ry: 10, ex: 'shocked' }); pts0(HALL.localToWorld(V(0, 2.5, 6)), 40);
-  camH([-.6, 1.6, 1.0], [-.1, 1.8, 8.3], [-.4, 1.55, 1.8], [-.1, 1.8, 8.3], U(lt, 1.9, eIO), 46); });
+  put(K2_(), HALL, { p: [0, 0, 8.3], ry: 180, ex: 'calm', blink: blinkAt(t, 1) }); EL({ p: [-.6, 0, 3.6], ry: 10, ex: 'shocked', tears: .5 }); pts0(HALL.localToWorld(V(0, 2.5, 6)), 40);
+  camH([.5, 2.7, .6], [0, 1.5, 8.3], [.4, 2.6, 1.3], [0, 1.55, 8.3], U(lt, 1.9, eIO), 50); });
 E3('S21', 38.63, 'cut', (lt, t) => { // "เสื้อขาด ตัวเปื้อนฝุ่น" - tilt down the dusty traveller
   hallLight({ hemiI: 1.0 }); Wd.hallAt(t); doorAt(1); Wd.raysAt(HALL.localToWorld(V(0, 0, 8.2)), .8, t, '#fff2c0'); POST.sat = .8;
   put(K2_(), HALL, { p: [0, 0, 7.4], ry: 180, ex: 'calm', blink: blinkAt(t, 1) }); for (let i = 0; i < 4; i++) smokeAt(HALL.localToWorld(V((i - 1.5) * .25, .9 + (i % 2) * .4, 7.2)), (lt * .8 + i * .3) % 1.6, { col: '#b8a888', size: .35, life: 1.6 });
   camH([.3, 2.0, 5.6], [0, 1.9, 7.4], [.3, 1.2, 5.4], [0, .9, 7.4], U(lt, 2.3, eIO), 42); }, { noCut: true });
 E3('S22', 40.93, 'cut', (lt, t) => { // "แต่รอยยิ้มนั้น ยังเหมือนเดิม" - the smile
   hallLight({ hemiI: 1.1 }); Wd.hallAt(t); doorAt(1); Wd.raysAt(HALL.localToWorld(V(0, 0, 8.2)), .7, t, '#fff2c0');
-  put(K2_(), HALL, { p: [0, 0, 7.0], ry: 180, ex: lt > .5 ? 'happy' : 'calm', pop: popAt(lt, .5, .06), blink: false, tears: .3 });
-  camH([-.35, 1.5, 5.3], [0, 1.45, 7.0], [-.2, 1.47, 5.8], [0, 1.45, 7.0], U(lt, 2.3, eOut), 40); }, { noCut: true });
+  put(K2_(), HALL, { p: [0, 0, 7.0], ry: 180, ...pf(lt, [[0, 'calm'], [.5, 'happy']]), pop: popAt(lt, .5, .06), tears: .3 });
+  camH([-1.6, 1.25, 5.6], [0, 1.5, 7.0], [-1.3, 1.35, 5.4], [0, 1.5, 7.0], U(lt, 2.3, eOut), 42); }, { noCut: true });
 E3('S23', 43.26, 'cut', (lt, t) => { // "ขอโทษที่มาสาย... เจ้าสาวของฉัน" - over Elena's shoulder
   hallLight({ hemiI: 1.1 }); Wd.hallAt(t); doorAt(1); Wd.raysAt(HALL.localToWorld(V(0, 0, 8.2)), .6, t, '#fff2c0');
   put(K2_(), HALL, { p: [0, 0, 6.2], ry: 180, ex: 'happy', talk: talkAt(t), hR: [.25, .55, .35], pR: [1, -.3, -.3] }); EL({ p: [-.5, 0, 4.4], ry: 10, ex: 'shocked', tears: .5 });
@@ -228,9 +231,9 @@ E3('S29', 58.88, 'cut', (lt, t) => { // "และเขาใช้เวลา
 E3('S30', 62.85, 'blur', (lt, t) => { // "เขาหยิบแหวนบนโต๊ะ แล้วสวมให้เธออีกครั้ง"
   wedNight(); Wd.hallAt(t); NOOK.visible = false; const k = sstep(1.2, 2.4, lt);
   put(K2_(), HALL, { p: [.45, .9, -10.4], ry: -80, ex: 'happy', hR: lp([.3, .45, .3], [.25, .55, .5], k), pR: [1, -.3, -.3] });
-  EL({ p: [-.45, .9, -10.4], ry: 80, ex: k > .7 ? 'happy' : 'sad', tears: .8, hL: [-.2, .5, .45], pL: [-1, -.3, -.3] });
+  EL({ p: [-.45, .9, -10.4], ry: 80, ...pf(lt, [[0, 'sad'], [1.98, 'happy']]), tears: .8, hL: [-.2, .5, .45], pL: [-1, -.3, -.3] });
   RINGH.visible = true; RINGH.position.copy(W(K2_(), lp([.3, .48, .33], [.25, .58, .53], k))); if (k > .9) sparkAt(RINGH.position.clone(), .8, .6);
-  camH([0, 2.0, -7.2], [0, 1.85, -10.4], [0, 1.95, -8.0], [0, 1.85, -10.4], U(lt, 2.9, eOut), 42); }, { noCut: true });
+  camH([0, 2.2, -6.6], [0, 2.05, -10.4], [0, 2.15, -7.4], [0, 2.0, -10.4], U(lt, 2.9, eOut), 50); }, { noCut: true });
 E3('S31', 65.75, 'cut', (lt, t) => { // "คืนนั้น งานแต่งงานที่ไม่เคยมีเจ้าบ่าว" - every candle burns again
   wedNight(); Wd.hallAt(t); nookAt({ webs: 0, lit: 7 }); Wd.raysAt(HALL.localToWorld(V(0, 0, -11)), .5, t, '#ffe0a0');
   put(K2_(), HALL, { p: [.4, .3, -10.0], ry: -20, ex: 'happy', hL: [-.3, .45, .3], pL: [-1, -.3, 0] }); EL({ p: [-.4, .3, -10.0], ry: 20, ex: 'happy', tears: .45, hR: [.3, .45, .3], pR: [1, -.3, 0] });

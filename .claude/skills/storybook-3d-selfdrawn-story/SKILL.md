@@ -150,6 +150,16 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    v4.31 EMOTION: pose P.tears 0..1 (.3 glistening eyes, .6 streams, 1 streams + falling drops; drawn on the 2D overlay
    from headBall(C), so avoid it when another head blocks the face) and P.gloom for sorrow. Use them on every emotional
    beat: tears make sad/reunion scenes land.
+   v4.32 PERFORM + AUDIT (user's reference slides):
+   - Expression changes: ...pf(lt, [[0, 'calm'], [.6, 'happy']]) - the swap hides behind a ~4-frame blink with a small
+     head dip; never `ex: lt > x ? a : b` (a hard cut on the face). Don't put a later blink:/head: in the same pose.
+   - After building shots run `node tools/audit.js <project> <t...>` (3 samples per shot): per character in frame?
+     blocked by a nearer character? head >= 5% of the screen? and compare consecutive shots: a 'cut' where the camera
+     moved < 1.6 m and < 22 deg on the same characters is a JUMP CUT -> make it one continuous take (same camera, blink
+     the expression change) or a different angle (~30 deg+), or 'dis' for time passing. Intentional off-frame heads
+     (over-the-shoulder, macro of hands/props, pull-back to sky) are fine - check the rest with stills.
+   - 4-step camera for reveal beats: wide hold (the setting) -> push in (the one who acts) -> FAST zoom out (everyone
+     reacts, eOut over ~.7 s) -> group shot. Characters in a confrontation face each other (check ry with a still).
    v4.13 extra physics: the head (and hat/headband art) lags and wobbles on starts/stops/turns; held props never sink
    into the body (hold entry noClip / clear); flyPath(..., {walls: [{axis: 'x'|'z', at, n, e}]}) bounces off walls;
    makeRope/updateRope (sagging, swaying rope/leash/chain) and makeFlag/waveFlag (flag, cloth, cape in the wind).

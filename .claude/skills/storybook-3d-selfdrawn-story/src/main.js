@@ -165,6 +165,18 @@ function progress(t) { if (!project.progressBar) return; const u = Math.min(1, t
 const DIS = .28, WH = .22, BLR = .4;
 function keyZoom(t) { if (!project.keyZoom) return 1; const c = timing.caps.find(c => t >= c[0] && t < c[1]); if (!c) return 1; const hi = /\*(.+?)\*/.test(c[2]) || /[0-9๐-๙]/.test(c[2]) || (project.hiWords || []).some(w => c[2].includes(w));
   const a = t - c[0]; return hi ? 1 + .028 * FXL * Math.sin(Math.PI * Math.min(1, a / .45)) : 1; } // gentle push-in on highlighted words
+
+// v4.32 beat audit (tools/audit.js): per visible character -> in frame? blocked by someone nearer? head width as % of screen. + camera for jump-cut checks
+window.audit = (t) => { window.frame(t, { nocap: true }); const cam = E.camera, out = { t, cam: cam.position.toArray(), dir: new E.THREE.Vector3(0, 0, -1).transformDirection(cam.matrixWorld).toArray(), chars: [] };
+  const P = (v) => { const q = v.clone().project(cam); return [(q.x + 1) / 2, (1 - q.y) / 2, q.z]; }, boxes = [];
+  for (const C of Object.values(CHARS)) { if (!C.sb || !C.sb.visible) continue; const B = headBall(C); if (!B) continue; const c = P(B.c), e = P(B.c.clone().addScaledVector(B.right, B.r));
+    const r = Math.hypot(e[0] - c[0], (e[1] - c[1]) * 16 / 9), d = cam.position.distanceTo(B.c); const sb = C.sb, hw = sb.scale.x / 2, hh = sb.scale.y / 2;
+    const R = new E.THREE.Vector3(1, 0, 0).applyQuaternion(sb.quaternion), U = new E.THREE.Vector3(0, 1, 0).applyQuaternion(sb.quaternion);
+    const cs = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([a, b]) => P(sb.position.clone().addScaledVector(R, a * hw).addScaledVector(U, b * hh)));
+    boxes.push({ id: C.spec.id, d, x0: Math.min(...cs.map(q => q[0])), x1: Math.max(...cs.map(q => q[0])), y0: Math.min(...cs.map(q => q[1]), c[1] - r), y1: Math.max(...cs.map(q => q[1])) });
+    out.chars.push({ id: C.spec.id, x: c[0], y: c[1], r, d, view: C.view, inFrame: c[0] - r > -.02 && c[0] + r < 1.02 && c[1] - r * .5625 > -.02 && c[1] < 1 && c[2] < 1 }); }
+  for (const h of out.chars) { h.headPct = +(h.r * 2 * 100).toFixed(1); h.blockedBy = boxes.filter(b => b.id !== h.id && b.d < h.d - .05 && h.x > b.x0 && h.x < b.x1 && h.y > b.y0 && h.y < b.y1).map(b => b.id); }
+  return out; };
 window.frame = (t, opts = {}) => { ZP = keyZoom(t); globalThis.FRAME_T = t; // v4.24 shots can tell the frame being drawn from the smoothing look-backs
   let i = SHOTS.length - 1; for (let k = 0; k < SHOTS.length; k++) if (t < SHOTS[k].t1) { i = k; break; }
   const sh = SHOTS[i], lt = t - sh.t0;

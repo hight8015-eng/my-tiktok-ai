@@ -81,6 +81,9 @@ function coverage(sh, ltR) { return; /* v4.30 off: the mid-shot close-up cut sti
   const dir = new THREE.Vector3(back.x * ca - back.z * sa, 0, back.x * sa + back.z * ca), nd = Math.max(1.25, dist * .45);
   const tgt = best.clone().add(V(0, -.18, 0)); /* just below the face centre: face in the upper third */ camera.position.copy(tgt).addScaledVector(dir, nd).add(V(0, .06, 0)); camera.lookAt(tgt); camera.updateMatrixWorld(); POST.focus = camera.position.distanceTo(tgt); }
 const S = (id, t0, tr, fn, o = {}) => { const sh = { id, t0, tr, ...o }; sh.fn = (lt, t) => { fn(lt * SP, t * SP); coverage(sh, (globalThis.FRAME_T ?? t) - sh.t0); Wd.ambientAt(t, o.amb ?? AMBK()); Wd.clothAt(t); Wd.flamesAt(t); }; SHOTS.push(sh); };
+/* v4.32 perform(lt, [[t, ex], ...]): expression changes happen behind a blink (eyes shut ~4 frames around the swap) with a small head dip, never a hard cut */
+function pf(lt, keys) { let i = 0; for (let k = 0; k < keys.length; k++) if (lt >= keys[k][0]) i = k; const o = { ex: keys[i][1] };
+  for (let k = 1; k < keys.length; k++) { const d = lt - keys[k][0]; if (d > -.06 && d < .1) o.blink = true; if (d >= 0 && d < .32) o.head = [7 * Math.sin(Math.PI * d / .32), 0, 0]; } return o; }
 // ===================== EP2 set pieces =====================
 const K2_ = () => CHARS.kael2;   // Kael reborn: the village boy with the red eyes
 const PR = Wd.PROP;
@@ -146,26 +149,29 @@ E2('S06', 14.16, 'cut', (lt, t) => { // "ขอโทษที่มาช้า
   camH([-.5, 1.5, 2.6], [0, 1.42, 5.4], [-.2, 1.45, 3.6], [0, 1.42, 5.4], U(lt, 2.3, eOut), 44); });
 E2('S07', 16.46, 'cut', (lt, t) => { // "ลูเซียนหน้าซีด ดาบในมือสั่น"
   hallLight(); Wd.hallAt(t); SWORD.visible = true; const sh = Math.sin(t * 60) * 6;
-  put(L(), HALL, { p: [.75, .6, -11.0], ry: 180, ex: 'scared', sweat: true, hR: [.3, .5, .3], pR: [1, -.3, -.3], hold: { R: { obj: SWORD, off: [0, -.01, .02], rot: [40 + sh, sh * .5, 0], mass: .4 } } });
-  camH([1.3, 2.05, -13.8], [.75, 2.0, -11.0], [1.0, 2.0, -13.0], [.75, 2.0, -11.0], U(lt, 2.5, eOut), 44); });
+  put(L(), HALL, { p: [.75, .6, -11.0], ry: 0, ex: 'scared', sweat: true, hR: [.3, .5, .3], pR: [1, -.3, -.3], hold: { R: { obj: SWORD, off: [0, -.01, .02], rot: [40 + sh, sh * .5, 0], mass: .4 } } });
+  camH([1.3, 2.05, -8.2], [.75, 2.0, -11.0], [1.0, 2.0, -9.0], [.75, 2.0, -11.0], U(lt, 2.5, eOut), 44); });
 E2('S08', 19.35, 'cut', (lt, t) => { // "เป็นไปไม่ได้... ข้าฆ่าเจ้าไปแล้ว" - over Kael's shoulder
   hallLight(); Wd.hallAt(t); SWORD.visible = true;
-  put(L(), HALL, { p: [.75, .6, -11.0], ry: 180, ex: 'angry', talk: talkAt(t), sweat: true, hR: [.35, .62, .45], pR: [1, -.3, -.3], hold: { R: { obj: SWORD, off: [0, -.01, .02], rot: [85, 0, 0], mass: .4 } } });
-  put(K2_(), HALL, { p: [-.2, 0, -7.6], ry: 170, ex: 'calm', eyeC: '#ff2030', ...hip });
-  camH([-1.8, 2.1, -4.6], [.6, 1.7, -11], [-1.5, 2.0, -5.4], [.7, 1.7, -11], U(lt, 2.3, eIO), 40); });
+  put(L(), HALL, { p: [.75, .6, -11.0], ry: 0, ex: 'angry', talk: talkAt(t), sweat: true, hR: [.35, .62, .45], pR: [1, -.3, -.3], hold: { R: { obj: SWORD, off: [0, -.01, .02], rot: [85, 0, 0], mass: .4 } } });
+  put(K2_(), HALL, { p: [-.2, 0, -7.6], ry: 170, ex: 'calm', eyeC: '#ff2030', ...hip }); chainsOn(0);
+  put(E_(), HALL, { p: [0, .9, -11.6], ry: 0, ex: 'shocked', tears: .35, hL: [-.62, .78, .1], hR: [.62, .78, .1], pL: [-1, -.3, -.3], pR: [1, -.3, -.3] });
+  put(A(), HALL, { p: [-1.6, .6, -12.2], ry: 40, ex: 'shocked', pop: popAt(lt, .5, .08) });
+  /* 4-step camera, step 3: hold on Lucien, then a FAST zoom out so everyone's shock is seen at once */
+  const zo = eOut(sstep(.45, 1.15, lt)); camH(lp([1.2, 2.0, -9.0], [-1.6, 3.0, -3.4], zo), lp([.75, 1.9, -11], [0, 1.6, -11], zo), lp([1.2, 2.0, -9.0], [-1.6, 3.0, -3.4], zo), lp([.75, 1.9, -11], [0, 1.6, -11], zo), 0, lerp(40, 52, zo)); }, { noCut: true });
 E2('S09', 21.97, 'cut', (lt, t) => { // "เขาไม่แม้แต่จะหันไปมอง" - he walks straight past Lucien
   hallLight(); Wd.hallAt(t); SWORD.visible = true; const z = -8.2 - lt * .9;
   put(L(), HALL, { p: [1.4, .3, -10.4], ry: -110, ex: 'shocked', hR: [.35, .55, .4], pR: [1, -.3, -.3], hold: { R: { obj: SWORD, off: [0, -.01, .02], rot: [70, 0, 0] } } });
   put(K2_(), HALL, { p: [0, Math.max(0, (-z - 10.7) * .25), z], ry: 180, ex: 'calm', eyeC: '#ff2030', walk: { ph: lt * 7, stride: .2 } });
-  camH([3.4, 1.6, -7.2], [0, 1.4, z], [3.0, 1.7, -8.4], [0, 1.4, z - .5], U(lt, 2.1, eIO), 48); });
+  camH([3.2, 1.7, -5.6], [.7, 1.4, -9.6], [2.6, 1.8, -6.6], [.6, 1.4, -10.2], U(lt, 2.1, eIO), 52); });
 E2('S10', 24.02, 'cut', (lt, t) => { // "แค่ดีดนิ้ว" - the snap
   hallLight(); Wd.hallAt(t); const k = sstep(.25, .45, lt);
-  put(K2_(), HALL, { p: [0, .3, -10.2], ry: 180, ex: k > .5 ? 'evil' : 'sly', eyeC: '#ff2030', ...flick(k), fast: true }); const h = W2(K2_(), [.62, .8, .55]);
+  put(K2_(), HALL, { p: [0, .3, -10.2], ry: 180, ...pf(lt, [[0, 'sly'], [.35, 'evil']]), eyeC: '#ff2030', ...flick(k), fast: true }); const h = W2(K2_(), [.62, .8, .55]);
   if (lt > .4) { sparkAt(h, 1, 1.3); shockAt(h, (lt - .4) / .6, .5, '#ff5070'); }
   camH([-.9, 1.7, -11.8], [.12, 1.6, -10.2], [-.6, 1.65, -11.4], [.12, 1.6, -10.2], U(lt, 1.3, eOut), 44); });
 E2('S11', 25.35, 'cut', (lt, t) => { // "โซ่ทุกเส้นก็ขาดสะบั้น" - chains burst, she drops free
   hallLight(); Wd.hallAt(t, { circle: .6 * (1 - lt) }); const k = sstep(0, .8, lt); chainsOn(k);
-  put(E_(), HALL, { p: [0, .9 - sstep(.7, 1.1, lt) * .15, -11.6], ry: 0, ex: k > .9 ? 'shocked' : 'scared', tears: .35, hL: lp([-.62, .78, .1], [-.3, .35, .1], sstep(.7, 1.1, lt)), hR: lp([.62, .78, .1], [.3, .35, .1], sstep(.7, 1.1, lt)), pL: [-1, -.3, -.3], pR: [1, -.3, -.3] });
+  put(E_(), HALL, { p: [0, .9 - sstep(.7, 1.1, lt) * .15, -11.6], ry: 0, ...pf(lt, [[0, 'scared'], [.65, 'shocked']]), tears: .35, hL: lp([-.62, .78, .1], [-.3, .35, .1], sstep(.7, 1.1, lt)), hR: lp([.62, .78, .1], [.3, .35, .1], sstep(.7, 1.1, lt)), pL: [-1, -.3, -.3], pR: [1, -.3, -.3] });
   for (let i = 0; i < 4; i++) if (lt > i * .2) sparkAt(HALL.localToWorld(V(i % 2 ? 1.2 : -1.2, i < 2 ? 2.8 : 2.2, -11.4)), Math.max(0, 1 - (lt - i * .2) * 3), 1.1);
   camH([0, 1.6, -7.6], [0, 1.7, -11.6], [0, 1.6, -8.6], [0, 1.7, -11.6], U(lt, 2.2, eIO), 48); });
 E2('S12', 27.54, 'cut', (lt, t) => { // "แต่ทุกอย่างสายไปแล้ว" - red cracks race across the floor
@@ -198,7 +204,7 @@ E2('S18', 39.39, 'blur', (lt, t) => { // "เหลืออยู่ทาง�
   camH([.3, 1.9, -12.6], [0, 1.85, -10.6], [.15, 1.85, -12.0], [0, 1.85, -10.6], U(lt, 1.4, eOut), 38); });
 E2('S19', 40.79, 'cut', (lt, t) => { // "เขาหันมายิ้มให้เอเลน่า" - over Elena's shoulder
   hallLight(); Wd.hallAt(t); RUIN.visible = true; put(E_(), HALL, { p: [-.4, .6, -11.4], ry: 30, ex: 'sad', blink: blinkAt(t, 2) });
-  put(K2_(), HALL, { p: [.6, .6, -10.4], ry: lerp(160, 230, sstep(0, .8, lt)), ex: lt > .6 ? 'happy' : 'determined', eyeC: '#ff2030', pop: popAt(lt, .7, .08) });
+  put(K2_(), HALL, { p: [.6, .6, -10.4], ry: lerp(160, 230, sstep(0, .8, lt)), ...pf(lt, [[0, 'determined'], [.6, 'happy']]), eyeC: '#ff2030', pop: popAt(lt, .7, .08) });
   camH([-1.3, 2.0, -13.4], [.6, 1.85, -10.4], [-1.0, 1.95, -13.0], [.6, 1.85, -10.4], U(lt, 1.9, eIO), 46); });
 E2('S20', 42.68, 'dis', (lt, t) => { // "ยิ้มแบบที่เธอจำได้ดี" - a flash of the old smile, 100 years ago
   moonLight(); BALC.visible = true; past(); POST.sat = .5; burnAt(.55); put(K(), BALC, { p: [.3, 0, -1.6], ry: 20, ex: 'happy', blink: blinkAt(t, 1), ...hip });
@@ -207,7 +213,7 @@ E2('S21', 44.60, 'dis', (lt, t) => { // "ยิ้มก่อนเขาจะ
   hallLight(); Wd.hallAt(t); RUIN.visible = true; put(K2_(), HALL, { p: [.6, .6, -10.4], ry: 230, ex: 'smug', eyeC: '#ff2030', blink: false, ...hip });
   camH([-.6, 1.8, -12.0], [.6, 1.75, -10.4], [-.3, 1.78, -11.5], [.6, 1.75, -10.4], U(lt, 2.0, eOut), 38); });
 E2('S22', 46.66, 'cut', (lt, t) => { // "รอฉันนะ"
-  hallLight(); Wd.hallAt(t); RUIN.visible = true; put(K2_(), HALL, { p: [.6, .6, -10.4], ry: 230, ex: 'calm', eyeC: '#ff2030', talk: talkAt(t), blink: false, tears: .35 });
+  hallLight(); Wd.hallAt(t); RUIN.visible = true; put(K2_(), HALL, { p: [.6, .6, -10.4], ry: 230, ...pf(lt, [[0, 'smug'], [.12, 'calm']]), eyeC: '#ff2030', talk: talkAt(t), tears: .35 });
   camH([-.25, 1.85, -11.4], [.6, 1.8, -10.4], [-.15, 1.82, -11.2], [.6, 1.8, -10.4], U(lt, .9, eOut), 34); });
 E2('S23', 47.54, 'cut', (lt, t) => { // "เวทบทสุดท้าย" - white runes ring him, low angle
   hallLight({ hemiI: 1.2 }); Wd.hallAt(t); RUIN.visible = true; put(K2_(), HALL, { p: [0, .6, -10.6], ry: 180, ex: 'determined', eyeC: '#ffffff', hR: [.3, 1.05, .2], pR: [1, -.3, -.3], hL: [-.3, .3, .1], pL: [-1, 0, -.5] });
