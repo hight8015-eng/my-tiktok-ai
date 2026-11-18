@@ -160,6 +160,11 @@ If the user wants characters made in Flow from their own prompt, use the sister 
      (over-the-shoulder, macro of hands/props, pull-back to sky) are fine - check the rest with stills.
    - 4-step camera for reveal beats: wide hold (the setting) -> push in (the one who acts) -> FAST zoom out (everyone
      reacts, eOut over ~.7 s) -> group shot. Characters in a confrontation face each other (check ry with a still).
+   HELPER RENDER SESSIONS (user rule): before every full render, ASK the user whether to use helper sessions and how
+   many (each is a separate cloud session on the user's usage quota). Default = render on this machine only. If they
+   agree: push the project's src/ to render_jobs/<proj>/ on the work branch, create_session per helper with
+   `bash render_jobs/render_segments.sh render_jobs/<proj> <seg...>` + push the s_*.mp4 to its own branch, touch the
+   matching .ok files locally so rq.sh skips them, fetch + concat, then archive the helper sessions.
    NEXT STORY CHECKLIST (user asked to apply these from the start of the next story, refs = the user's slides):
    - HAIR LIBRARY: build reusable hair shapes in the mk script (target ~18: swoop, crop, slick, quiff, spiky, curly, afro,
      balding, combover, bob, long straight, ponytail, bun, braids, side part, buzz, wavy, hat-hair) with strand lines,
