@@ -99,6 +99,10 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    inner, tie, bowtie, zip, vest, buttons, buttonC, pocket: kangaroo|chest|chest4, pocketC, badge: star|tag,
    sideStripes, apron, scarf }. Without a uniform the colours are sampled from the costume sprite. Limbs are thin with
    no hull outline, and the body sits in front of the leg tops so legs come out from under it.
+   v4.17 costume layers (uniform keys): robe + inner + robeOpen + trim (open coat), highCollar, clasp, skirt + waistAt
+   (dress with pleats), lacing (bodice X lacing), sash + gem, plate (breastplate), mail (chain mail), tabard, stole,
+   emblem: cross|sun|eye (+ emblemC), edge (coloured trim inside the outline). Hair: draw smooth Catmull-Rom shapes
+   (see cr() in a story's mk script), long hair as a back layer drawn before the head ball, ending above y 840.
    v4.13 extra physics: the head (and hat/headband art) lags and wobbles on starts/stops/turns; held props never sink
    into the body (hold entry noClip / clear); flyPath(..., {walls: [{axis: 'x'|'z', at, n, e}]}) bounces off walls;
    makeRope/updateRope (sagging, swaying rope/leash/chain) and makeFlag/waveFlag (flag, cloth, cape in the wind).

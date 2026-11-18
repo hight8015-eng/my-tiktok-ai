@@ -417,6 +417,7 @@ function capsuleBody(im, o, U, view = 'F') { const W = im.width, H = im.height, 
   x.save(); path(); x.clip();
   if (!U) U = autoUniform(im);
   drawUniform(x, { cx, cy, cw, ch, W, H, lw, INK }, U, view);
+  if (U.edge) { x.lineWidth = lw * 2.2; x.strokeStyle = U.edge; path(); x.stroke(); } // coloured trim just inside the outline
   const g = x.createLinearGradient(cx, 0, cx + cw, 0); g.addColorStop(0, 'rgba(255,255,255,.10)'); g.addColorStop(.35, 'rgba(255,255,255,0)'); g.addColorStop(.7, 'rgba(20,16,40,0)'); g.addColorStop(.72, 'rgba(20,16,40,.15)'); g.addColorStop(1, 'rgba(20,16,40,.2)');
   x.fillStyle = g; x.fillRect(cx, cy, cw, ch); x.restore(); // cel shade: lit left, shaded right band
   x.lineWidth = lw; x.strokeStyle = INK; path(); x.stroke(); return c; }
@@ -432,7 +433,17 @@ function drawUniform(x, G, U, view) { const { cx, cy, cw, ch, lw, INK } = G, mid
   const poly = (pts, fill, stroke = true) => { x.beginPath(); pts.forEach((p, i) => i ? x.lineTo(...p) : x.moveTo(...p)); x.closePath(); x.fillStyle = fill; x.fill(); if (stroke) { x.lineWidth = thin; x.strokeStyle = INK; x.stroke(); } };
   x.fillStyle = U.base; x.fillRect(cx - 5, cy - 5, cw + 10, ch + 10);
   if (U.stripe) { const n = U.stripes || 9, bh = ch / n; x.fillStyle = U.stripe; for (let k = 1; k < n; k += 2) x.fillRect(cx - 5, cy + k * bh, cw + 10, bh); }
-  const pantsTop = cy + ch * (U.pantsAt ?? .72);
+  const pantsTop = cy + ch * (U.pantsAt ?? .72), waist = cy + ch * (U.waistAt ?? .5);
+  // v4.17 fantasy costume layers ---------------------------------------------------------------
+  if (U.skirt) { x.fillStyle = U.skirt; x.beginPath(); x.moveTo(cx - 5, waist); x.lineTo(cx + cw + 5, waist); x.lineTo(cx + cw + 5, cy + ch + 5); x.lineTo(cx - 5, cy + ch + 5); x.fill();
+    for (let k = 1; k < 6; k++) { const px = cx + cw * k / 6; line([[px + (px - mid) * .05, waist + ch * .06], [px + (px - mid) * .25, cy + ch]], thin * .7, 'rgba(34,34,58,.45)'); } line([[cx - 5, waist], [cx + cw + 5, waist]]); }
+  if (U.tabard && front) { const w2 = cw * .2; poly([[X0 - w2, cy - 5], [X0 + w2, cy - 5], [X0 + w2 * 1.1, cy + ch + 5], [X0 - w2 * 1.1, cy + ch + 5]], U.tabard); }
+  if (U.plate && front) { x.save(); x.beginPath(); x.ellipse(X0, cy + ch * .3, cw * .44, ch * .3, 0, 0, 7); x.fillStyle = U.plate; x.fill(); x.lineWidth = thin; x.strokeStyle = INK; x.stroke();
+    x.beginPath(); x.ellipse(X0 - cw * .14, cy + ch * .22, cw * .12, ch * .08, -.5, 0, 7); x.fillStyle = 'rgba(255,255,255,.55)'; x.fill(); x.restore(); line([[X0, cy + ch * .06], [X0, cy + ch * .54]], thin * .6, 'rgba(34,34,58,.5)'); }
+  if (U.robe && front) { const o = cw * (U.robeOpen ?? .1); x.fillStyle = U.inner || '#b0213a'; x.beginPath(); x.moveTo(X0 - o * .4, cy); x.quadraticCurveTo(X0 - o * 1.4, cy + ch * .5, X0 - o * 2.2, cy + ch + 5); x.lineTo(X0 + o * 2.2, cy + ch + 5); x.quadraticCurveTo(X0 + o * 1.4, cy + ch * .5, X0 + o * .4, cy); x.fill();
+    for (const sg of [-1, 1]) { x.beginPath(); x.moveTo(X0 + sg * o * .4, cy); x.quadraticCurveTo(X0 + sg * o * 1.4, cy + ch * .5, X0 + sg * o * 2.2, cy + ch + 5); x.lineWidth = thin * 1.6; x.strokeStyle = U.trim || INK; x.stroke(); x.lineWidth = thin * .6; x.strokeStyle = INK; x.stroke(); } }
+  if (U.stole && front) for (const sg of [-1, 1]) { const sx = X0 + sg * cw * .19; poly([[sx - cw * .06, cy - 5], [sx + cw * .06, cy - 5], [sx + cw * .07, cy + ch * .9], [sx - cw * .07, cy + ch * .9]], U.stole); line([[sx - cw * .07, cy + ch * .86], [sx + cw * .07, cy + ch * .86]], thin * 1.4, U.trim || '#e2b23c'); }
+  if (U.mail) { x.strokeStyle = 'rgba(34,34,58,.25)'; x.lineWidth = 2; for (let yy = cy + 8; yy < cy + ch; yy += 14) for (let xx = cx + ((yy / 14) % 2) * 7; xx < cx + cw; xx += 14) { x.beginPath(); x.arc(xx, yy, 6, 0, Math.PI); x.stroke(); } }
   if (U.vest && front) { const half = cw * .13; x.fillStyle = U.inner || '#d9d6cc'; x.fillRect(X0 - half, cy - 5, half * 2, pantsTop - cy + 5); line([[X0 - half, cy], [X0 - half, pantsTop]]); line([[X0 + half, cy], [X0 + half, pantsTop]]); }
   if (U.apron && front) { x.fillStyle = U.apron; x.fillRect(X0 - cw * .3, cy + ch * .3, cw * .6, ch * .7); line([[X0 - cw * .3, cy + ch * .3], [X0 + cw * .3, cy + ch * .3]]); line([[X0 - cw * .2, cy], [X0 - cw * .24, cy + ch * .3]], thin * 1.6, U.apron); line([[X0 + cw * .2, cy], [X0 + cw * .24, cy + ch * .3]], thin * 1.6, U.apron); }
   if (U.sideStripes) { const ofs = front ? [X0 - cw * .34, X0 + cw * .34] : view === 'S' ? [mid] : [cx + cw * .2, cx + cw * .8]; for (const sx of ofs) line([[sx, cy], [sx, pantsTop]], cw * .05, U.sideStripes); }
@@ -455,6 +466,15 @@ function drawUniform(x, G, U, view) { const { cx, cy, cw, ch, lw, INK } = G, mid
   if (U.pocket === 'chest') { x.lineWidth = thin; x.strokeStyle = INK; x.strokeRect(X0 + cw * .1, ny + ch * .26, cw * .17, ch * .1); }
   if (U.pocket === 'chest4') for (const sx of [-1, 1]) for (const k of [0, 1]) { x.fillStyle = U.pocketC || 'rgba(0,0,0,.12)'; const px = X0 + sx * cw * .3 - cw * .09, py = ny + ch * (.26 + k * .2); x.fillRect(px, py, cw * .18, ch * .11); x.lineWidth = thin; x.strokeStyle = INK; x.strokeRect(px, py, cw * .18, ch * .11); }
   if (U.badge === 'star') { const bx = X0 + cw * .22, by = ny + ch * .2, R = cw * .07; x.beginPath(); for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? R * .45 : R; x.lineTo(bx + Math.cos(a) * rr, by + Math.sin(a) * rr); } x.closePath(); x.fillStyle = '#f2c94c'; x.fill(); x.lineWidth = thin * .7; x.strokeStyle = INK; x.stroke(); }
+  if (U.lacing) { const y0 = ny + ch * .1, y1 = waist - ch * .03; for (let k = 0; k < 4; k++) { const ya = y0 + (y1 - y0) * k / 4, yb = y0 + (y1 - y0) * (k + 1) / 4; line([[X0 - cw * .06, ya], [X0 + cw * .06, yb]], thin * .7, U.lacing); line([[X0 + cw * .06, ya], [X0 - cw * .06, yb]], thin * .7, U.lacing); } }
+  if (U.sash) { x.fillStyle = U.sash; x.fillRect(cx - 5, waist - ch * .045, cw + 10, ch * .07); line([[cx - 5, waist - ch * .045], [cx + cw + 5, waist - ch * .045]], thin * .7); line([[cx - 5, waist + ch * .025], [cx + cw + 5, waist + ch * .025]], thin * .7);
+    x.fillStyle = U.gem || '#e2445a'; x.beginPath(); x.arc(X0, waist - ch * .01, cw * .045, 0, 7); x.fill(); x.lineWidth = thin * .7; x.strokeStyle = INK; x.stroke(); }
+  if (U.emblem) { const ex_ = X0, ey_ = ny + ch * (U.plate ? .25 : .3), r = cw * .1, col = U.emblemC || '#e2b23c'; x.fillStyle = col; x.strokeStyle = INK; x.lineWidth = thin * .7;
+    if (U.emblem === 'cross') { x.fillRect(ex_ - r * .25, ey_ - r, r * .5, r * 2); x.fillRect(ex_ - r * .8, ey_ - r * .45, r * 1.6, r * .5); x.strokeRect(ex_ - r * .25, ey_ - r, r * .5, r * 2); }
+    else if (U.emblem === 'sun') { x.beginPath(); for (let k = 0; k < 16; k++) { const a = k / 16 * 6.283, rr = k % 2 ? r * .55 : r; x.lineTo(ex_ + Math.cos(a) * rr, ey_ + Math.sin(a) * rr); } x.closePath(); x.fill(); x.stroke(); }
+    else if (U.emblem === 'eye') { x.beginPath(); x.ellipse(ex_, ey_, r, r * .55, 0, 0, 7); x.fill(); x.stroke(); x.fillStyle = INK; x.beginPath(); x.arc(ex_, ey_, r * .28, 0, 7); x.fill(); } }
+  if (U.highCollar) for (const sg of [-1, 1]) poly([[X0 + sg * cw * .06, ny - 5], [X0 + sg * cw * .42, ny - 5], [X0 + sg * cw * .3, ny + ch * .13]], U.highCollar);
+  if (U.clasp) { x.fillStyle = U.clasp; x.beginPath(); x.arc(X0, ny + ch * .07, cw * .05, 0, 7); x.fill(); x.lineWidth = thin * .7; x.strokeStyle = INK; x.stroke(); }
   if (U.badge === 'tag') { x.fillStyle = '#ffffff'; const bx = X0 + cw * .12, by = ny + ch * .22; x.fillRect(bx, by, cw * .2, ch * .08); x.lineWidth = thin * .8; x.strokeStyle = INK; x.strokeRect(bx, by, cw * .2, ch * .08); x.fillStyle = '#2f5fb8'; x.beginPath(); x.arc(bx + cw * .1, by + ch * .04, cw * .03, 0, 7); x.fill(); }
 }
 export async function loadSprites(cast = []) { const UNI = {}; for (const c of cast) if (c.uniform && c.sprite) UNI[c.sprite] = c.uniform;
