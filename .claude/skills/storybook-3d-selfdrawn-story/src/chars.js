@@ -419,7 +419,12 @@ function capsuleBody(im, o, U, view = 'F') { const W = im.width, H = im.height, 
   drawUniform(x, { cx, cy, cw, ch, W, H, lw, INK }, U, view);
   if (U.edge) { x.lineWidth = lw * 2.2; x.strokeStyle = U.edge; path(); x.stroke(); } // coloured trim just inside the outline
   const g = x.createLinearGradient(cx, 0, cx + cw, 0); g.addColorStop(0, 'rgba(255,255,255,.10)'); g.addColorStop(.35, 'rgba(255,255,255,0)'); g.addColorStop(.7, 'rgba(20,16,40,0)'); g.addColorStop(.72, 'rgba(20,16,40,.15)'); g.addColorStop(1, 'rgba(20,16,40,.2)');
-  x.fillStyle = g; x.fillRect(cx, cy, cw, ch); x.restore(); // cel shade: lit left, shaded right band
+  x.fillStyle = g; x.fillRect(cx, cy, cw, ch); // cel shade: lit left, shaded right band
+  // v4.18 sheen (refs): a crisp light strip curving along the left edge + a soft darker hem, so clothes read as glossy fabric
+  x.save(); x.beginPath(); x.moveTo(cx + cw * .1, cy + ch * .14); x.quadraticCurveTo(cx + cw * .04, cy + ch * .5, cx + cw * .12, cy + ch * .86); x.lineTo(cx + cw * .2, cy + ch * .84); x.quadraticCurveTo(cx + cw * .13, cy + ch * .5, cx + cw * .19, cy + ch * .14); x.closePath();
+  x.fillStyle = 'rgba(255,255,255,.22)'; x.fill(); x.restore();
+  const gb = x.createLinearGradient(0, cy + ch * .78, 0, cy + ch); gb.addColorStop(0, 'rgba(20,16,40,0)'); gb.addColorStop(1, 'rgba(20,16,40,.18)'); x.fillStyle = gb; x.fillRect(cx, cy, cw, ch);
+  x.restore();
   x.lineWidth = lw; x.strokeStyle = INK; path(); x.stroke(); return c; }
 // v4.12 uniforms drawn to fit the capsule (refs): flat colours, bold simple details, thin navy lines.
 //   U = { base, stripe, stripes: n, pants, belt, hem, collar: 'shirt'|'hood'|'round'|'vee'|null, inner, tie, bowtie, zip, vest, buttons: n,
@@ -473,6 +478,7 @@ function drawUniform(x, G, U, view) { const { cx, cy, cw, ch, lw, INK } = G, mid
     if (U.emblem === 'cross') { x.fillRect(ex_ - r * .25, ey_ - r, r * .5, r * 2); x.fillRect(ex_ - r * .8, ey_ - r * .45, r * 1.6, r * .5); x.strokeRect(ex_ - r * .25, ey_ - r, r * .5, r * 2); }
     else if (U.emblem === 'sun') { x.beginPath(); for (let k = 0; k < 16; k++) { const a = k / 16 * 6.283, rr = k % 2 ? r * .55 : r; x.lineTo(ex_ + Math.cos(a) * rr, ey_ + Math.sin(a) * rr); } x.closePath(); x.fill(); x.stroke(); }
     else if (U.emblem === 'eye') { x.beginPath(); x.ellipse(ex_, ey_, r, r * .55, 0, 0, 7); x.fill(); x.stroke(); x.fillStyle = INK; x.beginPath(); x.arc(ex_, ey_, r * .28, 0, 7); x.fill(); } }
+  if (U.lapels) for (const sg of [-1, 1]) poly([[X0 + sg * cw * .05, ny + ch * .02], [X0 + sg * cw * .3, ny], [X0 + sg * cw * .22, ny + ch * .14], [X0 + sg * cw * .3, ny + ch * .2], [X0 + sg * cw * .1, ny + ch * .42]], U.lapels); // coat lapels
   if (U.highCollar) for (const sg of [-1, 1]) poly([[X0 + sg * cw * .06, ny - 5], [X0 + sg * cw * .42, ny - 5], [X0 + sg * cw * .3, ny + ch * .13]], U.highCollar);
   if (U.clasp) { x.fillStyle = U.clasp; x.beginPath(); x.arc(X0, ny + ch * .07, cw * .05, 0, 7); x.fill(); x.lineWidth = thin * .7; x.strokeStyle = INK; x.stroke(); }
   if (U.badge === 'tag') { x.fillStyle = '#ffffff'; const bx = X0 + cw * .12, by = ny + ch * .22; x.fillRect(bx, by, cw * .2, ch * .08); x.lineWidth = thin * .8; x.strokeStyle = INK; x.strokeRect(bx, by, cw * .2, ch * .08); x.fillStyle = '#2f5fb8'; x.beginPath(); x.arc(bx + cw * .1, by + ch * .04, cw * .03, 0, 7); x.fill(); }
