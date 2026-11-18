@@ -360,9 +360,15 @@ export async function loadSprites() {
 }
 const sprNVS = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }`;
 const sprNFS = `uniform sampler2D map; varying vec2 vUv; void main(){ if (texture2D(map, vUv).a < .5) discard; gl_FragColor = vec4(.5, .5, 1., .4); }`;
-function sprMesh() {
+// v4.7 chibi body: the costume sprite is warped into an inverted pear (narrow shoulders, full rounded bottom), keeping its art
+export const BODY = { w: .86, h: .9, top: .7, bottom: 1.1, head: 1.14 };
+function pearGeo() { const g = new THREE.PlaneGeometry(1, 1, 12, 16), P = g.attributes.position;
+  for (let i = 0; i < P.count; i++) { const v = P.getY(i) + .5, sstep_ = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+    const prof = BODY.bottom + (BODY.top - BODY.bottom) * sstep_(.22, 1, v), tuck = 1 - .14 * (1 - sstep_(0, .16, v)); P.setX(i, P.getX(i) * prof * tuck); }
+  P.needsUpdate = true; return g; }
+function sprMesh(pear = false) {
   const m = new THREE.MeshLambertMaterial({ alphaTest: .5, side: THREE.DoubleSide, emissive: 0xffffff, emissiveIntensity: .32 }); noOutline(m);
-  const me = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), m); me.castShadow = false; me.receiveShadow = false;
+  const me = new THREE.Mesh(pear ? pearGeo() : new THREE.PlaneGeometry(1, 1), m); me.castShadow = false; me.receiveShadow = false;
   me.userData.sprN = new THREE.ShaderMaterial({ uniforms: { map: { value: null } }, vertexShader: sprNVS, fragmentShader: sprNFS, side: THREE.DoubleSide });
   return me;
 }
@@ -395,14 +401,14 @@ export function makeChar2D(spec) {
   const inArm = (o) => { for (let q = o.parent; q && q !== C.torso; q = q.parent) if (q === C.aL.up || q === C.aL.fo || q === C.aR.up || q === C.aR.fo) return true; return false; };
   C.torso.traverse(o => { if (o.isMesh && !inArm(o) && o.parent !== C.sweat && o.parent !== C.props) {
     if (o === C.face) { o.visible = false; return; } o.material = SHADOWONLY; o.userData.noInk = true; o.castShadow = true; } });
-  for (const L of [C.aL, C.aR]) { L.S.x = Math.sign(L.S.x) * (spec.shoulderX ?? .23); L.S.y = spec.shoulderY ?? .84; } // v4.6 sheet: arms start right under the head
+  for (const L of [C.aL, C.aR]) { L.S.x = Math.sign(L.S.x) * (spec.shoulderX ?? .17); L.S.y = spec.shoulderY ?? .7; } // v4.6 sheet: arms start right under the head
   C.hc.children.forEach(o => { if (o.isMesh && o.material === SHADOWONLY) o.scale.setScalar(.68); });
   const F = SPR.meta[spec.sprite + '-F']; C.cx = F.ball[0];
   // v3.1: the Flow head floated above the collar so the neck hole showed -> sink the ball into the collar (ball bottom IN px below the body top)
   C.sink = spec.sink ?? 105; const IN = C.sink, drop = (F.body[1] - (F.ball[1] + F.ball[2])) + IN;
   C.head.position.y = .93; C.hc.position.y = .91 + (F.gap[1] - F.ball[1] - drop) * K2 - .93;
   C.torso.position.y = -(spec.drop ?? .32); // v2: short costume, hem just below the hips
-  C.sb = sprMesh(); C.sh = sprMesh(); C.sh.renderOrder = 1; SPRG.add(C.sb, C.sh);
+  C.sb = sprMesh(!spec.classicBody); C.sh = sprMesh(); C.sh.renderOrder = 1; SPRG.add(C.sb, C.sh); C.bodyK = spec.classicBody ? { w: 1, h: 1, head: 1 } : BODY;
   return C;
 }
 const SHADOWONLY = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false }); noOutline(SHADOWONLY);
@@ -430,8 +436,8 @@ export function updateSprites(cam) {
     const U = s_u.set(0, 1, 0).transformDirection(C.torso.matrixWorld); const rollB = Math.atan2(-U.dot(s_r), U.y);
     const [x0, y0, x1, y1] = M.body; const lx = ((x0 + x1) / 2 - C.cx) * K2 * (mir ? -1 : 1), ly = .91 - ((y0 + y1) / 2 - M.gap[1]) * K2;
     const cb = C.torso.localToWorld(new THREE.Vector3(0, ly, 0)).addScaledVector(s_r, lx * s * Math.cos(rollB)).addScaledVector(s_v, -.14 * s);
-    const sq = clamp(C.sq || 0, -.45, .6), bh = (y1 - y0) * K2 * s; cb.y += bh / 2 * sq; // v4 squash/stretch, feet stay planted
-    place(C.sb, cb, yaw, rollB, (x1 - x0) * K2 * s * (1 - (C.br || 0) * .5) * (1 - sq * .5) * turnW, bh * (1 + (C.br || 0)) * (1 + sq), mir);
+    const BK = C.bodyK || { w: 1, h: 1, head: 1 }, sq = clamp(C.sq || 0, -.45, .6), bh0 = (y1 - y0) * K2 * s, bh = bh0 * BK.h; cb.y += -(bh0 - bh) / 2 + bh / 2 * sq; // v4 squash/stretch, feet stay planted; v4.7 shorter torso keeps its hem
+    place(C.sb, cb, yaw, rollB, (x1 - x0) * K2 * s * BK.w * (1 - (C.br || 0) * .5) * (1 - sq * .5) * turnW, bh * (1 + (C.br || 0)) * (1 + sq), mir);
     C.sb.material.map !== SPR.body[key] && (C.sb.material.map = SPR.body[key], C.sb.material.emissiveMap = SPR.body[key], C.sb.material.needsUpdate = true);
     C.sb.userData.sprN.uniforms.map.value = SPR.body[key];
     // head
@@ -442,10 +448,10 @@ export function updateSprites(cam) {
     const upB = new THREE.Vector3(0, Math.cos(rollB), 0).addScaledVector(s_r, -Math.sin(rollB)), rtB = s_r.clone().multiplyScalar(Math.cos(rollB)).add(new THREE.Vector3(0, Math.sin(rollB), 0));
     const upH = new THREE.Vector3(0, Math.cos(rollH), 0).addScaledVector(s_r, -Math.sin(rollH)), rtH = s_r.clone().multiplyScalar(Math.cos(rollH)).add(new THREE.Vector3(0, Math.sin(rollH), 0));
     const nod = (C.head.rotation.x || 0); // looking down sinks the head a touch, looking up lifts it a touch
-    const neck = cb.clone().addScaledVector(upB, (y1 - y0) / 2 * K2 * s * (1 + sq)).addScaledVector(rtB, (M.ball[0] - (x0 + x1) / 2) * K2 * s * (mir ? -1 : 1) * .5);
-    const ballC = neck.addScaledVector(upH, (M.ball[2] - (C.sink ?? 105) - 40 * Math.sin(nod)) * K2 * s).addScaledVector(rtH, (M.ball[0] - (x0 + x1) / 2) * K2 * s * (mir ? -1 : 1) * .5);
-    const ch = ballC.addScaledVector(rtH, dx * s).addScaledVector(upH, dy * s).addScaledVector(s_v, .04 * s);
-    const pp = C.pop || 0, hq = sq * .45; place(C.sh, ch, yaw, rollH, (hx1 - hx0) * K2 * s * (1 + pp * .6) * (1 - hq * .5) * turnW, (hy1 - hy0) * K2 * s * (1 + pp) * (1 + hq), mir);
+    const neck = cb.clone().addScaledVector(upB, bh / 2 * (1 + sq)).addScaledVector(rtB, (M.ball[0] - (x0 + x1) / 2) * K2 * s * (mir ? -1 : 1) * .5);
+    const hk = BK.head || 1, ballC = neck.addScaledVector(upH, (M.ball[2] * hk - (C.sink ?? 105) - 40 * Math.sin(nod)) * K2 * s).addScaledVector(rtH, (M.ball[0] - (x0 + x1) / 2) * K2 * s * (mir ? -1 : 1) * .5);
+    const ch = ballC.addScaledVector(rtH, dx * s * hk).addScaledVector(upH, dy * s * hk).addScaledVector(s_v, .04 * s);
+    const pp = C.pop || 0, hq = sq * .45; place(C.sh, ch, yaw, rollH, (hx1 - hx0) * K2 * s * hk * (1 + pp * .6) * (1 - hq * .5) * turnW, (hy1 - hy0) * K2 * s * hk * (1 + pp) * (1 + hq), mir);
     const ht = headTex(C, key, view); if (C.sh.material.map !== ht) { C.sh.material.map = ht; C.sh.material.emissiveMap = ht; C.sh.material.needsUpdate = true; }
     C.sh.userData.sprN.uniforms.map.value = ht;
     C.view = view; C.mir = mir;
