@@ -226,7 +226,7 @@ export function pose(C, P = {}) {
     C.head.rotation.x += hd2[0]; C.head.rotation.y += hd2[1]; C.head.rotation.z += hd2[2];
     if (ta && !w) { const gx = noise1(t * 2.4 + sd * 11), gy = Math.max(0, noise1(t * 1.9 + sd * 13)); gR = [.03 * gx, .16 * gy, .12 * gy]; gL = [-.02 * gx, .05 * Math.max(0, noise1(t * 1.6 + sd * 17)), .04]; }
   } else C.br = 0;
-  const runA_ = w && w.run && !P.hL && !P.hR; if (runA_) { const a = Math.sin(w.ph) * w.run; P = { ...P, hL: [-.26, .42 + .14 * Math.max(0, -a), -.32 * a + .08], hR: [.26, .42 + .14 * Math.max(0, a), .32 * a + .08], pL: [-1, -.4, -.9], pR: [1, -.4, -.9] }; }
+  const runA_ = w && w.run && !P.hL && !P.hR; if (runA_) { const a = Math.sin(w.ph) * w.run; const r0 = (ST_.rest ?? .2) + .3; P = { ...P, hL: [-.24, r0 + .16 * Math.max(0, -a), -.3 * a + .1], hR: [.24, r0 + .16 * Math.max(0, a), .3 * a + .1], pL: [-.25, -.5, -1], pR: [.25, -.5, -1] }; } // v4.22 run: bent arms pump forward/back, elbows down-back (not out like wings)
   const hL = P.hL ? (P.hL.isVector3 ? P.hL.clone() : new THREE.Vector3(...P.hL)) : new THREE.Vector3(-.3, (ST_.rest ?? .2) + Math.abs(sw) * .25, .07 - sw); // v4.6: rest hands hang at the hips, close to the body
   const hR = P.hR ? (P.hR.isVector3 ? P.hR.clone() : new THREE.Vector3(...P.hR)) : new THREE.Vector3(.3, (ST_.rest ?? .2) + Math.abs(sw) * .25, .07 + sw);
   if (live) { const k = (P.hR || P.hL) ? .45 : 1; hR.x += gR[0] * k; hR.y += gR[1] * k; hR.z += gR[2] * k; hL.x += gL[0] * k; hL.y += gL[1] * k; hL.z += gL[2] * k;
