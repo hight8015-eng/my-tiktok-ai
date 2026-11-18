@@ -146,7 +146,7 @@ function hook(t) { const H = project.hook; if (!H || !H.text) return; const d = 
 // the last seconds dim a little and a clean title card slides up; then the usual fade to black
 function endCard(t) { const E_ = project.endCard; if (!E_ || LOOP) return; const d = E_.dur ?? 1.6, t0 = timing.end - d - .25; if (t < t0) return;
   const a = E.eOut(Math.min(1, (t - t0) / .35)); X.save(); X.fillStyle = `rgba(10,8,20,${.42 * a})`; X.fillRect(0, 0, 1080, 1920);
-  X.globalAlpha = a; X.translate(540, (E_.y ?? 900) + 40 * (1 - a)); // mid-screen: never collides with the caption line X.textAlign = 'center'; X.textBaseline = 'middle'; X.lineJoin = 'round';
+  X.globalAlpha = a; X.translate(540, (E_.y ?? 900) + 40 * (1 - a)); X.textAlign = 'center'; X.textBaseline = 'middle'; X.lineJoin = 'round'; /* mid-screen: never collides with the caption line */
   X.font = '700 80px Prompt'; X.lineWidth = 14; X.strokeStyle = '#141018'; X.strokeText(E_.text || 'ติดตามตอนต่อไป', 0, 0, 900); X.fillStyle = '#ffffff'; X.fillText(E_.text || 'ติดตามตอนต่อไป', 0, 0, 900);
   if (E_.sub) { X.font = '600 50px Prompt'; X.lineWidth = 10; X.strokeText(E_.sub, 0, 90, 900); X.fillStyle = '#ffd23f'; X.fillText(E_.sub, 0, 90, 900); } X.restore(); }
 function progress(t) { if (!project.progressBar) return; const u = Math.min(1, t / timing.end); X.save(); if (LOOP) X.globalAlpha = 1 - E.sstep(timing.end - LOOP_D, timing.end - .05, t); X.fillStyle = 'rgba(255,255,255,.18)'; X.fillRect(0, 1906, 1080, 14); X.fillStyle = '#ffd23f'; X.fillRect(0, 1906, 1080 * u, 14); X.restore(); }
