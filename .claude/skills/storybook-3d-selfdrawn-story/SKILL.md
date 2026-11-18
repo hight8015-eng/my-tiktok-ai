@@ -93,6 +93,12 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    bare white hands and plain oval feet by default (spec.glove / spec.cuff / spec.shoe / spec.sole dress them).
    v4.6: shoulders sit right under the head (spec.shoulderX/Y), rest hands hang at the hips; sheet face by default:
    big white oval eyes with pupils, nearly touching, wide smile (spec.dotEyes = old small dot eyes).
+   v4.7 body: the costume sprite is warped into an inverted pear (BODY = {w, h, top, bottom, head}; spec.classicBody
+   to opt out); head 1.14x, torso .9x, shoulders on the upper torso (spec.shoulderX/Y).
+   Object physics (P.hold entries): mass (0 none .. 1 heavy) = the object's axis lags hand velocity/acceleration
+   and swings through on stops; wrist (deg) rolls it about the forearm; hang: true keeps it hanging under the grip
+   (lantern, bag) and swinging; from {p, q} + blend 0..1 = pick up / put down / hand-over without popping.
+   flyPath(age, p0, v0, {floor, e, mu, spin, axis}) = thrown/dropped object: arc, bounces, slides to rest, tumbles.
 9. **Finish:** `bash tools/finish.sh <out_dir> "<title>" 26`, then `bash tools/cover.sh <out_dir>/ปก.jpg`.
 10. **Deliver:** on the user's computer put the files in `~/Desktop/edit-video/<project>/<version>/`. On a phone,
     send them back in the chat.
