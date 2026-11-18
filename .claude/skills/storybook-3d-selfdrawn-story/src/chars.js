@@ -127,12 +127,12 @@ export function makeChar(spec) { // v2: stick figure: white ball head, bean tors
   // stick limbs
   const tube = (len, r, parent) => { const m = mesh(new THREE.CapsuleGeometry(r, len, 3, 8), inkM, { p: [0, -len / 2, 0], parent }); return m; };
   // v4.2 model: thicker rubber-hose limbs with round joints, cartoon gloves (thumb + cuff) and rounded shoes. spec.classic = old hair-thin sticks
-  const CL = !!spec.classic, rA = CL ? .007 : (spec.limbW || 1) * .018, rL = CL ? .008 : (spec.limbW || 1) * .022;
+  const CL = !!spec.classic, rA = CL ? .007 : (spec.limbW || ST_.limbW || 1) * .018, rL = CL ? .008 : (spec.limbW || ST_.limbW || 1) * .022;
   // v4.8 hybrid: ink dot hands + ink feet (pirate refs); spec.whiteHands = bare white hands, spec.glove / spec.shoe dress them
   const W_ = spec.whiteHands, skin = spec.glove || (W_ ? spec.skin || '#f7f2e8' : '#231a28'), gloveM = W_ || spec.glove ? toon(skin, { grad: GRAD_FLAT, ol: OL * .8, emissive: skin, ei: .42 }) : inkM, shoeM = spec.shoe ? toon(spec.shoe, { grad: GRAD_2, ol: OL * .8 }) : W_ ? toon(skin, { grad: GRAD_2, ol: OL * .8, emissive: skin, ei: .42 }) : inkM, soleM = toon(spec.sole || '#e9e1d4', { grad: GRAD_FLAT, ol: OL * .6 }); // v4.5 default: bare hands + plain oval feet (spec.glove / spec.shoe / spec.cuff / spec.sole to dress them)
   const arm = (s) => { const up = group({ parent: torso }), fo = group({ parent: torso }); tube(AL, rA, up); tube(AL, rA * .9, fo);
     let hand; if (CL) hand = mesh(new THREE.SphereGeometry(.032, 12, 10), inkM, { p: [0, -AL, 0], parent: fo });
-    else { hand = group({ p: [0, -AL - .02, 0], parent: fo }); mesh(new THREE.SphereGeometry(W_ || spec.glove ? .058 : .042, 16, 12), gloveM, { s: W_ || spec.glove ? [1, 1.12, .78] : [1, 1, 1], parent: hand });
+    else { hand = group({ p: [0, -AL - .02, 0], parent: fo }); mesh(new THREE.SphereGeometry(W_ || spec.glove ? .058 : (ST_.handR || .042), 16, 12), gloveM, { s: W_ || spec.glove ? [1, 1.12, .78] : [1, 1, 1], parent: hand });
       if (W_ || spec.glove) mesh(new THREE.SphereGeometry(.022, 10, 8), gloveM, { p: [s * -.045, .018, .02], s: [1, 1.5, 1], r: [0, 0, s * 35], parent: hand });
       if (spec.cuff) mesh(new THREE.CylinderGeometry(.04, .036, .03, 14), gloveM, { p: [0, .052, 0], parent: hand }); }
     let open = null; if (!CL) { open = group({ p: [0, -AL - .02, 0], parent: fo }); open.visible = false; // v4.3 open hand: palm + 4 spread fingers + thumb
@@ -142,7 +142,7 @@ export function makeChar(spec) { // v2: stick figure: white ball head, bean tors
     return { up, fo, hand, open, S: new THREE.Vector3(s * .22, .72, 0) }; };
   const leg = (s) => { const up = group({ parent: hips }), fo = group({ parent: hips }); tube(LL, rL, up); tube(LL, rL * .92, fo);
     let shoe; if (CL) shoe = mesh(new THREE.SphereGeometry(.045, 12, 8), inkM, { p: [0, -LL, .04], s: [.85, .55, 1.6], parent: fo });
-    else { shoe = group({ p: [0, -LL - .005, .045], parent: fo }); mesh(new THREE.SphereGeometry(.07, 16, 10), shoeM, { p: [0, 0, .025], s: [.95, .62, 1.85], parent: shoe });
+    else { shoe = group({ p: [0, -LL - .005, .045], parent: fo }); shoe.scale.setScalar(ST_.footK || 1); mesh(new THREE.SphereGeometry(.07, 16, 10), shoeM, { p: [0, 0, .025], s: [.95, .62, 1.85], parent: shoe });
       if (spec.sole || spec.shoe) mesh(new THREE.CylinderGeometry(.068, .068, .02, 16), soleM, { p: [0, -.036, .025], s: [.95, 1, 1.85], parent: shoe }); }
     return { up, fo, shoe, S: new THREE.Vector3(s * .11, 0, 0) }; };
   const sweat = group({ parent: hc }); sweat.visible = false; { const dm = toon('#bfe6ff', { grad: GRAD_FLAT, ol: .006 }); mesh(new THREE.SphereGeometry(.06, 12, 8), dm, { parent: sweat }); mesh(new THREE.ConeGeometry(.052, .1, 12), dm, { p: [0, .07, 0], parent: sweat }); sweat.position.set(HR * .8, HR * .45, HR * .4); }
@@ -152,7 +152,7 @@ export function makeChar(spec) { // v2: stick figure: white ball head, bean tors
 // v4.9 body styles (set window.CHAR_STYLE before main.js loads, or project.json -> style): 'pirate' (default, from the pirate refs: bean body
 //   ~1.25 heads, thin stick legs ~1 head, arms to the hips) | 'chibi' (2.5-head sheet: pear body, legs half a head)
 export const STYLE = (globalThis.CHAR_STYLE || 'pirate');
-const ST_ = { pirate: { LEG: .6, AL: .34, LL: .32, body: { w: .78, h: 1.12, top: .92, bottom: 1.0, head: 1.0 }, sh: [.19, .74], rest: .18 },
+const ST_ = { pirate: { LEG: .6, AL: .34, LL: .32, body: { w: 1.0, h: 1.12, top: 1.0, bottom: 1.0, head: 1.0, flat: true }, capsule: { w: .64, bottom: .8 }, sh: [.2, .74], rest: .18, limbW: .66, handR: .03, footK: .72 },
   chibi: { LEG: .42, AL: .28, LL: .225, body: { w: .86, h: .9, top: .7, bottom: 1.1, head: 1.14 }, sh: [.17, .7], rest: .32 } }[STYLE] || {};
 export const LEG = ST_.LEG ?? .6, AL = ST_.AL ?? .34, LL = ST_.LL ?? .32; // v3: longer but hair-thin limbs // v2: short chubby figures like the ref (about 3 heads tall)
 // ---- IK ----
@@ -386,11 +386,20 @@ export function blinkAt(t, seed = 0) { const p = 3.1 + (seed % 3) * .4; const u 
 // around the character; faces are drawn per view (projected onto the ball), limbs stay 3D ink sticks.
 const SPR = { meta: null, body: {}, headImg: {}, mask: {} };
 const K2 = .96 / 1274;            // torso-local units per sprite pixel (2x sprites)
+// v4.10 capsule body (pirate refs): the costume art is fitted into a clean bean/capsule (straight sides, round ends) with a fresh
+// thick ink outline, so clothes keep their colours/details (tie, pockets, stripes, badges) but the silhouette matches the refs.
+function capsuleBody(im, o) { const W = im.width, H = im.height, c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+  const cw = W * (o.w ?? .64), ch = H * .985, cx = (W - cw) / 2, cy = (H - ch) / 2, r = cw / 2, lw = Math.max(8, W * .034);
+  const path = () => { x.beginPath(); x.moveTo(cx, cy + r); x.arc(cx + r, cy + r, r, Math.PI, 0); x.lineTo(cx + cw, cy + ch - r * (o.bottom ?? .8)); x.ellipse(cx + r, cy + ch - r * (o.bottom ?? .8), r, r * (o.bottom ?? .8), 0, 0, Math.PI); x.closePath(); };
+  x.save(); path(); x.clip(); const ins = W * .045; x.drawImage(im, ins, H * .02, W - 2 * ins, H * .96, cx - lw, cy - H * .03, cw + 2 * lw, ch + H * .03); x.restore();
+  x.lineWidth = lw; x.strokeStyle = '#1c1420'; path(); x.stroke(); return c; }
 export async function loadSprites() {
   SPR.meta = await (await fetch('sprites/sprites.json')).json();
   const L = new THREE.TextureLoader(); const img = (u) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = u; });
   await Promise.all(Object.keys(SPR.meta).map(async k => {
-    const t = await L.loadAsync(`sprites/${k}-body.png`); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; SPR.body[k] = t;
+    let t; if (ST_.capsule) { const im = await img(`sprites/${k}-body.png`); t = new THREE.CanvasTexture(capsuleBody(im, ST_.capsule)); }
+    else t = await L.loadAsync(`sprites/${k}-body.png`);
+    t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; SPR.body[k] = t;
     SPR.headImg[k] = await img(`sprites/${k}-head.png`); SPR.mask[k] = await img(`sprites/${k}-mask.png`);
   }));
 }
@@ -400,7 +409,7 @@ const sprNFS = `uniform sampler2D map; varying vec2 vUv; void main(){ if (textur
 export const BODY = ST_.body || { w: .78, h: 1.12, top: .92, bottom: 1.0, head: 1.0 };
 function pearGeo() { const g = new THREE.PlaneGeometry(1, 1, 12, 16), P = g.attributes.position;
   for (let i = 0; i < P.count; i++) { const v = P.getY(i) + .5, sstep_ = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
-    const prof = BODY.bottom + (BODY.top - BODY.bottom) * sstep_(.22, 1, v), tuck = 1 - .14 * (1 - sstep_(0, .16, v)); P.setX(i, P.getX(i) * prof * tuck); }
+    const prof = BODY.bottom + (BODY.top - BODY.bottom) * sstep_(.22, 1, v), tuck = BODY.flat ? 1 : 1 - .14 * (1 - sstep_(0, .16, v)); P.setX(i, P.getX(i) * prof * tuck); }
   P.needsUpdate = true; return g; }
 function sprMesh(pear = false) {
   const m = new THREE.MeshLambertMaterial({ alphaTest: .5, side: THREE.DoubleSide, emissive: 0xffffff, emissiveIntensity: .32 }); noOutline(m);
