@@ -15,6 +15,7 @@ function nearestHead() { let best = null; E.camera.getWorldPosition(_cv); const 
     C.head.getWorldPosition(_hv); const d = _hv.clone().sub(_cv), z = d.dot(fw); if (z < .3) continue; const sp = _hv.clone().project(E.camera); if (Math.abs(sp.x) > .85 || sp.y > .95 || sp.y < -.9) continue;
     if (!best || z < best.z) best = { C, z, sx: (sp.x + 1) * 540, sy: (1 - sp.y) * 960 }; } return best; }
 let FX = null;
+let SPL = null;
 function camDrift(t) { const f = Math.min(1.6, Math.max(.4, (E.POST.focus || 3) / 4)); E.camera.translateX(E.noise1(t * .45 + 3) * .13 * f); E.camera.translateY(E.noise1(t * .38 + 21) * .05 * f); // v4.29 the camera always floats a little (refs: 90% of frames move)
   E.camera.rotateX(E.noise1(t * .33 + 11) * .0045); E.camera.rotateY(E.noise1(t * .27 + 47) * .006); E.camera.updateMatrixWorld(); }
 function draw(sh, t, alpha = 1, mb = 0, dir = 1) { OVL.length = 0; E.POST.gseed = Math.floor(t * 30 + .5) % 97; /* v4.26 grain refreshes every frame (12 fps grain read as stutter) */ E.POST.dof = 0; E.POST.mblur = [mb * 90 * dir, mb * 14]; E.POST.leakPh = t * .6;
@@ -58,6 +59,14 @@ function overlays(t, alpha) { // gloom lines + sparkles requested by poses/shots
             for (let s_ = 1; s_ <= 8; s_++) { const u = s_ / 8; X.lineTo(xs + Math.sin(u * 5 + ph) * .018 * r + u * .035 * r * out, ys + u * L); } X.stroke(); }
           if (k > .7) for (let d = 0; d < 2; d++) { const u = (o.t * 1.1 + d * .5 + (sd < 0 ? 0 : .25)) % 1, y = ys + L + u * r * 1.2; X.globalAlpha = alpha * (1 - u) * .9; X.fillStyle = '#9fd8ff';
             X.beginPath(); X.ellipse(xs + .05 * r * out, y, .04 * r, .058 * r, 0, 0, 7); X.fill(); X.fillStyle = '#ffffff'; X.beginPath(); X.arc(xs + .04 * r * out, y - .018 * r, .011 * r, 0, 7); X.fill(); } } } }
+    else if (o.kind === 'split') { // v5.0 ultimate slash: a bright cut line across the frame, the two halves slide apart along it and settle back
+      const k = o.k, c = Math.cos(o.ang), s_ = Math.sin(o.ang), sh = o.gap * Math.sin(Math.PI * E.sstep(.12, 1, k)), cx = 540, cy = 900;
+      if (!SPL) { SPL = document.createElement('canvas'); SPL.width = 1080; SPL.height = 1920; } const sx = SPL.getContext('2d'); sx.clearRect(0, 0, 1080, 1920); sx.drawImage(out, 0, 0);
+      if (sh > .3) for (const side of [-1, 1]) { X.save(); X.beginPath(); const nx = -s_ * side, ny = c * side, L = 3000;
+        X.moveTo(cx - c * L, cy - s_ * L); X.lineTo(cx + c * L, cy + s_ * L); X.lineTo(cx + c * L + nx * L, cy + s_ * L + ny * L); X.lineTo(cx - c * L + nx * L, cy - s_ * L + ny * L); X.closePath(); X.clip();
+        X.globalAlpha = 1; X.drawImage(SPL, c * sh * side, s_ * sh * side); X.restore(); }
+      const lw = 14 * (1 - E.sstep(.05, .6, k)) + 2; X.save(); X.globalCompositeOperation = 'lighter'; X.globalAlpha = alpha * (1 - E.sstep(.4, 1, k)); X.strokeStyle = '#ffffff'; X.shadowColor = '#bfe4ff'; X.shadowBlur = 40; X.lineWidth = lw;
+      X.beginPath(); X.moveTo(cx - c * 1400, cy - s_ * 1400); X.lineTo(cx + c * 1400, cy + s_ * 1400); X.stroke(); X.restore(); }
     else if (o.kind === 'gloom') { const C = o.C; C.head.updateWorldMatrix(true, false); const hp = C.head.getWorldPosition(new E.THREE.Vector3()), q = scr(hp); if (!q) { X.restore(); continue; }
       const top = scr(hp.clone().add(new E.THREE.Vector3(0, .5 * C.spec.s, 0))), R = top ? Math.max(40, Math.abs(q[1] - top[1])) : 120; X.strokeStyle = 'rgba(40,30,70,.75)'; X.lineCap = 'round';
       for (let i = 0; i < 9; i++) { const xx = q[0] + (i - 4) * R * .2, ph = ((t * .9 + i * .37) % 1), y0 = q[1] - R * 1.5 + ph * R * .5, L = R * (.5 + .3 * ((i * 7) % 3) / 2);

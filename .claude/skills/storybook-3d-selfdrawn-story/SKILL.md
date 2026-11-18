@@ -190,6 +190,25 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    - Captions stay burned in (many people watch muted). The (ไม่มีเพลง) file lets the user add a trending track inside
      the app at low volume. Copyright: meme sounds ripped from compilations / other channels can be claimed; prefer
      the platform's own sound library or royalty-free packs for anything the user posts commercially.
+   v5.0 PHYSICS FX (src/fxphys.js, demo: examples/shots_physdemo.js + mix_physdemo.py). `import * as FX from './fxphys.js'`.
+   Every effect is a pure function of time (fixed 1/240 s integration from its start, seeded) -> identical on every
+   frame, segment and smoothing look-back = no jitter / no skipped frames. Build once at module load (parent = a group
+   inside the set), call .at(t) with REAL seconds every frame; each returns .events (impacts) for sound + dust.
+     FX.body / FX.rainOf  falling crates, barrels, apples, coins, books, rubble: gravity, bounce, rolling spin, friction,
+                          sleep, dust on hard landings
+     FX.shatter           pot / rock / glass / ice / wood: tremble, burst into shards (radial + directional impulse),
+                          shards stretch along their speed, bounce and settle
+     FX.chain             taut chain sways, shivers under strain, snaps; links fly and clatter (glow:'#..' = magic chain)
+     FX.pour / FX.stream  water: stretched drops in a ballistic stream, splash droplets, ripples; flowing ribbon river
+     FX.energy            charge (particles spiral in) -> ball with comet tail (accelerates) -> flash, ring, burst
+     FX.cracks            branching cracks revealed outward from the impact (eOut), glowing edge that cools
+     FX.slash             crescent that SWEEPS open over ~3 frames then thins + fades, faces the camera;
+                          ultimate:true = bigger, after-images + the frame is CUT along a line and slides apart
+     FX.lightning         branching bolt, re-strikes every 3 frames, flicker gap, white flash
+     FX.explosion         white-hot -> yellow -> orange -> charcoal fireballs, flash, then soft smoke
+   Rules: hide each demo/effect group outside its shot (sets are reused); reset Wd.rocksAt/raysAt/fogAt per shot; flat
+   effects on the ground sit >= .035 above it (roads/carpets are thin boxes); anticipation (tremble, wind-up, held
+   breath) before every release, follow-through after; fast pieces get velocity stretch instead of strobing.
    HELPER RENDER SESSIONS (user rule): before every full render, ASK the user whether to use helper sessions and how
    many (each is a separate cloud session on the user's usage quota). Default = render on this machine only. If they
    agree: push the project's src/ to render_jobs/<proj>/ on the work branch, create_session per helper with
