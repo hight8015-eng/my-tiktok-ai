@@ -210,6 +210,12 @@ If the user wants characters made in Flow from their own prompt, use the sister 
                           crate towers collapsing, rock slides, rubble heaps (example: examples/shots_physdemo2.js)
      FX.impactFrame       v5.1 anime impact frame: 2 inverted black & white frames + bold radial lines on THE big hit
                           of a scene (max 1-2 per clip; never longer than ~.07 s - flashing)
+   Falling things must ENTER the frame: spawn them above the top edge (t0 earlier, small downward v0) - an object that
+   appears mid-air on its release frame reads as a skipped frame (measured: periodic diff spikes every pop-in).
+   Measured smoothness of the demo (median 2nd difference of per-frame change): shatter .07, cracks .05, energy .10,
+   chain .10, slash .12, water .17, tower collapse .18 - lightning (.76) flickers on purpose.
+   Not used: rapier3d-deterministic (would allow baked rigid-body piles with real box shapes) - running the downloaded
+   package was blocked by this environment's safety check; ask the user before trying again.
    Rules: hide each demo/effect group outside its shot (sets are reused); reset Wd.rocksAt/raysAt/fogAt per shot; flat
    effects on the ground sit >= .035 above it (roads/carpets are thin boxes); anticipation (tremble, wind-up, held
    breath) before every release, follow-through after; fast pieces get velocity stretch instead of strobing.

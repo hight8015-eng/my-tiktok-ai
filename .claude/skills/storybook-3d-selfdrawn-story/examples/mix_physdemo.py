@@ -11,8 +11,8 @@ def water(a, b, g=.25):   # pouring water: band noise with bubbling flutter, sof
     s *= np.clip(x / .2, 0, 1) * np.clip((b - a - x) / .3, 0, 1); add(s, a, g)
 L_ = 2.6
 # D1 falling objects
-for t, f in ((1.0, 120), (1.15, 95), (1.27, 140)): thud(f, .25, .8, t)
-for k in range(14): thud(380 + rs.rand() * 200, .12, .25, .95 + rs.rand() * .9)
+for t, f in ((.59, 120), (.71, 95), (.83, 140)): thud(f, .25, .8, t)
+for k in range(14): thud(380 + rs.rand() * 200, .12, .25, .97 + rs.rand() * .55)
 # D2 snap + pot + ice
 hit('click', 2.6 + .95, .6, tier='small'); hit('crash', 2.6 + 1.0, .7, -.2); hit('crash', 2.6 + 1.45, .55, .3); hit('shimmer', 2.6 + 1.47, .35, .3, tier='small')
 # D3 chains snap one by one, links clatter

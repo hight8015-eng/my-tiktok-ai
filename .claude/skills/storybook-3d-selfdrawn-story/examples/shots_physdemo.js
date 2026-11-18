@@ -92,9 +92,9 @@ const GRP = []; const grp = (par) => { const g = group({ parent: par }); GRP.pus
 const L_ = 2.6;   // seconds per demo scene
 // --- D1 falling objects: crates, a barrel and apples tumble off a cart, bounce, roll and settle (FIELD) ---
 const g1 = grp(FIELD); const T1 = 0;
-const fall = [FX.body(g1, { kind: 'crate', size: .55, p0: [-.6, 2.6, -2], v0: [.6, .5, .4], t0: T1 + .3, seed: 2 }), FX.body(g1, { kind: 'crate', size: .45, p0: [.1, 3.1, -2.2], v0: [-.3, .2, .6], t0: T1 + .5, seed: 3 }),
-  FX.body(g1, { kind: 'barrel', size: .6, p0: [.8, 2.8, -2.4], v0: [-.5, .4, .9], t0: T1 + .4, seed: 4, rest: .3 })];
-const apples = FX.rainOf(g1, { kind: 'apple', n: 14, at: [0, 3.3, -2.2], spread: .7, size: .16, t0: T1 + .7, stagger: .5, scatter: 1.6, seed: 5, rest: .45 });
+const fall = [FX.body(g1, { kind: 'crate', size: .55, p0: [-.6, 5.6, -2], v0: [.6, -2.4, .4], t0: T1 - .25, seed: 2 }), FX.body(g1, { kind: 'crate', size: .45, p0: [.1, 6.1, -2.2], v0: [-.3, -2.4, .6], t0: T1 - .05, seed: 3 }),
+  FX.body(g1, { kind: 'barrel', size: .6, p0: [.8, 5.8, -2.4], v0: [-.5, -2.4, .9], t0: T1 - .15, seed: 4, rest: .3 })];
+const apples = FX.rainOf(g1, { kind: 'apple', n: 14, at: [0, 6.3, -2.2], spread: .7, size: .16, t0: T1 + .1, stagger: .5, up: -2.4, scatter: 1.6, seed: 5, rest: .45 });
 // --- D2 shatter: Kael flicks his fingers - a clay pot and a block of ice burst (FIELD) ---
 const g2 = grp(FIELD); const T2 = L_; const ped = mesh(new THREE.CylinderGeometry(.35, .4, .9, 14), toon('#8a86a0'), { p: [.6, .45, -3], parent: g2 }); const ped2 = mesh(new THREE.CylinderGeometry(.35, .4, .9, 14), toon('#8a86a0'), { p: [-.8, .45, -3.4], parent: g2 });
 const pot = FX.shatter(g2, { kind: 'pot', at: [.6, 1.15, -3], size: .5, tBreak: T2 + 1.0, dir: [.8, .3, -.3], power: 2.6, seed: 7 });
