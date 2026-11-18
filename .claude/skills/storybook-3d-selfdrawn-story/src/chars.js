@@ -110,10 +110,20 @@ export function makeChar(spec) { // v2: stick figure: white ball head, bean tors
   if (spec.hat === 'bicorne') { const hm = toon('#1d1d2c', F); mesh(new THREE.CylinderGeometry(.6, .6, .13, 32, 1, false, 0, Math.PI), hm, { p: [0, HR * .66, 0], r: [90, 90, 0], parent: hat }); mesh(new THREE.CircleGeometry(.08, 14), toon('#d8483e', { grad: GRAD_FLAT }), { p: [0, HR * .98, .075], parent: hat }); }
   // stick limbs
   const tube = (len, r, parent) => { const m = mesh(new THREE.CapsuleGeometry(r, len, 3, 8), inkM, { p: [0, -len / 2, 0], parent }); return m; };
-  const arm = (s) => { const up = group({ parent: torso }), fo = group({ parent: torso }); tube(AL, .007, up); tube(AL, .007, fo);
-    const hand = mesh(new THREE.SphereGeometry(.032, 12, 10), inkM, { p: [0, -AL, 0], parent: fo }); return { up, fo, hand, S: new THREE.Vector3(s * .22, .72, 0) }; };
-  const leg = (s) => { const up = group({ parent: hips }), fo = group({ parent: hips }); tube(LL, .008, up); tube(LL, .008, fo);
-    const shoe = mesh(new THREE.SphereGeometry(.045, 12, 8), inkM, { p: [0, -LL, .04], s: [.85, .55, 1.6], parent: fo }); return { up, fo, shoe, S: new THREE.Vector3(s * .11, 0, 0) }; };
+  // v4.2 model: thicker rubber-hose limbs with round joints, cartoon gloves (thumb + cuff) and rounded shoes. spec.classic = old hair-thin sticks
+  const CL = !!spec.classic, rA = CL ? .007 : (spec.limbW || 1) * .018, rL = CL ? .008 : (spec.limbW || 1) * .022;
+  const gloveM = toon(spec.glove || '#f7f2e8', { grad: GRAD_FLAT, ol: OL * .8, emissive: spec.glove || '#f7f2e8', ei: .42 }), shoeM = toon(spec.shoe || '#2b2233', { grad: GRAD_2, ol: OL * .8 }), soleM = toon(spec.sole || '#e9e1d4', { grad: GRAD_FLAT, ol: OL * .6 });
+  const arm = (s) => { const up = group({ parent: torso }), fo = group({ parent: torso }); tube(AL, rA, up); tube(AL, rA * .9, fo);
+    let hand; if (CL) hand = mesh(new THREE.SphereGeometry(.032, 12, 10), inkM, { p: [0, -AL, 0], parent: fo });
+    else { hand = group({ p: [0, -AL - .02, 0], parent: fo }); mesh(new THREE.SphereGeometry(.058, 16, 12), gloveM, { s: [1, 1.12, .78], parent: hand });
+      mesh(new THREE.SphereGeometry(.022, 10, 8), gloveM, { p: [s * -.045, .018, .02], s: [1, 1.5, 1], r: [0, 0, s * 35], parent: hand });
+      mesh(new THREE.CylinderGeometry(.04, .036, .03, 14), gloveM, { p: [0, .052, 0], parent: hand }); }
+    return { up, fo, hand, S: new THREE.Vector3(s * .22, .72, 0) }; };
+  const leg = (s) => { const up = group({ parent: hips }), fo = group({ parent: hips }); tube(LL, rL, up); tube(LL, rL * .92, fo);
+    let shoe; if (CL) shoe = mesh(new THREE.SphereGeometry(.045, 12, 8), inkM, { p: [0, -LL, .04], s: [.85, .55, 1.6], parent: fo });
+    else { shoe = group({ p: [0, -LL - .005, .045], parent: fo }); mesh(new THREE.SphereGeometry(.07, 16, 10), shoeM, { s: [.95, .62, 1.55], parent: shoe });
+      mesh(new THREE.CylinderGeometry(.068, .068, .02, 16), soleM, { p: [0, -.036, 0], s: [.95, 1, 1.55], parent: shoe }); }
+    return { up, fo, shoe, S: new THREE.Vector3(s * .11, 0, 0) }; };
   const sweat = group({ parent: hc }); sweat.visible = false; { const dm = toon('#bfe6ff', { grad: GRAD_FLAT, ol: .006 }); mesh(new THREE.SphereGeometry(.06, 12, 8), dm, { parent: sweat }); mesh(new THREE.ConeGeometry(.052, .1, 12), dm, { p: [0, .07, 0], parent: sweat }); sweat.position.set(HR * .8, HR * .45, HR * .4); }
   const C = { g, spec, hips, torso, head, hc, face, faceM, hat, sweat, aL: arm(-1), aR: arm(1), lL: leg(-1), lR: leg(1), HR, props: group({ parent: torso }) };
   CHARS[spec.id] = C; return C;
@@ -186,7 +196,7 @@ export function pose(C, P = {}) {
   C.handL = ik(C.aL, hL, AL, AL, P.pL || [-.6, -.3, -.7]); C.handR = ik(C.aR, hR, AL, AL, P.pR || [.6, -.3, -.7]);
   if (C.is2D) C.f2 = [P.ex || 'neutral', !!P.blink, P.talk || 0, P.look];
   else { const tex = faceTexFor(C.spec, P.ex || 'neutral', !!P.blink, P.talk || 0, P.look); if (C.faceM.map !== tex) { C.faceM.map = tex; C.faceM.needsUpdate = true; } }
-  C.sweat.visible = !!P.sweat; C.pop = P.pop || 0; C.sq = P.squash || 0; C.smear = P.smear || null;
+  C.sweat.visible = !!P.sweat; C.pop = P.pop || 0; C.sq = (P.squash || 0) + (w && w.heavy ? -.09 * w.heavy * Math.pow(Math.max(0, Math.cos(2 * w.ph)), 6) : 0); C.smear = P.smear || null;
   if (ANIM.rec !== undefined) recPose(C, fL, fR, hL, hR, P);
   if (P.gloom > 0 && (P.visible ?? true)) OVL.push({ kind: 'gloom', C, k: P.gloom });
 }
@@ -249,6 +259,15 @@ export function actPush(lt, { t0 = 0, rate = 1.6 } = {}) {
   const k = sm(t0, t0 + .35, lt), ph = Math.max(0, lt - t0) * rate * Math.PI * 2;
   return { lean: 30 * k, hipY: -.06 * k, hL: [-.2, .62, .62 * k + .06], hR: [.2, .62, .62 * k + .06], pL: [-1, -.3, -.3], pR: [1, -.3, -.3], walk: k > .5 ? { ph, stride: .13 } : undefined, squash: -.05 * k + .03 * Math.sin(ph * 2) * k, ex: 'angry', sweat: k > .9 };
 }
+// fast repeated work (hammering, chopping, typing): `rate` strikes per second, returns pose params + strike phase info
+//   o.strike = seconds since the last impact (use for sparks / sfx), o.k = 0..1 swing
+export function actHammer(lt, { rate = 3, side = 1 } = {}) {
+  const ph = lt * rate, f = ph % 1, up = f < .55 ? sm(0, .55, f) : 1 - sm(.55, .7, f), k = up; // slow raise, snap down
+  const arm = mixA([.14, .42, .66], [.28, 1.05, .42], k), o = { lean: 10 - 8 * k, hipY: -.06, squash: -.06 * (1 - k) * (f > .7 && f < .8 ? 1 : 0), twist: -10 * k * side,
+    head: [8 - 10 * k, 0, 0], ex: f > .68 && f < .9 ? 'angry' : 'nervous', strike: f >= .7 ? (f - .7) / rate : -1 };
+  if (side > 0) { o.hR = arm; o.pR = [1, -.4, -.3]; o.hL = [-.12, .42, .6]; o.pL = [-1, -.3, 0]; } else { o.hL = [-arm[0], arm[1], arm[2]]; o.pL = [-1, -.4, -.3]; o.hR = [.12, .42, .6]; o.pR = [1, -.3, 0]; }
+  return o;
+}
 // hit-stop: freeze the clock for `frames` right after `at` (use the returned lt for everything in the shot)
 export function hitStop(lt, at, frames = 4) { const d = frames / 30; return lt < at ? lt : lt < at + d ? at : lt - d; }
 // lip flap like anime: the mouth shape changes at most every 3 frames, from the envelope averaged over those frames
@@ -304,7 +323,8 @@ export const SPRG = new THREE.Group(); // sprite planes live at scene root (adde
 export function makeChar2D(spec) {
   const C = makeChar({ ...spec, hat: 'none' }); C.is2D = true; C.spr = spec.sprite;
   // the 3D bean/ball become invisible shadow casters; face patch off
-  C.torso.traverse(o => { if (o.isMesh && !C.aL.up.children.includes(o) && !C.aL.fo.children.includes(o) && !C.aR.up.children.includes(o) && !C.aR.fo.children.includes(o) && o.parent !== C.sweat && o.parent !== C.props) {
+  const inArm = (o) => { for (let q = o.parent; q && q !== C.torso; q = q.parent) if (q === C.aL.up || q === C.aL.fo || q === C.aR.up || q === C.aR.fo) return true; return false; };
+  C.torso.traverse(o => { if (o.isMesh && !inArm(o) && o.parent !== C.sweat && o.parent !== C.props) {
     if (o === C.face) { o.visible = false; return; } o.material = SHADOWONLY; o.userData.noInk = true; o.castShadow = true; } });
   for (const L of [C.aL, C.aR]) L.S.x = Math.sign(L.S.x) * .26;
   C.hc.children.forEach(o => { if (o.isMesh && o.material === SHADOWONLY) o.scale.setScalar(.68); });

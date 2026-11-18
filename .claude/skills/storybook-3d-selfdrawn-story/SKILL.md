@@ -77,6 +77,9 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    FX: debrisAt(p, age, {kind: 'rock'|'leaf'|'spark', n, speed, size, floor}) bursts, smokeAt(p, age, {size}) cel puff
    clouds, ramp(lt, at, dur, k) slow motion. Fast camera moves get motion blur automatically. FX are drawn over the
    frame (no depth), so put blasts between the camera and the characters, not behind them.
+   Model v4.2: thicker rubber-hose limbs, cartoon gloves and shoes (spec.glove / spec.shoe / spec.limbW; spec.classic
+   for the old hair-thin sticks). actHammer(lt, {rate}) loops a work action (o.strike = time since impact);
+   walk: {ph, stride, heavy: 1} stomps with a squash on each footfall.
 9. **Finish:** `bash tools/finish.sh <out_dir> "<title>" 26`, then `bash tools/cover.sh <out_dir>/ปก.jpg`.
 10. **Deliver:** on the user's computer put the files in `~/Desktop/edit-video/<project>/<version>/`. On a phone,
     send them back in the chat.
