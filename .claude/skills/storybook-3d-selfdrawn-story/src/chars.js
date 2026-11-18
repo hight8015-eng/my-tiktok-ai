@@ -34,19 +34,19 @@ const EX = {
 function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a white ball head (no nose)
   const S = 512; x.clearRect(0, 0, S, S);
   const BIG = !!spec.bigEyes, EK = BIG ? 2.45 : 1; // v4.8 hybrid: pirate-ref dot eyes by default (spec.bigEyes = sheet eyes everywhere) // v4.6 sheet face: eyes ~1/4 head wide, nearly touching; bigger mouth
-  const ey = S * (spec.eyeY ?? .5), ex = S * (BIG ? .152 : .13), ink = '#1c1420';
+  const ey = S * (spec.eyeY ?? .5), ex = S * (BIG ? .152 : .13), ink = '#22223a'; // v4.11 refs: dark navy ink, thin face lines
   x.fillStyle = spec.cheek || 'rgba(255,128,140,.38)'; for (const s of [-1, 1]) { x.beginPath(); x.ellipse(S / 2 + s * S * (BIG ? .37 : .2), ey + (BIG ? 128 : 62), 30, 17, 0, 0, 7); x.fill(); }
   const eyes = blink ? 'closed' : e.eyes; const lx = (look?.[0] || 0) * 9, ly = (look?.[1] || 0) * 7;
   x.lineCap = 'round'; x.lineJoin = 'round';
   for (const s of [-1, 1]) {
     const cx = S / 2 + s * ex, cy = ey; let kind = eyes; if (kind === 'wink') kind = s < 0 ? 'open' : 'closedUp';
     x.save(); if (BIG) { x.translate(cx, cy); x.scale(EK, EK); x.translate(-cx, -cy); }
-    x.fillStyle = ink; x.strokeStyle = ink; x.lineWidth = BIG ? 9 : 19;
+    x.fillStyle = ink; x.strokeStyle = ink; x.lineWidth = BIG ? 9 : 12;
     if (!BIG && (kind === 'wide' || kind === 'tiny')) { x.translate(cx, cy); x.scale(1.75, 1.75); x.translate(-cx, -cy); } // shock: dot eyes pop into big white eyes
     if ((kind === 'open' || kind === 'side') && BIG) { const dx = kind === 'side' ? 13 * (spec.sideDir || 1) : lx * 1.4; // v4.6 sheet eyes: big white ovals, ink outline, pupil
       x.fillStyle = '#fbf8f2'; x.lineWidth = 6; x.beginPath(); x.ellipse(cx, cy - 2, 30, 38, 0, 0, 7); x.fill(); x.stroke();
       x.fillStyle = ink; x.beginPath(); x.ellipse(cx + dx + 3, cy + 6 + ly * 1.2, 13, 18, 0, 0, 7); x.fill(); x.fillStyle = '#ffffff'; x.beginPath(); x.arc(cx + dx - 1, cy - 2 + ly, 4.5, 0, 7); x.fill(); }
-    else if (kind === 'open' || kind === 'side') { const dx = kind === 'side' ? 11 * (spec.sideDir || 1) : lx; x.beginPath(); x.ellipse(cx + dx, cy + ly, 15, 21, 0, 0, 7); x.fill(); }
+    else if (kind === 'open' || kind === 'side') { const dx = kind === 'side' ? 11 * (spec.sideDir || 1) : lx; x.beginPath(); x.ellipse(cx + dx, cy + ly, 12, 18, 0, 0, 7); x.fill(); }
     else if (kind === 'chev') { x.lineWidth = BIG ? 10 : 16; x.beginPath(); x.moveTo(cx - 20 * s, cy - 16); x.lineTo(cx + 14 * s, cy); x.lineTo(cx - 20 * s, cy + 16); x.stroke(); } // > <
     else if (kind === 'spiral') { x.lineWidth = BIG ? 6 : 9; x.beginPath(); for (let i = 0; i <= 60; i++) { const a = i / 60 * Math.PI * 5 * s, r = 3 + i / 60 * 30; x.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r * 1.1); } x.stroke(); }
     else if (kind === 'tiny') { x.fillStyle = '#fbf8f2'; x.lineWidth = BIG ? 6 : 12; x.beginPath(); x.ellipse(cx, cy - 2, 30, 38, 0, 0, 7); x.fill(); x.stroke(); x.fillStyle = ink; x.beginPath(); x.arc(cx + lx * .5, cy + ly * .5, 6, 0, 7); x.fill(); }
@@ -56,7 +56,7 @@ function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a wh
     else if (kind === 'wide') { x.fillStyle = '#fbf8f2'; x.lineWidth = 13; x.beginPath(); x.ellipse(cx, cy, 30, 36, 0, 0, 7); x.fill(); x.stroke(); x.fillStyle = ink; x.beginPath(); x.arc(cx + lx * .6, cy + ly * .6, 9, 0, 7); x.fill(); }
     x.restore();
     const ang = (s < 0 ? e.bl : e.br) * D2R; const by = cy - (BIG ? 128 : /wide|tiny/.test(kind) ? 80 : 50) + (e.by || 0) * EK;
-    x.strokeStyle = spec.browC || ink; x.lineWidth = spec.browW || (BIG ? 26 : 22); x.save(); x.translate(cx, by); x.rotate(s < 0 ? -ang : ang); x.beginPath(); x.moveTo(BIG ? -36 : -24, 0); x.lineTo(BIG ? 36 : 24, 0); x.stroke(); x.restore();
+    x.strokeStyle = spec.browC || ink; x.lineWidth = spec.browW || (BIG ? 16 : 11); x.save(); x.translate(cx, by); x.rotate(s < 0 ? -ang : ang); x.beginPath(); x.moveTo(BIG ? -36 : -24, 0); x.lineTo(BIG ? 36 : 24, 0); x.stroke(); x.restore();
   }
   if (spec.fringe) { x.fillStyle = spec.fringe; x.strokeStyle = ink; x.lineWidth = 12; const top = ey - 190, L = S * .16, Rr = S * .84, n = 6; x.beginPath(); x.moveTo(L, top); x.lineTo(L, ey - 60);
     for (let i = 1; i <= n; i++) { const bx = L + (Rr - L) * i / n, yb = ey - 60 - Math.sin(Math.PI * i / n) * 34 - (i === n ? 0 : 0); x.quadraticCurveTo(bx - (Rr - L) / n / 2, yb + 44, bx, i === n ? ey - 60 : yb); }
@@ -67,7 +67,7 @@ function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a wh
     const n = 7; for (let i = 0; i <= n; i++) { const u = i / n, bx = L + (Rr - L) * u, by = top + Math.sin(Math.PI * u) * 120 + 18; if (i) x.quadraticCurveTo(bx - (Rr - L) / n / 2, by + 26, bx, by); else x.lineTo(bx, by); }
     x.lineTo(Rr, top); x.quadraticCurveTo(S / 2, top + 44, L, top); x.closePath(); x.fill(); x.stroke(); }
   let m = e.mouth; if (talk > 0) m = talk > .66 ? 'open' : talk > .33 ? 'talk' : (m === 'o' || m === 'yawn' ? m : 'flat');
-  x.strokeStyle = ink; x.fillStyle = '#3a1a24'; x.lineWidth = 15; const cx = S / 2; x.save(); { x.translate(cx, my); x.scale(BIG ? 1.9 : 1.3, BIG ? 1.9 : 1.3); x.translate(-cx, -my); }
+  x.strokeStyle = ink; x.fillStyle = '#3a1a24'; x.lineWidth = 10; const cx = S / 2; x.save(); { x.translate(cx, my); x.scale(BIG ? 1.9 : 1.3, BIG ? 1.9 : 1.3); x.translate(-cx, -my); }
   if (m === 'smile') { const W = BIG ? 44 : 24, D = BIG ? 30 : 16; x.beginPath(); x.moveTo(cx - W, my - 10); x.quadraticCurveTo(cx, my + D, cx + W, my - 10); x.stroke(); } // v4.6 wide sheet smile
   else if (m === 'flat') { x.beginPath(); x.moveTo(cx - 18, my + 4); x.lineTo(cx + 18, my + 4); x.stroke(); }
   else if (m === 'smirk') { x.beginPath(); x.moveTo(cx - 22, my + 6); x.quadraticCurveTo(cx + 6, my + 12, cx + 28, my - 6); x.stroke(); }
@@ -100,7 +100,7 @@ export function makeChar(spec) { // v2: stick figure: white ball head, bean tors
   const g = group(); g.userData.spec = spec; g.scale.setScalar(spec.s);
   const F = { grad: GRAD_2, ol: OL };
   const shirtM = spec.stripe ? toon('#ffffff', { map: stripeTex(spec.shirt, spec.stripe), ...F }) : toon(spec.shirt, F);
-  const inkM = toon('#231a28', { grad: GRAD_FLAT, ol: OL });
+  const inkM = toon(spec.limbC || '#262338', { grad: GRAD_FLAT, ol: OL });
   const hips = group({ p: [0, LEG, 0], parent: g });
   const torso = group({ parent: hips });
   const R = .27 * spec.belly;
@@ -146,6 +146,8 @@ export function makeChar(spec) { // v2: stick figure: white ball head, bean tors
       if (spec.sole || spec.shoe) mesh(new THREE.CylinderGeometry(.068, .068, .02, 16), soleM, { p: [0, -.036, .025], s: [.95, 1, 1.85], parent: shoe }); }
     return { up, fo, shoe, S: new THREE.Vector3(s * .11, 0, 0) }; };
   const sweat = group({ parent: hc }); sweat.visible = false; { const dm = toon('#bfe6ff', { grad: GRAD_FLAT, ol: .006 }); mesh(new THREE.SphereGeometry(.06, 12, 8), dm, { parent: sweat }); mesh(new THREE.ConeGeometry(.052, .1, 12), dm, { p: [0, .07, 0], parent: sweat }); sweat.position.set(HR * .8, HR * .45, HR * .4); }
+  { const sm_ = new THREE.MeshBasicMaterial({ color: 0x0c0a18, transparent: true, opacity: .26, depthWrite: false }); noOutline(sm_); sm_.userData.noInk = true; // v4.11 soft contact shadow (refs)
+    const blob = new THREE.Mesh(new THREE.CircleGeometry(.28, 28), sm_); blob.rotation.x = -Math.PI / 2; blob.position.y = .006; blob.scale.set(1, .62, 1); blob.renderOrder = -1; blob.castShadow = blob.receiveShadow = false; blob.userData.noInk = true; g.add(blob); g.userData.blob = blob; }
   const C = { g, spec, hips, torso, head, hc, face, faceM, hat, sweat, aL: arm(-1), aR: arm(1), lL: leg(-1), lR: leg(1), HR, props: group({ parent: torso }) };
   CHARS[spec.id] = C; return C;
 }
@@ -227,6 +229,7 @@ export function pose(C, P = {}) {
   if (C.is2D) C.f2 = [P.ex || 'neutral', !!P.blink, P.talk || 0, P.look];
   else { const tex = faceTexFor(C.spec, P.ex || 'neutral', !!P.blink, P.talk || 0, P.look); if (C.faceM.map !== tex) { C.faceM.map = tex; C.faceM.needsUpdate = true; } }
   for (const [L_, k] of [[C.aL, 'L'], [C.aR, 'R']]) if (L_.open) { const o = P.open === true || P.open === k; L_.open.visible = o; L_.hand.visible = !o; }
+  { const bl = g.userData.blob; if (bl) { const lift = P.groundY !== undefined && P.p ? (P.p[1] - P.groundY) / s : 0; bl.position.y = .006 - lift; const k = Math.max(.35, 1 - lift * .9); bl.scale.set(k, .62 * k, 1); bl.visible = !P.noShadow; } }
   C._hold = P.hold || null; // v4.4 { R: { obj, off: [x,y,z], rot: [deg x,y,z] }, L: {...} } -> attached to the (smoothed) hand after posing
   C.sweat.visible = !!P.sweat; C.pop = P.pop || 0; C.sq = (P.squash || 0) + (w && w.heavy ? -.09 * w.heavy * Math.pow(Math.max(0, Math.cos(2 * w.ph)), 6) : 0); C.smear = P.smear || null;
   if (ANIM.rec !== undefined) recPose(C, fL, fR, hL, hR, P);
@@ -270,7 +273,7 @@ export function actJump(lt, { t0 = .3, dur = .6, h = .6, from = [0, 0, 0], to = 
   let squash = -.28 * pre, hipY = -.2 * pre, lean = 14 * pre, hL = mixA([-.36, .2, .06], [-.3, .05, -.3], pre), hR = mixA([.36, .2, .06], [.3, .05, -.3], pre), fL, fR;
   if (air) { const st = 1 - sm(0, .5, u); squash = .22 * st - .08 * sm(.6, 1, u); lean = -8 * st + 10 * sm(.5, 1, u); hL = [-.42, .95, .2]; hR = [.42, .95, .2]; fL = [-.13, -.5 + .16 * Math.sin(u * Math.PI), .12]; fR = [.13, -.42 + .1 * Math.sin(u * Math.PI), -.06]; }
   if (la >= 0) { const k = 1 - spring(la / .45); squash = -.32 * k; hipY = -.18 * Math.max(0, k); lean = 16 * Math.max(0, k); hL = mixA([-.36, .2, .06], [-.45, .45, .25], Math.max(0, k)); hR = mixA([.36, .2, .06], [.45, .45, .25], Math.max(0, k)); }
-  return { p, squash, hipY, lean, hL, hR, ...(fL ? { fL, fR } : {}), pL: [-1, -.2, -.3], pR: [1, -.2, -.3], landed: la >= 0 ? la : -1 };
+  return { p, squash, hipY, lean, hL, hR, ...(fL ? { fL, fR } : {}), pL: [-1, -.2, -.3], pR: [1, -.2, -.3], landed: la >= 0 ? la : -1, groundY: from[1] + (to[1] - from[1]) * u };
 }
 // right punch landing at `at`: wind-up, snap (stretch), hold, recover
 export function actPunch(lt, at, { side = 1 } = {}) {
@@ -391,8 +394,10 @@ const K2 = .96 / 1274;            // torso-local units per sprite pixel (2x spri
 function capsuleBody(im, o) { const W = im.width, H = im.height, c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
   const cw = W * (o.w ?? .64), ch = H * .985, cx = (W - cw) / 2, cy = (H - ch) / 2, r = cw / 2, lw = Math.max(8, W * .034);
   const path = () => { x.beginPath(); x.moveTo(cx, cy + r); x.arc(cx + r, cy + r, r, Math.PI, 0); x.lineTo(cx + cw, cy + ch - r * (o.bottom ?? .8)); x.ellipse(cx + r, cy + ch - r * (o.bottom ?? .8), r, r * (o.bottom ?? .8), 0, 0, Math.PI); x.closePath(); };
-  x.save(); path(); x.clip(); const ins = W * .045; x.drawImage(im, ins, H * .02, W - 2 * ins, H * .96, cx - lw, cy - H * .03, cw + 2 * lw, ch + H * .03); x.restore();
-  x.lineWidth = lw; x.strokeStyle = '#1c1420'; path(); x.stroke(); return c; }
+  x.save(); path(); x.clip(); const ins = W * .045; x.drawImage(im, ins, H * .02, W - 2 * ins, H * .96, cx - lw, cy - H * .03, cw + 2 * lw, ch + H * .03);
+  const g = x.createLinearGradient(cx, 0, cx + cw, 0); g.addColorStop(0, 'rgba(255,255,255,.10)'); g.addColorStop(.35, 'rgba(255,255,255,0)'); g.addColorStop(.7, 'rgba(20,16,40,0)'); g.addColorStop(.72, 'rgba(20,16,40,.16)'); g.addColorStop(1, 'rgba(20,16,40,.22)');
+  x.fillStyle = g; x.fillRect(cx, cy, cw, ch); x.restore(); // v4.11 cel shade: lit left, shaded right band
+  x.lineWidth = lw; x.strokeStyle = '#22223a'; path(); x.stroke(); return c; }
 export async function loadSprites() {
   SPR.meta = await (await fetch('sprites/sprites.json')).json();
   const L = new THREE.TextureLoader(); const img = (u) => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = u; });
