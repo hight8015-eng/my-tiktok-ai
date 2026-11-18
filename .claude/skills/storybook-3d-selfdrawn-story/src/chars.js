@@ -155,16 +155,20 @@ const seedOf = (C) => C._sd ?? (C._sd = [...(C.spec.id || 'x')].reduce((a, c) =>
 export function pose(C, P = {}) {
   const g = C.g, s = C.spec.s; if (P.p) g.position.set(...P.p); g.rotation.set(P.rx ? P.rx * D2R : 0, (P.ry || 0) * D2R, P.rz ? P.rz * D2R : 0);
   g.visible = P.visible ?? true;
-  const w = P.walk; let hy = P.sit ? .04 + (P.hipY || 0) : LEG + (P.hipY || 0); if (w) hy += Math.abs(Math.sin(w.ph)) * .03;
+  const w = P.walk; let hy = P.sit ? .04 + (P.hipY || 0) : LEG + (P.hipY || 0); if (w) hy += (.5 - .5 * Math.cos(2 * w.ph)) * .035 - .02; // v4.1: two bobs per cycle, a touch of knee bend
   C.hips.position.set(0, hy, 0); C.hips.rotation.set(0, 0, 0);
   C.torso.rotation.set((P.lean || 0) * D2R, (P.twist || 0) * D2R, (P.side || 0) * D2R, 'YXZ');
   const hd = P.head || [0, 0, 0]; C.head.rotation.set(hd[0] * D2R, hd[1] * D2R, hd[2] * D2R, 'YXZ');
+  if (w && !P.still) { const ph = w.ph, k = Math.min(1, (w.stride ?? .22) / .22); // hips twist with the stride, body rocks side to side, head stays steady and lags the bob
+    C.torso.rotation.y += Math.sin(ph) * .14 * k; C.torso.rotation.z += Math.sin(ph) * .045 * k; C.torso.rotation.x += .06 * k;
+    C.head.rotation.y -= Math.sin(ph) * .1 * k; C.head.rotation.x += Math.sin(2 * ph - .7) * .035 * k; }
   let fL = P.fL, fR = P.fR;
   if (!fL) { if (P.sit) { const sh = (P.seat ?? .45) / s; fL = [-.14, -sh + .03, .5]; fR = [.14, -sh + .03, .5]; }
-    else if (w) { const st = w.stride ?? .22; fL = [-.12, -hy + .03 + Math.max(0, Math.sin(w.ph)) * .1, Math.sin(w.ph + Math.PI / 2) * st]; fR = [.12, -hy + .03 + Math.max(0, -Math.sin(w.ph)) * .1, -Math.sin(w.ph + Math.PI / 2) * st]; }
+    else if (w) { const st = w.stride ?? .22, lift = (x) => { const v = Math.max(0, x); return v * v * .13; }; // smooth foot arcs (no hard corners at plant/lift)
+      fL = [-.12, -hy + .03 + lift(Math.sin(w.ph)), Math.sin(w.ph + Math.PI / 2) * st]; fR = [.12, -hy + .03 + lift(-Math.sin(w.ph)), -Math.sin(w.ph + Math.PI / 2) * st]; }
     else { fL = [-.13, -hy + .03, .03]; fR = [.13, -hy + .03, .03]; } }
   ik(C.lL, new THREE.Vector3(...fL), LL, LL, [0, 0, 1]); ik(C.lR, new THREE.Vector3(...fR), LL, LL, [0, 0, 1]);
-  const sw = w ? Math.sin(w.ph) * .16 : 0;
+  const sw = w ? Math.sin(w.ph - .35) * .16 * Math.min(1.4, (w.stride ?? .22) / .22) : 0; // arms trail the legs slightly
   const live = ANIM.on && !P.still && (P.visible ?? true), t = ANIM.t, sd = seedOf(C), tk = P.talk || 0, A = ANIM.k;
   let gR = [0, 0, 0], gL = [0, 0, 0], hd2 = [0, 0, 0];
   if (live) { // idle: breathing bob, slow weight shift, head drift; talking: nods + small hand gestures
@@ -175,8 +179,8 @@ export function pose(C, P = {}) {
     C.head.rotation.x += hd2[0]; C.head.rotation.y += hd2[1]; C.head.rotation.z += hd2[2];
     if (ta && !w) { const gx = noise1(t * 2.4 + sd * 11), gy = Math.max(0, noise1(t * 1.9 + sd * 13)); gR = [.03 * gx, .16 * gy, .12 * gy]; gL = [-.02 * gx, .05 * Math.max(0, noise1(t * 1.6 + sd * 17)), .04]; }
   } else C.br = 0;
-  const hL = P.hL ? (P.hL.isVector3 ? P.hL.clone() : new THREE.Vector3(...P.hL)) : new THREE.Vector3(-.36, .2, .06 - sw);
-  const hR = P.hR ? (P.hR.isVector3 ? P.hR.clone() : new THREE.Vector3(...P.hR)) : new THREE.Vector3(.36, .2, .06 + sw);
+  const hL = P.hL ? (P.hL.isVector3 ? P.hL.clone() : new THREE.Vector3(...P.hL)) : new THREE.Vector3(-.36, .2 + Math.abs(sw) * .25, .06 - sw);
+  const hR = P.hR ? (P.hR.isVector3 ? P.hR.clone() : new THREE.Vector3(...P.hR)) : new THREE.Vector3(.36, .2 + Math.abs(sw) * .25, .06 + sw);
   if (live) { const k = (P.hR || P.hL) ? .45 : 1; hR.x += gR[0] * k; hR.y += gR[1] * k; hR.z += gR[2] * k; hL.x += gL[0] * k; hL.y += gL[1] * k; hL.z += gL[2] * k;
     const dr = .012 * A; hR.y += dr * Math.sin(t * 2.3 + sd + .6); hL.y += dr * Math.sin(t * 2.3 + sd + 1.1); }
   C.handL = ik(C.aL, hL, AL, AL, P.pL || [-.6, -.3, -.7]); C.handR = ik(C.aR, hR, AL, AL, P.pR || [.6, -.3, -.7]);
@@ -192,6 +196,7 @@ function recPose(C, fL, fR, hL, hR, P) {
   const w = ANIM.rec; if (!w) return; const g = C.g; g.updateMatrixWorld(true);
   const v = [...fL, ...fR, hL.x, hL.y, hL.z, hR.x, hR.y, hR.z, C.head.rotation.x, C.head.rotation.y, C.head.rotation.z, C.torso.rotation.x, C.torso.rotation.y, C.torso.rotation.z, C.hips.position.y];
   const root = g.getWorldPosition(new THREE.Vector3());
+  (C._roots || (C._roots = [])).push(root.clone());
   (C._trail || (C._trail = [])).push([C.aL.fo.localToWorld(new THREE.Vector3(0, -AL, 0)), C.aR.fo.localToWorld(new THREE.Vector3(0, -AL, 0)), C.lL.fo.localToWorld(new THREE.Vector3(0, -LL, 0)), C.lR.fo.localToWorld(new THREE.Vector3(0, -LL, 0))]);
   if (!C._acc) C._acc = { v: v.map(x => x * w), w, root, P };
   else if (C._acc.root.distanceTo(root) < .35 * C.spec.s / .6 && C._acc.vis === (P.visible ?? true)) { C._acc.v.forEach((_, i) => { C._acc.v[i] += v[i] * w; }); C._acc.w += w; C._acc.root = root; C._acc.P = P; }
@@ -199,8 +204,15 @@ function recPose(C, fL, fR, hL, hR, P) {
   C._acc.vis = P.visible ?? true;
 }
 export function applySmooth(C) {
-  const A = C._acc; C._acc = null; if (!A || A.w <= 1.01 * ANIM.wFinal || !C.g.visible) return; const v = A.v.map(x => x / A.w), P = A.P;
+  const A = C._acc; C._acc = null; if (!A || A.w <= 1.01 * ANIM.wFinal || !C.g.visible) { C._roots = []; return; } const v = A.v.map(x => x / A.w), P = A.P;
   C.head.rotation.set(v[12], v[13], v[14], 'YXZ'); C.torso.rotation.set(v[15], v[16], v[17], 'YXZ'); C.hips.position.y = v[18];
+  const R = C._roots || []; C._roots = [];
+  if (R.length >= 4 && !P.still && ANIM.on) { // v4.1 momentum: lean into the travel direction, head + body lag on starts/stops (follow-through)
+    const n = R.length, vel = R[n - 1].clone().sub(R[n - 2]).multiplyScalar(30), vel0 = R[n - 3].clone().sub(R[n - 4]).multiplyScalar(30), acc = vel.clone().sub(vel0).multiplyScalar(15);
+    const sc = C.g.getWorldScale(new THREE.Vector3()).x || 1, inv = new THREE.Quaternion(); C.g.getWorldQuaternion(inv).invert();
+    const lv = vel.applyQuaternion(inv).divideScalar(sc), la = acc.applyQuaternion(inv).divideScalar(sc);
+    if (lv.length() < 40) { const fwd = clamp(lv.z, -6, 6), side = clamp(lv.x, -6, 6), af = clamp(la.z, -60, 60), as = clamp(la.x, -60, 60);
+      C.torso.rotation.x += .035 * fwd - .0035 * af; C.torso.rotation.z -= .03 * side - .003 * as; C.head.rotation.x -= .005 * af; C.head.rotation.z += .004 * as; } }
   ik(C.lL, new THREE.Vector3(v[0], v[1], v[2]), LL, LL, [0, 0, 1]); ik(C.lR, new THREE.Vector3(v[3], v[4], v[5]), LL, LL, [0, 0, 1]);
   C.handL = ik(C.aL, new THREE.Vector3(v[6], v[7], v[8]), AL, AL, P.pL || [-.6, -.3, -.7]); C.handR = ik(C.aR, new THREE.Vector3(v[9], v[10], v[11]), AL, AL, P.pR || [.6, -.3, -.7]);
 }
@@ -322,6 +334,7 @@ export function updateSprites(cam) {
     s_v.copy(s_cp).sub(anc); s_v.y = 0; s_v.normalize();
     const th = Math.atan2(s_f.z * s_v.x - s_f.x * s_v.z, s_f.dot(s_v)) * 180 / Math.PI, a = Math.abs(th);
     const view = a < 24 ? 'F' : a < 60 ? 'Q' : a < 128 ? 'S' : 'B', mir = (view === 'Q' || view === 'S') && th < 0;
+    const db = Math.min(Math.abs(a - 24), Math.abs(a - 60), Math.abs(a - 128)), turnW = db < 9 ? .82 + .18 * (db / 9) * (db / 9) : 1; // v4.1 turn squash
     const key = C.spr + '-' + view, M = SPR.meta[key]; const yaw = Math.atan2(s_v.x, s_v.z);
     s_r.set(Math.cos(yaw), 0, -Math.sin(yaw));
     // body
@@ -329,7 +342,7 @@ export function updateSprites(cam) {
     const [x0, y0, x1, y1] = M.body; const lx = ((x0 + x1) / 2 - C.cx) * K2 * (mir ? -1 : 1), ly = .91 - ((y0 + y1) / 2 - M.gap[1]) * K2;
     const cb = C.torso.localToWorld(new THREE.Vector3(0, ly, 0)).addScaledVector(s_r, lx * s * Math.cos(rollB)).addScaledVector(s_v, -.14 * s);
     const sq = clamp(C.sq || 0, -.45, .6), bh = (y1 - y0) * K2 * s; cb.y += bh / 2 * sq; // v4 squash/stretch, feet stay planted
-    place(C.sb, cb, yaw, rollB, (x1 - x0) * K2 * s * (1 - (C.br || 0) * .5) * (1 - sq * .5), bh * (1 + (C.br || 0)) * (1 + sq), mir);
+    place(C.sb, cb, yaw, rollB, (x1 - x0) * K2 * s * (1 - (C.br || 0) * .5) * (1 - sq * .5) * turnW, bh * (1 + (C.br || 0)) * (1 + sq), mir);
     C.sb.material.map !== SPR.body[key] && (C.sb.material.map = SPR.body[key], C.sb.material.emissiveMap = SPR.body[key], C.sb.material.needsUpdate = true);
     C.sb.userData.sprN.uniforms.map.value = SPR.body[key];
     // head
@@ -343,7 +356,7 @@ export function updateSprites(cam) {
     const neck = cb.clone().addScaledVector(upB, (y1 - y0) / 2 * K2 * s * (1 + sq)).addScaledVector(rtB, (M.ball[0] - (x0 + x1) / 2) * K2 * s * (mir ? -1 : 1) * .5);
     const ballC = neck.addScaledVector(upH, (M.ball[2] - (C.sink ?? 105) - 40 * Math.sin(nod)) * K2 * s).addScaledVector(rtH, (M.ball[0] - (x0 + x1) / 2) * K2 * s * (mir ? -1 : 1) * .5);
     const ch = ballC.addScaledVector(rtH, dx * s).addScaledVector(upH, dy * s).addScaledVector(s_v, .04 * s);
-    const pp = C.pop || 0, hq = sq * .45; place(C.sh, ch, yaw, rollH, (hx1 - hx0) * K2 * s * (1 + pp * .6) * (1 - hq * .5), (hy1 - hy0) * K2 * s * (1 + pp) * (1 + hq), mir);
+    const pp = C.pop || 0, hq = sq * .45; place(C.sh, ch, yaw, rollH, (hx1 - hx0) * K2 * s * (1 + pp * .6) * (1 - hq * .5) * turnW, (hy1 - hy0) * K2 * s * (1 + pp) * (1 + hq), mir);
     const ht = headTex(C, key, view); if (C.sh.material.map !== ht) { C.sh.material.map = ht; C.sh.material.emissiveMap = ht; C.sh.material.needsUpdate = true; }
     C.sh.userData.sprN.uniforms.map.value = ht;
     C.view = view; C.mir = mir;
