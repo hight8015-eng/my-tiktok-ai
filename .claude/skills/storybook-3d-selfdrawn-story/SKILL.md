@@ -179,6 +179,17 @@ If the user wants characters made in Flow from their own prompt, use the sister 
      onto the head ball with the view angle (PHI) and mirroring, so it follows 3/4 and side views; any new face overlay
      (blush, sweat, sparkle in the eye) must use the same headBall(C) eye math, never a fixed offset.
    - Watch the frames at the size of a phone: anything that pulls the eye away from the face in an emotional beat goes.
+   v4.35 SOUND PLAN FOR SHORT-FORM STORIES (research: creator/editing guides 2026, game + film audio practice):
+   - Density: ~3-5 effects per 30 s (1.5-2.5 per 10 s) - the voice is the star; an effect on every cut wears viewers out.
+   - Meme sounds (vine-boom style boom, ding, fail horn, bruh...): <= 3 per clip, only on a reveal / plot twist / comic
+     reaction, never the same one twice, NEVER inside sad or tender beats (declare them: QUIET += [(a, b)]).
+   - Silence is a tool: a beat of quiet before a twist or a big hit makes it land (pre-hit dip does this automatically).
+   - Match mood + weight: action -> whoosh/impact; magic -> shimmer/rise; emotion -> music only, maybe one soft chime.
+   - Keep a signature: 1-2 recurring motif sounds per series (same family, varied) so viewers recognise the channel.
+   - Clean audio only (no distorted/clipped meme rips); mastering keeps the mix at -14 LUFS.
+   - Captions stay burned in (many people watch muted). The (ไม่มีเพลง) file lets the user add a trending track inside
+     the app at low volume. Copyright: meme sounds ripped from compilations / other channels can be claimed; prefer
+     the platform's own sound library or royalty-free packs for anything the user posts commercially.
    HELPER RENDER SESSIONS (user rule): before every full render, ASK the user whether to use helper sessions and how
    many (each is a separate cloud session on the user's usage quota). Default = render on this machine only. If they
    agree: push the project's src/ to render_jobs/<proj>/ on the work branch, create_session per helper with

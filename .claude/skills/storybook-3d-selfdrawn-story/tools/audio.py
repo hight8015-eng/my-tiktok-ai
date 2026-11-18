@@ -121,8 +121,14 @@ def _vary(a):
     r = 2 ** (_rs_sfx.uniform(-1.5, 1.5) / 12); n = int(a.shape[-1] / r); x = np.linspace(0, a.shape[-1] - 1, n)
     v = np.interp(x, np.arange(a.shape[-1]), a) if a.ndim == 1 else np.stack([np.interp(x, np.arange(a.shape[-1]), c) for c in a])
     return v * 10 ** (_rs_sfx.uniform(-2, 2) / 20)
+MEME = {'mboom', 'mding', 'mwhoosh', 'mrise', 'mfall', 'mroll', 'mrumble', 'mvoice', 'voice_react', 'laugh', 'silly', 'horn', 'wobble', 'buzzer', 'gong_comic', 'kwing'}
+QUIET = []   # v4.35 EPISODE block: QUIET += [(a, b)] for sad / tender beats -> meme sounds are refused there, other hits halved
 def hit(cat, t, g=1.0, pan=0.0, tier='mid', lead=None, i=None):
     """the way to place a library sound: hit('mboom', 48.85, .8, tier='big', lead='whoosh')"""
+    quiet = any(a_ <= t <= b_ for a_, b_ in QUIET)
+    if cat in MEME and quiet: print(f'  [sfx] skip meme {cat} @ {t:.2f}: inside an emotional beat'); return
+    if cat in MEME and sum(1 for x in SFXLOG if x[1] in MEME) >= 3: print(f'  [sfx] skip meme {cat} @ {t:.2f}: 3 meme sounds already (they wear out fast)'); return
+    if quiet: g *= .5; tier = 'small'
     if tier == 'big' and sum(1 for x in SFXLOG if x[3] == 'big') >= 3: tier = 'mid'
     if sum(1 for x in SFXLOG if x[1] == cat) >= 4: print(f'  [sfx] skip {cat} @ {t:.2f}: category already used 4x'); return
     a = sfx(cat, i); tries = 0
@@ -139,7 +145,9 @@ def sfx_report():
     if not SFXLOG: return
     ts = sorted(x[0] for x in SFXLOG); from collections import Counter; c = Counter(x[1] for x in SFXLOG)
     gaps = np.diff(ts) if len(ts) > 1 else [0]
-    print(f'  [sfx] {len(SFXLOG)} hits, {len(SFXLOG) / END * 10:.1f} per 10 s (aim 2.5-3.5), longest quiet gap {max(gaps):.1f} s, big {sum(1 for x in SFXLOG if x[3] == "big")}; per category {dict(c)}')
+    m = sum(1 for x in SFXLOG if x[1] in MEME)
+    print(f'  [sfx] meme sounds {m} (<= 3, only on comic / reveal beats)')
+    print(f'  [sfx] {len(SFXLOG)} hits, {len(SFXLOG) / END * 10:.1f} per 10 s (aim 1.5-2.5; ~3-5 per 30 s), longest quiet gap {max(gaps):.1f} s, big {sum(1 for x in SFXLOG if x[3] == "big")}; per category {dict(c)}')
 # ===== EPISODE 1/2: ambience (river valley by day, quiet night, the workshop) =====
 t = np.arange(N) / SR
 sw = .6 + .4 * np.sin(2 * np.pi * t / 5.5) * np.sin(2 * np.pi * t / 2.3 + 1)
