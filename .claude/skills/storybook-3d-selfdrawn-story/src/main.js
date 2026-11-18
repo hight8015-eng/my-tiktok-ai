@@ -16,11 +16,11 @@ function nearestHead() { let best = null; E.camera.getWorldPosition(_cv); const 
     if (!best || z < best.z) best = { C, z, sx: (sp.x + 1) * 540, sy: (1 - sp.y) * 960 }; } return best; }
 let FX = null;
 function camDrift(t) { E.camera.rotateX(E.noise1(t * .33 + 11) * .0045); E.camera.rotateY(E.noise1(t * .27 + 47) * .006); E.camera.updateMatrixWorld(); }
-function draw(sh, t, alpha = 1, mb = 0, dir = 1) { OVL.length = 0; E.POST.gseed = Math.floor(t * 12) % 97; E.POST.dof = 0; E.POST.mblur = [mb * 90 * dir, mb * 14]; E.POST.leakPh = t * .6;
+function draw(sh, t, alpha = 1, mb = 0, dir = 1) { OVL.length = 0; E.POST.gseed = Math.floor(t * 30 + .5) % 97; // v4.26 grain refreshes every frame (12 fps grain read as stutter) E.POST.dof = 0; E.POST.mblur = [mb * 90 * dir, mb * 14]; E.POST.leakPh = t * .6;
   // v4 motion smoothing: evaluate the shot 5..1 frames back (no render) and blend character poses -> no 1-frame snaps
   const SW = [.05, .08, .12, .17, .23], lt0 = t - sh.t0; Object.values(CHARS).forEach(C => { C._acc = null; C._trail = []; C._roots = []; });
   let prevCam = null;
-  if (!window.NOSMOOTH) for (let k = 5; k >= 1; k--) { const tk = t - k / 30; if (tk - sh.t0 < 0) continue; ANIM.rec = SW[5 - k]; ANIM.t = tk; runShot(sh, tk); if (k === 1) { if (!window.NOAUTO) camDrift(tk); E.camera.updateMatrixWorld(); prevCam = { m: E.camera.matrixWorldInverse.clone(), pm: E.camera.projectionMatrix.clone() }; } }
+  if (!window.NOSMOOTH) for (let k = 5; k >= 1; k--) { const tk = Math.max(sh.t0, t - k / 30); ANIM.rec = SW[5 - k]; ANIM.t = tk; runShot(sh, tk); if (k === 1) { if (!window.NOAUTO) camDrift(tk); E.camera.updateMatrixWorld(); prevCam = { m: E.camera.matrixWorldInverse.clone(), pm: E.camera.projectionMatrix.clone() }; } } // v4.26 look-backs before a cut hold the first pose (same smoothing weight every frame, no settle-jolt)
   ANIM.wFinal = .35; ANIM.rec = window.NOSMOOTH ? undefined : .35; ANIM.t = t; OVL.length = 0; runShot(sh, t); ANIM.rec = undefined;
   if (!window.NOSMOOTH) Object.values(CHARS).forEach(applySmooth); E.scene.updateMatrixWorld(); Object.values(CHARS).forEach(attachHeld);
   if (!window.NOAUTO) camDrift(t); // v4.1 living camera: slow handheld drift

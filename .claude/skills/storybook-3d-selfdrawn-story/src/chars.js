@@ -193,7 +193,7 @@ export const smokeAt = (p, age, o = {}) => { if (age >= 0 && age <= (o.life ?? 3
 // ramp(lt, at, dur, k): slow-motion window: from `at` for `dur` seconds the clock runs at speed k (e.g. .25), then normal again
 export function ramp(lt, at, dur, k = .25) { return lt < at ? lt : lt < at + dur ? at + (lt - at) * k : at + dur * k + (lt - at - dur); }
 // popAt(lt, at): squash-and-stretch head pop when an expression changes at shot time `at` (pass as P.pop)
-export const popAt = (lt, at, amp = .13) => { const u = (lt - at) / .32; return u < 0 || u > 1 ? 0 : amp * Math.sin(u * Math.PI) * (1 - u * .4); };
+export const popAt = (lt, at, amp = .13) => { const u = (lt - at) / .45; return u < 0 || u > 1 ? 0 : amp * .75 * (1 - Math.cos(u * Math.PI * 2)) / 2; }; // v4.26 softer pop: eases in and out (a fast .32 s swell read as a twitch)
 const seedOf = (C) => C._sd ?? (C._sd = [...(C.spec.id || 'x')].reduce((a, c) => a + c.charCodeAt(0) * 7.13, 0) % 97);
 // pose: {p:[x,y,z], ry, lean, twist, side, head:[x,y,z], hL, hR (torso space arrays or Vector3), pL, pR (elbow poles), fL, fR (hips space), sit, hipY, walk:{ph, stride}, ex, blink, talk, look, sweat}
 export function pose(C, P = {}) {
