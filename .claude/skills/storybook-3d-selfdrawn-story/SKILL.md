@@ -160,6 +160,17 @@ If the user wants characters made in Flow from their own prompt, use the sister 
      (over-the-shoulder, macro of hands/props, pull-back to sky) are fine - check the rest with stills.
    - 4-step camera for reveal beats: wide hold (the setting) -> push in (the one who acts) -> FAST zoom out (everyone
      reacts, eOut over ~.7 s) -> group shot. Characters in a confrontation face each other (check ry with a still).
+   NEXT STORY CHECKLIST (user asked to apply these from the start of the next story, refs = the user's slides):
+   - HAIR LIBRARY: build reusable hair shapes in the mk script (target ~18: swoop, crop, slick, quiff, spiky, curly, afro,
+     balding, combover, bob, long straight, ponytail, bun, braids, side part, buzz, wavy, hat-hair) with strand lines,
+     a shade band and a matching BACK view. Rule: characters in the same scene differ by hair SILHOUETTE, not just colour.
+   - POSE LIBRARY: ~38 named body poses (neutral, happy, laugh, cheer, proud, bawl, angry, furious, scared, panic,
+     thinking, pointing, shrug, facepalm, hands on hips, arms crossed, wave, thumbs up, salute, sneaky, sleepy, ...) as
+     presets of hL/hR/pL/pR/lean/head + ex, so a beat is written as perform(t, [[t, 'pose'], ...]); make a contact sheet.
+   - COSTUMES: one clear outfit idea per character (suit + tie, apron, uniform with badge, robe...) with 2-3 bold
+     details (lapels, buttons, belt, badge, stripes), distinct colour per character, cel shade + sheen strip.
+   - BACK VIEW: when a character turns away, hands, held props and hair direction mirror; light stays from the same side.
+   - Shading contrast: shadow side a little darker (refs .72 -> .53) so clothes read as volume.
    v4.13 extra physics: the head (and hat/headband art) lags and wobbles on starts/stops/turns; held props never sink
    into the body (hold entry noClip / clear); flyPath(..., {walls: [{axis: 'x'|'z', at, n, e}]}) bounces off walls;
    makeRope/updateRope (sagging, swaying rope/leash/chain) and makeFlag/waveFlag (flag, cloth, cape in the wind).
