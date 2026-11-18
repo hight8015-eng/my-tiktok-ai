@@ -114,7 +114,9 @@ If the user wants characters made in Flow from their own prompt, use the sister 
      put a sound accent (whoosh, hit, ding) on every cut and every caption keyword.
    v4.14 CLEAN-BUT-CATCHY defaults: "fxLevel" 0..1 (default .7) scales every automatic effect (speed lines, smears,
    grain) so frames never get cluttered; highlighted caption words get a gentle 2-3 % push-in; the last .45 s dissolves
-   into the opening frame (seamless loop: replays raise watch time; "loop": false ends on black instead);
+   into the opening frame ONLY when "loop": true (gag clips). Story / series channels (default): the episode ends
+   properly with a fade to black, optionally after "endCard": { text: 'ติดตามตอนต่อไป', sub: 'ตอนที่ 4: ...', dur, y }
+   (frame dims, a clean card rises mid-screen); end the narration on a cliffhanger line for the next part;
    captions stay inside the app safe zone (centre-left, max 860 px wide, above the bottom UI); audio is already
    mastered to -14 LUFS / -1.5 dBTP (platform standard); โพสต์.txt ends with a question to pull comments
    ("post": { "question" }). Keep the frame simple: one focal action per shot, max one FX burst at a time, captions

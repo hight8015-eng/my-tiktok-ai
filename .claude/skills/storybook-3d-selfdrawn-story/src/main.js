@@ -102,7 +102,7 @@ const CAP = { pop: true, hi: '#ffd23f', y: 1350, size: 70, maxW: 860, ...(projec
 // v4.14 one knob for all automatic effects (0 = clean .. 1 = loud); default .7 keeps it lively but uncluttered
 const FXL = Math.max(0, Math.min(1, project.fxLevel ?? .7)); E.POST.grain = .025 * FXL;
 // seamless loop: the last LOOP_D seconds dissolve into the opening frame so replays feel continuous (project.loop = false to end on black)
-const LOOP = project.loop !== false, LOOP_D = .45; let ZP = 1;
+const LOOP = project.loop === true, LOOP_D = .45; let ZP = 1; // story channels: off by default (stories end); opt in for short gag clips
 function caption(t) {
   const c = timing.caps.find(c => t >= c[0] && t < c[1]); if (!c) return;
   let txt = c[2]; const star = /\*(.+?)\*/.test(txt), hi = star || /[0-9๐-๙]/.test(txt) || (project.hiWords || []).some(w => txt.includes(w)); txt = txt.replace(/\*/g, '');
@@ -120,6 +120,13 @@ function hook(t) { const H = project.hook; if (!H || !H.text) return; const d = 
   X.fillStyle = '#ffd23f'; X.strokeStyle = '#141018'; X.lineWidth = 10; X.beginPath(); X.roundRect(-w / 2, -h / 2, w, h, 28); X.fill(); X.stroke();
   X.fillStyle = '#141018'; X.textAlign = 'center'; X.textBaseline = 'middle'; X.fillText(H.text, 0, H.sub ? -28 : 4, 940);
   if (H.sub) { X.font = '600 46px Prompt'; X.fillText(H.sub, 0, 46, 920); } X.restore(); }
+// v4.15 series end card for story channels (project.json endCard: { text: 'ติดตามตอนต่อไป', sub: 'ตอนที่ 4: ...', dur: 1.6 }):
+// the last seconds dim a little and a clean title card slides up; then the usual fade to black
+function endCard(t) { const E_ = project.endCard; if (!E_ || LOOP) return; const d = E_.dur ?? 1.6, t0 = timing.end - d - .25; if (t < t0) return;
+  const a = E.eOut(Math.min(1, (t - t0) / .35)); X.save(); X.fillStyle = `rgba(10,8,20,${.42 * a})`; X.fillRect(0, 0, 1080, 1920);
+  X.globalAlpha = a; X.translate(540, (E_.y ?? 900) + 40 * (1 - a)); // mid-screen: never collides with the caption line X.textAlign = 'center'; X.textBaseline = 'middle'; X.lineJoin = 'round';
+  X.font = '700 80px Prompt'; X.lineWidth = 14; X.strokeStyle = '#141018'; X.strokeText(E_.text || 'ติดตามตอนต่อไป', 0, 0, 900); X.fillStyle = '#ffffff'; X.fillText(E_.text || 'ติดตามตอนต่อไป', 0, 0, 900);
+  if (E_.sub) { X.font = '600 50px Prompt'; X.lineWidth = 10; X.strokeText(E_.sub, 0, 90, 900); X.fillStyle = '#ffd23f'; X.fillText(E_.sub, 0, 90, 900); } X.restore(); }
 function progress(t) { if (!project.progressBar) return; const u = Math.min(1, t / timing.end); X.save(); if (LOOP) X.globalAlpha = 1 - E.sstep(timing.end - LOOP_D, timing.end - .05, t); X.fillStyle = 'rgba(255,255,255,.18)'; X.fillRect(0, 1906, 1080, 14); X.fillStyle = '#ffd23f'; X.fillRect(0, 1906, 1080 * u, 14); X.restore(); }
 const DIS = .28, WH = .22;
 function keyZoom(t) { const c = timing.caps.find(c => t >= c[0] && t < c[1]); if (!c) return 1; const hi = /\*(.+?)\*/.test(c[2]) || /[0-9๐-๙]/.test(c[2]) || (project.hiWords || []).some(w => c[2].includes(w));
@@ -135,8 +142,8 @@ window.frame = (t, opts = {}) => { ZP = keyZoom(t);
   bloom();
   if (sh.tr === 'sweep' && lt < .45) sweep(lt / .45); const nx = SHOTS[i + 1]; if (nx && nx.tr === 'sweep' && nx.t0 - t < .2) sweep((t - (nx.t0 - .2)) / .45);
   if (LOOP && t > timing.end - LOOP_D) { const k = E.eSine((t - (timing.end - LOOP_D)) / LOOP_D); ZP = 1; draw(SHOTS[0], 0, k); }
-  else if (!LOOP && t > timing.end - .25) { X.fillStyle = `rgba(0,0,0,${E.clamp((t - (timing.end - .25)) / .25)})`; X.fillRect(0, 0, 1080, 1920); }
-  if (!opts.nocap) { caption(t); hook(t); } progress(t);
+  if (!opts.nocap) { caption(t); hook(t); endCard(t); } progress(t);
+  if (!LOOP && t > timing.end - .25) { X.fillStyle = `rgba(0,0,0,${E.clamp((t - (timing.end - .25)) / .25)})`; X.fillRect(0, 0, 1080, 1920); } // fade to black last
   return out.toDataURL('image/jpeg', .92);
 };
 window.cover = (o = {}) => { reset0(); COVER.fn(0, 57.5, o); updateSprites(E.camera); Wd.updateSky(57.5); E.render(); X.drawImage(E.glc, 0, 0); bloom(); return out.toDataURL('image/jpeg', .95); };
