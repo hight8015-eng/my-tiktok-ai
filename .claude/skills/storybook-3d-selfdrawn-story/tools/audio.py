@@ -166,7 +166,7 @@ act = np.abs(V) > 0.02; vr = rms(V[act])
 env = lp(lp(np.abs(V), 6), 6); env = env / (env.max() + 1e-9); duck = 1 - .5 * np.clip(env * 4, 0, 1)
 sfx_r = rms(SFX[:, np.abs(SFX).max(0) > 1e-3]); bed_r = rms(BED)
 SFX *= (vr * 10 ** (-13 / 20)) / max(sfx_r, 1e-9) * duck; BED *= (vr * 10 ** (-24 / 20)) / max(bed_r, 1e-9) * (.6 + .4 * duck)
-bell_r = rms(BELL[:, np.abs(BELL).max(0) > 1e-3]); BELL *= (vr * 10 ** (-7 / 20)) / max(bell_r, 1e-9) * (1 - .4 * (1 - duck))
+bell_r = rms(BELL[:, np.abs(BELL).max(0) > 1e-3]) if (np.abs(BELL).max() > 1e-3) else 1.0; BELL *= (vr * 10 ** (-7 / 20)) / max(bell_r, 1e-9) * (1 - .4 * (1 - duck))
 mix = SFX + BED + BELL; mix[0] += V; mix[1] += V
 # v3: optional music bed (tools/music.py -> aud/music_bed.wav) for the (มีเพลง) version: ~12 dB under VO (rms), -6 dB more under speech, -4 dB under bells
 MIXM = None

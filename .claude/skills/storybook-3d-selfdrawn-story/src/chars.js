@@ -46,11 +46,11 @@ function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a wh
     if ((kind === 'open' || kind === 'side') && BIG) { const dx = kind === 'side' ? 13 * (spec.sideDir || 1) : lx * 1.4; // v4.6 sheet eyes: big white ovals, ink outline, pupil
       x.fillStyle = '#fbf8f2'; x.lineWidth = 6; x.beginPath(); x.ellipse(cx, cy - 2, 30, 38, 0, 0, 7); x.fill(); x.stroke();
       x.fillStyle = ink; x.beginPath(); x.ellipse(cx + dx + 3, cy + 6 + ly * 1.2, 13, 18, 0, 0, 7); x.fill(); x.fillStyle = '#ffffff'; x.beginPath(); x.arc(cx + dx - 1, cy - 2 + ly, 4.5, 0, 7); x.fill(); }
-    else if (kind === 'open' || kind === 'side') { const dx = kind === 'side' ? 11 * (spec.sideDir || 1) : lx; x.beginPath(); x.ellipse(cx + dx, cy + ly, 12, 18, 0, 0, 7); x.fill(); }
+    else if (kind === 'open' || kind === 'side') { const dx = kind === 'side' ? 11 * (spec.sideDir || 1) : lx; if (spec.eyeC) { x.fillStyle = spec.eyeC; x.shadowColor = spec.eyeC; x.shadowBlur = 18; } x.beginPath(); x.ellipse(cx + dx, cy + ly, spec.eyeC ? 15 : 12, spec.eyeC ? 21 : 18, 0, 0, 7); x.fill(); x.shadowBlur = 0; x.fillStyle = ink; }
     else if (kind === 'chev') { x.lineWidth = BIG ? 10 : 16; x.beginPath(); x.moveTo(cx - 20 * s, cy - 16); x.lineTo(cx + 14 * s, cy); x.lineTo(cx - 20 * s, cy + 16); x.stroke(); } // > <
     else if (kind === 'spiral') { x.lineWidth = BIG ? 6 : 9; x.beginPath(); for (let i = 0; i <= 60; i++) { const a = i / 60 * Math.PI * 5 * s, r = 3 + i / 60 * 30; x.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r * 1.1); } x.stroke(); }
     else if (kind === 'tiny') { x.fillStyle = '#fbf8f2'; x.lineWidth = BIG ? 6 : 12; x.beginPath(); x.ellipse(cx, cy - 2, 30, 38, 0, 0, 7); x.fill(); x.stroke(); x.fillStyle = ink; x.beginPath(); x.arc(cx + lx * .5, cy + ly * .5, 6, 0, 7); x.fill(); }
-    else if (kind === 'half') { x.save(); x.beginPath(); x.rect(cx - 40, cy - 2, 80, 60); x.clip(); x.beginPath(); x.ellipse(cx + lx, cy + 2, 16, 20, 0, 0, 7); x.fill(); x.restore(); x.beginPath(); x.moveTo(cx - 25, cy - 2); x.lineTo(cx + 25, cy - 2); x.stroke(); }
+    else if (kind === 'half') { x.save(); x.beginPath(); x.rect(cx - 40, cy - 2, 80, 60); x.clip(); if (spec.eyeC) { x.fillStyle = spec.eyeC; x.shadowColor = spec.eyeC; x.shadowBlur = 18; } x.beginPath(); x.ellipse(cx + lx, cy + 2, 16, 20, 0, 0, 7); x.fill(); x.restore(); x.fillStyle = ink; x.beginPath(); x.moveTo(cx - 25, cy - 2); x.lineTo(cx + 25, cy - 2); x.stroke(); }
     else if (kind === 'closed') { x.beginPath(); x.moveTo(cx - 22, cy + 2); x.quadraticCurveTo(cx, cy + 14, cx + 22, cy + 2); x.stroke(); }
     else if (kind === 'closedUp' || kind === 'happy') { x.beginPath(); x.moveTo(cx - 22, cy + 8); x.quadraticCurveTo(cx, cy - 16, cx + 22, cy + 8); x.stroke(); }
     else if (kind === 'wide') { x.fillStyle = '#fbf8f2'; x.lineWidth = 13; x.beginPath(); x.ellipse(cx, cy, 30, 36, 0, 0, 7); x.fill(); x.stroke(); x.fillStyle = ink; x.beginPath(); x.arc(cx + lx * .6, cy + ly * .6, 9, 0, 7); x.fill(); }
@@ -227,7 +227,7 @@ export function pose(C, P = {}) {
   if (live) { const k = (P.hR || P.hL) ? .45 : 1; hR.x += gR[0] * k; hR.y += gR[1] * k; hR.z += gR[2] * k; hL.x += gL[0] * k; hL.y += gL[1] * k; hL.z += gL[2] * k;
     const dr = .012 * A; hR.y += dr * Math.sin(t * 2.3 + sd + .6); hL.y += dr * Math.sin(t * 2.3 + sd + 1.1); }
   C.handL = ik(C.aL, hL, AL, AL, P.pL || [-.6, -.3, -.7]); C.handR = ik(C.aR, hR, AL, AL, P.pR || [.6, -.3, -.7]);
-  if (C.is2D) C.f2 = [P.ex || 'neutral', !!P.blink, P.talk || 0, P.look];
+  if (C.is2D) C.f2 = [P.ex || 'neutral', !!P.blink, P.talk || 0, P.look, P.eyeC || ''];
   else { const tex = faceTexFor(C.spec, P.ex || 'neutral', !!P.blink, P.talk || 0, P.look); if (C.faceM.map !== tex) { C.faceM.map = tex; C.faceM.needsUpdate = true; } }
   for (const [L_, k] of [[C.aL, 'L'], [C.aR, 'R']]) if (L_.open) { const o = P.open === true || P.open === k; L_.open.visible = o; L_.hand.visible = !o; }
   { const bl = g.userData.blob; if (bl) { const lift = P.groundY !== undefined && P.p ? (P.p[1] - P.groundY) / s : 0; bl.position.y = .006 - lift; const k = Math.max(.35, 1 - lift * .9); bl.scale.set(k, .62 * k, 1); bl.visible = !P.noShadow; } }
@@ -485,14 +485,14 @@ const HEADC = new Map(), HS = .72, FC = document.createElement('canvas'); FC.wid
 const TMP = document.createElement('canvas'), TX = TMP.getContext('2d');
 const PHI = { F: 0, Q: -.42, S: -1.42 };
 function headTex(C, key, view) {
-  const [exName, blink, talk, look] = C.f2 || ['neutral', false, 0, null]; const tq = talk > .66 ? 2 : talk > .33 ? 1 : 0;
-  const ck = key + '|' + exName + '|' + (blink ? 1 : 0) + '|' + tq + '|' + (look ? look.join(',') : '') + '|' + C.spec.id;
+  const [exName, blink, talk, look, eyeC] = C.f2 || ['neutral', false, 0, null, '']; const tq = talk > .66 ? 2 : talk > .33 ? 1 : 0;
+  const ck = key + '|' + exName + '|' + (blink ? 1 : 0) + '|' + tq + '|' + (look ? look.join(',') : '') + '|' + C.spec.id + '|' + (eyeC || '');
   if (HEADC.has(ck)) { const t = HEADC.get(ck); HEADC.delete(ck); HEADC.set(ck, t); return t; }
   const im = SPR.headImg[key], w = Math.round(im.width * HS), h = Math.round(im.height * HS);
   const t = canvasTex(w, h, (x) => {
     x.drawImage(im, 0, 0, w, h); if (view === 'B') return;
     const [bx, by, br] = SPR.meta[key].ballH; const cx = bx * HS, cy = by * HS, r = br * HS;
-    drawFace(FX, C.spec, EX[exName] || EX.neutral, blink, tq ? (tq === 2 ? 1 : .5) : 0, look);
+    drawFace(FX, eyeC ? { ...C.spec, eyeC } : C.spec, EX[exName] || EX.neutral, blink, tq ? (tq === 2 ? 1 : .5) : 0, look); // P.eyeC: glowing coloured eyes (e.g. '#ff2030')
     TMP.width = w; TMP.height = h; TX.clearRect(0, 0, w, h); const phi = PHI[view], FH = 1.53 * r * (C.spec.faceV || 1), fy = cy + r * (C.spec.faceY || 0);
     for (let i = 0; i < 64; i++) { const al = ((i + .5) / 64 - .5) * 1.9, c = Math.cos(al + phi); if (c < .07) continue;
       const X = cx + r * Math.sin(al + phi), ww = r * c * 1.9 / 64 + 1.2; TX.drawImage(FC, i * 8, 0, 8, 512, X - ww / 2, fy - FH / 2, ww, FH); }

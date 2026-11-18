@@ -7,6 +7,9 @@ for k in sorted(meta):
     im = np.asarray(Image.open(f'{d}/{k}-head.png').convert('RGBA')).astype(int)
     rgb, a = im[:, :, :3], im[:, :, 3]
     iv = (rgb.min(2) > 170) & ((rgb[:, :, 0] - rgb[:, :, 2]) < 70) & (a > 230)
+    if iv.sum() < 200:  # back view fully covered by hair: no face area; empty mask, ball from the head box
+        h, w = a.shape; A = np.zeros((h, w), np.uint8); Image.fromarray(np.dstack([np.full_like(A, 255), A]), 'LA').save(f'{d}/{k}-mask.png')
+        meta[k]['ballH'] = [w / 2, h - w * .45, w * .45]; print(k, 'covered'); continue
     lab, n = nd.label(iv); sizes = nd.sum(iv, lab, range(1, n + 1)); big = lab == (1 + int(np.argmax(sizes)))
     big = nd.binary_fill_holes(big); big = nd.binary_erosion(big, iterations=5)
     ys, xs = np.where(big); cx = (xs.min() + xs.max()) / 2; r = (xs.max() - xs.min()) / 2 + 5; bot = ys.max() + 5; cy = bot - r

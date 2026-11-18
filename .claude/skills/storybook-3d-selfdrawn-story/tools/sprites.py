@@ -41,8 +41,11 @@ for f in sorted(glob.glob(os.path.join(src, 'C[0-9][0-9]-[FQSB]*.jpg')) + glob.g
     hx0, hy0, hx1, hy1 = parts['head']; hb = a[hy0:hy1, hx0:hx1]; hm = m[hy0:hy1, hx0:hx1]
     ivory = (hb.min(2) > 175) & (np.abs(hb[:, :, 0] - hb[:, :, 2]) < 60) & hm
     wid = ivory.sum(1); yb_ = int(np.argmax(wid)); cols = np.where(ivory[yb_])[0]
-    ball_cx = hx0 + (cols.min() + cols.max()) / 2; ball_r = (cols.max() - cols.min()) / 2
-    ball_bot = hy0 + np.where(ivory.any(1))[0].max(); ball_cy = ball_bot - ball_r
+    if wid.max() > 20:
+        ball_cx = hx0 + (cols.min() + cols.max()) / 2; ball_r = (cols.max() - cols.min()) / 2
+        ball_bot = hy0 + np.where(ivory.any(1))[0].max(); ball_cy = ball_bot - ball_r
+    else:  # back view fully covered by hair: take the ball from the matching front view of the same character
+        F = meta.get(key[:-1] + 'F'); ball_cx, ball_cy, ball_r = F['ball'] if F else ((hx0 + hx1) / 2, hy1 - (hx1 - hx0) * .45, (hx1 - hx0) * .45)
     meta[key] = dict(W=W, H=H, gap=[int(g0), int(g1)], top=int(top), bot=int(bot), head=parts['head'], body=parts['body'], ball=[round(float(ball_cx), 1), round(float(ball_cy), 1), round(float(ball_r), 1)])
     print(key, meta[key])
 json.dump(meta, open(os.path.join(out, 'sprites.json'), 'w'), indent=0)
