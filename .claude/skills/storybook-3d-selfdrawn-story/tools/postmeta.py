@@ -26,7 +26,8 @@ tags = tags[:12]
 lines = [f'{hook} 😳' if hook else title, '']
 if series: lines.append(f'{series}{(" " + part) if part else ""}')
 if P.get('desc'): lines.append(P['desc'])
-lines += ['ติดตามตอนต่อไป 👉 กดติดตามไว้เลย', '', ' '.join('#' + t for t in tags)]
+q = P.get('question') or 'คิดว่าตอนต่อไปจะเป็นยังไง? คอมเมนต์บอกหน่อย 👇'   # a question in the caption drives comments
+lines += [q, 'ติดตามตอนต่อไป 👉 กดติดตามไว้เลย', '', ' '.join('#' + t for t in tags)]
 os.makedirs(out, exist_ok=True)
 path = os.path.join(out, 'โพสต์.txt')
 open(path, 'w', encoding='utf-8').write('\n'.join(lines) + '\n')

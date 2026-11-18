@@ -111,7 +111,14 @@ If the user wants characters made in Flow from their own prompt, use the sister 
      "post": { title, hook, desc, tags, series, part } in project.json.
    - Shot rules that the algorithm rewards: something changes every 2-3 s (cut, camera move, FX, expression pop);
      open on the most surprising image, not the setup; end on a question / cliffhanger that loops into part 2;
-     put a sound accent (whoosh, hit, ding) on every cut and every caption keyword. set window.CHAR_STYLE = 'chibi' in index.html (before main.js) for the 2.5-head sheet below.
+     put a sound accent (whoosh, hit, ding) on every cut and every caption keyword.
+   v4.14 CLEAN-BUT-CATCHY defaults: "fxLevel" 0..1 (default .7) scales every automatic effect (speed lines, smears,
+   grain) so frames never get cluttered; highlighted caption words get a gentle 2-3 % push-in; the last .45 s dissolves
+   into the opening frame (seamless loop: replays raise watch time; "loop": false ends on black instead);
+   captions stay inside the app safe zone (centre-left, max 860 px wide, above the bottom UI); audio is already
+   mastered to -14 LUFS / -1.5 dBTP (platform standard); โพสต์.txt ends with a question to pull comments
+   ("post": { "question" }). Keep the frame simple: one focal action per shot, max one FX burst at a time, captions
+   1-3 words, hook banner only in the first 2.5 s. Sweet-spot length 45-75 s; post a series at a steady rhythm. set window.CHAR_STYLE = 'chibi' in index.html (before main.js) for the 2.5-head sheet below.
    Proportions v4.5 (chibi sheet): 2.5 heads tall: head 1, torso ~1, legs ~0.5 head (LEG .42, LL .225, AL .28);
    bare white hands and plain oval feet by default (spec.glove / spec.cuff / spec.shoe / spec.sole dress them).
    v4.6: shoulders sit right under the head (spec.shoulderX/Y), rest hands hang at the hips.

@@ -31,6 +31,7 @@ function draw(sh, t, alpha = 1, mb = 0, dir = 1) { OVL.length = 0; E.POST.gseed 
     if (L > 6) { const k = Math.min(1, (L - 6) / 30) * .6; E.POST.mblur = [dx * k, dy * k]; } }
   const nh = nearestHead(); if (E.POST.dof === 0 && nh && nh.z < 9 && !window.NOAUTO) { E.POST.focus = nh.z * .97; E.POST.dof = .7 * (1 - E.sstep(3.5, 9, nh.z)); }
   const lt = t - sh.t0, shock = nh && nh.C.f2 && /shocked|scared|scream/.test(nh.C.f2[0]) && nh.C.view !== 'B' && nh.z < 7 && lt < .75 && !window.NOAUTO; FX = shock ? { lt, x: nh.sx, y: nh.sy } : (alpha === 1 ? null : FX); if (window.NOFACE) Object.values(CHARS).forEach(C => { C.face.visible = false; C.sweat.visible = false; for (const L of [C.aL, C.aR, C.lL, C.lR]) { L.up.visible = false; L.fo.visible = false; } }); Wd.updateSky(t); E.render(); X.globalAlpha = alpha;
+  if (!(FX && FX.lt < .32) && ZP > 1.0005) { X.drawImage(E.glc, 540 * (1 - ZP), 860 * (1 - ZP), 1080 * ZP, 1920 * ZP); } else
   if (FX && FX.lt < .32) { const k = 1 + .07 * (1 - E.eOut(FX.lt / .32)); X.drawImage(E.glc, FX.x * (1 - k), FX.y * (1 - k), 1080 * k, 1920 * k); } else X.drawImage(E.glc, 0, 0);
   X.globalAlpha = 1; if (FX) speedLines(FX); overlays(t, alpha); }
 function scr(v) { const p = v.clone().project(E.camera); return p.z > 1 ? null : [(p.x + 1) * 540, (1 - p.y) * 960]; }
@@ -38,7 +39,7 @@ function trails(alpha) { // v4 smear trails behind fast hands/feet (positions fr
   for (const C of Object.values(CHARS)) { const T = C._trail; if (!C.g.visible || !T || T.length < 4) continue;
     for (const j of (C.smear || [])) { const pts = T.map(s => scr(s[j])).filter(Boolean); if (pts.length < 4) continue; // P.smear = [0 hand L, 1 hand R, 2 foot L, 3 foot R]
       let L = 0; for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); if (L < 70) continue;
-      const a = Math.min(1, (L - 70) / 120) * alpha; X.save(); X.lineCap = 'round'; X.lineJoin = 'round';
+      const a = Math.min(1, (L - 70) / 120) * alpha * Math.min(1, .4 + FXL); X.save(); X.lineCap = 'round'; X.lineJoin = 'round';
       for (let i = 1; i < pts.length; i++) { const u = i / (pts.length - 1); X.strokeStyle = `rgba(255,255,255,${(.12 + .5 * u) * a})`; X.lineWidth = 6 + 26 * u; X.beginPath(); X.moveTo(...pts[i - 1]); X.lineTo(...pts[i]); X.stroke(); }
       X.restore(); } } }
 function overlays(t, alpha) { // gloom lines + sparkles requested by poses/shots this frame
@@ -88,7 +89,7 @@ function overlays(t, alpha) { // gloom lines + sparkles requested by poses/shots
       X.fillStyle = '#fffbe8'; for (const [rr, rot] of [[r, 0], [r * .55, Math.PI / 4]]) { X.save(); X.rotate(rot); X.beginPath(); for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, d = k % 2 ? rr * .16 : rr; X.lineTo(Math.cos(a) * d, Math.sin(a) * d); } X.closePath(); X.fill(); X.restore(); } }
     X.restore(); } }
 function speedLines(f) { // manga focus lines toward the shocked face, fading out
-  const a = (1 - E.sstep(.35, .75, f.lt)) * E.sstep(0, .06, f.lt); if (a <= 0) return; const r = E.rng(Math.floor(f.lt * 12) + 7);
+  const a = (1 - E.sstep(.35, .75, f.lt)) * E.sstep(0, .06, f.lt) * Math.min(1, FXL * 1.3); if (a <= 0 || FXL < .25) return; const r = E.rng(Math.floor(f.lt * 12) + 7);
   X.save(); X.globalAlpha = a * .85; X.fillStyle = '#ffffff'; X.strokeStyle = 'rgba(20,16,24,.55)'; X.lineWidth = 2;
   for (let i = 0; i < 46; i++) { const an = (i / 46) * Math.PI * 2 + r() * .12, w = .006 + r() * .012, R0 = 330 + r() * 160, R1 = 1700;
     X.beginPath(); X.moveTo(f.x + Math.cos(an) * R0, f.y + Math.sin(an) * R0); X.lineTo(f.x + Math.cos(an - w) * R1, f.y + Math.sin(an - w) * R1); X.lineTo(f.x + Math.cos(an + w) * R1, f.y + Math.sin(an + w) * R1); X.closePath(); X.fill(); X.stroke(); }
@@ -97,15 +98,19 @@ function sweep(k) { // soft warm light sweep across the frame (k 0..1)
   X.save(); X.globalCompositeOperation = 'screen'; const x = -700 + k * 2500; const g = X.createLinearGradient(x - 500, 0, x + 500, 400);
   g.addColorStop(0, 'rgba(255,240,215,0)'); g.addColorStop(.5, `rgba(255,240,215,${.75 * Math.sin(Math.PI * k)})`); g.addColorStop(1, 'rgba(255,240,215,0)'); X.fillStyle = g; X.fillRect(0, 0, 1080, 1920); X.restore(); }
 // v4.13 viral captions: each word pops in (overshoot), *word* or numbers are highlighted yellow (project.json captions: { pop, hi, y, size })
-const CAP = { pop: true, hi: '#ffd23f', y: 1350, size: 70, ...(project.captions || {}) };
+const CAP = { pop: true, hi: '#ffd23f', y: 1350, size: 70, maxW: 860, ...(project.captions || {}) };
+// v4.14 one knob for all automatic effects (0 = clean .. 1 = loud); default .7 keeps it lively but uncluttered
+const FXL = Math.max(0, Math.min(1, project.fxLevel ?? .7)); E.POST.grain = .025 * FXL;
+// seamless loop: the last LOOP_D seconds dissolve into the opening frame so replays feel continuous (project.loop = false to end on black)
+const LOOP = project.loop !== false, LOOP_D = .45; let ZP = 1;
 function caption(t) {
   const c = timing.caps.find(c => t >= c[0] && t < c[1]); if (!c) return;
   let txt = c[2]; const star = /\*(.+?)\*/.test(txt), hi = star || /[0-9๐-๙]/.test(txt) || (project.hiWords || []).some(w => txt.includes(w)); txt = txt.replace(/\*/g, '');
   const a = t - c[0], k = CAP.pop ? (a < .16 ? .55 + .45 * E.eOut(a / .16) + .12 * Math.sin(Math.PI * Math.min(1, a / .16)) : 1) : 1;
-  X.save(); X.translate(540, CAP.y); X.scale(k, k); X.rotate(hi && CAP.pop ? Math.sin(a * 18) * .025 * Math.exp(-a * 6) : 0);
+  X.save(); X.translate(520, CAP.y); X.scale(k, k); // safe zone: a touch left of the app's right-hand buttons X.rotate(hi && CAP.pop ? Math.sin(a * 18) * .025 * Math.exp(-a * 6) : 0);
   X.font = `700 ${CAP.size * (hi ? 1.12 : 1)}px Prompt`; X.textAlign = 'center'; X.textBaseline = 'alphabetic'; X.lineJoin = 'round';
-  X.shadowColor = 'rgba(0,0,0,.45)'; X.shadowBlur = 10; X.shadowOffsetY = 5; X.lineWidth = 13; X.strokeStyle = '#141018'; X.strokeText(txt, 0, 0);
-  X.shadowColor = 'transparent'; X.fillStyle = hi ? CAP.hi : '#ffffff'; X.fillText(txt, 0, 0); X.restore();
+  X.shadowColor = 'rgba(0,0,0,.45)'; X.shadowBlur = 10; X.shadowOffsetY = 5; X.lineWidth = 13; X.strokeStyle = '#141018'; X.strokeText(txt, 0, 0, CAP.maxW);
+  X.shadowColor = 'transparent'; X.fillStyle = hi ? CAP.hi : '#ffffff'; X.fillText(txt, 0, 0, CAP.maxW); X.restore();
 }
 // v4.13 hook banner for the first seconds (project.json hook: { text, sub, dur }) and an optional progress bar (project.json progressBar: true)
 function hook(t) { const H = project.hook; if (!H || !H.text) return; const d = H.dur ?? 2.6; if (t > d) return;
@@ -115,9 +120,11 @@ function hook(t) { const H = project.hook; if (!H || !H.text) return; const d = 
   X.fillStyle = '#ffd23f'; X.strokeStyle = '#141018'; X.lineWidth = 10; X.beginPath(); X.roundRect(-w / 2, -h / 2, w, h, 28); X.fill(); X.stroke();
   X.fillStyle = '#141018'; X.textAlign = 'center'; X.textBaseline = 'middle'; X.fillText(H.text, 0, H.sub ? -28 : 4, 940);
   if (H.sub) { X.font = '600 46px Prompt'; X.fillText(H.sub, 0, 46, 920); } X.restore(); }
-function progress(t) { if (!project.progressBar) return; const u = Math.min(1, t / timing.end); X.save(); X.fillStyle = 'rgba(255,255,255,.18)'; X.fillRect(0, 1906, 1080, 14); X.fillStyle = '#ffd23f'; X.fillRect(0, 1906, 1080 * u, 14); X.restore(); }
+function progress(t) { if (!project.progressBar) return; const u = Math.min(1, t / timing.end); X.save(); if (LOOP) X.globalAlpha = 1 - E.sstep(timing.end - LOOP_D, timing.end - .05, t); X.fillStyle = 'rgba(255,255,255,.18)'; X.fillRect(0, 1906, 1080, 14); X.fillStyle = '#ffd23f'; X.fillRect(0, 1906, 1080 * u, 14); X.restore(); }
 const DIS = .28, WH = .22;
-window.frame = (t, opts = {}) => {
+function keyZoom(t) { const c = timing.caps.find(c => t >= c[0] && t < c[1]); if (!c) return 1; const hi = /\*(.+?)\*/.test(c[2]) || /[0-9๐-๙]/.test(c[2]) || (project.hiWords || []).some(w => c[2].includes(w));
+  const a = t - c[0]; return hi ? 1 + .028 * FXL * Math.sin(Math.PI * Math.min(1, a / .45)) : 1; } // gentle push-in on highlighted words
+window.frame = (t, opts = {}) => { ZP = keyZoom(t);
   let i = SHOTS.length - 1; for (let k = 0; k < SHOTS.length; k++) if (t < SHOTS[k].t1) { i = k; break; }
   const sh = SHOTS[i], lt = t - sh.t0;
   const nx0 = SHOTS[i + 1], dir = i % 2 ? 1 : -1;
@@ -127,7 +134,8 @@ window.frame = (t, opts = {}) => {
   else draw(sh, t, 1, Math.max(bIn, bOut), bOut > bIn ? -dir : dir);
   bloom();
   if (sh.tr === 'sweep' && lt < .45) sweep(lt / .45); const nx = SHOTS[i + 1]; if (nx && nx.tr === 'sweep' && nx.t0 - t < .2) sweep((t - (nx.t0 - .2)) / .45);
-  if (t > timing.end - .25) { X.fillStyle = `rgba(0,0,0,${E.clamp((t - (timing.end - .25)) / .25)})`; X.fillRect(0, 0, 1080, 1920); }
+  if (LOOP && t > timing.end - LOOP_D) { const k = E.eSine((t - (timing.end - LOOP_D)) / LOOP_D); ZP = 1; draw(SHOTS[0], 0, k); }
+  else if (!LOOP && t > timing.end - .25) { X.fillStyle = `rgba(0,0,0,${E.clamp((t - (timing.end - .25)) / .25)})`; X.fillRect(0, 0, 1080, 1920); }
   if (!opts.nocap) { caption(t); hook(t); } progress(t);
   return out.toDataURL('image/jpeg', .92);
 };
