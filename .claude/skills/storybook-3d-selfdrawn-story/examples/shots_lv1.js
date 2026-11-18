@@ -62,12 +62,17 @@ const AMBK = () => HALL.visible ? 'dust' : BALC.visible ? 'firefly' : CRYPT.visi
 const SP = 1.12;
 // v4.24 COVERAGE: longer shots get a cut-in (same side of the action, no spin) so the angle changes every ~1.2-1.8 s
 const _f = new THREE.Vector3(), _r = new THREE.Vector3(), _T = new THREE.Vector3();
-function coverage(sh, ltR) { const i = SHOTS.indexOf(sh), nx = SHOTS[i + 1], d = (nx ? nx.t0 : 74.66 / SP) - sh.t0; if (sh.noCut || d < 2.3) return;
-  const parts = d > 4.2 ? 3 : 2, k = Math.min(parts - 1, Math.floor(ltR / (d / parts))); if (k === 0) return;
-  camera.updateMatrixWorld(); camera.getWorldDirection(_f); const dist = Math.max(.8, POST.focus || 3); _T.copy(camera.position).addScaledVector(_f, dist); _r.crossVectors(_f, camera.up).normalize();
-  const side = (i % 2 ? 1 : -1) * (k === 1 ? 1 : -.6), near = dist < 1.8; // close-ups: swing a little around the subject; wider shots: punch in
-  const nd = near ? dist * .97 : dist * (k === 1 ? .62 : .8); if (!near) _T.y += dist * .07; // punch-ins aim a touch higher so heads stay in frame camera.position.copy(_T).addScaledVector(_f, -nd).addScaledVector(_r, side * dist * (near ? .3 : .14));
-  camera.lookAt(_T); camera.updateMatrixWorld(); POST.focus = camera.position.distanceTo(_T); }
+function coverage(sh, ltR) { // v4.27: one clear change of angle per long shot - a close-up on the main character from ~30 deg to the same side, about 2x closer.
+  // (small punch-ins of the same framing read as skipped frames / jump cuts, so they are not used)
+  const i = SHOTS.indexOf(sh), nx = SHOTS[i + 1], d = (nx ? nx.t0 : 74.66 / SP) - sh.t0; if (sh.noCut || d < 2.6 || ltR < d * .55) return;
+  camera.updateMatrixWorld(); const cp = camera.position.clone(); camera.getWorldDirection(_f); let best = null, bd = 1e9;
+  for (const C of Object.values(CHARS)) { let o = C.g, v = true; while (o) { v = v && o.visible; o = o.parent; } if (!v || !C.g.parent) continue;
+    const h = C.is2D && C.sh && C.sh.visible ? C.sh.position.clone() : C.hc.getWorldPosition(new THREE.Vector3()), rel = h.clone().sub(cp), z = rel.dot(_f); if (z < .5) continue; const off = rel.clone().addScaledVector(_f, -z).length() / z; // angle off the view axis
+    if (off > .5) continue; const sc = off * 4 + z * .05; if (sc < bd) { bd = sc; best = h; } }
+  if (!best) return; const dist = cp.distanceTo(best); if (dist < 2.2) return;   // already a close-up
+  const back = cp.clone().sub(best).setY(0).normalize(), sg = i % 2 ? 1 : -1, a = sg * .5, ca = Math.cos(a), sa = Math.sin(a);
+  const dir = new THREE.Vector3(back.x * ca - back.z * sa, 0, back.x * sa + back.z * ca), nd = Math.max(1.25, dist * .45);
+  const tgt = best.clone().add(V(0, -.18, 0)); /* just below the face centre: face in the upper third */ camera.position.copy(tgt).addScaledVector(dir, nd).add(V(0, .06, 0)); camera.lookAt(tgt); camera.updateMatrixWorld(); POST.focus = camera.position.distanceTo(tgt); }
 const S = (id, t0, tr, fn, o = {}) => { const sh = { id, t0: t0 / SP, tr, ...o }; sh.fn = (lt, t) => { fn(lt * SP, t * SP); coverage(sh, (globalThis.FRAME_T ?? t) - sh.t0); Wd.ambientAt(t, o.amb ?? AMBK()); Wd.clothAt(t); Wd.flamesAt(t); }; SHOTS.push(sh); };
 // --- hook: the forced engagement ---
 S('S01', 0, 'cut', (lt, t) => { // "เจ้าหญิงคนนี้ ถูกบังคับให้แต่งงาน"

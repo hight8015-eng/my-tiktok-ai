@@ -119,8 +119,9 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    characters, a far landmark (castle, peaks with snow, clouds).
    v4.24 PACE + COVERAGE (examples/shots_lv1.js): speed the whole clip evenly with SP ~1.12 (atempo the voice, re-run
    timing.py with silence_min ~.16, scale shot t0 by 1/SP and pass lt*SP to shot fns, scale audio.py add/seg and music
-   put times by 1/SP). Shots >2.3 s get automatic cut-ins (coverage(): punch-in .62 on the same side, close-ups swing
-   ~15 deg) so the angle changes every 1.2-1.8 s without whips or spins. Give characters things to hold (book, staff,
+   put times by 1/SP). v4.27 coverage(): shots >=2.6 s with a character get ONE clear second angle at 55%: a close-up on
+   the head sprite, ~30 deg to the same side, ~2x closer. Never cut to a slightly tighter copy of the same framing - a
+   small punch-in reads as skipped frames (jump cut). Check: per-frame diff spikes must only sit on real cuts. Give characters things to hold (book, staff,
    spears) via hold:{R:{obj}} - hands with props read better than empty hands.
    v4.25 PROPS MUST TELL THE STORY: dress each set for what happens in it (wedding = pews, flower arch, petals;
    battlefield = standards carried IN the army's ranks, broken spears, dropped shields, scorch marks; love scene =
