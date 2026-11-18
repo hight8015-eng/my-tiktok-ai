@@ -139,7 +139,7 @@ E3('S03', 3.37, 'cut', (lt, t) => { // "ที่ไม่มีเจ้าบ�
   camH([-.2, 2.2, -6.2], [0, 1.8, -12], [-.4, 2.6, -4.8], [0, 1.9, -12], U(lt, 1.4, eOut), 44); tintAt('#101830', .15); });
 E3('S04', 4.78, 'cut', (lt, t) => { // "ชุดเจ้าสาวหนึ่งชุด" - slide past the dress
   wedNight(); Wd.hallAt(t); const P = NOOK.localToWorld(V(-2.4, 1.1, -.6));
-  camH([-4.2, 2.1, -7.6], [-2.4, 1.8, -11.6], [-1.6, 2.0, -7.4], [-2.4, 1.8, -11.6], U(lt, 1.6, eIO), 46); });
+  camH([-2.6, 2.0, -7.4], [-2.4, 1.8, -11.6], [-2.0, 1.95, -7.6], [-2.4, 1.8, -11.6], U(lt, 1.6, eIO), 46); }); /* clear of the pillar at x -3.4 */
 E3('S05', 6.36, 'cut', (lt, t) => { MIND = 0; // "แหวนสองวง" - macro orbit around the rings
   wedNight(); Wd.hallAt(t); const a = lerp(-.5, .4, eIO(lt / 1.3)); const c = V(.18, 1.72, -10.95);
   camH([c.x + Math.sin(a) * 1.0, 2.25, c.z + Math.cos(a) * 1.0], c.toArray(), [c.x + Math.sin(a) * 1.0, 2.25, c.z + Math.cos(a) * 1.0], c.toArray(), 0, 34); dof(.8); }, { noCut: true });

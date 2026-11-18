@@ -163,7 +163,7 @@ E2('S09', 21.97, 'cut', (lt, t) => { // "เขาไม่แม้แต่จ
   hallLight(); Wd.hallAt(t); SWORD.visible = true; const z = -8.2 - lt * .9;
   put(L(), HALL, { p: [1.4, .3, -10.4], ry: -110, ex: 'shocked', hR: [.35, .55, .4], pR: [1, -.3, -.3], hold: { R: { obj: SWORD, off: [0, -.01, .02], rot: [70, 0, 0] } } });
   put(K2_(), HALL, { p: [0, Math.max(0, (-z - 10.7) * .25), z], ry: 180, ex: 'calm', eyeC: '#ff2030', walk: { ph: lt * 7, stride: .2 } });
-  camH([3.2, 1.7, -5.6], [.7, 1.4, -9.6], [2.6, 1.8, -6.6], [.6, 1.4, -10.2], U(lt, 2.1, eIO), 52); });
+  camH([2.3, 1.75, -4.9], [.7, 1.4, -9.6], [2.1, 1.8, -6.4], [.6, 1.4, -10.2], U(lt, 2.1, eIO), 54); }); /* clear of the pillar at x 3.4 (camera sway included) */
 E2('S10', 24.02, 'cut', (lt, t) => { // "แค่ดีดนิ้ว" - the snap
   hallLight(); Wd.hallAt(t); const k = sstep(.25, .45, lt);
   put(K2_(), HALL, { p: [0, .3, -10.2], ry: 180, ...pf(lt, [[0, 'sly'], [.35, 'evil']]), eyeC: '#ff2030', ...flick(k), fast: true }); const h = W2(K2_(), [.62, .8, .55]);

@@ -165,6 +165,10 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    agree: push the project's src/ to render_jobs/<proj>/ on the work branch, create_session per helper with
    `bash render_jobs/render_segments.sh render_jobs/<proj> <seg...>` + push the s_*.mp4 to its own branch, touch the
    matching .ok files locally so rq.sh skips them, fetch + concat, then archive the helper sessions.
+   POST-RENDER CHECK (found real bugs every episode): per-frame diff spikes outside cuts + runs of low-detail frames
+   (std of the grey frame < 30 for 5+ frames) -> camera inside a pillar/wall, often the stretched FAR end of a move or
+   the camera sway. Keep cameras >= .9 m from pillars/walls, view the flagged frames, re-render only that 100-frame
+   segment and re-concat.
    NEXT STORY CHECKLIST (user asked to apply these from the start of the next story, refs = the user's slides):
    - HAIR LIBRARY: build reusable hair shapes in the mk script (target ~18: swoop, crop, slick, quiff, spiky, curly, afro,
      balding, combover, bob, long straight, ponytail, bun, braids, side part, buzz, wavy, hat-hair) with strand lines,
