@@ -103,6 +103,11 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    (dress with pleats), lacing (bodice X lacing), sash + gem, plate (breastplate), mail (chain mail), tabard, stole,
    emblem: cross|sun|eye (+ emblemC), edge (coloured trim inside the outline). Hair: draw smooth Catmull-Rom shapes
    (see cr() in a story's mk script), long hair as a back layer drawn before the head ball, ending above y 840.
+   v4.19-20 OUTFIT MODEL (outfit sheets): limbs are part of the costume. cast[].wear = { sleeve, cuff (forearm; a
+   different colour = short sleeve / bare arm), pants, boot (shin), shoe, glove (else white mitten hands), armR, legR }.
+   uniform.shape: 'torso' (shoulders + waist, for shirts/armour) | 'dress' (+ flare .1-.32, waistAt: A-line gown, robe,
+   long coat); cast[].long 1.2-1.6 lengthens it down (>=1.3 hides the legs, shoes peek out). Ink is weighted: thick on
+   the shadow side (lower right), thin where light hits. Hair gets darker strand lines (strands() in the mk script).
    v4.13 extra physics: the head (and hat/headband art) lags and wobbles on starts/stops/turns; held props never sink
    into the body (hold entry noClip / clear); flyPath(..., {walls: [{axis: 'x'|'z', at, n, e}]}) bounces off walls;
    makeRope/updateRope (sagging, swaying rope/leash/chain) and makeFlag/waveFlag (flag, cloth, cape in the wind).
