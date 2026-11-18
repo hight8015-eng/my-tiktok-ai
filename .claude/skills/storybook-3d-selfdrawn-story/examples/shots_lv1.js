@@ -34,7 +34,7 @@ function reset(t) {
   SH.a = 0; SH.t = t; Object.values(CHARS).forEach(C => { C.g.visible = false; });
   Wd.hideSets(); Wd.hideSea(); Wd.pts.forEach(l => { l.intensity = 0; });
   SWORD.visible = BOOK.visible = STAFF.visible = false; SPEARS.forEach(x => { x.visible = false; }); AUR.material.opacity = 0; HOLY.material.opacity = 0; EYES.forEach(e => { e.material.opacity = 0; }); WAVE.material.opacity = 0; WHITE.k = 0;
-  FA.army.forEach(m => { m.visible = false; }); Wd.cityAt(false, t); Wd.posterAt(false); FA.rock.visible = true;
+  FA.army.forEach(m => { m.visible = false; }); (FA.standards || []).forEach(g => { g.visible = false; }); Wd.cityAt(false, t); Wd.posterAt(false); FA.rock.visible = true;
   POST.sat = 1; POST.lift = 1; POST.vig = .32;
 }
 // ---------- light helpers ----------

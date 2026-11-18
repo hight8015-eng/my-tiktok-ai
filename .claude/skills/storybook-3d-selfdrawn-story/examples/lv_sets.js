@@ -54,7 +54,7 @@ export function armyAt(k, t, gone = 0) { // gone 0..1: front rows vanish first
   const N = FA.armyPos.length; for (let i = 0; i < N; i++) { const [x, z, ph] = FA.armyPos[i], row = Math.floor(i / 26), v = clamp((gone * 12 - row * .9) / 1.2), sc = (1 - v) * k, bob = Math.abs(Math.sin(t * 3 + ph)) * .04;
     _q.setFromEuler(new THREE.Euler(0, Math.PI, 0)); _s.setScalar(Math.max(1e-4, sc));
     [[0, .55 + bob], [0, 1.05 + bob], [0, 1.08 + bob], [.3, .9 + bob]].forEach(([dx, y], j) => { _p.set(x + dx, y * Math.max(.001, sc) + v * 1.2, z); _m4.compose(_p, _q, _s); FA.army[j].setMatrixAt(i, _m4); }); }
-  FA.army.forEach(m => { m.instanceMatrix.needsUpdate = true; m.visible = k > 0; }); }
+  FA.army.forEach(m => { m.instanceMatrix.needsUpdate = true; m.visible = k > 0; }); if (FA.standards) armyStandards(k, gone); }
 export function cityAt(on, t) { FA.city.visible = on; FA.flames.forEach((f, i) => { f.scale.set(1 + .15 * Math.sin(t * 9 + i), 1 + .3 * Math.sin(t * 7 + i * 1.7), 1); }); }
 export function posterAt(on) { FA.poster.visible = on; if (on && !FA.posterDrawn) { FA.posterDrawn = true; FA.poster.material.map = canvasTex(512, 704, (x, w, h) => {
   x.fillStyle = '#e8d4a8'; x.fillRect(0, 0, w, h); x.strokeStyle = '#7a5a30'; x.lineWidth = 18; x.strokeRect(9, 9, w - 18, h - 18); x.fillStyle = '#5a1a1a'; x.textAlign = 'center'; x.font = 'bold 78px Prompt'; x.fillText('ประกาศจับ', 256, 110);
@@ -151,7 +151,6 @@ const crestTex = (bg, fg) => T(128, 256, (x, w, h) => { x.fillStyle = bg; x.fill
   const gl = mesh(new THREE.CircleGeometry(9, 40), basic('#b8c8ff', { fog: false, transparent: true, opacity: .18, add: true, depthWrite: false }), { p: [8, 22, -60.5], parent: BALC, cast: false }); gl.userData.noInk = true;
   for (const x of [-2.6, 2.6]) cloth(BALC, [x, 3.6, -2.95], .9, 2.2, '#ffffff', { map: crestTex('#24468e', '#f2c94c'), amp: .07 }); }
 // field: battle flags along the army
-{ FA.flags = []; for (const [x, z] of [[-6, 9], [-2, 11], [2.5, 10], [6.5, 12], [0, 15]]) { cylBetween([x, 0, z], [x, 4.2, z], .05, toon('#5a4030'), FIELD, 6); FA.flags.push(cloth(FIELD, [x + .02, 4.1, z], .7, 1.25, '#ffffff', { map: crestTex(['#b0303a', '#24468e', '#b0303a', '#e2b23c', '#24468e'][FA.flags.length], '#f2c94c'), r: [0, 0, 90], amp: .1 })); } }
 
 // ---------- v4.23 PROP LIBRARY (refs: barrels, crates, carts, tents, racks, shields, lanterns, skulls...) ----------
 const PM = (c) => toon(c), WOOD = '#8a5a36', WOOD2 = '#6e4426', IRON = '#5a5a68', GOLD = '#d9a93a';
@@ -204,17 +203,11 @@ function stones(par, n, area, seed = 5, col = '#a89a84') { const R = rng(seed), 
 { // FIELD: dirt road, grass tufts, army camp (tents, racks, barrels, crates, cart), snow-capped peaks, rolling hills, clouds, a castle on the hill
   mesh(rbox(5, .02, 80), PM('#9a8060'), { p: [0, .005, 0], parent: FIELD, cast: false }); stones(FIELD, 160, [-2.4, 2.4, -30, 30], 11);
   grassField(FIELD, 700, [-16, 16, -22, 22], 3, '#7e9a50'); grassField(FIELD, 300, [-30, 30, -60, -22], 4, '#728e48');
-  for (const [x, z, c] of [[-7, 4, '#b0303a'], [-10, -2, '#24468e'], [8, 3, '#b0303a'], [11, -4, '#e2b23c'], [-12, 9, '#24468e'], [12, 10, '#b0303a']]) tent(FIELD, [x, 0, z], 1, '#efe6d2', c, x * 10);
-  spearRack(FIELD, [-4.5, 0, -1.5], 20); spearRack(FIELD, [4.6, 0, -2.2], -25); cart(FIELD, [5.6, 0, 1.6], -35, 'goods'); cart(FIELD, [-6, 0, -6], 60, 'hay');
-  for (const [x, z, s] of [[-3.6, 1.2, 1], [-3.0, 1.6, .9], [3.4, -.8, 1], [6.8, -1, .9], [-5.2, -3, 1]]) barrel(FIELD, [x, 0, z], s, x);
-  for (const [x, z, r] of [[3.9, 0, 10], [-4.2, -2.5, -20], [7.5, -2.8, 35]]) crate(FIELD, [x, 0, z], 1, r);
-  shield(FIELD, [-3.9, .55, 1.9], .42, 30, '#b0303a'); shield(FIELD, [3.1, .5, -1.3], .4, -40);
   for (const [x, z] of [[-60, -150], [-20, -170], [30, -160], [75, -150]]) { mesh(new THREE.SphereGeometry(40, 20, 12), PM('#5f8a4a'), { p: [x, -22, z + 60], s: [1.4, .6, 1], parent: FIELD, cast: false }); }
   const R = rng(21); for (let i = 0; i < 9; i++) { const x = -180 + i * 45 + R() * 20, z = -190 - R() * 40, h = 40 + R() * 40; mesh(new THREE.ConeGeometry(9 + R() * 4, 12, 5), PM('#f4f2ec'), { p: [x, 15 + h / 2 - 2, z + 1], parent: FIELD, cast: false }); }
   for (const [x, y, z, s] of [[-40, 40, -120, 4], [20, 48, -140, 5], [60, 36, -110, 3.5], [-80, 52, -150, 5], [0, 30, -90, 3]]) cloud(FIELD, [x, y, z], s);
   castle(FIELD, [-28, 4, -60], 1.6); }
 { // HALL: armour stands along the carpet, shields + crossed spears on the pillars, candelabras, chests
-  for (const s of [-1, 1]) for (const z of [1.5, -5]) armorStand(HALL, [s * 2.5, 0, z], s * -70);
   for (const s of [-1, 1]) for (let z = 4; z >= -13; z -= 3.4) { shield(HALL, [s * 3.0, 3.2, z], .5, s * 90, s < 0 ? '#6a2a8c' : '#24468e'); }
   for (const [x, z] of [[-2.2, -9.8], [2.2, -9.8], [-1.8, 3.6], [1.8, 3.6]]) { cylBetween([x, 0, z], [x, 1.6, z], .05, PM(GOLD), HALL, 6); candles(HALL, [x, 1.6, z], 3); }
   for (const [x, z] of [[-4.6, -3], [4.6, 0.5]]) { crate(HALL, [x, 0, z], .9, 15); barrel(HALL, [x + .2, 0, z + 1.2], .85); } }
@@ -269,20 +262,37 @@ function flowerBox(par, p, l = 1.2) { const g = group({ p, parent: par }); mesh(
 const FLAMES = [];
 export function flamesAt(t) { FLAMES.forEach((f, i) => { f.scale.set(1 + .12 * Math.sin(t * 11 + i * 2), 1 + .25 * Math.sin(t * 8.3 + i * 1.3), 1 + .12 * Math.cos(t * 9 + i)); }); }
 { // HALL: bunting across the nave + flower urns by the altar
-  for (const z of [2, -3.5, -8.5]) bunting(HALL, [-5.6, 6.2, z], [5.6, 6.2, z], 16, ['#6a2a8c', '#e2b23c', '#f4ecd8']);
   for (const x of [-3.4, 3.4]) { mesh(new THREE.CylinderGeometry(.3, .2, .6, 12), PM('#d8d2e4'), { p: [x, .3 + .9, -11.4], parent: HALL }); for (let k = 0; k < 5; k++) mesh(new THREE.SphereGeometry(.12, 8, 6), PM(['#e2445a', '#f4ecd8', '#f2c94c'][k % 3]), { p: [x + (k - 2) * .1, 1.65 + (k % 2) * .08, -11.4], parent: HALL }); } }
-{ // FIELD camp: campfire, haystacks, a barrel of swords
-  campfire(FIELD, [-7.6, 0, 1.2]); campfire(FIELD, [9.6, 0, 6]);
-  for (const [x, z] of [[6.2, -5.5], [-9.2, 4.8]]) mesh(new THREE.SphereGeometry(.9, 12, 8), PM('#d9b85a'), { p: [x, .45, z], s: [1, .75, 1], parent: FIELD });
-  const bs = barrel(FIELD, [4.3, 0, .9], .9); for (let k = 0; k < 4; k++) { cylBetween([(k - 1.5) * .1, .9, 0], [(k - 1.5) * .16, 1.8, (k % 2) * .08], .018, PM('#dfe3ec'), bs, 4); }
-  for (let i = 0; i < 6; i++) sack(FIELD, [-8.4 + (i % 3) * .5, 0, 3 + (i / 3 | 0) * .5], .8); }
 { // BALCONY: flower boxes on the railing
   for (const x of [-2.7, 0, 2.7]) flowerBox(BALC, [x, 1.09, -2.8], 1.1); }
 { // CRYPT: wall torches ring the ritual circle
   for (const [x, z] of [[-8, -4], [8, -4], [-9, -10], [9, -10], [-5, -16], [5, -16]]) { mesh(rbox(1.2, 3, .4), PM('#4a4460'), { p: [x, 1.5, z - .3], parent: CRYPT }); torch(CRYPT, [x, 1.6, z - .1], 0); } }
 { // VILLAGE: market stalls, woodpile, string lights; hut: hanging herbs, pots on a shelf, bread basket, broom
-  stall(VILL, [-6.5, 0, -4.2], 8, '#b0303a'); stall(VILL, [9.5, 0, -4.6], -10, '#24468e'); woodpile(VILL, [-1, 0, -4.6], 0);
   for (const x of [-14, -4, 6]) { const a = [x, 2.4, -1.5], b = [x + 10, 2.4, -1.5]; cylBetween(a, b, .01, PM('#3a3040'), VILL, 3); for (let k = 1; k < 10; k++) { const l = mesh(new THREE.SphereGeometry(.07, 8, 6), basic(['#ffcf6a', '#ff8a5a', '#fff2b0'][k % 3]), { p: [x + k, 2.4 - Math.sin(k / 10 * Math.PI) * .35, -1.5], parent: VILL, cast: false }); l.userData.noInk = true; } }
   for (const x of [-2, -1.4, -.8, .4, 1]) herbs(VI.hut, [x, 3.95, -1.8]);
   for (const [x, c] of [[-1.8, '#5a5a68'], [-1.45, '#a0583a'], [-1.1, '#5a5a68']]) mesh(new THREE.CylinderGeometry(.13, .1, .22, 10), PM(c), { p: [x, 2.36, -2.75], parent: VI.hut });
   basket(VI.hut, [1.0, .79, -1.5], '#c88a3a', .6); const br = group({ p: [2.6, 0, -2.6], r: [0, 0, 12], parent: VI.hut }); cylBetween([0, 0, 0], [0, 1.4, 0], .025, PM(WOOD), br, 4); mesh(new THREE.ConeGeometry(.16, .4, 8), PM('#d9b85a'), { p: [0, .15, 0], r: [180, 0, 0], parent: br }); }
+
+// ---------- v4.25 STORY DRESSING: props that belong to what happens in each scene ----------
+{ // BATTLEFIELD (Kael vs the army, then the heroes' charge): standards carried IN the army's front rank, war debris on the ground
+  FA.standards = []; for (const c of [2, 7, 12.5, 18, 23]) { const g = group({ parent: FIELD }); g.userData.x = (c - 12.5) * 1.1; cylBetween([0, 0, 0], [0, 3.6, 0], .04, PM(WOOD2), g, 6); mesh(new THREE.ConeGeometry(.06, .2, 6), PM(GOLD), { p: [0, 3.7, 0], parent: g });
+    cloth(g, [.03, 3.5, 0], .55, 1.0, '#ffffff', { map: crestTex(c === 12.5 ? '#e2b23c' : '#b0303a', c === 12.5 ? '#b0303a' : '#f2c94c'), r: [0, 0, 90], amp: .08 }); g.visible = false; FA.standards.push(g); }
+  const R = rng(61); for (let i = 0; i < 14; i++) { const x = (R() - .5) * 12, z = -2 - R() * 9; if (Math.abs(x) < 1.6) continue; const g = group({ p: [x, 0, z], r: [(R() - .5) * 40, R() * 180, (R() - .5) * 40], parent: FIELD });   // broken spears stuck in the ground
+    cylBetween([0, 0, 0], [0, .7 + R() * .6, 0], .018, PM('#6a4a2a'), g, 4); }
+  for (let i = 0; i < 7; i++) { const x = (R() - .5) * 11, z = -1 - R() * 8; if (Math.abs(x) < 1.8) continue; const sh = shield(FIELD, [x, .04, z], .34, 0, R() < .5 ? '#b0303a' : '#6a7486', '#9aa0ae'); sh.rotation.set(-Math.PI / 2 + (R() - .5) * .3, 0, R() * 6); }
+  for (let i = 0; i < 6; i++) { const m = mesh(new THREE.CircleGeometry(.8 + R() * .9, 20), basic('#2a2228', { transparent: true, opacity: .35, depthWrite: false }), { p: [(R() - .5) * 10, .02, -1 - R() * 9], r: [-90, 0, 0], parent: FIELD, cast: false }); m.userData.noInk = true; } }   // scorch marks
+export function armyStandards(k, gone = 0) { FA.standards.forEach((g, i) => { const on = k > .05 && gone < .08; g.visible = on; g.position.set(g.userData.x, 0, -13.6); g.scale.setScalar(Math.max(.001, k)); }); }
+{ // WEDDING HALL (the forced engagement): pews for the guests, a flower arch over the altar, rose petals on the carpet, white + gold swags
+  for (const s of [-1, 1]) for (let z = 2.6; z >= -8.2; z -= 1.8) { const g = group({ p: [s * 2.7, 0, z], parent: HALL }); mesh(rbox(2.2, .12, .5), PM('#7a4a2e'), { p: [0, .48, 0], parent: g }); mesh(rbox(2.2, .55, .08), PM('#6a3e26'), { p: [0, .8, -.24], parent: g });
+    for (const x of [-1.05, 1.05]) mesh(rbox(.08, .5, .5), PM('#5a3420'), { p: [x, .25, 0], parent: g }); mesh(new THREE.SphereGeometry(.13, 8, 6), PM('#f4ecd8'), { p: [-s * 1.1, .95, .05], parent: g }); }
+  const ar = group({ p: [0, .9, -11.9], parent: HALL }); mesh(new THREE.TorusGeometry(1.7, .07, 8, 40, Math.PI), PM('#e8e0cc'), { p: [0, 1.4, 0], parent: ar });
+  for (let k = 0; k <= 22; k++) { const a = k / 22 * Math.PI, x = Math.cos(a) * 1.7, y = 1.4 + Math.sin(a) * 1.7; mesh(new THREE.SphereGeometry(.13 + (k % 3) * .02, 8, 6), PM(['#f4ecd8', '#e8a0b0', '#f2c94c', '#3e7a4a'][k % 4]), { p: [x, y, .08], parent: ar }); }
+  for (const x of [-1.7, 1.7]) cylBetween([x, -.9, 0], [x, 1.4, 0], .06, PM('#e8e0cc'), ar, 6);
+  const R = rng(71), pg = new THREE.CircleGeometry(.05, 6), pim = new THREE.InstancedMesh(pg, basic('#e8708a'), 160); for (let i = 0; i < 160; i++) { _p.set((R() - .5) * 1.4, .045, 3 - R() * 13); _q.setFromEuler(new THREE.Euler(-Math.PI / 2, 0, R() * 6)); _s.setScalar(.7 + R() * .8); _m4.compose(_p, _q, _s); pim.setMatrixAt(i, _m4); }
+  pim.userData.noInk = true; HALL.add(pim);
+  for (let z = 4; z >= -13; z -= 3.4) for (const s of [-1, 1]) { const sw = mesh(new THREE.TorusGeometry(.75, .07, 6, 20, Math.PI), PM('#f4ecd8'), { p: [s * 3.4, 6.1, z - 1.7], r: [0, 90, 180], s: [1, .45, 1], parent: HALL }); mesh(new THREE.SphereGeometry(.16, 8, 6), PM(GOLD), { p: [s * 3.4, 6.1, z], parent: HALL }); } }
+{ // BALCONY (the love scene): climbing roses on the pillars and railing
+  for (const s of [-1, 1]) for (let k = 0; k < 16; k++) { const a = k * 1.1, y = .2 + k * .3; mesh(new THREE.SphereGeometry(.16, 8, 6), PM('#2f6a3a'), { p: [s * 4.2 + Math.cos(a) * .42, y, 4.0 + Math.sin(a) * .42], parent: BALC }); if (k % 2) mesh(new THREE.SphereGeometry(.09, 8, 6), PM('#d0304a'), { p: [s * 4.2 + Math.cos(a) * .5, y + .05, 4.0 + Math.sin(a) * .5], parent: BALC }); }
+  for (let x = -4.4; x <= 4.4; x += .55) { mesh(new THREE.SphereGeometry(.12, 8, 6), PM('#2f6a3a'), { p: [x, 1.12, -2.62], parent: BALC }); if (Math.round(x * 10) % 3 === 0) mesh(new THREE.SphereGeometry(.07, 8, 6), PM('#d0304a'), { p: [x + .05, 1.2, -2.52], parent: BALC }); } }
+{ // VILLAGE (a quiet farming village at night): the woodpile stays, plus a plough and a water trough
+  woodpile(VILL, [-1, 0, -4.6], 0); mesh(rbox(1.6, .4, .6), PM('#6a4a2a'), { p: [4, .2, -3], parent: VILL }); mesh(rbox(1.5, .05, .5), basic('#4a6a9a'), { p: [4, .38, -3], parent: VILL, cast: false }); }
