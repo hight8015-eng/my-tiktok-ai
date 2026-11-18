@@ -102,10 +102,23 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    v4.13 extra physics: the head (and hat/headband art) lags and wobbles on starts/stops/turns; held props never sink
    into the body (hold entry noClip / clear); flyPath(..., {walls: [{axis: 'x'|'z', at, n, e}]}) bounces off walls;
    makeRope/updateRope (sagging, swaying rope/leash/chain) and makeFlag/waveFlag (flag, cloth, cape in the wind).
-   RETENTION / VIRAL KIT (use on every story):
+   STORY-CHANNEL FORMULA (v4.16, from studying RicksClips: ~64 s Shorts, many >10M views). Follow this first; the
+   kit below is optional. Their pull comes from topic + script + rhythm, NOT from on-screen graphics:
+   - TOPIC: a true / odd / historical fact told as comedy, a logic puzzle ("the town with only 2 barbers"), or an
+     escalation list "Levels of X" (each level a new gag, the last one the biggest). Title = a curiosity gap.
+   - OPEN MID-ACTION: line 1 is already inside the event with its most striking image; no intro, no greeting.
+   - A beat every 5-8 s: a joke, a reveal, a twist or an anachronism gag; end on a short punchline / twist line.
+   - REACTIONS: every line gets a face change (shock, sweat, smug, laugh); cut to bystanders reacting (crowd laughs,
+     the guard panics) - that is where the comedy lands.
+   - EDIT: cut on sentence boundaries every 1-3 s; every shot has a slow push-in or drift; no frame stays still.
+   - LOOK: simple 2D-like characters on detailed, good-looking backgrounds; clean frame - no banners, no progress
+     bar, no coloured words. Captions: plain bold white with dark outline, 1-2 words at a time on the voice
+     (captions.words = 2 auto-splits longer chunks; for Thai write the timing chunks short by hand).
+   - LENGTH 55-75 s, one narrator, fast and conversational.
+   RETENTION / VIRAL KIT (optional extras, all OFF by default; turn on only if a story needs it):
    - project.json "hook": { text, sub, dur } = a big yellow banner in the first ~2.5 s (the hook decides the swipe).
-   - captions pop in word by word; wrap a word in *stars* in timing caps (or list "hiWords") to colour it yellow;
-     numbers are highlighted automatically. "captions": { y, size, pop, hi } to restyle.
+   - "captions": { pop: true, highlight: true } makes captions pop and colours *starred* words / numbers yellow;
+     "keyZoom": true adds a 2-3 % push-in on highlighted words.
    - no progress bar on story channels (user preference); "progressBar": true exists but leave it off.
    - finish.sh also writes โพสต์.txt (title, hook line, description, hashtags) via tools/postmeta.py; set
      "post": { title, hook, desc, tags, series, part } in project.json.

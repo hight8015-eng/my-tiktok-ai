@@ -98,14 +98,17 @@ function sweep(k) { // soft warm light sweep across the frame (k 0..1)
   X.save(); X.globalCompositeOperation = 'screen'; const x = -700 + k * 2500; const g = X.createLinearGradient(x - 500, 0, x + 500, 400);
   g.addColorStop(0, 'rgba(255,240,215,0)'); g.addColorStop(.5, `rgba(255,240,215,${.75 * Math.sin(Math.PI * k)})`); g.addColorStop(1, 'rgba(255,240,215,0)'); X.fillStyle = g; X.fillRect(0, 0, 1080, 1920); X.restore(); }
 // v4.13 viral captions: each word pops in (overshoot), *word* or numbers are highlighted yellow (project.json captions: { pop, hi, y, size })
-const CAP = { pop: true, hi: '#ffd23f', y: 1350, size: 70, maxW: 860, ...(project.captions || {}) };
+const CAP = { pop: false, highlight: false, hi: '#ffd23f', y: 1350, size: 70, maxW: 860, words: 2, ...(project.captions || {}) }; // v4.16 RicksClips study: plain white 1-2 word captions, no pop/colour by default
 // v4.14 one knob for all automatic effects (0 = clean .. 1 = loud); default .7 keeps it lively but uncluttered
 const FXL = Math.max(0, Math.min(1, project.fxLevel ?? .7)); E.POST.grain = .025 * FXL;
 // seamless loop: the last LOOP_D seconds dissolve into the opening frame so replays feel continuous (project.loop = false to end on black)
 const LOOP = project.loop === true, LOOP_D = .45; let ZP = 1; // story channels: off by default (stories end); opt in for short gag clips
+// a caption chunk with more than CAP.words space-separated words is split into 1-2 word pieces, timed by text length
+function capSlice(c, t) { const w = c[2].split(/\s+/).filter(Boolean); if (w.length <= CAP.words) return c; const parts = []; for (let i = 0; i < w.length; i += CAP.words) parts.push(w.slice(i, i + CAP.words).join(' '));
+  const L = parts.reduce((a, p) => a + p.length, 0); let t0 = c[0]; for (const p of parts) { const t1 = t0 + (c[1] - c[0]) * p.length / L; if (t < t1) return [t0, t1, p]; t0 = t1; } return [t0, c[1], parts[parts.length - 1]]; }
 function caption(t) {
-  const c = timing.caps.find(c => t >= c[0] && t < c[1]); if (!c) return;
-  let txt = c[2]; const star = /\*(.+?)\*/.test(txt), hi = star || /[0-9๐-๙]/.test(txt) || (project.hiWords || []).some(w => txt.includes(w)); txt = txt.replace(/\*/g, '');
+  const c0 = timing.caps.find(c => t >= c[0] && t < c[1]); if (!c0) return; const c = capSlice(c0, t);
+  let txt = c[2]; const star = /\*(.+?)\*/.test(txt), hi = CAP.highlight && (star || /[0-9๐-๙]/.test(txt) || (project.hiWords || []).some(w => txt.includes(w))); txt = txt.replace(/\*/g, '');
   const a = t - c[0], k = CAP.pop ? (a < .16 ? .55 + .45 * E.eOut(a / .16) + .12 * Math.sin(Math.PI * Math.min(1, a / .16)) : 1) : 1;
   X.save(); X.translate(520, CAP.y); X.scale(k, k); // safe zone: a touch left of the app's right-hand buttons X.rotate(hi && CAP.pop ? Math.sin(a * 18) * .025 * Math.exp(-a * 6) : 0);
   X.font = `700 ${CAP.size * (hi ? 1.12 : 1)}px Prompt`; X.textAlign = 'center'; X.textBaseline = 'alphabetic'; X.lineJoin = 'round';
@@ -129,7 +132,7 @@ function endCard(t) { const E_ = project.endCard; if (!E_ || LOOP) return; const
   if (E_.sub) { X.font = '600 50px Prompt'; X.lineWidth = 10; X.strokeText(E_.sub, 0, 90, 900); X.fillStyle = '#ffd23f'; X.fillText(E_.sub, 0, 90, 900); } X.restore(); }
 function progress(t) { if (!project.progressBar) return; const u = Math.min(1, t / timing.end); X.save(); if (LOOP) X.globalAlpha = 1 - E.sstep(timing.end - LOOP_D, timing.end - .05, t); X.fillStyle = 'rgba(255,255,255,.18)'; X.fillRect(0, 1906, 1080, 14); X.fillStyle = '#ffd23f'; X.fillRect(0, 1906, 1080 * u, 14); X.restore(); }
 const DIS = .28, WH = .22;
-function keyZoom(t) { const c = timing.caps.find(c => t >= c[0] && t < c[1]); if (!c) return 1; const hi = /\*(.+?)\*/.test(c[2]) || /[0-9๐-๙]/.test(c[2]) || (project.hiWords || []).some(w => c[2].includes(w));
+function keyZoom(t) { if (!project.keyZoom) return 1; const c = timing.caps.find(c => t >= c[0] && t < c[1]); if (!c) return 1; const hi = /\*(.+?)\*/.test(c[2]) || /[0-9๐-๙]/.test(c[2]) || (project.hiWords || []).some(w => c[2].includes(w));
   const a = t - c[0]; return hi ? 1 + .028 * FXL * Math.sin(Math.PI * Math.min(1, a / .45)) : 1; } // gentle push-in on highlighted words
 window.frame = (t, opts = {}) => { ZP = keyZoom(t);
   let i = SHOTS.length - 1; for (let k = 0; k < SHOTS.length; k++) if (t < SHOTS[k].t1) { i = k; break; }
