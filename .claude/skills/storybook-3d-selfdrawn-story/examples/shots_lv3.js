@@ -12,8 +12,12 @@ function look(pos, tgt, fov = 40, roll = 0) { POST.focus = pos.distanceTo(tgt); 
 const lp = (a, b, u) => a.map((v, i) => lerp(v, b[i], u));
 const HUP = .32, hup = (v) => { v[1] += HUP * clamp(v[1] / 1.4); return v; }; // taller cast (legs 1.2 heads): framing at head height lifts with the heads, floor framing stays
 const CAMX = 1.4; /* v4.29 refs move the camera 3-4x more: stretch every planned move around its midpoint */
-const ampl = (p0, p1) => [p0.map((v, i) => (v + p1[i]) / 2 + (v - (v + p1[i]) / 2) * CAMX), p1.map((v, i) => (v + p0[i]) / 2 + (v - (v + p0[i]) / 2) * CAMX)];
-const camO = (o) => (p0, t0, p1, t1, u, fov = 40, roll = 0) => { const [q0, q1] = ampl(p0, p1); look(V(...hup(lp(q0, q1, u))).add(o.position), V(...hup(lp(t0, t1, u))).add(o.position), fov, roll); };
+const ampl = (p0, p1, t0, t1) => { /* v4.30 keep the CLOSER end exactly as planned (no extra zoom into faces); stretch only the far end */
+  const d0 = Math.hypot(p0[0] - t0[0], p0[1] - t0[1], p0[2] - t0[2]), d1 = Math.hypot(p1[0] - t1[0], p1[1] - t1[1], p1[2] - t1[2]);
+  return d0 >= d1 ? [p0.map((v, i) => p1[i] + (v - p1[i]) * CAMX), p1] : [p0, p1.map((v, i) => p0[i] + (v - p0[i]) * CAMX)]; };
+let MIND = 2.0; /* v4.30 face shots: the camera never comes closer than 2 m (medium close-up with headroom); macro shots set MIND = 0 */
+const keep = (p, t) => { const d = Math.hypot(p[0] - t[0], p[1] - t[1], p[2] - t[2]); if (d >= MIND || d < 1e-3) return p; const k = MIND / d; return p.map((v, i) => t[i] + (v - t[i]) * k); };
+const camO = (o) => (p0, t0, p1, t1, u, fov = 40, roll = 0) => { p0 = keep(p0, t0); p1 = keep(p1, t1); const [q0, q1] = ampl(p0, p1, t0, t1); look(V(...hup(lp(q0, q1, u))).add(o.position), V(...hup(lp(t0, t1, u))).add(o.position), fov, roll); };
 const camH = camO(HALL), camF = camO(FIELD), camB = camO(BALC), camC = camO(CRYPT), camV = camO(VILL);
 function put(C, parent, P) { if (C.g.parent !== parent) parent.add(C.g); pose(C, P); }
 function dof(k) { POST.dof = k; }
@@ -64,7 +68,7 @@ const AMBK = () => HALL.visible ? 'dust' : BALC.visible ? 'firefly' : CRYPT.visi
 const SP = 1.12;
 // v4.24 COVERAGE: longer shots get a cut-in (same side of the action, no spin) so the angle changes every ~1.2-1.8 s
 const _f = new THREE.Vector3(), _r = new THREE.Vector3(), _T = new THREE.Vector3();
-function coverage(sh, ltR) { // v4.27: one clear change of angle per long shot - a close-up on the main character from ~30 deg to the same side, about 2x closer.
+function coverage(sh, ltR) { return; /* v4.30 off: the mid-shot close-up cut still read as a zoom + skipped frames */ // v4.27: one clear change of angle per long shot - a close-up on the main character from ~30 deg to the same side, about 2x closer.
   // (small punch-ins of the same framing read as skipped frames / jump cuts, so they are not used)
   const i = SHOTS.indexOf(sh), nx = SHOTS[i + 1], d = (nx ? nx.t0 : 75.23) - sh.t0; if (sh.noCut || d < 2.6 || ltR < d * .55) return;
   camera.updateMatrixWorld(); const cp = camera.position.clone(); camera.getWorldDirection(_f);
@@ -115,7 +119,7 @@ const pts0 = (p, i) => { const l = Wd.pts[1]; l.position.copy(p); l.color.set('#
 const wedNight = () => hallLight({ hemiI: 1.25, sunI: .5, hemiS: '#9a90d0', fog: '#1e1832' });
 function ep3Reset() { NOOK.visible = true; doorAt(0); nookAt(); YEAR.forEach(b => { b.visible = false; }); RINGH.visible = false; BQ.visible = false; CR.demon.visible = true;
   Wd.cracksAt(0, [0, 0, 0], 0); Wd.cracksAt(1, [0, 0, 0], 0); Wd.raysAt([0, 0, 0], 0); Wd.fogAt([0, 0, 0], 0, 0); Wd.rocksAt([0, 0, 0], 0, 0); }
-const E3 = (id, t0, tr, fn, o) => S(id, t0, tr, (lt, t) => { ep3Reset(); fn(lt, t); }, o);
+const E3 = (id, t0, tr, fn, o) => S(id, t0, tr, (lt, t) => { ep3Reset(); MIND = 2.0; fn(lt, t); }, o);
 const EL = (o) => put(E_(), HALL, o);
 const bq = (wilt) => { BQ.visible = true; BQ.children.forEach((m, i) => { if (i) m.position.y = .1 - wilt * .07 * (i % 3); }); return BQ; };
 
@@ -133,7 +137,7 @@ E3('S03', 3.37, 'cut', (lt, t) => { // "ที่ไม่มีเจ้าบ�
 E3('S04', 4.78, 'cut', (lt, t) => { // "ชุดเจ้าสาวหนึ่งชุด" - slide past the dress
   wedNight(); Wd.hallAt(t); const P = NOOK.localToWorld(V(-2.4, 1.1, -.6));
   camH([-4.2, 2.1, -7.6], [-2.4, 1.8, -11.6], [-1.6, 2.0, -7.4], [-2.4, 1.8, -11.6], U(lt, 1.6, eIO), 46); });
-E3('S05', 6.36, 'cut', (lt, t) => { // "แหวนสองวง" - macro orbit around the rings
+E3('S05', 6.36, 'cut', (lt, t) => { MIND = 0; // "แหวนสองวง" - macro orbit around the rings
   wedNight(); Wd.hallAt(t); const a = lerp(-.5, .4, eIO(lt / 1.3)); const c = V(.18, 1.72, -10.95);
   camH([c.x + Math.sin(a) * 1.0, 2.25, c.z + Math.cos(a) * 1.0], c.toArray(), [c.x + Math.sin(a) * 1.0, 2.25, c.z + Math.cos(a) * 1.0], c.toArray(), 0, 34); dof(.8); }, { noCut: true });
 E3('S06', 7.62, 'cut', (lt, t) => { // "และเก้าอี้ว่างอีกหนึ่งตัว" - truck from Elena to the empty chair
@@ -156,7 +160,7 @@ const yearShot = (i, webs, wilt, lit) => (lt, t) => { wedNight(); Wd.hallAt(t); 
 E3('S10', 18.06, 'cut', yearShot(0, 0, 0, 7), { noCut: true });       // "10 ปีผ่านไป"
 E3('S11', 19.84, 'cut', yearShot(1, 2, .5, 5), { noCut: true });      // "50 ปีผ่านไป"
 E3('S12', 21.60, 'cut', yearShot(2, 3, 1, 3), { noCut: true });       // "จนครบ 100 ปี"
-E3('S13', 23.68, 'cut', (lt, t) => { // "คืนนั้นเธอถอดแหวน วางลงบนโต๊ะ" - close on the hand and the table
+E3('S13', 23.68, 'cut', (lt, t) => { MIND = 0; // "คืนนั้นเธอถอดแหวน วางลงบนโต๊ะ" - close on the hand and the table
   wedNight(); Wd.hallAt(t); nookAt({ webs: 3, lit: 3, ring1: lt > 2.2 }); const k = sstep(.6, 2.2, lt);
   EL({ p: [-.55, .9, -10.6], ry: 40, ex: 'sad', hR: lp([.1, .55, .35], [.32, .48, .5], k), pR: [1, -.3, -.3], hL: [-.25, .35, .2], pL: [-1, 0, -.5] });
   if (lt < 2.2) { RINGH.visible = true; RINGH.position.copy(W(E_(), lp([.1, .58, .38], [.32, .5, .52], k))); RINGH.rotation.x = 1.2; }
@@ -165,7 +169,7 @@ E3('S14', 26.76, 'cut', (lt, t) => { // "พอแล้ว! ฉันรอม�
   wedNight(); Wd.hallAt(t); nookAt({ webs: 3, lit: 3 }); SH.a = .25; SH.t = t;
   EL({ p: [-.55, .9, -10.6], ry: 20, ex: lt < 1.0 ? 'angry' : 'sad', sweat: true, talk: talkAt(t), pop: popAt(lt, .05, .12), hL: [-.32, .6, .4], hR: [.32, .6, .4], pL: [-1, -.3, -.3], pR: [1, -.3, -.3] });
   camH([.2, 2.05, -8.9], [-.55, 2.0, -10.6], [-.1, 2.0, -9.4], [-.55, 2.0, -10.6], U(lt, 2.7, eOut), 40, -6); });
-E3('S15', 29.54, 'cut', (lt, t) => { // "เธอเป่าเทียนเล่มสุดท้าย" - the last flame goes out
+E3('S15', 29.54, 'cut', (lt, t) => { MIND = 0; // "เธอเป่าเทียนเล่มสุดท้าย" - the last flame goes out
   hallLight({ hemiI: lerp(1.25, .7, sstep(.6, 1.2, lt)), sunI: .3, hemiS: '#7a70b0', fog: '#141022' }); Wd.hallAt(t); nookAt({ webs: 3, lit: lt < .8 ? 1 : 0 });
   if (lt > .8) smokeAt(NOOK.localToWorld(V(Math.cos(0) * .4, 1.0, -.05)), lt - .8, { col: '#c8c0d8', size: .08, life: 1.4 });
   camH([.9, 1.85, -10.5], [.4, 1.65, -11.05], [.75, 1.8, -10.7], [.4, 1.65, -11.05], U(lt, 1.7, eOut), 36); }, { noCut: true });
@@ -174,7 +178,7 @@ E3('S16', 31.26, 'cut', (lt, t) => { // "แล้วเดินไปที่
   EL({ p: [0, 0, z], ry: 0, ex: 'sad', walk: { ph: lt * 6, stride: .16 } }); camH([.6, 1.9, z - 3.2], [0, 1.4, z + 4], [.4, 1.8, z - 2.6], [0, 1.4, z + 4], U(lt, 1.5, eIO), 50); });
 E3('S17', 32.78, 'cut', (lt, t) => { // "แต่แล้ว" - she stops
   hallLight({ hemiI: .7, sunI: .3, hemiS: '#7a70b0', fog: '#141022' }); Wd.hallAt(t); EL({ p: [0, 0, -7.3], ry: 0, ex: 'shocked', pop: popAt(lt, .1, .1) });
-  camH([.3, 1.75, -4.8], [0, 1.75, -7.3], [.25, 1.75, -5.2], [0, 1.75, -7.3], U(lt, .7, eOut), 40); });
+  camH([.3, 1.55, -4.8], [0, 1.42, -7.3], [.25, 1.55, -5.2], [0, 1.42, -7.3], U(lt, .7, eOut), 42); });
 E3('S18', 33.46, 'blur', (lt, t) => { // "ประตูที่ไม่เคยเปิดมา 100 ปี" - the dusty door, light leaks through
   hallLight({ hemiI: .7, sunI: .3, hemiS: '#7a70b0', fog: '#141022' }); Wd.hallAt(t); Wd.raysAt(HALL.localToWorld(V(0, 0, 9.4)), .35 + .3 * sstep(1.2, 2.1, lt), t, '#fff2c0'); pts0(HALL.localToWorld(V(0, 2.5, 6)), 30);
   camH([.8, 2.0, 2.4], [0, 2.4, 8.6], [.3, 2.2, 4.6], [0, 2.4, 8.6], U(lt, 2.1, eIO), 46); });

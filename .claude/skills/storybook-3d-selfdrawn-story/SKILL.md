@@ -144,6 +144,9 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    shot files stretch every planned move 1.4x (CAMX); location changes use tr 'blur' (motion-blur dissolve, .4 s) or
    'whip' for action and 'dis' for memories. NEVER put code after a // comment on the same line (it was swallowed 4
    times: endCard alignment, caption wobble, POST dof/mblur reset) - use /* */ for inline notes.
+   v4.30 NO EXTRA ZOOM (user: face shots zoomed too much + felt like skipped frames): coverage() cut-ins are OFF;
+   CAMX stretches only the FAR end of a move (the close end stays as planned); face shots keep the camera >= 2 m from
+   the target (MIND; macro shots of objects set MIND = 0) = medium close-up with headroom, never a face filling the frame.
    v4.13 extra physics: the head (and hat/headband art) lags and wobbles on starts/stops/turns; held props never sink
    into the body (hold entry noClip / clear); flyPath(..., {walls: [{axis: 'x'|'z', at, n, e}]}) bounces off walls;
    makeRope/updateRope (sagging, swaying rope/leash/chain) and makeFlag/waveFlag (flag, cloth, cape in the wind).
