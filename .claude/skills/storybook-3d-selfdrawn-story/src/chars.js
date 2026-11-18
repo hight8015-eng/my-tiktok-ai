@@ -1,5 +1,5 @@
 // chars.js: original chibi sailors (big round head, bean eyes, nose, ears, capsule body, IK limbs, canvas faces)
-import { THREE, toon, basic, noOutline, canvasTex, mesh, group, clamp, lerp, D2R, GRAD_FLAT, GRAD_2 } from './engine.js';
+import { THREE, toon, basic, noOutline, canvasTex, mesh, group, clamp, lerp, D2R, GRAD_FLAT, GRAD_2, noise1 } from './engine.js';
 
 const FACE = new Map();
 const EX = {
@@ -121,6 +121,10 @@ function ik(limb, T, L1, L2, pole) {
 }
 export function toTorso(C, wv) { let r = C.g; while (r.parent) r = r.parent; r.updateMatrixWorld(); return C.torso.worldToLocal(wv.clone()); }
 export function toHips(C, wv) { C.g.updateMatrixWorld(true); return C.hips.worldToLocal(wv.clone()); }
+// v4 secondary motion: every posed character breathes, sways, tilts its head, nods + gestures while talking.
+// ANIM.t is set by main.js each frame (deterministic per frame). P.still = true turns it off for one pose.
+export const ANIM = { t: 0, on: true, k: 1 };
+const seedOf = (C) => C._sd ?? (C._sd = [...(C.spec.id || 'x')].reduce((a, c) => a + c.charCodeAt(0) * 7.13, 0) % 97);
 // pose: {p:[x,y,z], ry, lean, twist, side, head:[x,y,z], hL, hR (torso space arrays or Vector3), pL, pR (elbow poles), fL, fR (hips space), sit, hipY, walk:{ph, stride}, ex, blink, talk, look, sweat}
 export function pose(C, P = {}) {
   const g = C.g, s = C.spec.s; if (P.p) g.position.set(...P.p); g.rotation.set(P.rx ? P.rx * D2R : 0, (P.ry || 0) * D2R, P.rz ? P.rz * D2R : 0);
@@ -135,8 +139,20 @@ export function pose(C, P = {}) {
     else { fL = [-.13, -hy + .03, .03]; fR = [.13, -hy + .03, .03]; } }
   ik(C.lL, new THREE.Vector3(...fL), LL, LL, [0, 0, 1]); ik(C.lR, new THREE.Vector3(...fR), LL, LL, [0, 0, 1]);
   const sw = w ? Math.sin(w.ph) * .16 : 0;
-  const hL = P.hL ? (P.hL.isVector3 ? P.hL : new THREE.Vector3(...P.hL)) : new THREE.Vector3(-.36, .2, .06 - sw);
-  const hR = P.hR ? (P.hR.isVector3 ? P.hR : new THREE.Vector3(...P.hR)) : new THREE.Vector3(.36, .2, .06 + sw);
+  const live = ANIM.on && !P.still && (P.visible ?? true), t = ANIM.t, sd = seedOf(C), tk = P.talk || 0, A = ANIM.k;
+  let gR = [0, 0, 0], gL = [0, 0, 0], hd2 = [0, 0, 0];
+  if (live) { // idle: breathing bob, slow weight shift, head drift; talking: nods + small hand gestures
+    const br = Math.sin(t * 2.3 + sd), ta = tk > 0 ? 1 : 0;
+    C.hips.position.y += .009 * br * A; C.br = .016 * br * A;
+    C.torso.rotation.z += (.045 * noise1(t * .45 + sd) + .02 * ta * noise1(t * 3.1 + sd)) * A; C.torso.rotation.x += (.015 * br + .03 * ta * noise1(t * 2.7 + sd * 2)) * A;
+    hd2 = [(.04 * noise1(t * .6 + sd * 3) + .12 * ta * Math.max(-.3, noise1(t * 5.2 + sd))) * A, .09 * noise1(t * .35 + sd * 5) * A, (.08 * noise1(t * .5 + sd * 7) + .05 * ta * noise1(t * 2.2 + sd)) * A];
+    C.head.rotation.x += hd2[0]; C.head.rotation.y += hd2[1]; C.head.rotation.z += hd2[2];
+    if (ta && !w) { const gx = noise1(t * 2.4 + sd * 11), gy = Math.max(0, noise1(t * 1.9 + sd * 13)); gR = [.03 * gx, .16 * gy, .12 * gy]; gL = [-.02 * gx, .05 * Math.max(0, noise1(t * 1.6 + sd * 17)), .04]; }
+  } else C.br = 0;
+  const hL = P.hL ? (P.hL.isVector3 ? P.hL.clone() : new THREE.Vector3(...P.hL)) : new THREE.Vector3(-.36, .2, .06 - sw);
+  const hR = P.hR ? (P.hR.isVector3 ? P.hR.clone() : new THREE.Vector3(...P.hR)) : new THREE.Vector3(.36, .2, .06 + sw);
+  if (live) { const k = (P.hR || P.hL) ? .45 : 1; hR.x += gR[0] * k; hR.y += gR[1] * k; hR.z += gR[2] * k; hL.x += gL[0] * k; hL.y += gL[1] * k; hL.z += gL[2] * k;
+    const dr = .012 * A; hR.y += dr * Math.sin(t * 2.3 + sd + .6); hL.y += dr * Math.sin(t * 2.3 + sd + 1.1); }
   C.handL = ik(C.aL, hL, AL, AL, P.pL || [-.6, -.3, -.7]); C.handR = ik(C.aR, hR, AL, AL, P.pR || [.6, -.3, -.7]);
   if (C.is2D) C.f2 = [P.ex || 'neutral', !!P.blink, P.talk || 0, P.look];
   else { const tex = faceTexFor(C.spec, P.ex || 'neutral', !!P.blink, P.talk || 0, P.look); if (C.faceM.map !== tex) { C.faceM.map = tex; C.faceM.needsUpdate = true; } }
@@ -229,7 +245,7 @@ export function updateSprites(cam) {
     const U = s_u.set(0, 1, 0).transformDirection(C.torso.matrixWorld); const rollB = Math.atan2(-U.dot(s_r), U.y);
     const [x0, y0, x1, y1] = M.body; const lx = ((x0 + x1) / 2 - C.cx) * K2 * (mir ? -1 : 1), ly = .91 - ((y0 + y1) / 2 - M.gap[1]) * K2;
     const cb = C.torso.localToWorld(new THREE.Vector3(0, ly, 0)).addScaledVector(s_r, lx * s * Math.cos(rollB)).addScaledVector(s_v, -.14 * s);
-    place(C.sb, cb, yaw, rollB, (x1 - x0) * K2 * s, (y1 - y0) * K2 * s, mir);
+    place(C.sb, cb, yaw, rollB, (x1 - x0) * K2 * s * (1 - (C.br || 0) * .5), (y1 - y0) * K2 * s * (1 + (C.br || 0)), mir);
     C.sb.material.map !== SPR.body[key] && (C.sb.material.map = SPR.body[key], C.sb.material.emissiveMap = SPR.body[key], C.sb.material.needsUpdate = true);
     C.sb.userData.sprN.uniforms.map.value = SPR.body[key];
     // head

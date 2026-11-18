@@ -1,14 +1,31 @@
 // main.js: frame(t) -> JPEG data URL (1080x1920): shots + transitions + one-word captions
 import * as E from './engine.js';
 import * as Wd from './world.js';
-import { makeCast, makeChar, pose, CHARS, loadSprites, updateSprites, SPRG } from './chars.js';
+import { makeCast, makeChar, pose, CHARS, loadSprites, updateSprites, SPRG, ANIM } from './chars.js';
 import { SHOTS, initShots, runShot, COVER, BENCH } from './shots.js';
 const timing = await (await fetch('timing.json')).json(), project = await (await fetch('project.json')).json();
 await E.fontsReady; await loadSprites(); E.scene.add(SPRG); makeCast(project.cast); initShots(timing); Wd.redrawSign();
 const out = document.getElementById('out'), X = out.getContext('2d');
 const BL = document.createElement('canvas'); BL.width = 270; BL.height = 480; const BX = BL.getContext('2d');
 function bloom(a = .24) { BX.filter = 'brightness(.9) contrast(3.4) saturate(1.3) blur(7px)'; BX.drawImage(out, 0, 0, 270, 480); BX.filter = 'none'; X.save(); X.globalCompositeOperation = 'screen'; X.globalAlpha = a; X.drawImage(BL, 0, 0, 1080, 1920); X.restore(); }
-function draw(sh, t, alpha = 1, mb = 0, dir = 1) { E.POST.dof = 0; E.POST.mblur = [mb * 90 * dir, mb * 14]; E.POST.leakPh = t * .6; runShot(sh, t); updateSprites(E.camera); if (window.NOFACE) Object.values(CHARS).forEach(C => { C.face.visible = false; C.sweat.visible = false; for (const L of [C.aL, C.aR, C.lL, C.lR]) { L.up.visible = false; L.fo.visible = false; } }); Wd.updateSky(t); E.render(); X.globalAlpha = alpha; X.drawImage(E.glc, 0, 0); X.globalAlpha = 1; }
+// v4 auto-cinematics (no effect on story/staging): shallow focus on the nearest character, shock speed lines + zoom punch
+const _hv = new E.THREE.Vector3(), _cv = new E.THREE.Vector3();
+function nearestHead() { let best = null; E.camera.getWorldPosition(_cv); const fw = new E.THREE.Vector3(0, 0, -1).transformDirection(E.camera.matrixWorld);
+  for (const C of Object.values(CHARS)) { let r = C.g, vis = true; while (r) { if (!r.visible) { vis = false; break; } r = r.parent; } if (!vis || !C.g.parent) continue;
+    C.head.getWorldPosition(_hv); const d = _hv.clone().sub(_cv), z = d.dot(fw); if (z < .3) continue; const sp = _hv.clone().project(E.camera); if (Math.abs(sp.x) > .85 || sp.y > .95 || sp.y < -.9) continue;
+    if (!best || z < best.z) best = { C, z, sx: (sp.x + 1) * 540, sy: (1 - sp.y) * 960 }; } return best; }
+let FX = null;
+function draw(sh, t, alpha = 1, mb = 0, dir = 1) { E.POST.dof = 0; E.POST.mblur = [mb * 90 * dir, mb * 14]; E.POST.leakPh = t * .6; ANIM.t = t; runShot(sh, t); updateSprites(E.camera);
+  const nh = nearestHead(); if (E.POST.dof === 0 && nh && nh.z < 9 && !window.NOAUTO) { E.POST.focus = nh.z * .97; E.POST.dof = .7 * (1 - E.sstep(3.5, 9, nh.z)); }
+  const lt = t - sh.t0, shock = nh && nh.C.f2 && /shocked|scared/.test(nh.C.f2[0]) && nh.C.view !== 'B' && nh.z < 7 && lt < .75 && !window.NOAUTO; FX = shock ? { lt, x: nh.sx, y: nh.sy } : (alpha === 1 ? null : FX); if (window.NOFACE) Object.values(CHARS).forEach(C => { C.face.visible = false; C.sweat.visible = false; for (const L of [C.aL, C.aR, C.lL, C.lR]) { L.up.visible = false; L.fo.visible = false; } }); Wd.updateSky(t); E.render(); X.globalAlpha = alpha;
+  if (FX && FX.lt < .32) { const k = 1 + .07 * (1 - E.eOut(FX.lt / .32)); X.drawImage(E.glc, FX.x * (1 - k), FX.y * (1 - k), 1080 * k, 1920 * k); } else X.drawImage(E.glc, 0, 0);
+  X.globalAlpha = 1; if (FX) speedLines(FX); }
+function speedLines(f) { // manga focus lines toward the shocked face, fading out
+  const a = (1 - E.sstep(.35, .75, f.lt)) * E.sstep(0, .06, f.lt); if (a <= 0) return; const r = E.rng(Math.floor(f.lt * 12) + 7);
+  X.save(); X.globalAlpha = a * .85; X.fillStyle = '#ffffff'; X.strokeStyle = 'rgba(20,16,24,.55)'; X.lineWidth = 2;
+  for (let i = 0; i < 46; i++) { const an = (i / 46) * Math.PI * 2 + r() * .12, w = .006 + r() * .012, R0 = 330 + r() * 160, R1 = 1700;
+    X.beginPath(); X.moveTo(f.x + Math.cos(an) * R0, f.y + Math.sin(an) * R0); X.lineTo(f.x + Math.cos(an - w) * R1, f.y + Math.sin(an - w) * R1); X.lineTo(f.x + Math.cos(an + w) * R1, f.y + Math.sin(an + w) * R1); X.closePath(); X.fill(); X.stroke(); }
+  X.restore(); }
 function sweep(k) { // soft warm light sweep across the frame (k 0..1)
   X.save(); X.globalCompositeOperation = 'screen'; const x = -700 + k * 2500; const g = X.createLinearGradient(x - 500, 0, x + 500, 400);
   g.addColorStop(0, 'rgba(255,240,215,0)'); g.addColorStop(.5, `rgba(255,240,215,${.75 * Math.sin(Math.PI * k)})`); g.addColorStop(1, 'rgba(255,240,215,0)'); X.fillStyle = g; X.fillRect(0, 0, 1080, 1920); X.restore(); }
