@@ -149,7 +149,12 @@ export function makeChar(spec) { // v2: stick figure: white ball head, bean tors
   const C = { g, spec, hips, torso, head, hc, face, faceM, hat, sweat, aL: arm(-1), aR: arm(1), lL: leg(-1), lR: leg(1), HR, props: group({ parent: torso }) };
   CHARS[spec.id] = C; return C;
 }
-export const LEG = .42, AL = .28, LL = .225; // v4.5 chibi sheet: 2.5 heads tall -> legs ~half a head, arms end at the hips (was .56/.34/.31) // v3: longer but hair-thin limbs // v2: short chubby figures like the ref (about 3 heads tall)
+// v4.9 body styles (set window.CHAR_STYLE before main.js loads, or project.json -> style): 'pirate' (default, from the pirate refs: bean body
+//   ~1.25 heads, thin stick legs ~1 head, arms to the hips) | 'chibi' (2.5-head sheet: pear body, legs half a head)
+export const STYLE = (globalThis.CHAR_STYLE || 'pirate');
+const ST_ = { pirate: { LEG: .6, AL: .34, LL: .32, body: { w: .78, h: 1.12, top: .92, bottom: 1.0, head: 1.0 }, sh: [.19, .74], rest: .18 },
+  chibi: { LEG: .42, AL: .28, LL: .225, body: { w: .86, h: .9, top: .7, bottom: 1.1, head: 1.14 }, sh: [.17, .7], rest: .32 } }[STYLE] || {};
+export const LEG = ST_.LEG ?? .6, AL = ST_.AL ?? .34, LL = ST_.LL ?? .32; // v3: longer but hair-thin limbs // v2: short chubby figures like the ref (about 3 heads tall)
 // ---- IK ----
 const _v = new THREE.Vector3(), _q = new THREE.Quaternion(), DOWN = new THREE.Vector3(0, -1, 0);
 function ik(limb, T, L1, L2, pole) {
@@ -214,8 +219,8 @@ export function pose(C, P = {}) {
     if (ta && !w) { const gx = noise1(t * 2.4 + sd * 11), gy = Math.max(0, noise1(t * 1.9 + sd * 13)); gR = [.03 * gx, .16 * gy, .12 * gy]; gL = [-.02 * gx, .05 * Math.max(0, noise1(t * 1.6 + sd * 17)), .04]; }
   } else C.br = 0;
   const runA_ = w && w.run && !P.hL && !P.hR; if (runA_) { const a = Math.sin(w.ph) * w.run; P = { ...P, hL: [-.26, .42 + .14 * Math.max(0, -a), -.32 * a + .08], hR: [.26, .42 + .14 * Math.max(0, a), .32 * a + .08], pL: [-1, -.4, -.9], pR: [1, -.4, -.9] }; }
-  const hL = P.hL ? (P.hL.isVector3 ? P.hL.clone() : new THREE.Vector3(...P.hL)) : new THREE.Vector3(-.31, .32 + Math.abs(sw) * .25, .05 - sw); // v4.6: rest hands hang at the hips, close to the body
-  const hR = P.hR ? (P.hR.isVector3 ? P.hR.clone() : new THREE.Vector3(...P.hR)) : new THREE.Vector3(.31, .32 + Math.abs(sw) * .25, .05 + sw);
+  const hL = P.hL ? (P.hL.isVector3 ? P.hL.clone() : new THREE.Vector3(...P.hL)) : new THREE.Vector3(-.31, (ST_.rest ?? .2) + Math.abs(sw) * .25, .05 - sw); // v4.6: rest hands hang at the hips, close to the body
+  const hR = P.hR ? (P.hR.isVector3 ? P.hR.clone() : new THREE.Vector3(...P.hR)) : new THREE.Vector3(.31, (ST_.rest ?? .2) + Math.abs(sw) * .25, .05 + sw);
   if (live) { const k = (P.hR || P.hL) ? .45 : 1; hR.x += gR[0] * k; hR.y += gR[1] * k; hR.z += gR[2] * k; hL.x += gL[0] * k; hL.y += gL[1] * k; hL.z += gL[2] * k;
     const dr = .012 * A; hR.y += dr * Math.sin(t * 2.3 + sd + .6); hL.y += dr * Math.sin(t * 2.3 + sd + 1.1); }
   C.handL = ik(C.aL, hL, AL, AL, P.pL || [-.6, -.3, -.7]); C.handR = ik(C.aR, hR, AL, AL, P.pR || [.6, -.3, -.7]);
@@ -392,7 +397,7 @@ export async function loadSprites() {
 const sprNVS = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }`;
 const sprNFS = `uniform sampler2D map; varying vec2 vUv; void main(){ if (texture2D(map, vUv).a < .5) discard; gl_FragColor = vec4(.5, .5, 1., .4); }`;
 // v4.7 chibi body: the costume sprite is warped into an inverted pear (narrow shoulders, full rounded bottom), keeping its art
-export const BODY = { w: .86, h: .9, top: .7, bottom: 1.1, head: 1.14 };
+export const BODY = ST_.body || { w: .78, h: 1.12, top: .92, bottom: 1.0, head: 1.0 };
 function pearGeo() { const g = new THREE.PlaneGeometry(1, 1, 12, 16), P = g.attributes.position;
   for (let i = 0; i < P.count; i++) { const v = P.getY(i) + .5, sstep_ = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
     const prof = BODY.bottom + (BODY.top - BODY.bottom) * sstep_(.22, 1, v), tuck = 1 - .14 * (1 - sstep_(0, .16, v)); P.setX(i, P.getX(i) * prof * tuck); }
@@ -432,7 +437,7 @@ export function makeChar2D(spec) {
   const inArm = (o) => { for (let q = o.parent; q && q !== C.torso; q = q.parent) if (q === C.aL.up || q === C.aL.fo || q === C.aR.up || q === C.aR.fo) return true; return false; };
   C.torso.traverse(o => { if (o.isMesh && !inArm(o) && o.parent !== C.sweat && o.parent !== C.props) {
     if (o === C.face) { o.visible = false; return; } o.material = SHADOWONLY; o.userData.noInk = true; o.castShadow = true; } });
-  for (const L of [C.aL, C.aR]) { L.S.x = Math.sign(L.S.x) * (spec.shoulderX ?? .17); L.S.y = spec.shoulderY ?? .7; } // v4.6 sheet: arms start right under the head
+  for (const L of [C.aL, C.aR]) { L.S.x = Math.sign(L.S.x) * (spec.shoulderX ?? (ST_.sh || [.19])[0]); L.S.y = spec.shoulderY ?? (ST_.sh || [0, .74])[1]; } // v4.6 sheet: arms start right under the head
   C.hc.children.forEach(o => { if (o.isMesh && o.material === SHADOWONLY) o.scale.setScalar(.68); });
   const F = SPR.meta[spec.sprite + '-F']; C.cx = F.ball[0];
   // v3.1: the Flow head floated above the collar so the neck hole showed -> sink the ball into the collar (ball bottom IN px below the body top)
