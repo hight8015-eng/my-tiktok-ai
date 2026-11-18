@@ -118,11 +118,15 @@ export function makeChar(spec) { // v2: stick figure: white ball head, bean tors
     else { hand = group({ p: [0, -AL - .02, 0], parent: fo }); mesh(new THREE.SphereGeometry(.058, 16, 12), gloveM, { s: [1, 1.12, .78], parent: hand });
       mesh(new THREE.SphereGeometry(.022, 10, 8), gloveM, { p: [s * -.045, .018, .02], s: [1, 1.5, 1], r: [0, 0, s * 35], parent: hand });
       mesh(new THREE.CylinderGeometry(.04, .036, .03, 14), gloveM, { p: [0, .052, 0], parent: hand }); }
-    return { up, fo, hand, S: new THREE.Vector3(s * .22, .72, 0) }; };
+    let open = null; if (!CL) { open = group({ p: [0, -AL - .02, 0], parent: fo }); open.visible = false; // v4.3 open hand: palm + 4 spread fingers + thumb
+      mesh(new THREE.SphereGeometry(.05, 14, 10), gloveM, { s: [1.05, 1, .6], parent: open }); mesh(new THREE.CylinderGeometry(.04, .036, .03, 14), gloveM, { p: [0, .05, 0], parent: open });
+      for (let i = 0; i < 4; i++) { const a = (-.5 + i / 3) * 1.05; mesh(new THREE.CapsuleGeometry(.014, .05, 3, 8), gloveM, { p: [Math.sin(a) * .06, -.055 - Math.cos(a) * .02, 0], r: [0, 0, a * 57], parent: open }); }
+      mesh(new THREE.CapsuleGeometry(.015, .04, 3, 8), gloveM, { p: [s * -.06, -.005, .01], r: [0, 0, s * 70], parent: open }); }
+    return { up, fo, hand, open, S: new THREE.Vector3(s * .22, .72, 0) }; };
   const leg = (s) => { const up = group({ parent: hips }), fo = group({ parent: hips }); tube(LL, rL, up); tube(LL, rL * .92, fo);
     let shoe; if (CL) shoe = mesh(new THREE.SphereGeometry(.045, 12, 8), inkM, { p: [0, -LL, .04], s: [.85, .55, 1.6], parent: fo });
-    else { shoe = group({ p: [0, -LL - .005, .045], parent: fo }); mesh(new THREE.SphereGeometry(.07, 16, 10), shoeM, { s: [.95, .62, 1.55], parent: shoe });
-      mesh(new THREE.CylinderGeometry(.068, .068, .02, 16), soleM, { p: [0, -.036, 0], s: [.95, 1, 1.55], parent: shoe }); }
+    else { shoe = group({ p: [0, -LL - .005, .045], parent: fo }); mesh(new THREE.SphereGeometry(.07, 16, 10), shoeM, { p: [0, 0, .025], s: [.95, .62, 1.85], parent: shoe });
+      mesh(new THREE.CylinderGeometry(.068, .068, .02, 16), soleM, { p: [0, -.036, .025], s: [.95, 1, 1.85], parent: shoe }); }
     return { up, fo, shoe, S: new THREE.Vector3(s * .11, 0, 0) }; };
   const sweat = group({ parent: hc }); sweat.visible = false; { const dm = toon('#bfe6ff', { grad: GRAD_FLAT, ol: .006 }); mesh(new THREE.SphereGeometry(.06, 12, 8), dm, { parent: sweat }); mesh(new THREE.ConeGeometry(.052, .1, 12), dm, { p: [0, .07, 0], parent: sweat }); sweat.position.set(HR * .8, HR * .45, HR * .4); }
   const C = { g, spec, hips, torso, head, hc, face, faceM, hat, sweat, aL: arm(-1), aR: arm(1), lL: leg(-1), lR: leg(1), HR, props: group({ parent: torso }) };
@@ -165,15 +169,18 @@ const seedOf = (C) => C._sd ?? (C._sd = [...(C.spec.id || 'x')].reduce((a, c) =>
 export function pose(C, P = {}) {
   const g = C.g, s = C.spec.s; if (P.p) g.position.set(...P.p); g.rotation.set(P.rx ? P.rx * D2R : 0, (P.ry || 0) * D2R, P.rz ? P.rz * D2R : 0);
   g.visible = P.visible ?? true;
-  const w = P.walk; let hy = P.sit ? .04 + (P.hipY || 0) : LEG + (P.hipY || 0); if (w) hy += (.5 - .5 * Math.cos(2 * w.ph)) * .035 - .02; // v4.1: two bobs per cycle, a touch of knee bend
+  const w = P.walk; let hy = P.sit ? .04 + (P.hipY || 0) : LEG + (P.hipY || 0); if (w) hy += w.run ? (-.09 + (.5 - .5 * Math.cos(2 * w.ph + 1.2)) * .06) * w.run : (.5 - .5 * Math.cos(2 * w.ph)) * .035 - .02; // v4.1: two bobs per cycle, a touch of knee bend (run: deep crouch + flight bob)
   C.hips.position.set(0, hy, 0); C.hips.rotation.set(0, 0, 0);
   C.torso.rotation.set((P.lean || 0) * D2R, (P.twist || 0) * D2R, (P.side || 0) * D2R, 'YXZ');
   const hd = P.head || [0, 0, 0]; C.head.rotation.set(hd[0] * D2R, hd[1] * D2R, hd[2] * D2R, 'YXZ');
   if (w && !P.still) { const ph = w.ph, k = Math.min(1, (w.stride ?? .22) / .22); // hips twist with the stride, body rocks side to side, head stays steady and lags the bob
-    C.torso.rotation.y += Math.sin(ph) * .14 * k; C.torso.rotation.z += Math.sin(ph) * .045 * k; C.torso.rotation.x += .06 * k;
+    C.torso.rotation.y += Math.sin(ph) * (w.run ? .2 : .14) * k; C.torso.rotation.z += Math.sin(ph) * .045 * k; C.torso.rotation.x += (w.run ? .24 * w.run : .06 * k);
     C.head.rotation.y -= Math.sin(ph) * .1 * k; C.head.rotation.x += Math.sin(2 * ph - .7) * .035 * k; }
   let fL = P.fL, fR = P.fR;
   if (!fL) { if (P.sit) { const sh = (P.seat ?? .45) / s; fL = [-.14, -sh + .03, .5]; fR = [.14, -sh + .03, .5]; }
+    else if (w && w.run) { const st = (w.stride ?? .3) * w.run, ft = (a) => { const sw = Math.cos(a); // v4.3 run (model sheet 11-20): bent knees, back foot kicks high, front foot reaches
+        return [-hy + .03 + Math.pow(Math.max(0, sw), 1.4) * .3 * w.run + Math.max(0, -sw) * Math.max(0, Math.sin(a)) * .04, Math.sin(a) * st - Math.max(0, sw) * .08 * w.run]; };
+      const L_ = ft(w.ph), R_ = ft(w.ph + Math.PI); fL = [-.11, L_[0], L_[1]]; fR = [.11, R_[0], R_[1]]; }
     else if (w) { const st = w.stride ?? .22, lift = (x) => { const v = Math.max(0, x); return v * v * .13; }; // smooth foot arcs (no hard corners at plant/lift)
       fL = [-.12, -hy + .03 + lift(Math.sin(w.ph)), Math.sin(w.ph + Math.PI / 2) * st]; fR = [.12, -hy + .03 + lift(-Math.sin(w.ph)), -Math.sin(w.ph + Math.PI / 2) * st]; }
     else { fL = [-.13, -hy + .03, .03]; fR = [.13, -hy + .03, .03]; } }
@@ -189,6 +196,7 @@ export function pose(C, P = {}) {
     C.head.rotation.x += hd2[0]; C.head.rotation.y += hd2[1]; C.head.rotation.z += hd2[2];
     if (ta && !w) { const gx = noise1(t * 2.4 + sd * 11), gy = Math.max(0, noise1(t * 1.9 + sd * 13)); gR = [.03 * gx, .16 * gy, .12 * gy]; gL = [-.02 * gx, .05 * Math.max(0, noise1(t * 1.6 + sd * 17)), .04]; }
   } else C.br = 0;
+  const runA_ = w && w.run && !P.hL && !P.hR; if (runA_) { const a = Math.sin(w.ph) * w.run; P = { ...P, hL: [-.26, .42 + .14 * Math.max(0, -a), -.32 * a + .08], hR: [.26, .42 + .14 * Math.max(0, a), .32 * a + .08], pL: [-1, -.4, -.9], pR: [1, -.4, -.9] }; }
   const hL = P.hL ? (P.hL.isVector3 ? P.hL.clone() : new THREE.Vector3(...P.hL)) : new THREE.Vector3(-.36, .2 + Math.abs(sw) * .25, .06 - sw);
   const hR = P.hR ? (P.hR.isVector3 ? P.hR.clone() : new THREE.Vector3(...P.hR)) : new THREE.Vector3(.36, .2 + Math.abs(sw) * .25, .06 + sw);
   if (live) { const k = (P.hR || P.hL) ? .45 : 1; hR.x += gR[0] * k; hR.y += gR[1] * k; hR.z += gR[2] * k; hL.x += gL[0] * k; hL.y += gL[1] * k; hL.z += gL[2] * k;
@@ -196,6 +204,7 @@ export function pose(C, P = {}) {
   C.handL = ik(C.aL, hL, AL, AL, P.pL || [-.6, -.3, -.7]); C.handR = ik(C.aR, hR, AL, AL, P.pR || [.6, -.3, -.7]);
   if (C.is2D) C.f2 = [P.ex || 'neutral', !!P.blink, P.talk || 0, P.look];
   else { const tex = faceTexFor(C.spec, P.ex || 'neutral', !!P.blink, P.talk || 0, P.look); if (C.faceM.map !== tex) { C.faceM.map = tex; C.faceM.needsUpdate = true; } }
+  for (const [L_, k] of [[C.aL, 'L'], [C.aR, 'R']]) if (L_.open) { const o = P.open === true || P.open === k; L_.open.visible = o; L_.hand.visible = !o; }
   C.sweat.visible = !!P.sweat; C.pop = P.pop || 0; C.sq = (P.squash || 0) + (w && w.heavy ? -.09 * w.heavy * Math.pow(Math.max(0, Math.cos(2 * w.ph)), 6) : 0); C.smear = P.smear || null;
   if (ANIM.rec !== undefined) recPose(C, fL, fR, hL, hR, P);
   if (P.gloom > 0 && (P.visible ?? true)) OVL.push({ kind: 'gloom', C, k: P.gloom });
@@ -214,7 +223,7 @@ function recPose(C, fL, fR, hL, hR, P) {
   C._acc.vis = P.visible ?? true;
 }
 export function applySmooth(C) {
-  const A = C._acc; C._acc = null; if (!A || A.w <= 1.01 * ANIM.wFinal || !C.g.visible) { C._roots = []; return; } const v = A.v.map(x => x / A.w), P = A.P;
+  const A = C._acc; C._acc = null; if (!A || A.w <= 1.01 * ANIM.wFinal || !C.g.visible || A.P.fast) { C._roots = []; return; } const v = A.v.map(x => x / A.w), P = A.P; // P.fast: snappy actions skip smoothing (hands stay on props)
   C.head.rotation.set(v[12], v[13], v[14], 'YXZ'); C.torso.rotation.set(v[15], v[16], v[17], 'YXZ'); C.hips.position.y = v[18];
   const R = C._roots || []; C._roots = [];
   if (R.length >= 4 && !P.still && ANIM.on) { // v4.1 momentum: lean into the travel direction, head + body lag on starts/stops (follow-through)
@@ -246,7 +255,7 @@ export function actPunch(lt, at, { side = 1 } = {}) {
   const arm = mixA(mixA([.36, .2, .06], [.32, .62, -.32], wind), [.12, .74, .95], hit);
   const o = { twist: (-24 * wind + 30 * hit) * side, lean: -8 * wind + 14 * hit, squash: -.08 * wind + .1 * hit * (1 - sm(at, at + .1, lt)), hipY: -.08 * (wind + hit), pR: [1, -.4, -.2], pL: [-1, -.3, 0] };
   if (side > 0) { o.hR = arm; o.hL = [-.18, .62, .4]; } else { o.hL = [-arm[0], arm[1], arm[2]]; o.hR = [.18, .62, .4]; o.pL = [-1, -.4, -.2]; o.pR = [1, -.3, 0]; }
-  o.smear = [side > 0 ? 1 : 0]; return o;
+  o.smear = [side > 0 ? 1 : 0]; o.fast = true; return o;
 }
 // got hit at `at`: knocked back along local -z by `dist`, flails, recovers
 export function actHit(lt, at, { dist = .6, side = 0 } = {}) {
@@ -259,12 +268,29 @@ export function actPush(lt, { t0 = 0, rate = 1.6 } = {}) {
   const k = sm(t0, t0 + .35, lt), ph = Math.max(0, lt - t0) * rate * Math.PI * 2;
   return { lean: 30 * k, hipY: -.06 * k, hL: [-.2, .62, .62 * k + .06], hR: [.2, .62, .62 * k + .06], pL: [-1, -.3, -.3], pR: [1, -.3, -.3], walk: k > .5 ? { ph, stride: .13 } : undefined, squash: -.05 * k + .03 * Math.sin(ph * 2) * k, ex: 'angry', sweat: k > .9 };
 }
+// cheering leap (model sheet 41-44): crouch with arms back -> launch with open hands up -> tucked apex -> squat landing
+export function actCheer(lt, { t0 = .35, dur = .55, h = .5, at = [0, 0, 0] } = {}) {
+  const J = actJump(lt, { t0, dur, h, from: at, to: at }), u = clamp((lt - t0) / dur), air = lt > t0 && lt < t0 + dur;
+  if (air) { J.hL = [-.48, 1.18, .12]; J.hR = [.48, 1.18, .12]; J.open = true; J.ex = 'happy'; J.fL = [-.16, -.35 + .12 * Math.sin(u * Math.PI), .1]; J.fR = [.16, -.42 + .1 * Math.sin(u * Math.PI), -.12]; }
+  else if (lt < t0) { J.ex = 'confident'; } else J.ex = J.landed < .5 ? 'grinTeeth' : 'happy';
+  return J;
+}
+// two-handed swing (model sheet 45-46): wind the prop up over the shoulder, chop down at `at`. Returns hands + o.prop {c, d} in torso space
+export function actAxe(lt, at, { side = 1 } = {}) {
+  const up = sm(at - .55, at - .12, lt) * (1 - sm(at - .06, at + .02, lt)), down = sm(at - .06, at + .02, lt) * (1 - sm(at + .35, at + .9, lt));
+  const c = mixA(mixA([.04 * side, .5, .4], [.1 * side, .98, .1], up), [0, .44, .52], down), d = mixA(mixA([0, .55, .83], [.1 * side, .5, -.86], up), [0, -.45, .9], down); // stays within arm reach
+  const n = Math.hypot(...d), D = d.map(v => v / n), hR = c.map((v, i) => v - D[i] * .02), hL = c.map((v, i) => v - D[i] * .14);
+  return { hL, hR, pL: [-1, -.3, -.4], pR: [1, -.3, -.4], lean: -10 * up + 16 * down, twist: (14 * up - 8 * down) * side, hipY: -.05 - .06 * down, squash: .06 * up - .1 * down * (1 - sm(at, at + .15, lt)), prop: { c, d: D }, smear: down > .2 && down < .95 ? [1] : null, fast: true };
+}
+// put a prop in the hands: its local +y follows prop.d (handle direction), origin at prop.c (both torso space)
+export function placeProp(obj, C, prop) { C.g.updateMatrixWorld(true); obj.visible = true; obj.position.copy(C.torso.localToWorld(new THREE.Vector3(...prop.c)));
+  const q = new THREE.Quaternion(); C.torso.getWorldQuaternion(q); const dw = new THREE.Vector3(...prop.d).applyQuaternion(q).normalize(); obj.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dw); }
 // fast repeated work (hammering, chopping, typing): `rate` strikes per second, returns pose params + strike phase info
 //   o.strike = seconds since the last impact (use for sparks / sfx), o.k = 0..1 swing
 export function actHammer(lt, { rate = 3, side = 1 } = {}) {
   const ph = lt * rate, f = ph % 1, up = f < .55 ? sm(0, .55, f) : 1 - sm(.55, .7, f), k = up; // slow raise, snap down
   const arm = mixA([.14, .42, .66], [.28, 1.05, .42], k), o = { lean: 10 - 8 * k, hipY: -.06, squash: -.06 * (1 - k) * (f > .7 && f < .8 ? 1 : 0), twist: -10 * k * side,
-    head: [8 - 10 * k, 0, 0], ex: f > .68 && f < .9 ? 'angry' : 'nervous', strike: f >= .7 ? (f - .7) / rate : -1 };
+    head: [8 - 10 * k, 0, 0], ex: f > .68 && f < .9 ? 'angry' : 'nervous', strike: f >= .7 ? (f - .7) / rate : -1, fast: true };
   if (side > 0) { o.hR = arm; o.pR = [1, -.4, -.3]; o.hL = [-.12, .42, .6]; o.pL = [-1, -.3, 0]; } else { o.hL = [-arm[0], arm[1], arm[2]]; o.pL = [-1, -.4, -.3]; o.hR = [.12, .42, .6]; o.pR = [1, -.3, 0]; }
   return o;
 }
