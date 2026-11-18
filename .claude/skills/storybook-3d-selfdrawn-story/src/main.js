@@ -64,13 +64,22 @@ function overlays(t, alpha) { // gloom lines + sparkles requested by poses/shots
         else { X.fillStyle = O.col || '#8f86a0'; X.strokeStyle = '#1c1420'; X.lineWidth = Math.max(2, sz * .1); X.beginPath(); const m = 5 + (i % 3), rj = E.rng(i * 31 + 5); for (let j = 0; j < m; j++) { const a = j / m * 6.283, rr = sz * (.55 + .45 * rj()); X.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } X.closePath(); X.fill(); X.stroke();
           X.fillStyle = 'rgba(255,255,255,.18)'; X.beginPath(); X.arc(-sz * .15, -sz * .15, sz * .3, 0, 7); X.fill(); }
         X.restore(); } }
-    else if (o.kind === 'smoke') { const O = o.o, r_ = E.rng((O.seed || 1) * 131), n = O.n || 9, age = o.age, life = O.life ?? 2.6, base = scr(o.p); if (!base) { X.restore(); continue; }
-      const d = E.camera.position.distanceTo(o.p), S0 = (O.size || 1) * 900 / Math.max(.5, d), grow = E.eOut(Math.min(1, age / .55)), shrink = 1 - E.sstep(life * .45, life, age), col = O.col || '#e9dcc0';
-      const puffs = []; for (let i = 0; i < n; i++) { const a = r_() * Math.PI * 2, rr = r_(); puffs.push([Math.cos(a) * rr * .9, -Math.abs(Math.sin(a)) * rr * .6 - (O.rise ?? .25) * age, .35 + .4 * r_()]); }
-      puffs.sort((A, B) => A[1] - B[1]); X.globalAlpha = alpha;
-      const at = ([px, py, pr]) => [base[0] + px * S0 * grow, base[1] + py * S0 * (.6 + .6 * grow), S0 * pr * (.35 + .85 * grow) * shrink];
-      for (const pf of puffs) { const [cx, cy, R] = at(pf); if (R < 1) continue; X.fillStyle = '#1c1420'; X.beginPath(); X.arc(cx, cy, R + 6, 0, 7); X.fill(); }
-      for (const pf of puffs) { const [cx, cy, R] = at(pf); if (R < 1) continue; X.fillStyle = col; X.beginPath(); X.arc(cx, cy, R, 0, 7); X.fill(); X.fillStyle = 'rgba(70,50,90,.28)'; X.beginPath(); X.arc(cx + R * .22, cy + R * .25, R * .78, 0, 7); X.fill(); X.fillStyle = col; X.beginPath(); X.arc(cx - R * .12, cy - R * .14, R * .7, 0, 7); X.fill(); } }
+    else if (o.kind === 'smoke') { // v4.1: each puff drifts outward + up on its own path, grows soft, then fades out (alpha), outline thins away
+      const O = o.o, r_ = E.rng((O.seed || 1) * 131), n = O.n || 22, age = o.age, life = O.life ?? 3.2, spread = O.spread ?? 1.6;
+      const d0 = E.camera.position.distanceTo(o.p), col = O.col || '#e9dcc0', sh = O.shade || 'rgba(70,50,90,.26)';
+      const P = []; for (let i = 0; i < n; i++) { const th = r_() * Math.PI * 2, v = .35 + .65 * r_(), up = .25 + .6 * r_(), r0 = (.18 + .22 * r_()) * (O.size || 1), dl = r_() * .25, lf = life * (.6 + .4 * r_());
+        const a = Math.max(0, age - dl), k = 1 - Math.exp(-a * 2.4); // eased outward travel
+        const w = new E.THREE.Vector3(o.p.x + Math.cos(th) * v * spread * k * (O.size || 1), o.p.y + (up * spread * .55 * k + (O.rise ?? .35) * a) * (O.size || 1), o.p.z + Math.sin(th) * v * spread * .6 * k * (O.size || 1));
+        const q = scr(w); if (!q || a <= 0) continue; const R = r0 * (.4 + 1.6 * (1 - Math.exp(-a * 1.8))) * 1100 / Math.max(.5, E.camera.position.distanceTo(w));
+        const fade = 1 - E.sstep(lf * .35, lf, a); if (fade <= .01) continue; P.push([q[0], q[1], R, fade, w.y]); }
+      P.sort((A, B) => A[4] - B[4]);
+      for (const [x, y, R, f] of P) { X.globalAlpha = alpha * f * f * .9; X.fillStyle = '#1c1420'; X.beginPath(); X.arc(x, y, R + 5 * f, 0, 7); X.fill(); }
+      for (const [x, y, R, f] of P) { X.globalAlpha = alpha * Math.min(1, f * 1.25); X.fillStyle = col; X.beginPath(); X.arc(x, y, R, 0, 7); X.fill();
+        X.fillStyle = sh; X.beginPath(); X.arc(x + R * .2, y + R * .24, R * .8, 0, 7); X.fill(); X.fillStyle = col; X.beginPath(); X.arc(x - R * .12, y - R * .14, R * .68, 0, 7); X.fill(); }
+      // soft haze that lingers after the puffs are gone
+      const hz = E.sstep(.2, .9, age) * (1 - E.sstep(life * .5, life * 1.05, age)), b = scr(o.p);
+      if (b && hz > 0) { const Rh = Math.min(520, (O.size || 1) * spread * 1300 / Math.max(.5, d0) * (.6 + .5 * E.sstep(0, life, age))); const g = X.createRadialGradient(b[0], b[1] - Rh * .3, 0, b[0], b[1] - Rh * .3, Rh);
+        g.addColorStop(0, `rgba(233,220,192,${.22 * hz})`); g.addColorStop(.6, `rgba(233,220,192,${.1 * hz})`); g.addColorStop(1, 'rgba(233,220,192,0)'); X.globalAlpha = alpha; X.fillStyle = g; X.beginPath(); X.arc(b[0], b[1] - Rh * .3, Rh, 0, 7); X.fill(); } }
     else if (o.kind === 'spark') { const q = scr(o.p); if (!q) { X.restore(); continue; } const r = 46 * o.size * (.6 + .4 * o.k), ro = t * 1.5;
       X.translate(q[0], q[1]); X.rotate(ro * .2); X.globalCompositeOperation = 'lighter'; const g = X.createRadialGradient(0, 0, 0, 0, 0, r * 1.3); g.addColorStop(0, 'rgba(255,250,220,.9)'); g.addColorStop(1, 'rgba(255,220,140,0)'); X.fillStyle = g; X.beginPath(); X.arc(0, 0, r * 1.3, 0, 7); X.fill();
       X.fillStyle = '#fffbe8'; for (const [rr, rot] of [[r, 0], [r * .55, Math.PI / 4]]) { X.save(); X.rotate(rot); X.beginPath(); for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, d = k % 2 ? rr * .16 : rr; X.lineTo(Math.cos(a) * d, Math.sin(a) * d); } X.closePath(); X.fill(); X.restore(); } }

@@ -144,8 +144,8 @@ export const dustAt = (p, k, size = 1) => { if (k >= 0 && k <= 1) OVL.push({ kin
 // debrisAt(origin, age, o): deterministic burst of chunks ('rock') / leaves ('leaf') / embers ('spark') thrown from origin.
 //   o = { n, seed, speed, up, grav, size, col, kind, life }  (age in seconds since the burst)
 export const debrisAt = (p, age, o = {}) => { if (age >= 0 && age <= (o.life ?? 2.2)) OVL.push({ kind: 'debris', p: p.clone ? p.clone() : new THREE.Vector3(...p), age, o }); };
-// smokeAt(origin, age, o): cel-shaded puff cloud that billows out and shrinks away. o = { n, seed, size, col, rise, life }
-export const smokeAt = (p, age, o = {}) => { if (age >= 0 && age <= (o.life ?? 2.6)) OVL.push({ kind: 'smoke', p: p.clone ? p.clone() : new THREE.Vector3(...p), age, o }); };
+// smokeAt(origin, age, o): cel-shaded puffs that drift outward + up, grow soft and fade, leaving a haze. o = { n, seed, size, spread, col, rise, life }
+export const smokeAt = (p, age, o = {}) => { if (age >= 0 && age <= (o.life ?? 3.2) * 1.1) OVL.push({ kind: 'smoke', p: p.clone ? p.clone() : new THREE.Vector3(...p), age, o }); };
 // ramp(lt, at, dur, k): slow-motion window: from `at` for `dur` seconds the clock runs at speed k (e.g. .25), then normal again
 export function ramp(lt, at, dur, k = .25) { return lt < at ? lt : lt < at + dur ? at + (lt - at) * k : at + dur * k + (lt - at - dur); }
 // popAt(lt, at): squash-and-stretch head pop when an expression changes at shot time `at` (pass as P.pop)
