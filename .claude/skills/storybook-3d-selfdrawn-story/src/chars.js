@@ -131,7 +131,7 @@ export function makeChar(spec) { // v2: stick figure: white ball head, bean tors
   const CL = !!spec.classic, rA = CL ? .007 : (spec.limbW || ST_.limbW || 1) * .018, rL = CL ? .008 : (spec.limbW || ST_.limbW || 1) * .022;
   // v4.8 hybrid: ink dot hands + ink feet (pirate refs); spec.whiteHands = bare white hands, spec.glove / spec.shoe dress them
   const W_ = spec.whiteHands, skin = spec.glove || (W_ ? spec.skin || '#f7f2e8' : '#231a28'), gloveM = W_ || spec.glove ? toon(skin, { grad: GRAD_FLAT, ol: OL * .8, emissive: skin, ei: .42 }) : inkM, shoeM = spec.shoe ? toon(spec.shoe, { grad: GRAD_2, ol: OL * .8 }) : W_ ? toon(skin, { grad: GRAD_2, ol: OL * .8, emissive: skin, ei: .42 }) : inkM, soleM = toon(spec.sole || '#e9e1d4', { grad: GRAD_FLAT, ol: OL * .6 }); // v4.5 default: bare hands + plain oval feet (spec.glove / spec.shoe / spec.cuff / spec.sole to dress them)
-  const arm = (s) => { const up = group({ parent: torso }), fo = group({ parent: torso }); tube(AL, rA, up); tube(AL, rA * .9, fo);
+  const arm = (s) => { const up = group({ parent: torso }), fo = group({ parent: torso }); tube(AL, rA, up); tube(AL, rA, fo); // v4.19 even-width arms (no taper)
     let hand; if (CL) hand = mesh(new THREE.SphereGeometry(.032, 12, 10), inkM, { p: [0, -AL, 0], parent: fo });
     else { hand = group({ p: [0, -AL - .02, 0], parent: fo }); mesh(new THREE.SphereGeometry(W_ || spec.glove ? .058 : (ST_.handR || .042), 16, 12), gloveM, { s: W_ || spec.glove ? [1, 1.12, .78] : [1, 1, 1], parent: hand });
       if (W_ || spec.glove) mesh(new THREE.SphereGeometry(.022, 10, 8), gloveM, { p: [s * -.045, .018, .02], s: [1, 1.5, 1], r: [0, 0, s * 35], parent: hand });
@@ -141,9 +141,9 @@ export function makeChar(spec) { // v2: stick figure: white ball head, bean tors
       for (let i = 0; i < 4; i++) { const a = (-.5 + i / 3) * 1.05; mesh(new THREE.CapsuleGeometry(.014, .05, 3, 8), gloveM, { p: [Math.sin(a) * .06, -.055 - Math.cos(a) * .02, 0], r: [0, 0, a * 57], parent: open }); }
       mesh(new THREE.CapsuleGeometry(.015, .04, 3, 8), gloveM, { p: [s * -.06, -.005, .01], r: [0, 0, s * 70], parent: open }); }
     return { up, fo, hand, open, S: new THREE.Vector3(s * .22, .72, 0) }; };
-  const leg = (s) => { const up = group({ parent: hips }), fo = group({ parent: hips }); tube(LL, rL, up); tube(LL, rL * .92, fo);
+  const leg = (s) => { const up = group({ parent: hips }), fo = group({ parent: hips }); tube(LL, rL, up); tube(LL, rL, fo); // v4.19 even-width legs: a tapered shin read as a pointy stake
     let shoe; if (CL) shoe = mesh(new THREE.SphereGeometry(.045, 12, 8), inkM, { p: [0, -LL, .04], s: [.85, .55, 1.6], parent: fo });
-    else { shoe = group({ p: [0, -LL - .005, .045], parent: fo }); shoe.scale.setScalar(ST_.footK || 1); mesh(new THREE.SphereGeometry(.07, 16, 10), shoeM, { p: [0, 0, .025], s: [.95, .62, 1.85], parent: shoe });
+    else { shoe = group({ p: [0, -LL - .005, .045], parent: fo }); shoe.scale.setScalar(ST_.footK || 1); mesh(new THREE.SphereGeometry(.07, 16, 10), shoeM, { p: [0, .028, .03], s: [1.12, .72, 1.6], parent: shoe }); // v4.19 rounder shoe that reads as an oval from the front
       if (spec.sole || spec.shoe) mesh(new THREE.CylinderGeometry(.068, .068, .02, 16), soleM, { p: [0, -.036, .025], s: [.95, 1, 1.85], parent: shoe }); }
     return { up, fo, shoe, S: new THREE.Vector3(s * .11, 0, 0) }; };
   const sweat = group({ parent: hc }); sweat.visible = false; { const dm = toon('#bfe6ff', { grad: GRAD_FLAT, ol: .006 }); mesh(new THREE.SphereGeometry(.06, 12, 8), dm, { parent: sweat }); mesh(new THREE.ConeGeometry(.052, .1, 12), dm, { p: [0, .07, 0], parent: sweat }); sweat.position.set(HR * .8, HR * .45, HR * .4); }
@@ -155,7 +155,7 @@ export function makeChar(spec) { // v2: stick figure: white ball head, bean tors
 // v4.9 body styles (set window.CHAR_STYLE before main.js loads, or project.json -> style): 'pirate' (default, from the pirate refs: bean body
 //   ~1.25 heads, thin stick legs ~1 head, arms to the hips) | 'chibi' (2.5-head sheet: pear body, legs half a head)
 export const STYLE = (globalThis.CHAR_STYLE || 'pirate');
-const ST_ = { pirate: { LEG: .6, AL: .34, LL: .32, body: { w: 1.0, h: 1.12, top: 1.0, bottom: 1.0, head: 1.0, flat: true }, capsule: { w: .64, bottom: .8 }, sh: [.2, .74], rest: .18, limbW: .5, handR: .026, footK: .66, limbNoOutline: true },
+const ST_ = { pirate: { LEG: .6, AL: .34, LL: .32, body: { w: 1.0, h: 1.12, top: 1.0, bottom: 1.0, head: 1.0, flat: true }, capsule: { w: .64, bottom: .8 }, sh: [.2, .74], rest: .1, limbW: .58, handR: .03, footK: .9, limbNoOutline: true },
   chibi: { LEG: .42, AL: .28, LL: .225, body: { w: .86, h: .9, top: .7, bottom: 1.1, head: 1.14 }, sh: [.17, .7], rest: .32 } }[STYLE] || {};
 export const LEG = ST_.LEG ?? .6, AL = ST_.AL ?? .34, LL = ST_.LL ?? .32; // v3: longer but hair-thin limbs // v2: short chubby figures like the ref (about 3 heads tall)
 // ---- IK ----
@@ -222,11 +222,11 @@ export function pose(C, P = {}) {
     if (ta && !w) { const gx = noise1(t * 2.4 + sd * 11), gy = Math.max(0, noise1(t * 1.9 + sd * 13)); gR = [.03 * gx, .16 * gy, .12 * gy]; gL = [-.02 * gx, .05 * Math.max(0, noise1(t * 1.6 + sd * 17)), .04]; }
   } else C.br = 0;
   const runA_ = w && w.run && !P.hL && !P.hR; if (runA_) { const a = Math.sin(w.ph) * w.run; P = { ...P, hL: [-.26, .42 + .14 * Math.max(0, -a), -.32 * a + .08], hR: [.26, .42 + .14 * Math.max(0, a), .32 * a + .08], pL: [-1, -.4, -.9], pR: [1, -.4, -.9] }; }
-  const hL = P.hL ? (P.hL.isVector3 ? P.hL.clone() : new THREE.Vector3(...P.hL)) : new THREE.Vector3(-.31, (ST_.rest ?? .2) + Math.abs(sw) * .25, .05 - sw); // v4.6: rest hands hang at the hips, close to the body
-  const hR = P.hR ? (P.hR.isVector3 ? P.hR.clone() : new THREE.Vector3(...P.hR)) : new THREE.Vector3(.31, (ST_.rest ?? .2) + Math.abs(sw) * .25, .05 + sw);
+  const hL = P.hL ? (P.hL.isVector3 ? P.hL.clone() : new THREE.Vector3(...P.hL)) : new THREE.Vector3(-.3, (ST_.rest ?? .2) + Math.abs(sw) * .25, .07 - sw); // v4.6: rest hands hang at the hips, close to the body
+  const hR = P.hR ? (P.hR.isVector3 ? P.hR.clone() : new THREE.Vector3(...P.hR)) : new THREE.Vector3(.3, (ST_.rest ?? .2) + Math.abs(sw) * .25, .07 + sw);
   if (live) { const k = (P.hR || P.hL) ? .45 : 1; hR.x += gR[0] * k; hR.y += gR[1] * k; hR.z += gR[2] * k; hL.x += gL[0] * k; hL.y += gL[1] * k; hL.z += gL[2] * k;
     const dr = .012 * A; hR.y += dr * Math.sin(t * 2.3 + sd + .6); hL.y += dr * Math.sin(t * 2.3 + sd + 1.1); }
-  C.handL = ik(C.aL, hL, AL, AL, P.pL || [-.6, -.3, -.7]); C.handR = ik(C.aR, hR, AL, AL, P.pR || [.6, -.3, -.7]);
+  C.handL = ik(C.aL, hL, AL, AL, P.pL || [-.3, -.45, -.85]); C.handR = ik(C.aR, hR, AL, AL, P.pR || [.3, -.45, -.85]); // v4.19 elbows bend down/back like a real arm, not out sideways
   if (C.is2D) C.f2 = [P.ex || 'neutral', !!P.blink, P.talk || 0, P.look, P.eyeC || ''];
   else { const tex = faceTexFor(C.spec, P.ex || 'neutral', !!P.blink, P.talk || 0, P.look); if (C.faceM.map !== tex) { C.faceM.map = tex; C.faceM.needsUpdate = true; } }
   for (const [L_, k] of [[C.aL, 'L'], [C.aR, 'R']]) if (L_.open) { const o = P.open === true || P.open === k; L_.open.visible = o; L_.hand.visible = !o; }
@@ -411,7 +411,7 @@ const SPR = { meta: null, body: {}, headImg: {}, mask: {} };
 const K2 = .96 / 1274;            // torso-local units per sprite pixel (2x sprites)
 // v4.10 capsule body (pirate refs): the costume art is fitted into a clean bean/capsule (straight sides, round ends) with a fresh
 // thick ink outline, so clothes keep their colours/details (tie, pockets, stripes, badges) but the silhouette matches the refs.
-function capsuleBody(im, o, U, view = 'F') { const W = im.width, H = im.height, c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+function capsuleBody(im, o, U, view = 'F') { const W = im.width, H = im.height, c = document.createElement('canvas'); c.width = W; c.height = H; let x = c.getContext('2d');
   const cw = W * (o.w ?? .64), ch = H * .985, cx = (W - cw) / 2, cy = (H - ch) / 2, r = cw / 2, lw = Math.max(8, W * .03), bk = o.bottom ?? .8, INK = '#22223a';
   const path = () => { x.beginPath(); x.moveTo(cx, cy + r); x.arc(cx + r, cy + r, r, Math.PI, 0); x.lineTo(cx + cw, cy + ch - r * bk); x.ellipse(cx + r, cy + ch - r * bk, r, r * bk, 0, 0, Math.PI); x.closePath(); };
   x.save(); path(); x.clip();
@@ -425,7 +425,10 @@ function capsuleBody(im, o, U, view = 'F') { const W = im.width, H = im.height, 
   x.fillStyle = 'rgba(255,255,255,.22)'; x.fill(); x.restore();
   const gb = x.createLinearGradient(0, cy + ch * .78, 0, cy + ch); gb.addColorStop(0, 'rgba(20,16,40,0)'); gb.addColorStop(1, 'rgba(20,16,40,.18)'); x.fillStyle = gb; x.fillRect(cx, cy, cw, ch);
   x.restore();
-  x.lineWidth = lw; x.strokeStyle = INK; path(); x.stroke(); return c; }
+  // v4.19 weighted ink (refs): the line swells on the shadow side (lower right) and thins where light hits (upper left)
+  { const o2 = document.createElement('canvas'); o2.width = W; o2.height = H; const y = o2.getContext('2d'), sp = x; const dx = lw * .9, dy = lw * .45;
+    y.fillStyle = INK; y.save(); y.translate(dx, dy); x = y; path(); y.fill(); y.restore(); y.globalCompositeOperation = 'destination-out'; path(); y.fill(); x = sp; x.drawImage(o2, 0, 0); }
+  x.lineWidth = lw * .55; x.strokeStyle = INK; path(); x.stroke(); return c; }
 // v4.12 uniforms drawn to fit the capsule (refs): flat colours, bold simple details, thin navy lines.
 //   U = { base, stripe, stripes: n, pants, belt, hem, collar: 'shirt'|'hood'|'round'|'vee'|null, inner, tie, bowtie, zip, vest, buttons: n,
 //         pocket: 'kangaroo'|'chest'|'chest4'|null, badge: 'star'|'tag'|null, sideStripes, apron, scarf }
