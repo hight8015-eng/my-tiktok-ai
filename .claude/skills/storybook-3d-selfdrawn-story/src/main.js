@@ -28,7 +28,7 @@ function draw(sh, t, alpha = 1, mb = 0, dir = 1) { OVL.length = 0; E.POST.gseed 
   if (prevCam && mb === 0 && !window.NOAUTO) { // v4 auto camera motion blur: how far the focus point slid on screen since the last frame
     E.camera.updateMatrixWorld(); const fw = new E.THREE.Vector3(0, 0, -1).transformDirection(E.camera.matrixWorld), P = E.camera.position.clone().addScaledVector(fw, Math.max(1, E.POST.focus || 4));
     const a = P.clone().project(E.camera), b = P.clone().applyMatrix4(prevCam.m).applyMatrix4(prevCam.pm), dx = (a.x - b.x) * 540, dy = -(a.y - b.y) * 960, L = Math.hypot(dx, dy);
-    if (L > 6) { const k = Math.min(1, (L - 6) / 30) * .6; E.POST.mblur = [dx * k, dy * k]; } }
+    if (L > 6 && L < 400) { const k = Math.min(1, (L - 6) / 30) * .6, cap = Math.min(1, 40 / (L * k)); E.POST.mblur = [dx * k * cap, dy * k * cap]; } } // v4.19 capped: a camera jump (cut/teleport) must never smear the whole frame
   const nh = nearestHead(); if (E.POST.dof === 0 && nh && nh.z < 9 && !window.NOAUTO) { E.POST.focus = nh.z * .97; E.POST.dof = .7 * (1 - E.sstep(3.5, 9, nh.z)); }
   const lt = t - sh.t0, shock = nh && nh.C.f2 && /shocked|scared|scream/.test(nh.C.f2[0]) && nh.C.view !== 'B' && nh.z < 7 && lt < .75 && !window.NOAUTO; FX = shock ? { lt, x: nh.sx, y: nh.sy } : (alpha === 1 ? null : FX); if (window.NOFACE) Object.values(CHARS).forEach(C => { C.face.visible = false; C.sweat.visible = false; for (const L of [C.aL, C.aR, C.lL, C.lR]) { L.up.visible = false; L.fo.visible = false; } }); Wd.updateSky(t); E.render(); X.globalAlpha = alpha;
   if (!(FX && FX.lt < .32) && ZP > 1.0005) { X.drawImage(E.glc, 540 * (1 - ZP), 860 * (1 - ZP), 1080 * ZP, 1920 * ZP); } else
