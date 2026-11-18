@@ -70,6 +70,10 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    metal_hit, gong_comic, shimmer, harp, kwing, horn, silly, scream, applause.
    Pair them with the auto visuals: speed lines/zoom punch -> whoosh or bang, sparkAt -> shine, popAt -> wobble,
    gloom -> voice_hum, a reveal -> hit_dramatic.
+   Animation helpers (chars.js, all deterministic per frame): actJump / actPunch / actHit / actPush return pose params
+   (anticipation, squash-and-stretch via P.squash, follow-through); hitStop(lt, at) freezes 4 frames on contact;
+   impactAt / dustAt / sparkAt draw comic FX; P.smear = [1] adds a smear trail to the right hand (actPunch sets it).
+   Poses are blended over 5 frames automatically, so snapping between preset poses is fine.
 9. **Finish:** `bash tools/finish.sh <out_dir> "<title>" 26`, then `bash tools/cover.sh <out_dir>/ปก.jpg`.
 10. **Deliver:** on the user's computer put the files in `~/Desktop/edit-video/<project>/<version>/`. On a phone,
     send them back in the chat.

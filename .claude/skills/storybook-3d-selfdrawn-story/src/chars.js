@@ -138,6 +138,9 @@ export const ANIM = { t: 0, on: true, k: 1 };
 // v4 2D overlay requests drawn by main.js after the 3D frame: P.gloom (0..1) = falling gloom lines over the head; sparkAt(worldPos, k) = 4-point glint
 export const OVL = [];
 export const sparkAt = (p, k = 1, size = 1) => { if (k > 0) OVL.push({ kind: 'spark', p: p.clone ? p.clone() : new THREE.Vector3(...p), k, size }); };
+// impactAt(worldPos, k, size): comic hit flash (jagged star + ring); dustAt(worldPos, k, size): ground puff. k = 0..1 progress
+export const impactAt = (p, k, size = 1) => { if (k >= 0 && k <= 1) OVL.push({ kind: 'impact', p: p.clone ? p.clone() : new THREE.Vector3(...p), k, size }); };
+export const dustAt = (p, k, size = 1) => { if (k >= 0 && k <= 1) OVL.push({ kind: 'dust', p: p.clone ? p.clone() : new THREE.Vector3(...p), k, size }); };
 // popAt(lt, at): squash-and-stretch head pop when an expression changes at shot time `at` (pass as P.pop)
 export const popAt = (lt, at, amp = .13) => { const u = (lt - at) / .32; return u < 0 || u > 1 ? 0 : amp * Math.sin(u * Math.PI) * (1 - u * .4); };
 const seedOf = (C) => C._sd ?? (C._sd = [...(C.spec.id || 'x')].reduce((a, c) => a + c.charCodeAt(0) * 7.13, 0) % 97);
@@ -172,7 +175,7 @@ export function pose(C, P = {}) {
   C.handL = ik(C.aL, hL, AL, AL, P.pL || [-.6, -.3, -.7]); C.handR = ik(C.aR, hR, AL, AL, P.pR || [.6, -.3, -.7]);
   if (C.is2D) C.f2 = [P.ex || 'neutral', !!P.blink, P.talk || 0, P.look];
   else { const tex = faceTexFor(C.spec, P.ex || 'neutral', !!P.blink, P.talk || 0, P.look); if (C.faceM.map !== tex) { C.faceM.map = tex; C.faceM.needsUpdate = true; } }
-  C.sweat.visible = !!P.sweat; C.pop = P.pop || 0;
+  C.sweat.visible = !!P.sweat; C.pop = P.pop || 0; C.sq = P.squash || 0; C.smear = P.smear || null;
   if (ANIM.rec !== undefined) recPose(C, fL, fR, hL, hR, P);
   if (P.gloom > 0 && (P.visible ?? true)) OVL.push({ kind: 'gloom', C, k: P.gloom });
 }
@@ -182,6 +185,7 @@ function recPose(C, fL, fR, hL, hR, P) {
   const w = ANIM.rec; if (!w) return; const g = C.g; g.updateMatrixWorld(true);
   const v = [...fL, ...fR, hL.x, hL.y, hL.z, hR.x, hR.y, hR.z, C.head.rotation.x, C.head.rotation.y, C.head.rotation.z, C.torso.rotation.x, C.torso.rotation.y, C.torso.rotation.z, C.hips.position.y];
   const root = g.getWorldPosition(new THREE.Vector3());
+  (C._trail || (C._trail = [])).push([C.aL.fo.localToWorld(new THREE.Vector3(0, -AL, 0)), C.aR.fo.localToWorld(new THREE.Vector3(0, -AL, 0)), C.lL.fo.localToWorld(new THREE.Vector3(0, -LL, 0)), C.lR.fo.localToWorld(new THREE.Vector3(0, -LL, 0))]);
   if (!C._acc) C._acc = { v: v.map(x => x * w), w, root, P };
   else if (C._acc.root.distanceTo(root) < .35 * C.spec.s / .6 && C._acc.vis === (P.visible ?? true)) { C._acc.v.forEach((_, i) => { C._acc.v[i] += v[i] * w; }); C._acc.w += w; C._acc.root = root; C._acc.P = P; }
   else { C._acc = { v: v.map(x => x * w), w, root, P }; } // teleported / reappeared: restart (no smear across jumps)
@@ -193,6 +197,41 @@ export function applySmooth(C) {
   ik(C.lL, new THREE.Vector3(v[0], v[1], v[2]), LL, LL, [0, 0, 1]); ik(C.lR, new THREE.Vector3(v[3], v[4], v[5]), LL, LL, [0, 0, 1]);
   C.handL = ik(C.aL, new THREE.Vector3(v[6], v[7], v[8]), AL, AL, P.pL || [-.6, -.3, -.7]); C.handR = ik(C.aR, new THREE.Vector3(v[9], v[10], v[11]), AL, AL, P.pR || [.6, -.3, -.7]);
 }
+// ================= v4 ACTIONS: deterministic full-body moves with anticipation, follow-through, squash/stretch =================
+// each returns pose params to spread into put()/pose(): put(C, parent, { ...base, ...actJump(lt, {...}) })
+const sm = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+const spring = (u) => u <= 0 ? 0 : 1 - Math.exp(-6 * u) * Math.cos(11 * u); // overshoot then settle
+const mixA = (A, B, k) => A.map((v, i) => v + (B[i] - v) * k);
+// jump from `from` to `to` (parent-space [x,y,z]); takeoff at t0, airborne `dur`, apex height h
+export function actJump(lt, { t0 = .3, dur = .6, h = .6, from = [0, 0, 0], to = [0, 0, 1] } = {}) {
+  const pre = sm(t0 - .28, t0 - .04, lt) * (1 - sm(t0 - .04, t0 + .02, lt)), u = clamp((lt - t0) / dur), air = lt > t0 && lt < t0 + dur, la = lt - t0 - dur;
+  const p = mixA(from, to, u); p[1] += 4 * h * u * (1 - u);
+  let squash = -.28 * pre, hipY = -.2 * pre, lean = 14 * pre, hL = mixA([-.36, .2, .06], [-.3, .05, -.3], pre), hR = mixA([.36, .2, .06], [.3, .05, -.3], pre), fL, fR;
+  if (air) { const st = 1 - sm(0, .5, u); squash = .22 * st - .08 * sm(.6, 1, u); lean = -8 * st + 10 * sm(.5, 1, u); hL = [-.42, .95, .2]; hR = [.42, .95, .2]; fL = [-.13, -.5 + .16 * Math.sin(u * Math.PI), .12]; fR = [.13, -.42 + .1 * Math.sin(u * Math.PI), -.06]; }
+  if (la >= 0) { const k = 1 - spring(la / .45); squash = -.32 * k; hipY = -.18 * Math.max(0, k); lean = 16 * Math.max(0, k); hL = mixA([-.36, .2, .06], [-.45, .45, .25], Math.max(0, k)); hR = mixA([.36, .2, .06], [.45, .45, .25], Math.max(0, k)); }
+  return { p, squash, hipY, lean, hL, hR, ...(fL ? { fL, fR } : {}), pL: [-1, -.2, -.3], pR: [1, -.2, -.3], landed: la >= 0 ? la : -1 };
+}
+// right punch landing at `at`: wind-up, snap (stretch), hold, recover
+export function actPunch(lt, at, { side = 1 } = {}) {
+  const wind = sm(at - .26, at - .06, lt) * (1 - sm(at - .06, at, lt)), hit = sm(at - .06, at, lt) * (1 - sm(at + .16, at + .5, lt));
+  const arm = mixA(mixA([.36, .2, .06], [.32, .62, -.32], wind), [.12, .74, .95], hit);
+  const o = { twist: (-24 * wind + 30 * hit) * side, lean: -8 * wind + 14 * hit, squash: -.08 * wind + .1 * hit * (1 - sm(at, at + .1, lt)), hipY: -.08 * (wind + hit), pR: [1, -.4, -.2], pL: [-1, -.3, 0] };
+  if (side > 0) { o.hR = arm; o.hL = [-.18, .62, .4]; } else { o.hL = [-arm[0], arm[1], arm[2]]; o.hR = [.18, .62, .4]; o.pL = [-1, -.4, -.2]; o.pR = [1, -.3, 0]; }
+  o.smear = [side > 0 ? 1 : 0]; return o;
+}
+// got hit at `at`: knocked back along local -z by `dist`, flails, recovers
+export function actHit(lt, at, { dist = .6, side = 0 } = {}) {
+  const u = lt - at; if (u < 0) return { kb: 0 };
+  const k = Math.exp(-u * 3.2) * sm(0, .04, u), kb = dist * (1 - Math.exp(-u * 7));
+  return { kb, lean: -32 * k, side: side * 18 * k, head: [-22 * k, 0, side * 10 * k], squash: -.25 * k * Math.exp(-u * 6) + .12 * k * Math.sin(u * 22) * Math.exp(-u * 5), hL: [-.5, .7 + .2 * k, -.1], hR: [.5, .75 + .2 * k, -.15], pL: [-1, 0, .5], pR: [1, 0, .5], ex: u < .9 ? 'scream' : 'shocked', pop: popAt(lt, at, .2) };
+}
+// shove something heavy: lean in, arms locked forward, slow trudging steps (ph advances with progress)
+export function actPush(lt, { t0 = 0, rate = 1.6 } = {}) {
+  const k = sm(t0, t0 + .35, lt), ph = Math.max(0, lt - t0) * rate * Math.PI * 2;
+  return { lean: 30 * k, hipY: -.06 * k, hL: [-.2, .62, .62 * k + .06], hR: [.2, .62, .62 * k + .06], pL: [-1, -.3, -.3], pR: [1, -.3, -.3], walk: k > .5 ? { ph, stride: .13 } : undefined, squash: -.05 * k + .03 * Math.sin(ph * 2) * k, ex: 'angry', sweat: k > .9 };
+}
+// hit-stop: freeze the clock for `frames` right after `at` (use the returned lt for everything in the shot)
+export function hitStop(lt, at, frames = 4) { const d = frames / 30; return lt < at ? lt : lt < at + d ? at : lt - d; }
 // lip flap like anime: the mouth shape changes at most every 3 frames, from the envelope averaged over those frames
 export function talkQ(env, t) { const f0 = Math.floor(t * 30 / 3) * 3; let e = 0; for (let k = -1; k < 3; k++) e += (env[f0 + k] || 0) * (k < 0 ? .5 : 1); e /= 3.5; return e > .5 ? 1 : e > .2 ? .5 : 0; }
 // auto blink helper: returns true during a 0.12 s blink every ~3.3 s (seeded)
@@ -282,7 +321,8 @@ export function updateSprites(cam) {
     const U = s_u.set(0, 1, 0).transformDirection(C.torso.matrixWorld); const rollB = Math.atan2(-U.dot(s_r), U.y);
     const [x0, y0, x1, y1] = M.body; const lx = ((x0 + x1) / 2 - C.cx) * K2 * (mir ? -1 : 1), ly = .91 - ((y0 + y1) / 2 - M.gap[1]) * K2;
     const cb = C.torso.localToWorld(new THREE.Vector3(0, ly, 0)).addScaledVector(s_r, lx * s * Math.cos(rollB)).addScaledVector(s_v, -.14 * s);
-    place(C.sb, cb, yaw, rollB, (x1 - x0) * K2 * s * (1 - (C.br || 0) * .5), (y1 - y0) * K2 * s * (1 + (C.br || 0)), mir);
+    const sq = clamp(C.sq || 0, -.45, .6), bh = (y1 - y0) * K2 * s; cb.y += bh / 2 * sq; // v4 squash/stretch, feet stay planted
+    place(C.sb, cb, yaw, rollB, (x1 - x0) * K2 * s * (1 - (C.br || 0) * .5) * (1 - sq * .5), bh * (1 + (C.br || 0)) * (1 + sq), mir);
     C.sb.material.map !== SPR.body[key] && (C.sb.material.map = SPR.body[key], C.sb.material.emissiveMap = SPR.body[key], C.sb.material.needsUpdate = true);
     C.sb.userData.sprN.uniforms.map.value = SPR.body[key];
     // head
@@ -293,10 +333,10 @@ export function updateSprites(cam) {
     const upB = new THREE.Vector3(0, Math.cos(rollB), 0).addScaledVector(s_r, -Math.sin(rollB)), rtB = s_r.clone().multiplyScalar(Math.cos(rollB)).add(new THREE.Vector3(0, Math.sin(rollB), 0));
     const upH = new THREE.Vector3(0, Math.cos(rollH), 0).addScaledVector(s_r, -Math.sin(rollH)), rtH = s_r.clone().multiplyScalar(Math.cos(rollH)).add(new THREE.Vector3(0, Math.sin(rollH), 0));
     const nod = (C.head.rotation.x || 0); // looking down sinks the head a touch, looking up lifts it a touch
-    const neck = cb.clone().addScaledVector(upB, (y1 - y0) / 2 * K2 * s).addScaledVector(rtB, (M.ball[0] - (x0 + x1) / 2) * K2 * s * (mir ? -1 : 1) * .5);
+    const neck = cb.clone().addScaledVector(upB, (y1 - y0) / 2 * K2 * s * (1 + sq)).addScaledVector(rtB, (M.ball[0] - (x0 + x1) / 2) * K2 * s * (mir ? -1 : 1) * .5);
     const ballC = neck.addScaledVector(upH, (M.ball[2] - (C.sink ?? 105) - 40 * Math.sin(nod)) * K2 * s).addScaledVector(rtH, (M.ball[0] - (x0 + x1) / 2) * K2 * s * (mir ? -1 : 1) * .5);
     const ch = ballC.addScaledVector(rtH, dx * s).addScaledVector(upH, dy * s).addScaledVector(s_v, .04 * s);
-    const pp = C.pop || 0; place(C.sh, ch, yaw, rollH, (hx1 - hx0) * K2 * s * (1 + pp * .6), (hy1 - hy0) * K2 * s * (1 + pp), mir);
+    const pp = C.pop || 0, hq = sq * .45; place(C.sh, ch, yaw, rollH, (hx1 - hx0) * K2 * s * (1 + pp * .6) * (1 - hq * .5), (hy1 - hy0) * K2 * s * (1 + pp) * (1 + hq), mir);
     const ht = headTex(C, key, view); if (C.sh.material.map !== ht) { C.sh.material.map = ht; C.sh.material.emissiveMap = ht; C.sh.material.needsUpdate = true; }
     C.sh.userData.sprN.uniforms.map.value = ht;
     C.view = view; C.mir = mir;

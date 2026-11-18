@@ -17,7 +17,7 @@ function nearestHead() { let best = null; E.camera.getWorldPosition(_cv); const 
 let FX = null;
 function draw(sh, t, alpha = 1, mb = 0, dir = 1) { OVL.length = 0; E.POST.gseed = Math.floor(t * 12) % 97; E.POST.dof = 0; E.POST.mblur = [mb * 90 * dir, mb * 14]; E.POST.leakPh = t * .6;
   // v4 motion smoothing: evaluate the shot 5..1 frames back (no render) and blend character poses -> no 1-frame snaps
-  const SW = [.05, .08, .12, .17, .23], lt0 = t - sh.t0; Object.values(CHARS).forEach(C => { C._acc = null; });
+  const SW = [.05, .08, .12, .17, .23], lt0 = t - sh.t0; Object.values(CHARS).forEach(C => { C._acc = null; C._trail = []; });
   if (!window.NOSMOOTH) for (let k = 5; k >= 1; k--) { const tk = t - k / 30; if (tk - sh.t0 < 0) continue; ANIM.rec = SW[5 - k]; ANIM.t = tk; runShot(sh, tk); }
   ANIM.wFinal = .35; ANIM.rec = window.NOSMOOTH ? undefined : .35; ANIM.t = t; OVL.length = 0; runShot(sh, t); ANIM.rec = undefined;
   if (!window.NOSMOOTH) Object.values(CHARS).forEach(applySmooth); updateSprites(E.camera);
@@ -26,12 +26,28 @@ function draw(sh, t, alpha = 1, mb = 0, dir = 1) { OVL.length = 0; E.POST.gseed 
   if (FX && FX.lt < .32) { const k = 1 + .07 * (1 - E.eOut(FX.lt / .32)); X.drawImage(E.glc, FX.x * (1 - k), FX.y * (1 - k), 1080 * k, 1920 * k); } else X.drawImage(E.glc, 0, 0);
   X.globalAlpha = 1; if (FX) speedLines(FX); overlays(t, alpha); }
 function scr(v) { const p = v.clone().project(E.camera); return p.z > 1 ? null : [(p.x + 1) * 540, (1 - p.y) * 960]; }
+function trails(alpha) { // v4 smear trails behind fast hands/feet (positions from the smoothing samples)
+  for (const C of Object.values(CHARS)) { const T = C._trail; if (!C.g.visible || !T || T.length < 4) continue;
+    for (const j of (C.smear || [])) { const pts = T.map(s => scr(s[j])).filter(Boolean); if (pts.length < 4) continue; // P.smear = [0 hand L, 1 hand R, 2 foot L, 3 foot R]
+      let L = 0; for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); if (L < 70) continue;
+      const a = Math.min(1, (L - 70) / 120) * alpha; X.save(); X.lineCap = 'round'; X.lineJoin = 'round';
+      for (let i = 1; i < pts.length; i++) { const u = i / (pts.length - 1); X.strokeStyle = `rgba(255,255,255,${(.12 + .5 * u) * a})`; X.lineWidth = 6 + 26 * u; X.beginPath(); X.moveTo(...pts[i - 1]); X.lineTo(...pts[i]); X.stroke(); }
+      X.restore(); } } }
 function overlays(t, alpha) { // gloom lines + sparkles requested by poses/shots this frame
+  trails(alpha);
   for (const o of OVL) { X.save(); X.globalAlpha = alpha * Math.min(1, o.k);
     if (o.kind === 'gloom') { const C = o.C; C.head.updateWorldMatrix(true, false); const hp = C.head.getWorldPosition(new E.THREE.Vector3()), q = scr(hp); if (!q) { X.restore(); continue; }
       const top = scr(hp.clone().add(new E.THREE.Vector3(0, .5 * C.spec.s, 0))), R = top ? Math.max(40, Math.abs(q[1] - top[1])) : 120; X.strokeStyle = 'rgba(40,30,70,.75)'; X.lineCap = 'round';
       for (let i = 0; i < 9; i++) { const xx = q[0] + (i - 4) * R * .2, ph = ((t * .9 + i * .37) % 1), y0 = q[1] - R * 1.5 + ph * R * .5, L = R * (.5 + .3 * ((i * 7) % 3) / 2);
         X.lineWidth = Math.max(2, R * .035); X.globalAlpha = alpha * Math.min(1, o.k) * (1 - ph) * .9; X.beginPath(); X.moveTo(xx, y0); X.lineTo(xx, y0 + L); X.stroke(); } }
+    else if (o.kind === 'impact') { const q = scr(o.p); if (!q) { X.restore(); continue; } const k = o.k, r = 150 * o.size * (.55 + .7 * E.eOut(k / .5)), r_ = E.rng(7);
+      X.translate(q[0], q[1]); X.globalAlpha = alpha * (1 - E.sstep(.35, 1, k));
+      X.fillStyle = '#fff6c8'; X.strokeStyle = '#1c1420'; X.lineWidth = 7; X.beginPath(); for (let i = 0; i < 20; i++) { const a = i / 20 * Math.PI * 2, d = (i % 2 ? .38 : 1) * r * (.8 + .4 * r_()); X.lineTo(Math.cos(a) * d, Math.sin(a) * d); } X.closePath(); X.fill(); X.stroke();
+      X.fillStyle = '#ffd24a'; X.beginPath(); for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2 + .2, d = (i % 2 ? .3 : .62) * r; X.lineTo(Math.cos(a) * d, Math.sin(a) * d); } X.closePath(); X.fill();
+      X.strokeStyle = `rgba(255,255,255,${1 - k})`; X.lineWidth = 10 * (1 - k); X.beginPath(); X.arc(0, 0, r * (1 + 1.2 * k), 0, 7); X.stroke(); }
+    else if (o.kind === 'dust') { const q = scr(o.p); if (!q) { X.restore(); continue; } const k = o.k, r_ = E.rng(3); X.translate(q[0], q[1]);
+      for (let i = 0; i < 9; i++) { const sd = i < 5 ? -1 : 1, a = (r_() * .5 + .1) * Math.PI, dx = sd * Math.cos(a) * (60 + 200 * E.eOut(k)) * o.size, dy = -Math.sin(a) * 50 * E.eOut(k) * o.size, rr = (22 + 30 * r_()) * (0.6 + k) * o.size;
+        X.globalAlpha = alpha * .8 * (1 - E.sstep(.3, 1, k)); X.fillStyle = '#d9d2e6'; X.strokeStyle = 'rgba(28,20,32,.6)'; X.lineWidth = 4; X.beginPath(); X.arc(dx, dy, rr, 0, 7); X.fill(); X.stroke(); } }
     else if (o.kind === 'spark') { const q = scr(o.p); if (!q) { X.restore(); continue; } const r = 46 * o.size * (.6 + .4 * o.k), ro = t * 1.5;
       X.translate(q[0], q[1]); X.rotate(ro * .2); X.globalCompositeOperation = 'lighter'; const g = X.createRadialGradient(0, 0, 0, 0, 0, r * 1.3); g.addColorStop(0, 'rgba(255,250,220,.9)'); g.addColorStop(1, 'rgba(255,220,140,0)'); X.fillStyle = g; X.beginPath(); X.arc(0, 0, r * 1.3, 0, 7); X.fill();
       X.fillStyle = '#fffbe8'; for (const [rr, rot] of [[r, 0], [r * .55, Math.PI / 4]]) { X.save(); X.rotate(rot); X.beginPath(); for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, d = k % 2 ? rr * .16 : rr; X.lineTo(Math.cos(a) * d, Math.sin(a) * d); } X.closePath(); X.fill(); X.restore(); } }
