@@ -1,7 +1,7 @@
 // main.js: frame(t) -> JPEG data URL (1080x1920): shots + transitions + one-word captions
 import * as E from './engine.js';
 import * as Wd from './world.js';
-import { makeCast, makeChar, pose, CHARS, loadSprites, updateSprites, SPRG, ANIM } from './chars.js';
+import { makeCast, makeChar, pose, CHARS, loadSprites, updateSprites, SPRG, ANIM, OVL } from './chars.js';
 import { SHOTS, initShots, runShot, COVER, BENCH } from './shots.js';
 const timing = await (await fetch('timing.json')).json(), project = await (await fetch('project.json')).json();
 await E.fontsReady; await loadSprites(); E.scene.add(SPRG); makeCast(project.cast); initShots(timing); Wd.redrawSign();
@@ -15,11 +15,22 @@ function nearestHead() { let best = null; E.camera.getWorldPosition(_cv); const 
     C.head.getWorldPosition(_hv); const d = _hv.clone().sub(_cv), z = d.dot(fw); if (z < .3) continue; const sp = _hv.clone().project(E.camera); if (Math.abs(sp.x) > .85 || sp.y > .95 || sp.y < -.9) continue;
     if (!best || z < best.z) best = { C, z, sx: (sp.x + 1) * 540, sy: (1 - sp.y) * 960 }; } return best; }
 let FX = null;
-function draw(sh, t, alpha = 1, mb = 0, dir = 1) { E.POST.dof = 0; E.POST.mblur = [mb * 90 * dir, mb * 14]; E.POST.leakPh = t * .6; ANIM.t = t; runShot(sh, t); updateSprites(E.camera);
+function draw(sh, t, alpha = 1, mb = 0, dir = 1) { OVL.length = 0; E.POST.gseed = Math.floor(t * 12) % 97; E.POST.dof = 0; E.POST.mblur = [mb * 90 * dir, mb * 14]; E.POST.leakPh = t * .6; ANIM.t = t; runShot(sh, t); updateSprites(E.camera);
   const nh = nearestHead(); if (E.POST.dof === 0 && nh && nh.z < 9 && !window.NOAUTO) { E.POST.focus = nh.z * .97; E.POST.dof = .7 * (1 - E.sstep(3.5, 9, nh.z)); }
-  const lt = t - sh.t0, shock = nh && nh.C.f2 && /shocked|scared/.test(nh.C.f2[0]) && nh.C.view !== 'B' && nh.z < 7 && lt < .75 && !window.NOAUTO; FX = shock ? { lt, x: nh.sx, y: nh.sy } : (alpha === 1 ? null : FX); if (window.NOFACE) Object.values(CHARS).forEach(C => { C.face.visible = false; C.sweat.visible = false; for (const L of [C.aL, C.aR, C.lL, C.lR]) { L.up.visible = false; L.fo.visible = false; } }); Wd.updateSky(t); E.render(); X.globalAlpha = alpha;
+  const lt = t - sh.t0, shock = nh && nh.C.f2 && /shocked|scared|scream/.test(nh.C.f2[0]) && nh.C.view !== 'B' && nh.z < 7 && lt < .75 && !window.NOAUTO; FX = shock ? { lt, x: nh.sx, y: nh.sy } : (alpha === 1 ? null : FX); if (window.NOFACE) Object.values(CHARS).forEach(C => { C.face.visible = false; C.sweat.visible = false; for (const L of [C.aL, C.aR, C.lL, C.lR]) { L.up.visible = false; L.fo.visible = false; } }); Wd.updateSky(t); E.render(); X.globalAlpha = alpha;
   if (FX && FX.lt < .32) { const k = 1 + .07 * (1 - E.eOut(FX.lt / .32)); X.drawImage(E.glc, FX.x * (1 - k), FX.y * (1 - k), 1080 * k, 1920 * k); } else X.drawImage(E.glc, 0, 0);
-  X.globalAlpha = 1; if (FX) speedLines(FX); }
+  X.globalAlpha = 1; if (FX) speedLines(FX); overlays(t, alpha); }
+function scr(v) { const p = v.clone().project(E.camera); return p.z > 1 ? null : [(p.x + 1) * 540, (1 - p.y) * 960]; }
+function overlays(t, alpha) { // gloom lines + sparkles requested by poses/shots this frame
+  for (const o of OVL) { X.save(); X.globalAlpha = alpha * Math.min(1, o.k);
+    if (o.kind === 'gloom') { const C = o.C; C.head.updateWorldMatrix(true, false); const hp = C.head.getWorldPosition(new E.THREE.Vector3()), q = scr(hp); if (!q) { X.restore(); continue; }
+      const top = scr(hp.clone().add(new E.THREE.Vector3(0, .5 * C.spec.s, 0))), R = top ? Math.max(40, Math.abs(q[1] - top[1])) : 120; X.strokeStyle = 'rgba(40,30,70,.75)'; X.lineCap = 'round';
+      for (let i = 0; i < 9; i++) { const xx = q[0] + (i - 4) * R * .2, ph = ((t * .9 + i * .37) % 1), y0 = q[1] - R * 1.5 + ph * R * .5, L = R * (.5 + .3 * ((i * 7) % 3) / 2);
+        X.lineWidth = Math.max(2, R * .035); X.globalAlpha = alpha * Math.min(1, o.k) * (1 - ph) * .9; X.beginPath(); X.moveTo(xx, y0); X.lineTo(xx, y0 + L); X.stroke(); } }
+    else if (o.kind === 'spark') { const q = scr(o.p); if (!q) { X.restore(); continue; } const r = 46 * o.size * (.6 + .4 * o.k), ro = t * 1.5;
+      X.translate(q[0], q[1]); X.rotate(ro * .2); X.globalCompositeOperation = 'lighter'; const g = X.createRadialGradient(0, 0, 0, 0, 0, r * 1.3); g.addColorStop(0, 'rgba(255,250,220,.9)'); g.addColorStop(1, 'rgba(255,220,140,0)'); X.fillStyle = g; X.beginPath(); X.arc(0, 0, r * 1.3, 0, 7); X.fill();
+      X.fillStyle = '#fffbe8'; for (const [rr, rot] of [[r, 0], [r * .55, Math.PI / 4]]) { X.save(); X.rotate(rot); X.beginPath(); for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, d = k % 2 ? rr * .16 : rr; X.lineTo(Math.cos(a) * d, Math.sin(a) * d); } X.closePath(); X.fill(); X.restore(); } }
+    X.restore(); } }
 function speedLines(f) { // manga focus lines toward the shocked face, fading out
   const a = (1 - E.sstep(.35, .75, f.lt)) * E.sstep(0, .06, f.lt); if (a <= 0) return; const r = E.rng(Math.floor(f.lt * 12) + 7);
   X.save(); X.globalAlpha = a * .85; X.fillStyle = '#ffffff'; X.strokeStyle = 'rgba(20,16,24,.55)'; X.lineWidth = 2;

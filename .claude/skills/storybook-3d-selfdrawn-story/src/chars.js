@@ -18,6 +18,13 @@ const EX = {
   frown: { eyes: 'open', bl: -18, br: 18, by: 4, mouth: 'frown' },
   sad: { eyes: 'half', bl: 20, br: -20, by: 0, mouth: 'frown' },
   determined: { eyes: 'open', bl: -14, br: 14, by: 2, mouth: 'flat' },
+  // v4 extra faces
+  grinTeeth: { eyes: 'happy', bl: -4, br: 4, by: -8, mouth: 'teeth' },
+  evil: { eyes: 'half', bl: -20, br: 20, by: 4, mouth: 'teeth' },
+  nervous: { eyes: 'wide', bl: 22, br: -22, by: -10, mouth: 'clench' },
+  scream: { eyes: 'wide', bl: 26, br: -26, by: -16, mouth: 'bigO' },
+  smug: { eyes: 'closed', bl: 10, br: -10, by: -4, mouth: 'smirk' },
+  angry: { eyes: 'open', bl: -26, br: 26, by: 8, mouth: 'clench' },
 };
 function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a white ball head (no nose)
   const S = 512; x.clearRect(0, 0, S, S);
@@ -54,6 +61,10 @@ function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a wh
   else if (m === 'open' || m === 'talk') { const h = m === 'open' ? 22 : 12; x.beginPath(); x.moveTo(cx - 22, my - 2); x.quadraticCurveTo(cx, my + h * 2, cx + 22, my - 2); x.closePath(); x.fill(); x.stroke(); }
   else if (m === 'yawn') { x.beginPath(); x.ellipse(cx, my + 10, 24, 32, 0, 0, 7); x.fill(); x.stroke(); }
   else if (m === 'frown') { x.beginPath(); x.moveTo(cx - 22, my + 12); x.quadraticCurveTo(cx, my - 6, cx + 22, my + 12); x.stroke(); }
+  else if (m === 'teeth' || m === 'clench') { const w = m === 'teeth' ? 60 : 46, h = m === 'teeth' ? 50 : 30, y0 = my - (m === 'teeth' ? 10 : 4);
+    x.fillStyle = '#fbf8f2'; x.beginPath(); if (m === 'teeth') { x.moveTo(cx - w, y0); x.lineTo(cx + w, y0); x.quadraticCurveTo(cx + w, y0 + h, cx, y0 + h); x.quadraticCurveTo(cx - w, y0 + h, cx - w, y0); } else x.roundRect(cx - w, y0, w * 2, h, 8);
+    x.closePath(); x.fill(); x.stroke(); x.lineWidth = 9; x.beginPath(); x.moveTo(cx - w + 4, y0 + h * .45); x.lineTo(cx + w - 4, y0 + h * .45); for (let i = -2; i <= 2; i++) { x.moveTo(cx + i * w / 3, y0 + 2); x.lineTo(cx + i * w / 3, y0 + h - 4); } x.stroke(); x.lineWidth = 15; }
+  else if (m === 'bigO') { x.beginPath(); x.ellipse(cx, my + 22, 40, 58, 0, 0, 7); x.fill(); x.stroke(); }
   else if (m === 'wavy') { x.beginPath(); x.moveTo(cx - 26, my + 6); for (let i = 1; i <= 6; i++) x.lineTo(cx - 26 + i * 8.7, my + 6 + (i % 2 ? -6 : 6)); x.stroke(); }
   if (spec.stache) { x.fillStyle = spec.stacheC || '#f2f0ea'; x.strokeStyle = ink; x.lineWidth = 12; for (const s of [-1, 1]) { x.beginPath(); x.moveTo(cx, my - 24); x.bezierCurveTo(cx + s * 26, my - 46, cx + s * 62, my - 28, cx + s * 78, my - 44); x.bezierCurveTo(cx + s * 72, my - 4, cx + s * 26, my - 6, cx, my - 12); x.closePath(); x.fill(); x.stroke(); } }
 }
@@ -124,6 +135,11 @@ export function toHips(C, wv) { C.g.updateMatrixWorld(true); return C.hips.world
 // v4 secondary motion: every posed character breathes, sways, tilts its head, nods + gestures while talking.
 // ANIM.t is set by main.js each frame (deterministic per frame). P.still = true turns it off for one pose.
 export const ANIM = { t: 0, on: true, k: 1 };
+// v4 2D overlay requests drawn by main.js after the 3D frame: P.gloom (0..1) = falling gloom lines over the head; sparkAt(worldPos, k) = 4-point glint
+export const OVL = [];
+export const sparkAt = (p, k = 1, size = 1) => { if (k > 0) OVL.push({ kind: 'spark', p: p.clone ? p.clone() : new THREE.Vector3(...p), k, size }); };
+// popAt(lt, at): squash-and-stretch head pop when an expression changes at shot time `at` (pass as P.pop)
+export const popAt = (lt, at, amp = .13) => { const u = (lt - at) / .32; return u < 0 || u > 1 ? 0 : amp * Math.sin(u * Math.PI) * (1 - u * .4); };
 const seedOf = (C) => C._sd ?? (C._sd = [...(C.spec.id || 'x')].reduce((a, c) => a + c.charCodeAt(0) * 7.13, 0) % 97);
 // pose: {p:[x,y,z], ry, lean, twist, side, head:[x,y,z], hL, hR (torso space arrays or Vector3), pL, pR (elbow poles), fL, fR (hips space), sit, hipY, walk:{ph, stride}, ex, blink, talk, look, sweat}
 export function pose(C, P = {}) {
@@ -156,7 +172,8 @@ export function pose(C, P = {}) {
   C.handL = ik(C.aL, hL, AL, AL, P.pL || [-.6, -.3, -.7]); C.handR = ik(C.aR, hR, AL, AL, P.pR || [.6, -.3, -.7]);
   if (C.is2D) C.f2 = [P.ex || 'neutral', !!P.blink, P.talk || 0, P.look];
   else { const tex = faceTexFor(C.spec, P.ex || 'neutral', !!P.blink, P.talk || 0, P.look); if (C.faceM.map !== tex) { C.faceM.map = tex; C.faceM.needsUpdate = true; } }
-  C.sweat.visible = !!P.sweat;
+  C.sweat.visible = !!P.sweat; C.pop = P.pop || 0;
+  if (P.gloom > 0 && (P.visible ?? true)) OVL.push({ kind: 'gloom', C, k: P.gloom });
 }
 // auto blink helper: returns true during a 0.12 s blink every ~3.3 s (seeded)
 export function blinkAt(t, seed = 0) { const p = 3.1 + (seed % 3) * .4; const u = ((t + seed * 1.37) % p); return u < .12; }
@@ -259,7 +276,7 @@ export function updateSprites(cam) {
     const neck = cb.clone().addScaledVector(upB, (y1 - y0) / 2 * K2 * s).addScaledVector(rtB, (M.ball[0] - (x0 + x1) / 2) * K2 * s * (mir ? -1 : 1) * .5);
     const ballC = neck.addScaledVector(upH, (M.ball[2] - (C.sink ?? 105) - 40 * Math.sin(nod)) * K2 * s).addScaledVector(rtH, (M.ball[0] - (x0 + x1) / 2) * K2 * s * (mir ? -1 : 1) * .5);
     const ch = ballC.addScaledVector(rtH, dx * s).addScaledVector(upH, dy * s).addScaledVector(s_v, .04 * s);
-    place(C.sh, ch, yaw, rollH, (hx1 - hx0) * K2 * s, (hy1 - hy0) * K2 * s, mir);
+    const pp = C.pop || 0; place(C.sh, ch, yaw, rollH, (hx1 - hx0) * K2 * s * (1 + pp * .6), (hy1 - hy0) * K2 * s * (1 + pp), mir);
     const ht = headTex(C, key, view); if (C.sh.material.map !== ht) { C.sh.material.map = ht; C.sh.material.emissiveMap = ht; C.sh.material.needsUpdate = true; }
     C.sh.userData.sprN.uniforms.map.value = ht;
     C.view = view; C.mir = mir;

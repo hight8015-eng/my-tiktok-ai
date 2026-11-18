@@ -87,7 +87,7 @@ export const fontsReady = Promise.all([
 ]).then(fs => fs.forEach(f => document.fonts.add(f)));
 
 // ---------- v2 post pipeline: color RT -> ink lines (normal + depth edges) -> DOF + grade -> canvas ----------
-export const POST = { mblur: [0, 0], focus: 4, dof: 0, inkFade: [80, 500], sat: 1.22, con: 1.05, lift: 1.06, vig: .22, leak: .5, leakPh: 0, thick: 4.6, thin: 1.8 };
+export const POST = { sharp: .35, grain: .025, mblur: [0, 0], focus: 4, dof: 0, inkFade: [80, 500], sat: 1.22, con: 1.05, lift: 1.06, vig: .22, leak: .5, leakPh: 0, thick: 4.6, thin: 1.8 };
 // v4: no MSAA on the colour target (~40% faster on SwiftShader); edges are smoothed by the ink pass + the FXAA-lite step in finMat
 const crt = new THREE.WebGLRenderTarget(W, H, { samples: 0 }); crt.texture.colorSpace = THREE.SRGBColorSpace;
 const nrt = new THREE.WebGLRenderTarget(W, H, { depthTexture: new THREE.DepthTexture(W, H) });
@@ -112,9 +112,9 @@ const inkMat = new THREE.ShaderMaterial({ depthTest: false, depthWrite: false,
     gl_FragColor = vec4(mix(c, inkC, e * .94), 1.);
   }` });
 const finMat = new THREE.ShaderMaterial({ depthTest: false, depthWrite: false,
-  uniforms: { tCol: { value: irt.texture }, tDep: { value: nrt.depthTexture }, near: { value: .05 }, far: { value: 3000 }, px: { value: new THREE.Vector2(1 / W, 1 / H) }, aa: { value: 1 }, focus: { value: 4 }, dof: { value: 0 }, sat: { value: 1.2 }, con: { value: 1.05 }, lift: { value: 1.06 }, vig: { value: .2 }, leak: { value: .5 }, leakPh: { value: 0 }, mblur: { value: new THREE.Vector2() } },
+  uniforms: { tCol: { value: irt.texture }, tDep: { value: nrt.depthTexture }, near: { value: .05 }, far: { value: 3000 }, px: { value: new THREE.Vector2(1 / W, 1 / H) }, aa: { value: 1 }, sharp: { value: .35 }, grain: { value: .025 }, gseed: { value: 0 }, focus: { value: 4 }, dof: { value: 0 }, sat: { value: 1.2 }, con: { value: 1.05 }, lift: { value: 1.06 }, vig: { value: .2 }, leak: { value: .5 }, leakPh: { value: 0 }, mblur: { value: new THREE.Vector2() } },
   vertexShader: VS, fragmentShader: COMMON + `
-  uniform sampler2D tCol; uniform vec2 px, mblur; uniform float aa, focus, dof, sat, con, lift, vig, leak, leakPh; varying vec2 vUv;
+  uniform sampler2D tCol; uniform vec2 px, mblur; uniform float aa, sharp, grain, gseed, focus, dof, sat, con, lift, vig, leak, leakPh; varying vec2 vUv;
   vec3 toS(vec3 c){ return mix(c * 12.92, 1.055 * pow(c, vec3(1. / 2.4)) - .055, step(.0031308, c)); }
   void main(){
     vec3 c = texture2D(tCol, vUv).rgb;
@@ -124,15 +124,17 @@ const finMat = new THREE.ShaderMaterial({ depthTest: false, depthWrite: false,
         vec3 a1 = .5*(texture2D(tCol,vUv+d).rgb+texture2D(tCol,vUv-d).rgb); vec3 a2 = .5*a1 + .25*(texture2D(tCol,vUv+d*3.).rgb+texture2D(tCol,vUv-d*3.).rgb);
         float la2=dot(a2,L); c = (la2<mn||la2>mx) ? a1 : a2; } }
     if (length(mblur) > 1.) { vec3 acc = vec3(0.); for (int i = 0; i < 14; i++) { float f = float(i) / 13. - .5; acc += texture2D(tCol, vUv + mblur * f * px).rgb; } c = acc / 14.; }
-    else if (dof > 0.) { float z = LD(vUv); float coc = clamp((z - focus) / max(z, .001) * 1.6, 0., 1.) * dof * 9.;
+    else if (dof > 0.) { float z = LD(vUv); float coc = clamp(abs(z - focus) / max(z, .001) * 1.6, 0., 1.) * dof * 9.; bool fg = z < focus * .9; // v4: foreground blurs too (rack focus)
       if (coc > .6) { vec3 acc = c; float w = 1.; for (int i = 0; i < 16; i++) { float a = float(i) * 2.39996; float r = sqrt((float(i) + .5) / 16.); vec2 uv = vUv + vec2(cos(a), sin(a)) * r * coc * px;
-          float zt = LD(uv); float wt = zt > focus * .9 ? 1. : .15; acc += texture2D(tCol, uv).rgb * wt; w += wt; } c = acc / w; } }
+          float zt = LD(uv); float wt = (fg || zt > focus * .9) ? 1. : .15; acc += texture2D(tCol, uv).rgb * wt; w += wt; } c = acc / w; } }
+    if (sharp > 0.) { vec3 bl = .25 * (texture2D(tCol, vUv + vec2(px.x, 0.)).rgb + texture2D(tCol, vUv - vec2(px.x, 0.)).rgb + texture2D(tCol, vUv + vec2(0., px.y)).rgb + texture2D(tCol, vUv - vec2(0., px.y)).rgb); c = max(c + (c - bl) * sharp, 0.); }
     vec3 s = toS(clamp(c, 0., 1.));
     s *= lift; float l = dot(s, vec3(.299, .587, .114)); s = mix(vec3(l), s, sat); s = (s - .5) * con + .5;
     vec2 q = vUv - .5; float v = 1. - vig * smoothstep(.25, .85, length(q * vec2(1., 1.3)));
     s *= v;
     vec2 L1 = vec2(1.05 + .05 * sin(leakPh), 1.02), L2 = vec2(-.08, -.04 + .04 * cos(leakPh * .7));
     s += leak * (vec3(.55, .16, .75) * pow(max(0., 1. - length((vUv - L1) * vec2(1.4, 1.)) / .62), 2.) * .45 + vec3(.95, .5, .2) * pow(max(0., 1. - length((vUv - L2) * vec2(1.4, 1.)) / .55), 2.) * .25) * (1. - s * .5);
+    if (grain > 0.) { float g = fract(sin(dot(floor(vUv / px / 1.5), vec2(12.9898, 78.233)) + gseed) * 43758.5453) - .5; s += g * grain * (1. - abs(dot(s, vec3(.333)) - .5)); }
     gl_FragColor = vec4(clamp(s, 0., 1.), 1.);
   }` });
 const _hid = [], _sw = [];
@@ -152,6 +154,6 @@ export function render() {
   inkMat.uniforms.thick.value = P.thick; inkMat.uniforms.thin.value = P.thin; inkMat.uniforms.fade.value.set(...P.inkFade);
   quad.material = inkMat; renderer.setRenderTarget(irt); renderer.render(quadScene, quadCam);
   // 4) DOF + grade to canvas
-  const u = finMat.uniforms; u.focus.value = P.focus; u.dof.value = P.dof; u.sat.value = P.sat; u.con.value = P.con; u.lift.value = P.lift; u.vig.value = P.vig; u.leak.value = P.leak; u.leakPh.value = P.leakPh; u.mblur.value.set(P.mblur[0], P.mblur[1]);
+  const u = finMat.uniforms; u.focus.value = P.focus; u.dof.value = P.dof; u.sat.value = P.sat; u.con.value = P.con; u.lift.value = P.lift; u.vig.value = P.vig; u.leak.value = P.leak; u.leakPh.value = P.leakPh; u.mblur.value.set(P.mblur[0], P.mblur[1]); u.sharp.value = P.sharp; u.grain.value = P.grain; u.gseed.value = P.gseed || 0;
   quad.material = finMat; renderer.setRenderTarget(null); renderer.render(quadScene, quadCam);
 }
