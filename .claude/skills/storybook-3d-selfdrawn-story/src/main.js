@@ -1,7 +1,7 @@
 // main.js: frame(t) -> JPEG data URL (1080x1920): shots + transitions + one-word captions
 import * as E from './engine.js';
 import * as Wd from './world.js';
-import { makeCast, makeChar, pose, CHARS, loadSprites, updateSprites, SPRG, ANIM, OVL } from './chars.js';
+import { makeCast, makeChar, pose, CHARS, loadSprites, updateSprites, SPRG, ANIM, OVL, applySmooth } from './chars.js';
 import { SHOTS, initShots, runShot, COVER, BENCH } from './shots.js';
 const timing = await (await fetch('timing.json')).json(), project = await (await fetch('project.json')).json();
 await E.fontsReady; await loadSprites(); E.scene.add(SPRG); makeCast(project.cast); initShots(timing); Wd.redrawSign();
@@ -15,7 +15,12 @@ function nearestHead() { let best = null; E.camera.getWorldPosition(_cv); const 
     C.head.getWorldPosition(_hv); const d = _hv.clone().sub(_cv), z = d.dot(fw); if (z < .3) continue; const sp = _hv.clone().project(E.camera); if (Math.abs(sp.x) > .85 || sp.y > .95 || sp.y < -.9) continue;
     if (!best || z < best.z) best = { C, z, sx: (sp.x + 1) * 540, sy: (1 - sp.y) * 960 }; } return best; }
 let FX = null;
-function draw(sh, t, alpha = 1, mb = 0, dir = 1) { OVL.length = 0; E.POST.gseed = Math.floor(t * 12) % 97; E.POST.dof = 0; E.POST.mblur = [mb * 90 * dir, mb * 14]; E.POST.leakPh = t * .6; ANIM.t = t; runShot(sh, t); updateSprites(E.camera);
+function draw(sh, t, alpha = 1, mb = 0, dir = 1) { OVL.length = 0; E.POST.gseed = Math.floor(t * 12) % 97; E.POST.dof = 0; E.POST.mblur = [mb * 90 * dir, mb * 14]; E.POST.leakPh = t * .6;
+  // v4 motion smoothing: evaluate the shot 5..1 frames back (no render) and blend character poses -> no 1-frame snaps
+  const SW = [.05, .08, .12, .17, .23], lt0 = t - sh.t0; Object.values(CHARS).forEach(C => { C._acc = null; });
+  if (!window.NOSMOOTH) for (let k = 5; k >= 1; k--) { const tk = t - k / 30; if (tk - sh.t0 < 0) continue; ANIM.rec = SW[5 - k]; ANIM.t = tk; runShot(sh, tk); }
+  ANIM.wFinal = .35; ANIM.rec = window.NOSMOOTH ? undefined : .35; ANIM.t = t; OVL.length = 0; runShot(sh, t); ANIM.rec = undefined;
+  if (!window.NOSMOOTH) Object.values(CHARS).forEach(applySmooth); updateSprites(E.camera);
   const nh = nearestHead(); if (E.POST.dof === 0 && nh && nh.z < 9 && !window.NOAUTO) { E.POST.focus = nh.z * .97; E.POST.dof = .7 * (1 - E.sstep(3.5, 9, nh.z)); }
   const lt = t - sh.t0, shock = nh && nh.C.f2 && /shocked|scared|scream/.test(nh.C.f2[0]) && nh.C.view !== 'B' && nh.z < 7 && lt < .75 && !window.NOAUTO; FX = shock ? { lt, x: nh.sx, y: nh.sy } : (alpha === 1 ? null : FX); if (window.NOFACE) Object.values(CHARS).forEach(C => { C.face.visible = false; C.sweat.visible = false; for (const L of [C.aL, C.aR, C.lL, C.lR]) { L.up.visible = false; L.fo.visible = false; } }); Wd.updateSky(t); E.render(); X.globalAlpha = alpha;
   if (FX && FX.lt < .32) { const k = 1 + .07 * (1 - E.eOut(FX.lt / .32)); X.drawImage(E.glc, FX.x * (1 - k), FX.y * (1 - k), 1080 * k, 1920 * k); } else X.drawImage(E.glc, 0, 0);

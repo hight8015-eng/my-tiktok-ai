@@ -1,11 +1,11 @@
 // shots.js: "สะพานสองหมู่บ้าน" (58.68 s timeline incl. the 0.9 s beat at 41.47)
 import { THREE, scene, camera, clamp, lerp, sstep, eIO, eOut, eIn, eSine, D2R, noise1, rng, POST, mesh, rbox, toon, group } from './engine.js';
 import * as Wd from './world.js';
-import { CHARS, pose, toTorso, blinkAt } from './chars.js';
+import { CHARS, pose, toTorso, blinkAt, talkQ } from './chars.js';
 const { VL, VA, DY, desk, DK, boat, BT } = Wd;
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 export const TM = { env: [] };
-const talkAt = (t) => { const e = TM.env[Math.round(t * 30)] || 0; return e > .55 ? 1 : e > .25 ? .5 : 0; };
+const talkAt = (t) => talkQ(TM.env, t); // v4: held 3 frames, no 1-frame mouth flicker
 let SH = { a: 0, t: 0 };
 function look(pos, tgt, fov = 40, roll = 0) { POST.focus = pos.distanceTo(tgt); camera.position.copy(pos); camera.fov = fov; camera.updateProjectionMatrix(); camera.up.set(0, 1, 0); if (Math.abs(pos.x - tgt.x) + Math.abs(pos.z - tgt.z) < .05) camera.up.set(0, 0, -1); camera.lookAt(tgt); if (roll) camera.rotateZ(roll * D2R);
   if (SH.a > 0) { const t = SH.t * 22; camera.rotateX(noise1(t) * .02 * SH.a); camera.rotateY(noise1(t + 50) * .02 * SH.a); camera.position.y += noise1(t + 9) * .08 * SH.a; } }

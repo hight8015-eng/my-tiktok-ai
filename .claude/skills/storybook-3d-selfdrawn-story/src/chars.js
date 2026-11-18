@@ -173,8 +173,28 @@ export function pose(C, P = {}) {
   if (C.is2D) C.f2 = [P.ex || 'neutral', !!P.blink, P.talk || 0, P.look];
   else { const tex = faceTexFor(C.spec, P.ex || 'neutral', !!P.blink, P.talk || 0, P.look); if (C.faceM.map !== tex) { C.faceM.map = tex; C.faceM.needsUpdate = true; } }
   C.sweat.visible = !!P.sweat; C.pop = P.pop || 0;
+  if (ANIM.rec !== undefined) recPose(C, fL, fR, hL, hR, P);
   if (P.gloom > 0 && (P.visible ?? true)) OVL.push({ kind: 'gloom', C, k: P.gloom });
 }
+// v4 temporal smoothing (main.js runs the shot at t-3..t-1 frames with ANIM.rec = weight, then at t):
+// limbs, head, torso and hip height are blended over those samples so pose changes ease in instead of snapping.
+function recPose(C, fL, fR, hL, hR, P) {
+  const w = ANIM.rec; if (!w) return; const g = C.g; g.updateMatrixWorld(true);
+  const v = [...fL, ...fR, hL.x, hL.y, hL.z, hR.x, hR.y, hR.z, C.head.rotation.x, C.head.rotation.y, C.head.rotation.z, C.torso.rotation.x, C.torso.rotation.y, C.torso.rotation.z, C.hips.position.y];
+  const root = g.getWorldPosition(new THREE.Vector3());
+  if (!C._acc) C._acc = { v: v.map(x => x * w), w, root, P };
+  else if (C._acc.root.distanceTo(root) < .35 * C.spec.s / .6 && C._acc.vis === (P.visible ?? true)) { C._acc.v.forEach((_, i) => { C._acc.v[i] += v[i] * w; }); C._acc.w += w; C._acc.root = root; C._acc.P = P; }
+  else { C._acc = { v: v.map(x => x * w), w, root, P }; } // teleported / reappeared: restart (no smear across jumps)
+  C._acc.vis = P.visible ?? true;
+}
+export function applySmooth(C) {
+  const A = C._acc; C._acc = null; if (!A || A.w <= 1.01 * ANIM.wFinal || !C.g.visible) return; const v = A.v.map(x => x / A.w), P = A.P;
+  C.head.rotation.set(v[12], v[13], v[14], 'YXZ'); C.torso.rotation.set(v[15], v[16], v[17], 'YXZ'); C.hips.position.y = v[18];
+  ik(C.lL, new THREE.Vector3(v[0], v[1], v[2]), LL, LL, [0, 0, 1]); ik(C.lR, new THREE.Vector3(v[3], v[4], v[5]), LL, LL, [0, 0, 1]);
+  C.handL = ik(C.aL, new THREE.Vector3(v[6], v[7], v[8]), AL, AL, P.pL || [-.6, -.3, -.7]); C.handR = ik(C.aR, new THREE.Vector3(v[9], v[10], v[11]), AL, AL, P.pR || [.6, -.3, -.7]);
+}
+// lip flap like anime: the mouth shape changes at most every 3 frames, from the envelope averaged over those frames
+export function talkQ(env, t) { const f0 = Math.floor(t * 30 / 3) * 3; let e = 0; for (let k = -1; k < 3; k++) e += (env[f0 + k] || 0) * (k < 0 ? .5 : 1); e /= 3.5; return e > .5 ? 1 : e > .2 ? .5 : 0; }
 // auto blink helper: returns true during a 0.12 s blink every ~3.3 s (seeded)
 export function blinkAt(t, seed = 0) { const p = 3.1 + (seed % 3) * .4; const u = ((t + seed * 1.37) % p); return u < .12; }
 
