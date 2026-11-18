@@ -93,7 +93,12 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    fresh thick ink outline (capsuleBody), thin stick limbs, small dot hands + feet, legs ~1 head, head on top, no neck);
    v4.11 line style (refs): dark navy ink #22223a for face lines/outlines, limbs #262338 (spec.limbC); thin brows and
    mouths, small oval dot eyes; capsule body gets a cel-shade band (lit left, shaded right); every character casts a
-   soft contact-shadow blob that stays on the ground during jumps (actJump returns groundY; P.noShadow hides it). set window.CHAR_STYLE = 'chibi' in index.html (before main.js) for the 2.5-head sheet below.
+   soft contact-shadow blob that stays on the ground during jumps (actJump returns groundY; P.noShadow hides it).
+   v4.12 uniforms: in the 'pirate' style the body is DRAWN to fit the capsule from project.json cast[].uniform
+   (flat colours, bold simple details): { base, stripe, stripes, pants, pantsAt, belt, hem, collar: shirt|hood|round|vee,
+   inner, tie, bowtie, zip, vest, buttons, buttonC, pocket: kangaroo|chest|chest4, pocketC, badge: star|tag,
+   sideStripes, apron, scarf }. Without a uniform the colours are sampled from the costume sprite. Limbs are thin with
+   no hull outline, and the body sits in front of the leg tops so legs come out from under it. set window.CHAR_STYLE = 'chibi' in index.html (before main.js) for the 2.5-head sheet below.
    Proportions v4.5 (chibi sheet): 2.5 heads tall: head 1, torso ~1, legs ~0.5 head (LEG .42, LL .225, AL .28);
    bare white hands and plain oval feet by default (spec.glove / spec.cuff / spec.shoe / spec.sole dress them).
    v4.6: shoulders sit right under the head (spec.shoulderX/Y), rest hands hang at the hips.
