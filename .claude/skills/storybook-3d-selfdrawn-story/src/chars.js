@@ -250,7 +250,7 @@ function recPose(C, fL, fR, hL, hR, P) {
   C._acc.vis = P.visible ?? true;
 }
 export function applySmooth(C) {
-  const A = C._acc; C._acc = null; if (!A || A.w <= 1.01 * ANIM.wFinal || !C.g.visible || A.P.fast) { C._roots = []; return; } const v = A.v.map(x => x / A.w), P = A.P; // P.fast: snappy actions skip smoothing (hands stay on props)
+  C.hw = 0; C.hb = 0; const A = C._acc; C._acc = null; if (!A || A.w <= 1.01 * ANIM.wFinal || !C.g.visible || A.P.fast) { C._roots = []; return; } const v = A.v.map(x => x / A.w), P = A.P; // P.fast: snappy actions skip smoothing (hands stay on props)
   C.head.rotation.set(v[12], v[13], v[14], 'YXZ'); C.torso.rotation.set(v[15], v[16], v[17], 'YXZ'); C.hips.position.y = v[18];
   const R = C._roots || []; C._roots = [];
   if (R.length >= 4 && !P.still && ANIM.on) { // v4.1 momentum: lean into the travel direction, head + body lag on starts/stops (follow-through)
@@ -258,7 +258,8 @@ export function applySmooth(C) {
     const sc = C.g.getWorldScale(new THREE.Vector3()).x || 1, inv = new THREE.Quaternion(); C.g.getWorldQuaternion(inv).invert();
     const lv = vel.applyQuaternion(inv).divideScalar(sc), la = acc.applyQuaternion(inv).divideScalar(sc);
     if (lv.length() < 40) { const fwd = clamp(lv.z, -6, 6), side = clamp(lv.x, -6, 6), af = clamp(la.z, -60, 60), as = clamp(la.x, -60, 60);
-      C.torso.rotation.x += .035 * fwd - .0035 * af; C.torso.rotation.z -= .03 * side - .003 * as; C.head.rotation.x -= .005 * af; C.head.rotation.z += .004 * as; } }
+      C.torso.rotation.x += .035 * fwd - .0035 * af; C.torso.rotation.z -= .03 * side - .003 * as; C.head.rotation.x -= .005 * af; C.head.rotation.z += .004 * as;
+      C.hw = clamp(-.0045 * as - .02 * side, -.3, .3); C.hb = clamp(-.0012 * la.y, -.08, .08); } } // v4.13 head (+ hat/headband) lags and wobbles on starts/stops/turns
   ik(C.lL, new THREE.Vector3(v[0], v[1], v[2]), LL, LL, [0, 0, 1]); ik(C.lR, new THREE.Vector3(v[3], v[4], v[5]), LL, LL, [0, 0, 1]);
   C.handL = ik(C.aL, new THREE.Vector3(v[6], v[7], v[8]), AL, AL, P.pL || [-.6, -.3, -.7]); C.handR = ik(C.aR, new THREE.Vector3(v[9], v[10], v[11]), AL, AL, P.pR || [.6, -.3, -.7]);
 }
@@ -331,15 +332,18 @@ export function attachHeld(C) { const H = C._hold; if (!H || !C.g.visible) retur
       const up = new THREE.Vector3(0, h.hang ? -1 : 1, 0).applyQuaternion(q), tgt = up.clone().add(lag).normalize(); q.premultiply(new THREE.Quaternion().setFromUnitVectors(up, tgt)); } }
     // pick up / put down / hand-over: blend from a resting transform { p, q } into the hand (h.blend 0..1)
     if (h.from && (h.blend ?? 1) < 1) { const b = Math.max(0, h.blend ?? 1); pos.lerpVectors(h.from.p, pos, b); q = h.from.q.clone().slerp(q, b); }
+    if (h.noClip !== false) { const tp = C.torso.getWorldPosition(new THREE.Vector3()), d = pos.clone().sub(tp); d.y = 0; const R = (h.clear ?? .2) * sc; // v4.13 keep held props out of the body
+      if (d.length() < R) { if (d.length() < 1e-4) d.set(0, 0, 1).applyQuaternion(C.g.getWorldQuaternion(new THREE.Quaternion())); d.y = 0; d.setLength(R); pos.x = tp.x + d.x; pos.z = tp.z + d.z; } }
     h.obj.visible = true; h.obj.position.copy(pos); h.obj.quaternion.copy(q); } }
 // thrown / dropped object: ballistic arc from p0 with velocity v0, bounces on `floor` (restitution e), then slides and stops (friction mu).
 //   returns { p:[x,y,z], q: Quaternion (tumble while flying, roll on the ground), rest: bool }
-export function flyPath(age, p0, v0, { g = 9.8, floor = -1e9, e = .42, mu = 2.5, r = .08, spin = 8, axis = [1, 0, 0] } = {}) {
+export function flyPath(age, p0, v0, { g = 9.8, floor = -1e9, e = .42, mu = 2.5, r = .08, spin = 8, axis = [1, 0, 0], walls = [] } = {}) {
   let p = [...p0], v = [...v0], t = age, ang = 0, rest = false;
   for (let k = 0; k < 8 && t > 0; k++) { const a = .5 * g, b = v[1], c = p[1] - floor; const tHit = c <= 1e-4 && b <= 0 ? 0 : (b + Math.sqrt(Math.max(0, b * b + 2 * g * c))) / g;
     if (tHit > t || !isFinite(tHit)) { p = [p[0] + v[0] * t, p[1] + v[1] * t - a * t * t, p[2] + v[2] * t]; ang += spin * t; t = 0; break; }
     p = [p[0] + v[0] * tHit, floor, p[2] + v[2] * tHit]; ang += spin * tHit; t -= tHit; v = [v[0] * .8, -(v[1] - g * tHit) * e, v[2] * .8]; spin *= .6; if (v[1] < .6) { v[1] = 0; break; } }
   if (t > 0) { const sp = Math.hypot(v[0], v[2]), ts = Math.min(t, sp / mu), d = sp * ts - .5 * mu * ts * ts; if (sp > 1e-4) { p[0] += v[0] / sp * d; p[2] += v[2] / sp * d; ang += d / r; } rest = t >= sp / mu; p[1] = floor; }
+  for (const w of walls) { const k = w.axis === 'z' ? 2 : 0, n = w.n ?? 1; if ((p[k] - w.at) * n < 0) { p[k] = w.at + (w.at - p[k]) * (w.e ?? .5); ang *= -.6; } } // v4.13 bounce off walls (mirror with restitution)
   const ax = new THREE.Vector3(...axis).normalize(); return { p, q: new THREE.Quaternion().setFromAxisAngle(ax, ang), rest }; }
 // bowling / underhand roll: carry at side -> pendulum back -> lunge + release at `at` -> follow-through. o.released = seconds since release
 export function actBowl(lt, at, { side = 1 } = {}) {
@@ -368,6 +372,21 @@ export function actSlash(lt, at, { admire = at + 1.2, side = 1 } = {}) {
 // a struck / dropped object: hop + squash and settle (returns { y, sq, rz })
 export function bounceAt(lt, at, { h = .12, n = 3 } = {}) { const u = lt - at; if (u < 0) return { y: 0, sq: 0, rz: 0 }; const T = .38; let y = 0, k = Math.floor(u / T), f = (u % T) / T;
   if (k < n) y = h * Math.pow(.45, k) * 4 * f * (1 - f); const sq = k < n && (f < .12 || f > .88) ? -.25 * Math.pow(.5, k) : 0; return { y, sq, rz: Math.exp(-u * 3) * Math.sin(u * 18) * .25 }; }
+// v4.13 flexible things --------------------------------------------------------------
+// rope / chain / leash between two world points: sags under gravity, sways, and lags when an end moves (pass vel of the moving end)
+export function makeRope(color = '#8a6a44', r = .012, n = 16) { const m = new THREE.Mesh(new THREE.BufferGeometry(), toon(color, { grad: GRAD_FLAT })); m.castShadow = false; m.userData.n = n; m.userData.r = r; return m; }
+export function updateRope(m, a, b, { sag = .25, t = 0, sway = .03, vel = null } = {}) { const n = m.userData.n, A = new THREE.Vector3(...(a.toArray ? a.toArray() : a)), B = new THREE.Vector3(...(b.toArray ? b.toArray() : b)), pts = [];
+  const L = A.distanceTo(B), side = new THREE.Vector3().subVectors(B, A).cross(new THREE.Vector3(0, 1, 0)).normalize();
+  for (let i = 0; i <= n; i++) { const u = i / n, p = A.clone().lerp(B, u), bell = 4 * u * (1 - u); p.y -= sag * L * bell; p.addScaledVector(side, Math.sin(t * 2.2 + u * 3) * sway * bell);
+    if (vel) p.addScaledVector(new THREE.Vector3(...(vel.toArray ? vel.toArray() : vel)), -.06 * bell * u); pts.push(p); }
+  m.geometry.dispose(); m.geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), n * 2, m.userData.r, 6, false); }
+// flag / cloth / cape: a plane whose free edge ripples in the wind (attach edge = local x 0)
+export function makeFlag(w = .5, h = .32, color = '#d8483e', map = null) { const g = new THREE.PlaneGeometry(w, h, 14, 6); g.translate(w / 2, 0, 0); const m = new THREE.Mesh(g, toon(color, { grad: GRAD_FLAT, side: THREE.DoubleSide, ...(map ? { map } : {}), unique: true }));
+  m.userData.base = Float32Array.from(g.attributes.position.array); m.userData.w = w; m.castShadow = false; return m; }
+export function waveFlag(m, t, { wind = 1, gust = .5 } = {}) { const P = m.geometry.attributes.position, B = m.userData.base, w = m.userData.w;
+  for (let i = 0; i < P.count; i++) { const x0 = B[i * 3], y0 = B[i * 3 + 1], u = x0 / w, amp = u * u * .09 * wind * (1 + gust * Math.sin(t * .9));
+    P.setXYZ(i, x0 * (1 - .06 * u * wind), y0 - u * u * .04 * (1.4 - wind), Math.sin(t * 6 * wind - x0 * 14) * amp + Math.sin(t * 3.1 + y0 * 9) * amp * .4); }
+  P.needsUpdate = true; m.geometry.computeVertexNormals(); }
 // fast repeated work (hammering, chopping, typing): `rate` strikes per second, returns pose params + strike phase info
 //   o.strike = seconds since the last impact (use for sparks / sfx), o.k = 0..1 swing
 export function actHammer(lt, { rate = 3, side = 1 } = {}) {
@@ -531,7 +550,7 @@ export function updateSprites(cam) {
     C.sb.material.map !== SPR.body[key] && (C.sb.material.map = SPR.body[key], C.sb.material.emissiveMap = SPR.body[key], C.sb.material.needsUpdate = true);
     C.sb.userData.sprN.uniforms.map.value = SPR.body[key];
     // head
-    const UH = new THREE.Vector3(0, 1, 0).transformDirection(C.hc.matrixWorld); const rollH = Math.atan2(-UH.dot(s_r), UH.y);
+    const UH = new THREE.Vector3(0, 1, 0).transformDirection(C.hc.matrixWorld); const rollH = Math.atan2(-UH.dot(s_r), UH.y) + (C.hw || 0) * (mir ? -1 : 1);
     // v3.1: the head is anchored like a 2D puppet to the costume's collar in the billboard plane (not to the 3D head bone),
     // so leaning/pitching never lifts it off the costume (neck hole showed when Tim yawned/leaned back)
     const [hx0, hy0, hx1, hy1] = M.head, [bx, by] = M.ballH; const dx = ((hx1 - hx0) / 2 - bx) * K2 * (mir ? -1 : 1), dy = (by - (hy1 - hy0) / 2) * K2;

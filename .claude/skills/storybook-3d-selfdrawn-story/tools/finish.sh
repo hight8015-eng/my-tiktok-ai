@@ -21,3 +21,4 @@ done
 ffmpeg -v error -y -i out/.v.mp4 -i aud/nomusic_final.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest -movflags +faststart "$O/$NAME (ไม่มีเพลง).mp4"
 [ -f aud/music_final.wav ] && ffmpeg -v error -y -i out/.v.mp4 -i aud/music_final.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest -movflags +faststart "$O/$NAME (มีเพลง).mp4"
 for f in "$O/$NAME"*.mp4; do echo "$f"; ffmpeg -hide_banner -i "$f" -af ebur128=peak=true -f null - 2>&1 | grep -E "^\s+I:|Peak:" | tail -2; done; echo "crf $crf"; ls -la "$O"
+[ -f tools/postmeta.py ] && python3 tools/postmeta.py . "$1" || true   # v4.13: ready-to-paste post text + hashtags (โพสต์.txt)

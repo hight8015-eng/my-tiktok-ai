@@ -96,12 +96,26 @@ function speedLines(f) { // manga focus lines toward the shocked face, fading ou
 function sweep(k) { // soft warm light sweep across the frame (k 0..1)
   X.save(); X.globalCompositeOperation = 'screen'; const x = -700 + k * 2500; const g = X.createLinearGradient(x - 500, 0, x + 500, 400);
   g.addColorStop(0, 'rgba(255,240,215,0)'); g.addColorStop(.5, `rgba(255,240,215,${.75 * Math.sin(Math.PI * k)})`); g.addColorStop(1, 'rgba(255,240,215,0)'); X.fillStyle = g; X.fillRect(0, 0, 1080, 1920); X.restore(); }
+// v4.13 viral captions: each word pops in (overshoot), *word* or numbers are highlighted yellow (project.json captions: { pop, hi, y, size })
+const CAP = { pop: true, hi: '#ffd23f', y: 1350, size: 70, ...(project.captions || {}) };
 function caption(t) {
   const c = timing.caps.find(c => t >= c[0] && t < c[1]); if (!c) return;
-  X.save(); X.font = '700 70px Prompt'; X.textAlign = 'center'; X.textBaseline = 'alphabetic'; X.lineJoin = 'round';
-  const y = 1350; X.shadowColor = 'rgba(0,0,0,.45)'; X.shadowBlur = 10; X.shadowOffsetY = 5; X.lineWidth = 13; X.strokeStyle = '#141018'; X.strokeText(c[2], 540, y);
-  X.shadowColor = 'transparent'; X.fillStyle = '#ffffff'; X.fillText(c[2], 540, y); X.restore();
+  let txt = c[2]; const star = /\*(.+?)\*/.test(txt), hi = star || /[0-9๐-๙]/.test(txt) || (project.hiWords || []).some(w => txt.includes(w)); txt = txt.replace(/\*/g, '');
+  const a = t - c[0], k = CAP.pop ? (a < .16 ? .55 + .45 * E.eOut(a / .16) + .12 * Math.sin(Math.PI * Math.min(1, a / .16)) : 1) : 1;
+  X.save(); X.translate(540, CAP.y); X.scale(k, k); X.rotate(hi && CAP.pop ? Math.sin(a * 18) * .025 * Math.exp(-a * 6) : 0);
+  X.font = `700 ${CAP.size * (hi ? 1.12 : 1)}px Prompt`; X.textAlign = 'center'; X.textBaseline = 'alphabetic'; X.lineJoin = 'round';
+  X.shadowColor = 'rgba(0,0,0,.45)'; X.shadowBlur = 10; X.shadowOffsetY = 5; X.lineWidth = 13; X.strokeStyle = '#141018'; X.strokeText(txt, 0, 0);
+  X.shadowColor = 'transparent'; X.fillStyle = hi ? CAP.hi : '#ffffff'; X.fillText(txt, 0, 0); X.restore();
 }
+// v4.13 hook banner for the first seconds (project.json hook: { text, sub, dur }) and an optional progress bar (project.json progressBar: true)
+function hook(t) { const H = project.hook; if (!H || !H.text) return; const d = H.dur ?? 2.6; if (t > d) return;
+  const a = E.eOut(Math.min(1, t / .25)), out = 1 - E.sstep(d - .3, d, t), k = (.6 + .4 * a + .06 * Math.sin(Math.min(1, t / .25) * Math.PI)) * (1 - .15 * (1 - out));
+  X.save(); X.globalAlpha = out; X.translate(540, 300); X.scale(k, k); X.rotate(-.03 + Math.sin(t * 3) * .01);
+  X.font = '700 78px Prompt'; const w = Math.min(980, X.measureText(H.text).width + 80), h = H.sub ? 190 : 130;
+  X.fillStyle = '#ffd23f'; X.strokeStyle = '#141018'; X.lineWidth = 10; X.beginPath(); X.roundRect(-w / 2, -h / 2, w, h, 28); X.fill(); X.stroke();
+  X.fillStyle = '#141018'; X.textAlign = 'center'; X.textBaseline = 'middle'; X.fillText(H.text, 0, H.sub ? -28 : 4, 940);
+  if (H.sub) { X.font = '600 46px Prompt'; X.fillText(H.sub, 0, 46, 920); } X.restore(); }
+function progress(t) { if (!project.progressBar) return; const u = Math.min(1, t / timing.end); X.save(); X.fillStyle = 'rgba(255,255,255,.18)'; X.fillRect(0, 1906, 1080, 14); X.fillStyle = '#ffd23f'; X.fillRect(0, 1906, 1080 * u, 14); X.restore(); }
 const DIS = .28, WH = .22;
 window.frame = (t, opts = {}) => {
   let i = SHOTS.length - 1; for (let k = 0; k < SHOTS.length; k++) if (t < SHOTS[k].t1) { i = k; break; }
@@ -114,7 +128,7 @@ window.frame = (t, opts = {}) => {
   bloom();
   if (sh.tr === 'sweep' && lt < .45) sweep(lt / .45); const nx = SHOTS[i + 1]; if (nx && nx.tr === 'sweep' && nx.t0 - t < .2) sweep((t - (nx.t0 - .2)) / .45);
   if (t > timing.end - .25) { X.fillStyle = `rgba(0,0,0,${E.clamp((t - (timing.end - .25)) / .25)})`; X.fillRect(0, 0, 1080, 1920); }
-  if (!opts.nocap) caption(t);
+  if (!opts.nocap) { caption(t); hook(t); } progress(t);
   return out.toDataURL('image/jpeg', .92);
 };
 window.cover = (o = {}) => { reset0(); COVER.fn(0, 57.5, o); updateSprites(E.camera); Wd.updateSky(57.5); E.render(); X.drawImage(E.glc, 0, 0); bloom(); return out.toDataURL('image/jpeg', .95); };

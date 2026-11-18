@@ -98,7 +98,20 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    (flat colours, bold simple details): { base, stripe, stripes, pants, pantsAt, belt, hem, collar: shirt|hood|round|vee,
    inner, tie, bowtie, zip, vest, buttons, buttonC, pocket: kangaroo|chest|chest4, pocketC, badge: star|tag,
    sideStripes, apron, scarf }. Without a uniform the colours are sampled from the costume sprite. Limbs are thin with
-   no hull outline, and the body sits in front of the leg tops so legs come out from under it. set window.CHAR_STYLE = 'chibi' in index.html (before main.js) for the 2.5-head sheet below.
+   no hull outline, and the body sits in front of the leg tops so legs come out from under it.
+   v4.13 extra physics: the head (and hat/headband art) lags and wobbles on starts/stops/turns; held props never sink
+   into the body (hold entry noClip / clear); flyPath(..., {walls: [{axis: 'x'|'z', at, n, e}]}) bounces off walls;
+   makeRope/updateRope (sagging, swaying rope/leash/chain) and makeFlag/waveFlag (flag, cloth, cape in the wind).
+   RETENTION / VIRAL KIT (use on every story):
+   - project.json "hook": { text, sub, dur } = a big yellow banner in the first ~2.5 s (the hook decides the swipe).
+   - captions pop in word by word; wrap a word in *stars* in timing caps (or list "hiWords") to colour it yellow;
+     numbers are highlighted automatically. "captions": { y, size, pop, hi } to restyle.
+   - "progressBar": true draws a thin progress bar (keeps people to the end).
+   - finish.sh also writes โพสต์.txt (title, hook line, description, hashtags) via tools/postmeta.py; set
+     "post": { title, hook, desc, tags, series, part } in project.json.
+   - Shot rules that the algorithm rewards: something changes every 2-3 s (cut, camera move, FX, expression pop);
+     open on the most surprising image, not the setup; end on a question / cliffhanger that loops into part 2;
+     put a sound accent (whoosh, hit, ding) on every cut and every caption keyword. set window.CHAR_STYLE = 'chibi' in index.html (before main.js) for the 2.5-head sheet below.
    Proportions v4.5 (chibi sheet): 2.5 heads tall: head 1, torso ~1, legs ~0.5 head (LEG .42, LL .225, AL .28);
    bare white hands and plain oval feet by default (spec.glove / spec.cuff / spec.shoe / spec.sole dress them).
    v4.6: shoulders sit right under the head (spec.shoulderX/Y), rest hands hang at the hips.
