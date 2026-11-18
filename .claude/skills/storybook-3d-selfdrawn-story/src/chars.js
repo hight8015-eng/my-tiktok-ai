@@ -28,32 +28,38 @@ const EX = {
 };
 function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a white ball head (no nose)
   const S = 512; x.clearRect(0, 0, S, S);
-  const ey = S * (spec.eyeY ?? .5), ex = S * .125, ink = '#1c1420';
-  x.fillStyle = spec.cheek || 'rgba(255,128,140,.38)'; for (const s of [-1, 1]) { x.beginPath(); x.ellipse(S / 2 + s * S * .2, ey + 62, 26, 15, 0, 0, 7); x.fill(); }
+  const BIG = !spec.dotEyes, EK = BIG ? 2.45 : 1; // v4.6 sheet face: eyes ~1/4 head wide, nearly touching; bigger mouth
+  const ey = S * (spec.eyeY ?? .5), ex = S * (BIG ? .152 : .125), ink = '#1c1420';
+  x.fillStyle = spec.cheek || 'rgba(255,128,140,.38)'; for (const s of [-1, 1]) { x.beginPath(); x.ellipse(S / 2 + s * S * (BIG ? .37 : .2), ey + (BIG ? 128 : 62), 30, 17, 0, 0, 7); x.fill(); }
   const eyes = blink ? 'closed' : e.eyes; const lx = (look?.[0] || 0) * 9, ly = (look?.[1] || 0) * 7;
   x.lineCap = 'round'; x.lineJoin = 'round';
   for (const s of [-1, 1]) {
     const cx = S / 2 + s * ex, cy = ey; let kind = eyes; if (kind === 'wink') kind = s < 0 ? 'open' : 'closedUp';
-    x.fillStyle = ink; x.strokeStyle = ink; x.lineWidth = 19;
-    if (kind === 'open' || kind === 'side') { const dx = kind === 'side' ? 11 * (spec.sideDir || 1) : lx; x.beginPath(); x.ellipse(cx + dx, cy + ly, 15, 21, 0, 0, 7); x.fill(); }
+    x.save(); if (BIG) { x.translate(cx, cy); x.scale(EK, EK); x.translate(-cx, -cy); }
+    x.fillStyle = ink; x.strokeStyle = ink; x.lineWidth = BIG ? 9 : 19;
+    if ((kind === 'open' || kind === 'side') && !spec.dotEyes) { const dx = kind === 'side' ? 13 * (spec.sideDir || 1) : lx * 1.4; // v4.6 sheet eyes: big white ovals, ink outline, pupil
+      x.fillStyle = '#fbf8f2'; x.lineWidth = 6; x.beginPath(); x.ellipse(cx, cy - 2, 30, 38, 0, 0, 7); x.fill(); x.stroke();
+      x.fillStyle = ink; x.beginPath(); x.ellipse(cx + dx + 3, cy + 6 + ly * 1.2, 13, 18, 0, 0, 7); x.fill(); x.fillStyle = '#ffffff'; x.beginPath(); x.arc(cx + dx - 1, cy - 2 + ly, 4.5, 0, 7); x.fill(); }
+    else if (kind === 'open' || kind === 'side') { const dx = kind === 'side' ? 11 * (spec.sideDir || 1) : lx; x.beginPath(); x.ellipse(cx + dx, cy + ly, 15, 21, 0, 0, 7); x.fill(); }
     else if (kind === 'half') { x.save(); x.beginPath(); x.rect(cx - 40, cy - 2, 80, 60); x.clip(); x.beginPath(); x.ellipse(cx + lx, cy + 2, 16, 20, 0, 0, 7); x.fill(); x.restore(); x.beginPath(); x.moveTo(cx - 25, cy - 2); x.lineTo(cx + 25, cy - 2); x.stroke(); }
     else if (kind === 'closed') { x.beginPath(); x.moveTo(cx - 22, cy + 2); x.quadraticCurveTo(cx, cy + 14, cx + 22, cy + 2); x.stroke(); }
     else if (kind === 'closedUp' || kind === 'happy') { x.beginPath(); x.moveTo(cx - 22, cy + 8); x.quadraticCurveTo(cx, cy - 16, cx + 22, cy + 8); x.stroke(); }
     else if (kind === 'wide') { x.fillStyle = '#fbf8f2'; x.lineWidth = 13; x.beginPath(); x.ellipse(cx, cy, 30, 36, 0, 0, 7); x.fill(); x.stroke(); x.fillStyle = ink; x.beginPath(); x.arc(cx + lx * .6, cy + ly * .6, 9, 0, 7); x.fill(); }
-    const ang = (s < 0 ? e.bl : e.br) * D2R; const by = cy - 48 + (e.by || 0);
-    x.strokeStyle = spec.browC || ink; x.lineWidth = spec.browW || 22; x.save(); x.translate(cx, by); x.rotate(s < 0 ? -ang : ang); x.beginPath(); x.moveTo(-24, 0); x.lineTo(24, 0); x.stroke(); x.restore();
+    x.restore();
+    const ang = (s < 0 ? e.bl : e.br) * D2R; const by = cy - (BIG ? 128 : 48) + (e.by || 0) * EK;
+    x.strokeStyle = spec.browC || ink; x.lineWidth = spec.browW || (BIG ? 26 : 22); x.save(); x.translate(cx, by); x.rotate(s < 0 ? -ang : ang); x.beginPath(); x.moveTo(BIG ? -36 : -24, 0); x.lineTo(BIG ? 36 : 24, 0); x.stroke(); x.restore();
   }
   if (spec.fringe) { x.fillStyle = spec.fringe; x.strokeStyle = ink; x.lineWidth = 12; const top = ey - 190, L = S * .16, Rr = S * .84, n = 6; x.beginPath(); x.moveTo(L, top); x.lineTo(L, ey - 60);
     for (let i = 1; i <= n; i++) { const bx = L + (Rr - L) * i / n, yb = ey - 60 - Math.sin(Math.PI * i / n) * 34 - (i === n ? 0 : 0); x.quadraticCurveTo(bx - (Rr - L) / n / 2, yb + 44, bx, i === n ? ey - 60 : yb); }
     x.lineTo(Rr, top); x.closePath(); x.fill(); x.stroke(); }
   if (spec.glasses2D) { x.strokeStyle = ink; x.lineWidth = 13; for (const s of [-1, 1]) { x.beginPath(); x.arc(S / 2 + s * ex, ey, 36, 0, 7); x.stroke(); } x.beginPath(); x.moveTo(S / 2 - ex + 36, ey - 4); x.quadraticCurveTo(S / 2, ey - 14, S / 2 + ex - 36, ey - 4); x.stroke(); }
-  const my = S * (spec.mouthY ?? .7);
+  const my = S * (spec.mouthY ?? .7) + (BIG ? 62 : 0);
   if (spec.beard) { x.fillStyle = spec.beard; x.strokeStyle = ink; x.lineWidth = 12; const top = ey + 34, L = S * .25, Rr = S * .75; x.beginPath(); x.moveTo(L, top);
     const n = 7; for (let i = 0; i <= n; i++) { const u = i / n, bx = L + (Rr - L) * u, by = top + Math.sin(Math.PI * u) * 120 + 18; if (i) x.quadraticCurveTo(bx - (Rr - L) / n / 2, by + 26, bx, by); else x.lineTo(bx, by); }
     x.lineTo(Rr, top); x.quadraticCurveTo(S / 2, top + 44, L, top); x.closePath(); x.fill(); x.stroke(); }
   let m = e.mouth; if (talk > 0) m = talk > .66 ? 'open' : talk > .33 ? 'talk' : (m === 'o' || m === 'yawn' ? m : 'flat');
-  x.strokeStyle = ink; x.fillStyle = '#3a1a24'; x.lineWidth = 15; const cx = S / 2;
-  if (m === 'smile') { x.beginPath(); x.moveTo(cx - 24, my - 2); x.quadraticCurveTo(cx, my + 16, cx + 24, my - 2); x.stroke(); }
+  x.strokeStyle = ink; x.fillStyle = '#3a1a24'; x.lineWidth = 15; const cx = S / 2; x.save(); if (BIG) { x.translate(cx, my); x.scale(1.9, 1.9); x.translate(-cx, -my); }
+  if (m === 'smile') { const W = BIG ? 44 : 24, D = BIG ? 30 : 16; x.beginPath(); x.moveTo(cx - W, my - 10); x.quadraticCurveTo(cx, my + D, cx + W, my - 10); x.stroke(); } // v4.6 wide sheet smile
   else if (m === 'flat') { x.beginPath(); x.moveTo(cx - 18, my + 4); x.lineTo(cx + 18, my + 4); x.stroke(); }
   else if (m === 'smirk') { x.beginPath(); x.moveTo(cx - 22, my + 6); x.quadraticCurveTo(cx + 6, my + 12, cx + 28, my - 6); x.stroke(); }
   else if (m === 'grin') { x.beginPath(); x.moveTo(cx - 32, my - 4); x.quadraticCurveTo(cx, my + 40, cx + 32, my - 4); x.closePath(); x.fill(); x.stroke(); x.fillStyle = '#fbf8f2'; x.fillRect(cx - 22, my - 1, 44, 8); }
@@ -66,6 +72,7 @@ function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a wh
     x.closePath(); x.fill(); x.stroke(); x.lineWidth = 9; x.beginPath(); x.moveTo(cx - w + 4, y0 + h * .45); x.lineTo(cx + w - 4, y0 + h * .45); for (let i = -2; i <= 2; i++) { x.moveTo(cx + i * w / 3, y0 + 2); x.lineTo(cx + i * w / 3, y0 + h - 4); } x.stroke(); x.lineWidth = 15; }
   else if (m === 'bigO') { x.beginPath(); x.ellipse(cx, my + 22, 40, 58, 0, 0, 7); x.fill(); x.stroke(); }
   else if (m === 'wavy') { x.beginPath(); x.moveTo(cx - 26, my + 6); for (let i = 1; i <= 6; i++) x.lineTo(cx - 26 + i * 8.7, my + 6 + (i % 2 ? -6 : 6)); x.stroke(); }
+  x.restore();
   if (spec.stache) { x.fillStyle = spec.stacheC || '#f2f0ea'; x.strokeStyle = ink; x.lineWidth = 12; for (const s of [-1, 1]) { x.beginPath(); x.moveTo(cx, my - 24); x.bezierCurveTo(cx + s * 26, my - 46, cx + s * 62, my - 28, cx + s * 78, my - 44); x.bezierCurveTo(cx + s * 72, my - 4, cx + s * 26, my - 6, cx, my - 12); x.closePath(); x.fill(); x.stroke(); } }
 }
 function faceTexFor(spec, exName, blink, talk, look) {
@@ -197,8 +204,8 @@ export function pose(C, P = {}) {
     if (ta && !w) { const gx = noise1(t * 2.4 + sd * 11), gy = Math.max(0, noise1(t * 1.9 + sd * 13)); gR = [.03 * gx, .16 * gy, .12 * gy]; gL = [-.02 * gx, .05 * Math.max(0, noise1(t * 1.6 + sd * 17)), .04]; }
   } else C.br = 0;
   const runA_ = w && w.run && !P.hL && !P.hR; if (runA_) { const a = Math.sin(w.ph) * w.run; P = { ...P, hL: [-.26, .42 + .14 * Math.max(0, -a), -.32 * a + .08], hR: [.26, .42 + .14 * Math.max(0, a), .32 * a + .08], pL: [-1, -.4, -.9], pR: [1, -.4, -.9] }; }
-  const hL = P.hL ? (P.hL.isVector3 ? P.hL.clone() : new THREE.Vector3(...P.hL)) : new THREE.Vector3(-.36, .2 + Math.abs(sw) * .25, .06 - sw);
-  const hR = P.hR ? (P.hR.isVector3 ? P.hR.clone() : new THREE.Vector3(...P.hR)) : new THREE.Vector3(.36, .2 + Math.abs(sw) * .25, .06 + sw);
+  const hL = P.hL ? (P.hL.isVector3 ? P.hL.clone() : new THREE.Vector3(...P.hL)) : new THREE.Vector3(-.31, .32 + Math.abs(sw) * .25, .05 - sw); // v4.6: rest hands hang at the hips, close to the body
+  const hR = P.hR ? (P.hR.isVector3 ? P.hR.clone() : new THREE.Vector3(...P.hR)) : new THREE.Vector3(.31, .32 + Math.abs(sw) * .25, .05 + sw);
   if (live) { const k = (P.hR || P.hL) ? .45 : 1; hR.x += gR[0] * k; hR.y += gR[1] * k; hR.z += gR[2] * k; hL.x += gL[0] * k; hL.y += gL[1] * k; hL.z += gL[2] * k;
     const dr = .012 * A; hR.y += dr * Math.sin(t * 2.3 + sd + .6); hL.y += dr * Math.sin(t * 2.3 + sd + 1.1); }
   C.handL = ik(C.aL, hL, AL, AL, P.pL || [-.6, -.3, -.7]); C.handR = ik(C.aR, hR, AL, AL, P.pR || [.6, -.3, -.7]);
@@ -388,7 +395,7 @@ export function makeChar2D(spec) {
   const inArm = (o) => { for (let q = o.parent; q && q !== C.torso; q = q.parent) if (q === C.aL.up || q === C.aL.fo || q === C.aR.up || q === C.aR.fo) return true; return false; };
   C.torso.traverse(o => { if (o.isMesh && !inArm(o) && o.parent !== C.sweat && o.parent !== C.props) {
     if (o === C.face) { o.visible = false; return; } o.material = SHADOWONLY; o.userData.noInk = true; o.castShadow = true; } });
-  for (const L of [C.aL, C.aR]) L.S.x = Math.sign(L.S.x) * .26;
+  for (const L of [C.aL, C.aR]) { L.S.x = Math.sign(L.S.x) * (spec.shoulderX ?? .23); L.S.y = spec.shoulderY ?? .84; } // v4.6 sheet: arms start right under the head
   C.hc.children.forEach(o => { if (o.isMesh && o.material === SHADOWONLY) o.scale.setScalar(.68); });
   const F = SPR.meta[spec.sprite + '-F']; C.cx = F.ball[0];
   // v3.1: the Flow head floated above the collar so the neck hole showed -> sink the ball into the collar (ball bottom IN px below the body top)

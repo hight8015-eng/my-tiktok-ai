@@ -91,6 +91,8 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    objects along the street (not across it into the buildings) and track them from the side.
    Proportions v4.5 (chibi sheet): 2.5 heads tall: head 1, torso ~1, legs ~0.5 head (LEG .42, LL .225, AL .28);
    bare white hands and plain oval feet by default (spec.glove / spec.cuff / spec.shoe / spec.sole dress them).
+   v4.6: shoulders sit right under the head (spec.shoulderX/Y), rest hands hang at the hips; sheet face by default:
+   big white oval eyes with pupils, nearly touching, wide smile (spec.dotEyes = old small dot eyes).
 9. **Finish:** `bash tools/finish.sh <out_dir> "<title>" 26`, then `bash tools/cover.sh <out_dir>/ปก.jpg`.
 10. **Deliver:** on the user's computer put the files in `~/Desktop/edit-video/<project>/<version>/`. On a phone,
     send them back in the chat.
