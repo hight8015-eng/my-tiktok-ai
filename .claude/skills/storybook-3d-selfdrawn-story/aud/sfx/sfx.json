@@ -355,5 +355,159 @@
   "th": "กรีดร้อง / คำราม ยาว",
   "file": "scream_long_51.wav",
   "src": "141_06"
+ },
+ {
+  "n": 52,
+  "cat": "punch",
+  "th": "ต่อย / ชก",
+  "file": "punch_52.wav",
+  "src": "Punches_01"
+ },
+ {
+  "n": 53,
+  "cat": "punch",
+  "th": "ต่อย / ชก",
+  "file": "punch_53.wav",
+  "src": "Punches_02"
+ },
+ {
+  "n": 54,
+  "cat": "punch",
+  "th": "ต่อย / ชก",
+  "file": "punch_54.wav",
+  "src": "Punches_03"
+ },
+ {
+  "n": 55,
+  "cat": "punch",
+  "th": "ต่อย / ชก",
+  "file": "punch_55.wav",
+  "src": "Punches_04"
+ },
+ {
+  "n": 56,
+  "cat": "punch",
+  "th": "ต่อย / ชก",
+  "file": "punch_56.wav",
+  "src": "Punches_05"
+ },
+ {
+  "n": 57,
+  "cat": "punch",
+  "th": "ต่อย / ชก",
+  "file": "punch_57.wav",
+  "src": "Punches_06"
+ },
+ {
+  "n": 58,
+  "cat": "punch",
+  "th": "ต่อย / ชก",
+  "file": "punch_58.wav",
+  "src": "Punches_07"
+ },
+ {
+  "n": 59,
+  "cat": "punch",
+  "th": "ต่อย / ชก",
+  "file": "punch_59.wav",
+  "src": "Punches_08"
+ },
+ {
+  "n": 60,
+  "cat": "explosion",
+  "th": "ระเบิด",
+  "file": "explosion_60.wav",
+  "src": "Explosion_Medium_2_01"
+ },
+ {
+  "n": 61,
+  "cat": "metal_hit",
+  "th": "โลหะกระทบ",
+  "file": "metal_hit_61.wav",
+  "src": "Metal_Hit_03_01"
+ },
+ {
+  "n": 62,
+  "cat": "gong_comic",
+  "th": "ฆ้องตลก",
+  "file": "gong_comic_62.wav",
+  "src": "Comical_Metal_Gong_01"
+ },
+ {
+  "n": 63,
+  "cat": "shimmer",
+  "th": "วิ้งเวทมนตร์ / ระยิบ",
+  "file": "shimmer_63.wav",
+  "src": "Shimmering01_01"
+ },
+ {
+  "n": 64,
+  "cat": "shimmer",
+  "th": "วิ้งเวทมนตร์ / ระยิบ",
+  "file": "shimmer_64.wav",
+  "src": "Shimmering02_01"
+ },
+ {
+  "n": 65,
+  "cat": "harp",
+  "th": "พิณ (ฝัน / ย้อนอดีต)",
+  "file": "harp_65.wav",
+  "src": "harp01_01"
+ },
+ {
+  "n": 66,
+  "cat": "harp",
+  "th": "พิณ (ฝัน / ย้อนอดีต)",
+  "file": "harp_66.wav",
+  "src": "harp06_01"
+ },
+ {
+  "n": 67,
+  "cat": "kwing",
+  "th": "กวิ้งๆ",
+  "file": "kwing_67.wav",
+  "src": "kwing_kwing_01"
+ },
+ {
+  "n": 68,
+  "cat": "horn",
+  "th": "แตรตลก / เป็ด",
+  "file": "horn_68.wav",
+  "src": "horn_duck_1_01"
+ },
+ {
+  "n": 69,
+  "cat": "horn",
+  "th": "แตรตลก / เป็ด",
+  "file": "horn_69.wav",
+  "src": "horn_duck_2_01"
+ },
+ {
+  "n": 70,
+  "cat": "horn",
+  "th": "แตรตลก / เป็ด",
+  "file": "horn_70.wav",
+  "src": "horn_3_01"
+ },
+ {
+  "n": 71,
+  "cat": "silly",
+  "th": "เสียงตลกสั้น",
+  "file": "silly_71.wav",
+  "src": "silly_1_01"
+ },
+ {
+  "n": 72,
+  "cat": "scream",
+  "th": "กรีดร้อง (ผู้ชาย)",
+  "file": "scream_72.wav",
+  "src": "Screams_Male_01_01"
+ },
+ {
+  "n": 73,
+  "cat": "applause",
+  "th": "เสียงฝูงชน / ปรบมือ",
+  "file": "applause_73.wav",
+  "src": "Filmmusik_-_Sound_Effect_01"
  }
 ]

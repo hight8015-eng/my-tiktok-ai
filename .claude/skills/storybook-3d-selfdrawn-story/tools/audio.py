@@ -91,6 +91,7 @@ def plip():
     t = np.arange(int(.15 * SR)) / SR; f = 900 + 1800 * t / .15; return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t / .04) * .5
 # v4 recorded SFX library (aud/sfx, index aud/sfx/sfx.json): sfx('whoosh'), sfx('shine'), sfx('hit_dramatic', 1) ...
 # categories: whoosh riser wobble hit_dramatic drumroll crash bang rattle noise bell chime buzzer shine click whistle laugh voice_hum voice_react scream_long
+#             punch explosion metal_hit gong_comic shimmer harp kwing horn silly scream applause
 SFXLIB = json.load(open(f'{W}/aud/sfx/sfx.json')) if os.path.exists(f'{W}/aud/sfx/sfx.json') else []
 def sfx(cat, i=0):
     L_ = [e for e in SFXLIB if e['cat'] == cat]
