@@ -162,7 +162,7 @@ export function makeChar(spec) { // v2: stick figure: white ball head, bean tors
 export const STYLE = (globalThis.CHAR_STYLE || 'pirate');
 const ST_ = { pirate: { LEG: .96, AL: .36, LL: .5, body: { w: 1.0, h: 1.4, top: 1.0, bottom: 1.0, head: 1.0, flat: true }, capsule: { w: .64, bottom: .8 }, sh: [.2, .98], rest: .26, limbW: .58, handR: .03, footK: .9, limbNoOutline: true },
   chibi: { LEG: .42, AL: .28, LL: .225, body: { w: .86, h: .9, top: .7, bottom: 1.1, head: 1.14 }, sh: [.17, .7], rest: .32 } }[STYLE] || {};
-export const LEG = ST_.LEG ?? .6, AL = ST_.AL ?? .34, LL = ST_.LL ?? .32; // v3: longer but hair-thin limbs // v2: short chubby figures like the ref (about 3 heads tall)
+export const LEG = ST_.LEG ?? .6, AL = ST_.AL ?? .34, LL = ST_.LL ?? .32, LK = Math.max(1, LEG / .6) * .85; // v3: longer but hair-thin limbs // v2: short chubby figures like the ref (about 3 heads tall)
 // ---- IK ----
 const _v = new THREE.Vector3(), _q = new THREE.Quaternion(), DOWN = new THREE.Vector3(0, -1, 0);
 function ik(limb, T, L1, L2, pole) {
@@ -208,10 +208,10 @@ export function pose(C, P = {}) {
     C.head.rotation.y -= Math.sin(ph) * .1 * k; C.head.rotation.x += Math.sin(2 * ph - .7) * .035 * k; }
   let fL = P.fL, fR = P.fR;
   if (!fL) { if (P.sit) { const sh = (P.seat ?? .45) / s; fL = [-.14, -sh + .03, .5]; fR = [.14, -sh + .03, .5]; }
-    else if (w && w.run) { const st = (w.stride ?? .3) * w.run, ft = (a) => { const sw = Math.cos(a); // v4.3 run (model sheet 11-20): bent knees, back foot kicks high, front foot reaches
-        return [-hy + .03 + Math.pow(Math.max(0, sw), 1.4) * .3 * w.run + Math.max(0, -sw) * Math.max(0, Math.sin(a)) * .04, Math.sin(a) * st - Math.max(0, sw) * .08 * w.run]; };
+    else if (w && w.run) { const st = (w.stride ?? .3) * w.run * LK, ft = (a) => { const sw = Math.cos(a); // v4.3 run (model sheet 11-20): bent knees, back foot kicks high, front foot reaches
+        return [-hy + .03 + Math.pow(Math.max(0, sw), 1.4) * .3 * LK * w.run + Math.max(0, -sw) * Math.max(0, Math.sin(a)) * .04, Math.sin(a) * st - Math.max(0, sw) * .08 * w.run]; };
       const L_ = ft(w.ph), R_ = ft(w.ph + Math.PI); fL = [-.11, L_[0], L_[1]]; fR = [.11, R_[0], R_[1]]; }
-    else if (w) { const st = w.stride ?? .22, lift = (x) => { const v = Math.max(0, x); return v * v * .13; }; // smooth foot arcs (no hard corners at plant/lift)
+    else if (w) { const st = (w.stride ?? .22) * LK, lift = (x) => { const v = Math.max(0, x); return v * v * .13 * LK; }; // v4.22 stride/lift scale with leg length // smooth foot arcs (no hard corners at plant/lift)
       fL = [-.12, -hy + .03 + lift(Math.sin(w.ph)), Math.sin(w.ph + Math.PI / 2) * st]; fR = [.12, -hy + .03 + lift(-Math.sin(w.ph)), -Math.sin(w.ph + Math.PI / 2) * st]; }
     else { fL = [-.13, -hy + .03, .03]; fR = [.13, -hy + .03, .03]; } }
   ik(C.lL, new THREE.Vector3(...fL), LL, LL, [0, 0, 1]); ik(C.lR, new THREE.Vector3(...fR), LL, LL, [0, 0, 1]);
@@ -230,9 +230,12 @@ export function pose(C, P = {}) {
   const hL = P.hL ? (P.hL.isVector3 ? P.hL.clone() : new THREE.Vector3(...P.hL)) : new THREE.Vector3(-.3, (ST_.rest ?? .2) + Math.abs(sw) * .25, .07 - sw); // v4.6: rest hands hang at the hips, close to the body
   const hR = P.hR ? (P.hR.isVector3 ? P.hR.clone() : new THREE.Vector3(...P.hR)) : new THREE.Vector3(.3, (ST_.rest ?? .2) + Math.abs(sw) * .25, .07 + sw);
   if (live) { const k = (P.hR || P.hL) ? .45 : 1; hR.x += gR[0] * k; hR.y += gR[1] * k; hR.z += gR[2] * k; hL.x += gL[0] * k; hL.y += gL[1] * k; hL.z += gL[2] * k;
-    const dr = .012 * A; hR.y += dr * Math.sin(t * 2.3 + sd + .6); hL.y += dr * Math.sin(t * 2.3 + sd + 1.1); }
+    const dr = .012 * A; hR.y += dr * Math.sin(t * 2.3 + sd + .6); hL.y += dr * Math.sin(t * 2.3 + sd + 1.1);
+    if (!P.hR && !w) hR.z += .018 * A * Math.sin(t * 1.15 + sd); if (!P.hL && !w) hL.z += .018 * A * Math.sin(t * 1.15 + sd + 2.1); } // v4.22 resting arms sway a little, never frozen
   C.handL = ik(C.aL, hL, AL, AL, P.pL || [-.3, -.45, -.85]); C.handR = ik(C.aR, hR, AL, AL, P.pR || [.3, -.45, -.85]); // v4.19 elbows bend down/back like a real arm, not out sideways
-  if (C.is2D) C.f2 = [P.ex || 'neutral', !!P.blink, P.talk || 0, P.look, P.eyeC || ''];
+  const bl = P.blink ?? (ANIM.on && !P.still ? blinkAt(ANIM.t, (seedOf(C) * 7) % 5) : false); // v4.22 everyone blinks on their own rhythm unless the shot says otherwise
+  C.walkPh = w && !P.still ? w.ph * Math.min(1, (w.stride ?? .22) / .22) : null;
+  if (C.is2D) C.f2 = [P.ex || 'neutral', !!bl, P.talk || 0, P.look, P.eyeC || ''];
   else { const tex = faceTexFor(C.spec, P.ex || 'neutral', !!P.blink, P.talk || 0, P.look); if (C.faceM.map !== tex) { C.faceM.map = tex; C.faceM.needsUpdate = true; } }
   for (const [L_, k] of [[C.aL, 'L'], [C.aR, 'R']]) if (L_.open) { const o = P.open === true || P.open === k; L_.open.visible = o; L_.hand.visible = !o; }
   { const bl = g.userData.blob; if (bl) { const lift = P.groundY !== undefined && P.p ? (P.p[1] - P.groundY) / s : 0; bl.position.y = .006 - lift; const k = Math.max(.35, 1 - lift * .9); bl.scale.set(k, .62 * k, 1); bl.visible = !P.noShadow; } }
@@ -426,6 +429,9 @@ function capsuleBody(im, o, U, view = 'F') { const W = im.width, H = im.height, 
       x.beginPath(); x.moveTo(tx, cy + rt); x.quadraticCurveTo(tx, cy, tx + rt, cy); x.lineTo(tx + tw - rt, cy); x.quadraticCurveTo(tx + tw, cy, tx + tw, cy + rt); x.lineTo(tx + tw - cw * .02, wy);
       x.bezierCurveTo(tx + tw + cw * .1, wy + ch * .12, cx + cw + fl * .8, cy + ch * .7, cx + cw + fl, cy + ch * .95); x.quadraticCurveTo(cx + cw / 2, cy + ch * 1.02, cx - fl, cy + ch * .95); x.bezierCurveTo(cx - fl * .8, cy + ch * .7, tx - cw * .1, wy + ch * .12, tx + cw * .02, wy); x.closePath(); }
     : () => { x.beginPath(); x.moveTo(cx, cy + r); x.arc(cx + r, cy + r, r, Math.PI, 0); x.lineTo(cx + cw, cy + ch - r * bk); x.ellipse(cx + r, cy + ch - r * bk, r, r * bk, 0, 0, Math.PI); x.closePath(); };
+  if (U && U.cape && view !== 'B') { const fl = cx * .85, sd = view === 'S' ? 1 : 0; x.fillStyle = U.cape; x.strokeStyle = INK; x.lineWidth = lw * .55; // v4.22 cape behind the body: flares out past the hem on both sides
+    for (const sg of sd ? [1] : [-1, 1]) { const ex = sg < 0 ? cx : cx + cw, ox = ex + sg * fl; x.beginPath(); x.moveTo(ex - sg * cw * .25, cy + ch * .06); x.quadraticCurveTo(ex + sg * fl * .5, cy + ch * .4, ox, cy + ch * .985); x.lineTo(ex - sg * cw * .2, cy + ch * .985); x.closePath(); x.fill(); x.stroke();
+      x.fillStyle = 'rgba(0,0,0,.18)'; x.beginPath(); x.moveTo(ex + sg * fl * .15, cy + ch * .3); x.quadraticCurveTo(ex + sg * fl * .45, cy + ch * .6, ox - sg * fl * .2, cy + ch * .97); x.lineTo(ex + sg * fl * .05, cy + ch * .97); x.closePath(); x.fill(); x.fillStyle = U.cape; } }
   x.save(); path(); x.clip();
   if (!U) U = autoUniform(im);
   drawUniform(x, { cx, cy, cw, ch, W, H, lw, INK }, U, view);
@@ -440,7 +446,14 @@ function capsuleBody(im, o, U, view = 'F') { const W = im.width, H = im.height, 
   // v4.19 weighted ink (refs): the line swells on the shadow side (lower right) and thins where light hits (upper left)
   { const o2 = document.createElement('canvas'); o2.width = W; o2.height = H; const y = o2.getContext('2d'), sp = x; const dx = lw * .9, dy = lw * .45;
     y.fillStyle = INK; y.save(); y.translate(dx, dy); x = y; path(); y.fill(); y.restore(); y.globalCompositeOperation = 'destination-out'; path(); y.fill(); x = sp; x.drawImage(o2, 0, 0); }
-  x.lineWidth = lw * .55; x.strokeStyle = INK; path(); x.stroke(); return c; }
+  x.lineWidth = lw * .55; x.strokeStyle = INK; path(); x.stroke();
+  if (U && U.cape && view === 'B') { x.save(); path(); x.clip(); x.fillStyle = U.cape; x.fillRect(cx + cw * .04, cy + ch * .05, cw * .92, ch); x.strokeStyle = 'rgba(0,0,0,.25)'; x.lineWidth = lw * .4;
+    for (const k of [.3, .5, .7]) { x.beginPath(); x.moveTo(cx + cw * k, cy + ch * .2); x.lineTo(cx + cw * (k + (k - .5) * .3), cy + ch); x.stroke(); } x.restore(); x.lineWidth = lw * .55; x.strokeStyle = INK; path(); x.stroke(); }
+  if (U && U.pauldron) { const sides = view === 'S' ? [1] : view === 'B' ? [-1, 1] : [-1, 1]; // v4.22 rounded shoulder plates with a rim and a shine
+    for (const sg of sides) { const px = view === 'S' ? cx + cw * .5 : sg < 0 ? cx + cw * .1 : cx + cw * .9, py = cy + ch * .11, rx = cw * (view === 'S' ? .3 : .22), ry = ch * .085;
+      for (const [k, col] of [[1, U.pauldron], [.62, U.pauldronRim || U.pauldron]]) { x.beginPath(); x.ellipse(px, py + ry * (1 - k) * .9, rx * k, ry * k, 0, Math.PI, 0); x.quadraticCurveTo(px + rx * k, py + ry * .9 * k + ry * (1 - k) * .9, px, py + ry * 1.05 * k + ry * (1 - k) * .9); x.quadraticCurveTo(px - rx * k, py + ry * .9 * k + ry * (1 - k) * .9, px - rx * k, py + ry * (1 - k) * .9); x.closePath(); x.fillStyle = col; x.fill(); x.lineWidth = lw * (k === 1 ? .55 : .35); x.strokeStyle = INK; x.stroke(); }
+      x.fillStyle = 'rgba(255,255,255,.55)'; x.beginPath(); x.ellipse(px - rx * .35, py - ry * .35, rx * .22, ry * .18, -.3, 0, Math.PI * 2); x.fill(); } }
+  return c; }
 // v4.12 uniforms drawn to fit the capsule (refs): flat colours, bold simple details, thin navy lines.
 //   U = { base, stripe, stripes: n, pants, belt, hem, collar: 'shirt'|'hood'|'round'|'vee'|null, inner, tie, bowtie, zip, vest, buttons: n,
 //         pocket: 'kangaroo'|'chest'|'chest4'|null, badge: 'star'|'tag'|null, sideStripes, apron, scarf }
@@ -583,7 +596,7 @@ export function updateSprites(cam) {
     const key = C.spr + '-' + view, M = SPR.meta[key]; const yaw = Math.atan2(s_v.x, s_v.z);
     s_r.set(Math.cos(yaw), 0, -Math.sin(yaw));
     // body
-    const U = s_u.set(0, 1, 0).transformDirection(C.torso.matrixWorld); const rollB = Math.atan2(-U.dot(s_r), U.y);
+    const U = s_u.set(0, 1, 0).transformDirection(C.torso.matrixWorld); const rollB = Math.atan2(-U.dot(s_r), U.y) + (C.walkPh != null && (C.spec.long || 1) > 1.1 ? Math.sin(C.walkPh - .6) * .035 * ((C.spec.long || 1) - .9) : 0); // v4.22 long hems swing with the steps
     const [x0, y0, x1, y1] = M.body; const lx = ((x0 + x1) / 2 - C.cx) * K2 * (mir ? -1 : 1), ly = .91 - ((y0 + y1) / 2 - M.gap[1]) * K2;
     const cb = C.torso.localToWorld(new THREE.Vector3(0, ly, 0)).addScaledVector(s_r, lx * s * Math.cos(rollB)).addScaledVector(s_v, (ST_.capsule ? .08 + ((C.spec.long || 1) - 1) * .3 : -.14) * s); // v4.12: capsule body sits in front of the leg tops
     const BK = C.bodyK || { w: 1, h: 1, head: 1 }, sq = clamp(C.sq || 0, -.45, .6), bh0 = (y1 - y0) * K2 * s, bh = bh0 * BK.h; cb.y += -(bh0 - bh) / 2 + bh / 2 * sq; const LG = C.spec.long || 1; // v4.20 long dress/robe: same top, hem reaches lower
