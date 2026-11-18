@@ -1,7 +1,7 @@
 // main.js: frame(t) -> JPEG data URL (1080x1920): shots + transitions + one-word captions
 import * as E from './engine.js';
 import * as Wd from './world.js';
-import { makeCast, makeChar, pose, CHARS, loadSprites, updateSprites, SPRG, ANIM, OVL, applySmooth } from './chars.js';
+import { makeCast, makeChar, pose, CHARS, loadSprites, updateSprites, SPRG, ANIM, OVL, applySmooth, attachHeld } from './chars.js';
 import { SHOTS, initShots, runShot, COVER, BENCH } from './shots.js';
 const timing = await (await fetch('timing.json')).json(), project = await (await fetch('project.json')).json();
 await E.fontsReady; await loadSprites(); E.scene.add(SPRG); makeCast(project.cast); initShots(timing); Wd.redrawSign();
@@ -22,7 +22,7 @@ function draw(sh, t, alpha = 1, mb = 0, dir = 1) { OVL.length = 0; E.POST.gseed 
   let prevCam = null;
   if (!window.NOSMOOTH) for (let k = 5; k >= 1; k--) { const tk = t - k / 30; if (tk - sh.t0 < 0) continue; ANIM.rec = SW[5 - k]; ANIM.t = tk; runShot(sh, tk); if (k === 1) { if (!window.NOAUTO) camDrift(tk); E.camera.updateMatrixWorld(); prevCam = { m: E.camera.matrixWorldInverse.clone(), pm: E.camera.projectionMatrix.clone() }; } }
   ANIM.wFinal = .35; ANIM.rec = window.NOSMOOTH ? undefined : .35; ANIM.t = t; OVL.length = 0; runShot(sh, t); ANIM.rec = undefined;
-  if (!window.NOSMOOTH) Object.values(CHARS).forEach(applySmooth);
+  if (!window.NOSMOOTH) Object.values(CHARS).forEach(applySmooth); E.scene.updateMatrixWorld(); Object.values(CHARS).forEach(attachHeld);
   if (!window.NOAUTO) camDrift(t); // v4.1 living camera: slow handheld drift
   updateSprites(E.camera);
   if (prevCam && mb === 0 && !window.NOAUTO) { // v4 auto camera motion blur: how far the focus point slid on screen since the last frame

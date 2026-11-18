@@ -84,6 +84,11 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    hands (spread fingers). actCheer(lt, {t0, at}) = crouch -> arms-up leap -> squat landing. actAxe(lt, at) is a
    two-handed swing; placeProp(obj, C, o.prop) keeps the prop in both hands. Fast actions set P.fast so the pose
    smoothing does not make the hands lag behind the prop.
+   Holding: P.hold = { R: { obj, off: [x,y,z], rot: [deg] }, L: {...} } glues an object to the (smoothed) hand every
+   frame, so it never lags. actBowl(lt, at) + rollPath(age, p0, dir) = underhand roll and a spinning ball that eases
+   to a stop; actShow(lt, at) lifts a held object up to show it; actSlash(lt, at, {admire}) = one-handed sword
+   raise/slash/admire (o.bladeRot for the hold rot); bounceAt(lt, at) = a struck object hops and settles. Roll
+   objects along the street (not across it into the buildings) and track them from the side.
 9. **Finish:** `bash tools/finish.sh <out_dir> "<title>" 26`, then `bash tools/cover.sh <out_dir>/ปก.jpg`.
 10. **Deliver:** on the user's computer put the files in `~/Desktop/edit-video/<project>/<version>/`. On a phone,
     send them back in the chat.
