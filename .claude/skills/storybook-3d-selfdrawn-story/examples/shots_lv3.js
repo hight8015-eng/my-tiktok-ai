@@ -11,7 +11,9 @@ function look(pos, tgt, fov = 40, roll = 0) { POST.focus = pos.distanceTo(tgt); 
   if (SH.a > 0) { const t = SH.t * 22; camera.rotateX(noise1(t) * .02 * SH.a); camera.rotateY(noise1(t + 50) * .02 * SH.a); camera.position.y += noise1(t + 9) * .06 * SH.a; } camera.updateMatrixWorld(); }
 const lp = (a, b, u) => a.map((v, i) => lerp(v, b[i], u));
 const HUP = .32, hup = (v) => { v[1] += HUP * clamp(v[1] / 1.4); return v; }; // taller cast (legs 1.2 heads): framing at head height lifts with the heads, floor framing stays
-const camO = (o) => (p0, t0, p1, t1, u, fov = 40, roll = 0) => look(V(...hup(lp(p0, p1, u))).add(o.position), V(...hup(lp(t0, t1, u))).add(o.position), fov, roll);
+const CAMX = 1.4; /* v4.29 refs move the camera 3-4x more: stretch every planned move around its midpoint */
+const ampl = (p0, p1) => [p0.map((v, i) => (v + p1[i]) / 2 + (v - (v + p1[i]) / 2) * CAMX), p1.map((v, i) => (v + p0[i]) / 2 + (v - (v + p0[i]) / 2) * CAMX)];
+const camO = (o) => (p0, t0, p1, t1, u, fov = 40, roll = 0) => { const [q0, q1] = ampl(p0, p1); look(V(...hup(lp(q0, q1, u))).add(o.position), V(...hup(lp(t0, t1, u))).add(o.position), fov, roll); };
 const camH = camO(HALL), camF = camO(FIELD), camB = camO(BALC), camC = camO(CRYPT), camV = camO(VILL);
 function put(C, parent, P) { if (C.g.parent !== parent) parent.add(C.g); pose(C, P); }
 function dof(k) { POST.dof = k; }
@@ -137,15 +139,15 @@ E3('S05', 6.36, 'cut', (lt, t) => { // "แหวนสองวง" - macro orb
 E3('S06', 7.62, 'cut', (lt, t) => { // "และเก้าอี้ว่างอีกหนึ่งตัว" - truck from Elena to the empty chair
   wedNight(); Wd.hallAt(t); EL({ p: [-1.1, 1.35, -10.85], ry: 25, ex: 'sad', sit: true, seat: .5, hL: [-.15, .35, .3], hR: [.15, .35, .3], pL: [-1, -.3, 0], pR: [1, -.3, 0] });
   camH([-1.2, 1.7, -8.0], [-1.0, 1.6, -11], [1.4, 1.6, -8.2], [1.1, 1.4, -11], U(lt, 2.0, eIO), 44); }, { noCut: true });
-E3('S07', 9.58, 'cut', (lt, t) => { // "เพราะวันนี้ คือวันที่เธอกับเคลเคยสัญญาว่าจะแต่งงานกัน" - the promise, 100+ years ago
+E3('S07', 9.58, 'dis', (lt, t) => { // "เพราะวันนี้ คือวันที่เธอกับเคลเคยสัญญาว่าจะแต่งงานกัน" - the promise, 100+ years ago
   moonLight(); BALC.visible = true; past(); POST.sat = .55; burnAt(.5 + .1 * Math.sin(t * 2));
   put(K(), BALC, { p: [.25, 0, -1.6], ry: -70, ex: 'happy', blink: blinkAt(t, 1), hL: [-.32, .45, .35], pL: [-1, -.3, 0] }); put(E_(), BALC, { p: [-.55, 0, -1.55], ry: 70, ex: 'happy', blink: blinkAt(t, 2), hR: [.32, .45, .35], pR: [1, -.3, 0] });
   camB([-.2, 1.5, 2.6], [-.15, 1.5, -1.6], [-.15, 1.6, 1.0], [-.15, 1.55, -1.6], U(lt, 4.4, eIO), 44); }, { noCut: true });
-E3('S08', 14.12, 'cut', (lt, t) => { // "ทั้งเมืองบอกว่าเขาตายไปแล้ว" - the town square, villagers gossip
+E3('S08', 14.12, 'blur', (lt, t) => { // "ทั้งเมืองบอกว่าเขาตายไปแล้ว" - the town square, villagers gossip
   villNight({ hemiI: 1.4 }); VILL.visible = true;
   put(KN(1), VILL, { p: [3.6, 0, 5.4], ry: 60, ex: 'frown', talk: talkAt(t) }); put(KN(2), VILL, { p: [4.6, 0, 6.1], ry: -110, ex: 'sly' }); put(K2_(), VILL, { p: [99, 0, 99], visible: false });
   camV([1.0, 1.6, 9.6], [4.6, 2.0, 4.4], [2.0, 2.4, 10.4], [5.4, 2.6, 3.8], U(lt, 2.1, eIO), 48); });
-E3('S09', 16.25, 'cut', (lt, t) => { // "แต่เอเลน่าไม่เคยเชื่อ" - she clutches her ring, determined
+E3('S09', 16.25, 'blur', (lt, t) => { // "แต่เอเลน่าไม่เคยเชื่อ" - she clutches her ring, determined
   wedNight(); Wd.hallAt(t); EL({ p: [-1.1, 1.35, -10.85], ry: 25, ex: 'determined', sit: true, seat: .5, hL: [-.1, .55, .35], hR: [.1, .55, .35], pL: [-1, -.3, 0], pR: [1, -.3, 0] });
   camH([-.4, 2.1, -9.0], [-1.1, 2.0, -10.85], [-.6, 2.08, -9.5], [-1.1, 2.0, -10.85], U(lt, 1.8, eOut), 40); });
 const yearShot = (i, webs, wilt, lit) => (lt, t) => { wedNight(); Wd.hallAt(t); YEAR[i].visible = true; nookAt({ webs, lit }); tintAt(['#0a1020', '#20140a', '#0a0a10'][i], .12 + .06 * Math.sin(t * 9));
@@ -173,7 +175,7 @@ E3('S16', 31.26, 'cut', (lt, t) => { // "แล้วเดินไปที่
 E3('S17', 32.78, 'cut', (lt, t) => { // "แต่แล้ว" - she stops
   hallLight({ hemiI: .7, sunI: .3, hemiS: '#7a70b0', fog: '#141022' }); Wd.hallAt(t); EL({ p: [0, 0, -7.3], ry: 0, ex: 'shocked', pop: popAt(lt, .1, .1) });
   camH([.3, 1.75, -4.8], [0, 1.75, -7.3], [.25, 1.75, -5.2], [0, 1.75, -7.3], U(lt, .7, eOut), 40); });
-E3('S18', 33.46, 'cut', (lt, t) => { // "ประตูที่ไม่เคยเปิดมา 100 ปี" - the dusty door, light leaks through
+E3('S18', 33.46, 'blur', (lt, t) => { // "ประตูที่ไม่เคยเปิดมา 100 ปี" - the dusty door, light leaks through
   hallLight({ hemiI: .7, sunI: .3, hemiS: '#7a70b0', fog: '#141022' }); Wd.hallAt(t); Wd.raysAt(HALL.localToWorld(V(0, 0, 9.4)), .35 + .3 * sstep(1.2, 2.1, lt), t, '#fff2c0'); pts0(HALL.localToWorld(V(0, 2.5, 6)), 30);
   camH([.8, 2.0, 2.4], [0, 2.4, 8.6], [.3, 2.2, 4.6], [0, 2.4, 8.6], U(lt, 2.1, eIO), 46); });
 E3('S19', 35.60, 'cut', (lt, t) => { // "ก็ถูกผลักออก" - the doors swing, light and dust pour in
@@ -207,12 +209,12 @@ E3('S25', 47.81, 'cut', (lt, t) => { // "เคล... นายกลับม�
 E3('S26', 50.27, 'cut', (lt, t) => { // "ฉันบอกแล้วไง ว่าฉันจะกลับมา"
   hallLight({ hemiI: 1.1 }); Wd.hallAt(t); put(K2_(), HALL, { p: [0, 0, 6.2], ry: 185, ex: 'happy', talk: talkAt(t), blink: blinkAt(t, 1) });
   camH([-.3, 1.5, 4.4], [0, 1.45, 6.2], [-.2, 1.47, 4.9], [0, 1.45, 6.2], U(lt, 2.4, eOut), 40); }, { noCut: true });
-E3('S27', 52.73, 'cut', (lt, t) => { // "เวท ZERO ไม่ได้ทำลายวิญญาณของเขา" - inside the white light
+E3('S27', 52.73, 'dis', (lt, t) => { // "เวท ZERO ไม่ได้ทำลายวิญญาณของเขา" - inside the white light
   cryptLight(); CRYPT.visible = true; CR.demon.visible = false; tintAt('#ffffff', .55 - .2 * sstep(1.5, 2.7, lt)); Wd.rocksAt(CRYPT.localToWorld(V(0, 0, -6)), t, 1);
   put(K2_(), CRYPT, { p: [0, 1.0 + Math.sin(t * 1.2) * .1, -6], ry: 0, ex: 'sleepy', blink: true, hL: [-.4, .5, .1], hR: [.4, .5, .1], pL: [-1, 0, -.5], pR: [1, 0, -.5] });
   runesAt(CRYPT.localToWorld(V(0, 1, -6)), t, .9, { col: '#ffffff', col2: '#ffffff', n: 16, w: 420, h: 600 });
   camC([1.5, 2.0, -1.2], [0, 2.2, -6], [.6, 2.4, -2.6], [0, 2.3, -6], U(lt, 2.8, eIO), 46); });
-E3('S28', 55.50, 'cut', (lt, t) => { // "มันส่งเขาไปติดอยู่ระหว่างความเป็นกับความตาย" - limbo
+E3('S28', 55.50, 'dis', (lt, t) => { // "มันส่งเขาไปติดอยู่ระหว่างความเป็นกับความตาย" - limbo
   cryptLight(); CRYPT.visible = true; CR.demon.visible = false; POST.sat = .45; Wd.fogAt(CRYPT.localToWorld(V(0, 0, -6)), t, 1, '#6a5a8a', 9); Wd.rocksAt(CRYPT.localToWorld(V(0, 0, -7)), t, 1); tintAt('#1a1030', .25);
   put(K2_(), CRYPT, { p: [0, .2, -6], ry: 20, ex: 'worried', blink: blinkAt(t, 2) });
   camC([4.0, 3.2, 0.5], [0, 1.4, -6], [2.6, 2.4, -1.8], [0, 1.5, -6], U(lt, 3.4, eIO), 50); });
@@ -220,7 +222,7 @@ E3('S29', 58.88, 'cut', (lt, t) => { // "และเขาใช้เวลา
   cryptLight(); CRYPT.visible = true; CR.demon.visible = false; POST.sat = .55; const x = -3 + lt * .9; Wd.fogAt(CRYPT.localToWorld(V(0, 0, -6)), t, 1, '#6a5a8a', 9);
   Wd.raysAt(CRYPT.localToWorld(V(5.5, 0, -8)), .8, t, '#fff2c0'); put(K2_(), CRYPT, { p: [x, 0, -6.5], ry: 70, ex: 'determined', walk: { ph: lt * 6, stride: .2 } });
   camC([x - .6, 1.4, -2.4], [x + .4, 1.4, -6.5], [x - .2, 1.5, -2.6], [x + .6, 1.4, -6.5], U(lt, 4.0, eIO), 48); }, { noCut: true });
-E3('S30', 62.85, 'cut', (lt, t) => { // "เขาหยิบแหวนบนโต๊ะ แล้วสวมให้เธออีกครั้ง"
+E3('S30', 62.85, 'blur', (lt, t) => { // "เขาหยิบแหวนบนโต๊ะ แล้วสวมให้เธออีกครั้ง"
   wedNight(); Wd.hallAt(t); NOOK.visible = false; const k = sstep(1.2, 2.4, lt);
   put(K2_(), HALL, { p: [.45, .9, -10.4], ry: -80, ex: 'happy', hR: lp([.3, .45, .3], [.25, .55, .5], k), pR: [1, -.3, -.3] });
   EL({ p: [-.45, .9, -10.4], ry: 80, ex: k > .7 ? 'happy' : 'sad', sweat: k < .7, hL: [-.2, .5, .45], pL: [-1, -.3, -.3] });
@@ -236,7 +238,7 @@ E3('S32', 68.90, 'cut', (lt, t) => { // "ได้มีเจ้าบ่าว
   put(K2_(), HALL, { p: [.4, .3, -10.0], ry: -20, ex: 'happy' }); EL({ p: [-.4, .3, -10.0], ry: 20, ex: 'happy', blink: true });
   debrisAt(HALL.localToWorld(V(0, 5, -10)), (lt * .5 + .4) % 1, { n: 22, seed: 6, speed: .6, kind: 'leaf', col: '#f2a0b8', grav: 1.2, life: 3 });
   camH([0, 2.0, -6.6], [0, 1.5, -10.0], [0, 6.5, -5.0], [0, 1.0, -10.0], U(lt, 1.95, eIO), 48); }, { noCut: true });
-E3('S33', 70.84, 'cut', (lt, t) => { // "และครั้งนี้ ไม่มีใครพรากพวกเขาจากกันได้อีก" - the balcony under the moon, pull back to the sky
+E3('S33', 70.84, 'dis', (lt, t) => { // "และครั้งนี้ ไม่มีใครพรากพวกเขาจากกันได้อีก" - the balcony under the moon, pull back to the sky
   moonLight(); BALC.visible = true; put(K2_(), BALC, { p: [.15, 0, -1.9], ry: 160, ex: 'happy', hL: [-.32, .4, .2], pL: [-1, -.3, 0] }); put(E_(), BALC, { p: [-.55, 0, -1.9], ry: 200, ex: 'happy', hR: [.32, .4, .2], pR: [1, -.3, 0] });
   camB([-.2, 1.6, 1.6], [-.2, 1.6, -1.9], [-.2, 3.6, 3.8], [3, 14, -40], U(lt, 4.4, eIO), 46); }, { noCut: true });
 

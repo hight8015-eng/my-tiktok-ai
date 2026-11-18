@@ -136,6 +136,14 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    bouquet(wilt), ring, dagger, torchHand, pitchfork. Reset 3D FX at the start of every shot (they are not in reset()).
    SFX: aud/sfx now has meme categories mboom, mding, mwhoosh, mrise, mfall, mroll, mrumble (auto-classified from the
    user's meme compilations) + mvoice (39 speech/music meme lines: only when a specific one is chosen by ear).
+   v4.29 SFX DISCIPLINE (user: repeated effects were annoying): ~1 effect per 3 s on average with quiet stretches; one
+   sound per story beat (not whoosh+shimmer+chime stacks); never the same sound twice within ~8 s; at most ~3 uses of a
+   category per episode; SFX bus sits 16 dB under the voice and ducks 60% while someone speaks; the add() guard softens a
+   hit that lands within .35 s of another.
+   v4.29 CAMERA (refs measured: 89-92% of frames move): camDrift now floats the camera (translate, scaled by focus);
+   shot files stretch every planned move 1.4x (CAMX); location changes use tr 'blur' (motion-blur dissolve, .4 s) or
+   'whip' for action and 'dis' for memories. NEVER put code after a // comment on the same line (it was swallowed 4
+   times: endCard alignment, caption wobble, POST dof/mblur reset) - use /* */ for inline notes.
    v4.13 extra physics: the head (and hat/headband art) lags and wobbles on starts/stops/turns; held props never sink
    into the body (hold entry noClip / clear); flyPath(..., {walls: [{axis: 'x'|'z', at, n, e}]}) bounces off walls;
    makeRope/updateRope (sagging, swaying rope/leash/chain) and makeFlag/waveFlag (flag, cloth, cape in the wind).

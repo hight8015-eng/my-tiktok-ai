@@ -15,8 +15,9 @@ function nearestHead() { let best = null; E.camera.getWorldPosition(_cv); const 
     C.head.getWorldPosition(_hv); const d = _hv.clone().sub(_cv), z = d.dot(fw); if (z < .3) continue; const sp = _hv.clone().project(E.camera); if (Math.abs(sp.x) > .85 || sp.y > .95 || sp.y < -.9) continue;
     if (!best || z < best.z) best = { C, z, sx: (sp.x + 1) * 540, sy: (1 - sp.y) * 960 }; } return best; }
 let FX = null;
-function camDrift(t) { E.camera.rotateX(E.noise1(t * .33 + 11) * .0045); E.camera.rotateY(E.noise1(t * .27 + 47) * .006); E.camera.updateMatrixWorld(); }
-function draw(sh, t, alpha = 1, mb = 0, dir = 1) { OVL.length = 0; E.POST.gseed = Math.floor(t * 30 + .5) % 97; // v4.26 grain refreshes every frame (12 fps grain read as stutter) E.POST.dof = 0; E.POST.mblur = [mb * 90 * dir, mb * 14]; E.POST.leakPh = t * .6;
+function camDrift(t) { const f = Math.min(1.6, Math.max(.4, (E.POST.focus || 3) / 4)); E.camera.translateX(E.noise1(t * .45 + 3) * .13 * f); E.camera.translateY(E.noise1(t * .38 + 21) * .05 * f); // v4.29 the camera always floats a little (refs: 90% of frames move)
+  E.camera.rotateX(E.noise1(t * .33 + 11) * .0045); E.camera.rotateY(E.noise1(t * .27 + 47) * .006); E.camera.updateMatrixWorld(); }
+function draw(sh, t, alpha = 1, mb = 0, dir = 1) { OVL.length = 0; E.POST.gseed = Math.floor(t * 30 + .5) % 97; /* v4.26 grain refreshes every frame (12 fps grain read as stutter) */ E.POST.dof = 0; E.POST.mblur = [mb * 90 * dir, mb * 14]; E.POST.leakPh = t * .6;
   // v4 motion smoothing: evaluate the shot 5..1 frames back (no render) and blend character poses -> no 1-frame snaps
   const SW = [.05, .08, .12, .17, .23], lt0 = t - sh.t0; Object.values(CHARS).forEach(C => { C._acc = null; C._trail = []; C._roots = []; });
   let prevCam = null;
@@ -129,7 +130,7 @@ function caption(t) {
   const c0 = timing.caps.find(c => t >= c[0] && t < c[1]); if (!c0) return; const c = capSlice(c0, t);
   let txt = c[2]; const star = /\*(.+?)\*/.test(txt), hi = CAP.highlight && (star || /[0-9๐-๙]/.test(txt) || (project.hiWords || []).some(w => txt.includes(w))); txt = txt.replace(/\*/g, '');
   const a = t - c[0], k = CAP.pop ? (a < .16 ? .55 + .45 * E.eOut(a / .16) + .12 * Math.sin(Math.PI * Math.min(1, a / .16)) : 1) : 1;
-  X.save(); X.translate(520, CAP.y); X.scale(k, k); // safe zone: a touch left of the app's right-hand buttons X.rotate(hi && CAP.pop ? Math.sin(a * 18) * .025 * Math.exp(-a * 6) : 0);
+  X.save(); X.translate(520, CAP.y); X.scale(k, k); /* safe zone: a touch left of the app's right-hand buttons */ X.rotate(hi && CAP.pop ? Math.sin(a * 18) * .025 * Math.exp(-a * 6) : 0);
   X.font = `700 ${CAP.size * (hi ? 1.12 : 1)}px Prompt`; X.textAlign = 'center'; X.textBaseline = 'alphabetic'; X.lineJoin = 'round';
   X.shadowColor = 'rgba(0,0,0,.45)'; X.shadowBlur = 10; X.shadowOffsetY = 5; X.lineWidth = 13; X.strokeStyle = '#141018'; X.strokeText(txt, 0, 0, CAP.maxW);
   X.shadowColor = 'transparent'; X.fillStyle = hi ? CAP.hi : '#ffffff'; X.fillText(txt, 0, 0, CAP.maxW); X.restore();
@@ -150,7 +151,7 @@ function endCard(t) { const E_ = project.endCard; if (!E_ || LOOP) return; const
   X.font = '700 80px Prompt'; X.lineWidth = 14; X.strokeStyle = '#141018'; X.strokeText(E_.text || 'ติดตามตอนต่อไป', 0, 0, 900); X.fillStyle = '#ffffff'; X.fillText(E_.text || 'ติดตามตอนต่อไป', 0, 0, 900);
   if (E_.sub) { X.font = '600 50px Prompt'; X.lineWidth = 10; X.strokeText(E_.sub, 0, 90, 900); X.fillStyle = '#ffd23f'; X.fillText(E_.sub, 0, 90, 900); } X.restore(); }
 function progress(t) { if (!project.progressBar) return; const u = Math.min(1, t / timing.end); X.save(); if (LOOP) X.globalAlpha = 1 - E.sstep(timing.end - LOOP_D, timing.end - .05, t); X.fillStyle = 'rgba(255,255,255,.18)'; X.fillRect(0, 1906, 1080, 14); X.fillStyle = '#ffd23f'; X.fillRect(0, 1906, 1080 * u, 14); X.restore(); }
-const DIS = .28, WH = .22;
+const DIS = .28, WH = .22, BLR = .4;
 function keyZoom(t) { if (!project.keyZoom) return 1; const c = timing.caps.find(c => t >= c[0] && t < c[1]); if (!c) return 1; const hi = /\*(.+?)\*/.test(c[2]) || /[0-9๐-๙]/.test(c[2]) || (project.hiWords || []).some(w => c[2].includes(w));
   const a = t - c[0]; return hi ? 1 + .028 * FXL * Math.sin(Math.PI * Math.min(1, a / .45)) : 1; } // gentle push-in on highlighted words
 window.frame = (t, opts = {}) => { ZP = keyZoom(t); globalThis.FRAME_T = t; // v4.24 shots can tell the frame being drawn from the smoothing look-backs
@@ -158,7 +159,8 @@ window.frame = (t, opts = {}) => { ZP = keyZoom(t); globalThis.FRAME_T = t; // v
   const sh = SHOTS[i], lt = t - sh.t0;
   const nx0 = SHOTS[i + 1], dir = i % 2 ? 1 : -1;
   const bIn = sh.tr === 'whip' && lt < WH ? 1 - lt / WH : 0, bOut = nx0 && nx0.tr === 'whip' && nx0.t0 - t < .12 ? 1 - (nx0.t0 - t) / .12 : 0;
-  if (i > 0 && (sh.tr === 'dis' || sh.tr === 'sweep') && lt < DIS) { draw(SHOTS[i - 1], t); draw(sh, t, E.eSine(lt / DIS)); }
+  if (i > 0 && sh.tr === 'blur' && lt < BLR) { const k = E.eSine(lt / BLR), m = Math.sin(Math.PI * k) * .9; draw(SHOTS[i - 1], t, 1, m, dir); draw(sh, t, k, m, dir); } // v4.29 motion-blur dissolve (refs): both shots smear along the move while they cross
+  else if (i > 0 && (sh.tr === 'dis' || sh.tr === 'sweep') && lt < DIS) { draw(SHOTS[i - 1], t); draw(sh, t, E.eSine(lt / DIS)); }
   else if (i > 0 && sh.tr === 'whip' && lt < .1) { draw(SHOTS[i - 1], t, 1, 1, -dir); draw(sh, t, lt / .1, bIn, dir); }
   else draw(sh, t, 1, Math.max(bIn, bOut), bOut > bIn ? -dir : dir);
   bloom();

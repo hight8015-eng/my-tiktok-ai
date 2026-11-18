@@ -127,6 +127,10 @@ def coins(n=4, seed=0):
 def tok(): return thump(520, .12, 1.0)
 BELLS = []
 SFX = np.zeros((2, N)); L0, R0 = L.copy(), R.copy(); L[:] = 0; R[:] = 0
+_addS = add; _ons = []
+def add(sig, t, g=1.0, pan=0.0):   # v4.29 SFX guard: a hit within .35 s of another is softened
+    if any(abs(t - u) < .35 for u in _ons): g *= .55
+    _ons.append(t); return _addS(sig, t, g, pan)
 for i, tt in enumerate((1.86, 9.08, 12.62, 13.78, 26.22, 31.95, 33.05, 44.0, 52.85)):
     w_ = swoosh(i); add(w_, max(0, tt - min(.18, len(w_) / SR * .4)), .5)
 for tt, f in ((.5, 1500), (4.2, 1700), (6.6, 1450), (7.7, 1700), (49.8, 1500), (56.1, 1650), (57.4, 1450)): add(reverb(gull(f), 1.5, .4, int(tt * 7)), tt, .14, pan=(-.5 if int(tt) % 2 else .5))
@@ -163,9 +167,9 @@ BELL = np.stack([L.copy(), R.copy()])
 vo = rd_wav(f'{W}/aud/vo.wav'); n = min(len(vo), N); V = np.zeros(N); V[:n] = vo[:n]
 def rms(x): return np.sqrt(np.mean(x ** 2) + 1e-12)
 act = np.abs(V) > 0.02; vr = rms(V[act])
-env = lp(lp(np.abs(V), 6), 6); env = env / (env.max() + 1e-9); duck = 1 - .5 * np.clip(env * 4, 0, 1)
+env = lp(lp(np.abs(V), 6), 6); env = env / (env.max() + 1e-9); duck = 1 - .6 * np.clip(env * 4, 0, 1)
 sfx_r = rms(SFX[:, np.abs(SFX).max(0) > 1e-3]); bed_r = rms(BED)
-SFX *= (vr * 10 ** (-13 / 20)) / max(sfx_r, 1e-9) * duck; BED *= (vr * 10 ** (-24 / 20)) / max(bed_r, 1e-9) * (.6 + .4 * duck)
+SFX *= (vr * 10 ** (-16 / 20)) / max(sfx_r, 1e-9) * duck; BED *= (vr * 10 ** (-24 / 20)) / max(bed_r, 1e-9) * (.6 + .4 * duck)
 bell_r = rms(BELL[:, np.abs(BELL).max(0) > 1e-3]) if (np.abs(BELL).max() > 1e-3) else 1.0; BELL *= (vr * 10 ** (-7 / 20)) / max(bell_r, 1e-9) * (1 - .4 * (1 - duck))
 mix = SFX + BED + BELL; mix[0] += V; mix[1] += V
 # v3: optional music bed (tools/music.py -> aud/music_bed.wav) for the (มีเพลง) version: ~12 dB under VO (rms), -6 dB more under speech, -4 dB under bells
