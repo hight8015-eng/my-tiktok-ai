@@ -63,7 +63,7 @@ function redEyes(C, k, t) { scene.updateMatrixWorld(); const h = C.head.getWorld
   EYES.forEach((e, i) => { e.position.copy(h).addScaledVector(d, .42 * s).addScaledVector(r, (i ? 1 : -1) * .13 * s).add(V(0, .16 * s, 0)); e.material.opacity = k * (.7 + .15 * Math.sin(t * 9 + i)); e.scale.setScalar(.5 * s * (.6 + .4 * k)); }); }
 // ===================================================================== SHOTS
 export const SHOTS = [];
-const AMBK = () => HALL.visible ? 'dust' : BALC.visible ? 'firefly' : CRYPT.visible ? 'spark' : VILL.visible ? 'firefly' : FIELD.visible ? 'ember' : null; // v4.22 ambience per set
+const AMBK = () => (HALL.visible && RUIN.visible) ? 'ember' : HALL.visible ? 'dust' : BALC.visible ? 'firefly' : CRYPT.visible ? 'spark' : VILL.visible ? 'firefly' : FIELD.visible ? 'ember' : null; // v4.22 ambience per set
 // v4.24 PACE: the whole clip plays SP x faster (voice sped up with atempo, pitch kept); shot times shrink, animation clocks run SP x
 const SP = 1.12;
 // v4.24 COVERAGE: longer shots get a cut-in (same side of the action, no spin) so the angle changes every ~1.2-1.8 s
@@ -128,7 +128,7 @@ E2('S02', 2.02, 'whip', (lt, t) => { // "ประตูมหาวิหาร
   camH([1.2, 1.2, 1.5], [0, 2.2, 8.6], [.5, 1.0, 2.6], [0, 2.4, 8.6], U(lt, 2.4, eOut), 52); });
 E2('S03', 4.41, 'cut', (lt, t) => { // "เอเลน่าถูกล่ามด้วยโซ่เวทมนตร์บนแท่นบูชา" - crane up from the chains to her face
   hallLight(); Wd.hallAt(t, { circle: .7 }); chainsOn(0);
-  put(E_(), HALL, { p: [0, .9, -11.6], ry: 0, ex: 'scared', sweat: true, hL: [-.62, .78, .1], hR: [.62, .78, .1], pL: [-1, -.3, -.3], pR: [1, -.3, -.3] });
+  put(E_(), HALL, { p: [0, .9, -11.6], ry: 0, ex: 'scared', tears: .55, hL: [-.62, .78, .1], hR: [.62, .78, .1], pL: [-1, -.3, -.3], pR: [1, -.3, -.3] });
   put(A(), HALL, { p: [1.6, .6, -12.4], ry: -40, ex: 'evil', hR: [.32, .7, .3], pR: [1, -.3, -.3], hold: { R: { obj: (STAFF.visible = true, STAFF), off: [0, -.02, 0], rot: [0, 0, 0] } } });
   runesAt(HALL.localToWorld(V(0, .95, -11.6)), t, .9, { col: '#a050ff', col2: '#e8d0ff', n: 14, w: 300, h: 380 });
   camH([.6, 1.0, -8.6], [0, 1.2, -11.6], [.4, 2.2, -8.4], [0, 2.0, -11.6], U(lt, 3.3, eIO), 46); });
@@ -165,7 +165,7 @@ E2('S10', 24.02, 'cut', (lt, t) => { // "แค่ดีดนิ้ว" - the s
   camH([-.9, 1.7, -11.8], [.12, 1.6, -10.2], [-.6, 1.65, -11.4], [.12, 1.6, -10.2], U(lt, 1.3, eOut), 44); });
 E2('S11', 25.35, 'cut', (lt, t) => { // "โซ่ทุกเส้นก็ขาดสะบั้น" - chains burst, she drops free
   hallLight(); Wd.hallAt(t, { circle: .6 * (1 - lt) }); const k = sstep(0, .8, lt); chainsOn(k);
-  put(E_(), HALL, { p: [0, .9 - sstep(.7, 1.1, lt) * .15, -11.6], ry: 0, ex: k > .9 ? 'shocked' : 'scared', hL: lp([-.62, .78, .1], [-.3, .35, .1], sstep(.7, 1.1, lt)), hR: lp([.62, .78, .1], [.3, .35, .1], sstep(.7, 1.1, lt)), pL: [-1, -.3, -.3], pR: [1, -.3, -.3] });
+  put(E_(), HALL, { p: [0, .9 - sstep(.7, 1.1, lt) * .15, -11.6], ry: 0, ex: k > .9 ? 'shocked' : 'scared', tears: .35, hL: lp([-.62, .78, .1], [-.3, .35, .1], sstep(.7, 1.1, lt)), hR: lp([.62, .78, .1], [.3, .35, .1], sstep(.7, 1.1, lt)), pL: [-1, -.3, -.3], pR: [1, -.3, -.3] });
   for (let i = 0; i < 4; i++) if (lt > i * .2) sparkAt(HALL.localToWorld(V(i % 2 ? 1.2 : -1.2, i < 2 ? 2.8 : 2.2, -11.4)), Math.max(0, 1 - (lt - i * .2) * 3), 1.1);
   camH([0, 1.6, -7.6], [0, 1.7, -11.6], [0, 1.6, -8.6], [0, 1.7, -11.6], U(lt, 2.2, eIO), 48); });
 E2('S12', 27.54, 'cut', (lt, t) => { // "แต่ทุกอย่างสายไปแล้ว" - red cracks race across the floor
@@ -207,7 +207,7 @@ E2('S21', 44.60, 'dis', (lt, t) => { // "ยิ้มก่อนเขาจะ
   hallLight(); Wd.hallAt(t); RUIN.visible = true; put(K2_(), HALL, { p: [.6, .6, -10.4], ry: 230, ex: 'smug', eyeC: '#ff2030', blink: false, ...hip });
   camH([-.6, 1.8, -12.0], [.6, 1.75, -10.4], [-.3, 1.78, -11.5], [.6, 1.75, -10.4], U(lt, 2.0, eOut), 38); });
 E2('S22', 46.66, 'cut', (lt, t) => { // "รอฉันนะ"
-  hallLight(); Wd.hallAt(t); RUIN.visible = true; put(K2_(), HALL, { p: [.6, .6, -10.4], ry: 230, ex: 'calm', eyeC: '#ff2030', talk: talkAt(t), blink: false });
+  hallLight(); Wd.hallAt(t); RUIN.visible = true; put(K2_(), HALL, { p: [.6, .6, -10.4], ry: 230, ex: 'calm', eyeC: '#ff2030', talk: talkAt(t), blink: false, tears: .35 });
   camH([-.25, 1.85, -11.4], [.6, 1.8, -10.4], [-.15, 1.82, -11.2], [.6, 1.8, -10.4], U(lt, .9, eOut), 34); });
 E2('S23', 47.54, 'cut', (lt, t) => { // "เวทบทสุดท้าย" - white runes ring him, low angle
   hallLight({ hemiI: 1.2 }); Wd.hallAt(t); RUIN.visible = true; put(K2_(), HALL, { p: [0, .6, -10.6], ry: 180, ex: 'determined', eyeC: '#ffffff', hR: [.3, 1.05, .2], pR: [1, -.3, -.3], hL: [-.3, .3, .1], pL: [-1, 0, -.5] });
@@ -221,13 +221,13 @@ E2('S25', 49.70, 'blur', (lt, t) => { // "แสงสีขาวกลืน�
   dawnLight(); FIELD.visible = true; FA.rock.visible = false; Wd.cityAt(false, t); DOME.visible = true; const k = sstep(0, 2.2, lt);
   DOME.position.set(-28, 4, -60); DOME.scale.setScalar(2 + k * 70); DOME.material.opacity = .85; tintAt('#ffffff', .55 * (1 - sstep(1.6, 2.4, lt)) + .25 * k);
   camF([10, 14, 30], [-28, 6, -60], [6, 18, 36], [-28, 12, -60], U(lt, 2.6, eOut), 46); });
-E2('S26', 52.36, 'blur', (lt, t) => { // "เมื่อแสงจางลง เทพปีศาจหายไปแล้ว" - empty, broken, quiet
+E2('S26', 52.36, 'blur', (lt, t) => { for (let i = 0; i < 3; i++) smokeAt(HALL.localToWorld(V((i - 1) * 2.4, .3, -6 - i * 2)), (lt * .5 + i * .4) % 2.5, { col: '#9a94a8', size: .8, life: 2.5 }); // "เมื่อแสงจางลง เทพปีศาจหายไปแล้ว" - empty, broken, quiet
   ruinLight(); Wd.hallAt(t); RUIN.visible = true; HA.glass.visible = false; DOOR.visible = false; tintAt('#ffffff', .6 * (1 - sstep(0, 1.2, lt)));
   Wd.raysAt(HALL.localToWorld(V(0, 0, -11)), .9, t); Wd.fogAt(HALL.localToWorld(V(0, 0, -7)), t, .6, '#e0dcff', 6);
   camH([0, 7.5, -1.5], [0, 1.0, -11], [0, 5.5, -4.0], [0, 1.0, -11], U(lt, 3.0, eIO), 50); });
-E2('S27', 55.41, 'cut', (lt, t) => { // "และเขาก็หายไปด้วย" - Elena alone in the ruins
+E2('S27', 55.41, 'cut', (lt, t) => { for (let i = 0; i < 3; i++) smokeAt(HALL.localToWorld(V((i - 1) * 2.4, .3, -7 - i * 1.5)), (lt * .5 + i * .4) % 2.5, { col: '#9a94a8', size: .8, life: 2.5 }); // "และเขาก็หายไปด้วย" - Elena alone in the ruins
   ruinLight(); Wd.hallAt(t); RUIN.visible = true; HA.glass.visible = false; DOOR.visible = false; Wd.raysAt(HALL.localToWorld(V(0, 0, -11)), .7, t);
-  put(E_(), HALL, { p: [0, .3, -10.2], ry: lerp(-40, 40, sstep(0, 1.6, lt)), ex: 'sad', sweat: true, blink: blinkAt(t, 2) });
+  put(E_(), HALL, { p: [0, .3, -10.2], ry: lerp(-40, 40, sstep(0, 1.6, lt)), ex: 'sad', tears: 1, gloom: .6, blink: blinkAt(t, 2) });
   camH([2.6, 1.2, -6.2], [0, 1.3, -10.2], [1.6, 1.4, -7.4], [0, 1.4, -10.2], U(lt, 2.0, eIO), 46); });
 E2('S28', 57.44, 'cut', (lt, t) => { MIND = 0; // "บนพื้น เหลือเพียงแหวนวงเดียว" - slow push to the ring
   ruinLight(); Wd.hallAt(t); RUIN.visible = true; HA.glass.visible = false; DOOR.visible = false; RING.visible = true; Wd.raysAt(HALL.localToWorld(V(.4, 0, -9.4)), .9, t);

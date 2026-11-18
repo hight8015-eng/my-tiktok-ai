@@ -252,6 +252,7 @@ export function pose(C, P = {}) {
   C.sweat.visible = !!P.sweat; C.pop = P.pop || 0; C.sq = (P.squash || 0) + (w && w.heavy ? -.09 * w.heavy * Math.pow(Math.max(0, Math.cos(2 * w.ph)), 6) : 0); C.smear = P.smear || null;
   if (ANIM.rec !== undefined) recPose(C, fL, fR, hL, hR, P);
   if (P.gloom > 0 && (P.visible ?? true)) OVL.push({ kind: 'gloom', C, k: P.gloom });
+  if (P.tears > 0 && (P.visible ?? true)) OVL.push({ kind: 'tears', C, k: Math.min(1, P.tears), t: ANIM.t || 0 }); // v4.31 tears: 0.3 = glistening eyes, 1 = streams + falling drops
 }
 // v4 temporal smoothing (main.js runs the shot at t-3..t-1 frames with ANIM.rec = weight, then at t):
 // limbs, head, torso and hip height are blended over those samples so pose changes ease in instead of snapping.
@@ -566,6 +567,11 @@ function headTex(C, key, view) {
   if (HEADC.size > 110) { const k0 = HEADC.keys().next().value; HEADC.get(k0).dispose(); HEADC.delete(k0); }
   return t;
 }
+// v4.31 where the drawn head ball is in the world (for face overlays like tears): centre, radius, sprite right/up axes
+export function headBall(C) { if (!C.is2D || !C.sh || !C.sh.visible || !SPR.meta) return null; const M = SPR.meta[C.spr + '-' + (C.view || 'F')]; if (!M) return null;
+  const [hx0, hy0, hx1, hy1] = M.head, [bx, by, br] = M.ballH, w = hx1 - hx0, h = hy1 - hy0, sx = C.sh.scale.x, sy = C.sh.scale.y;
+  const right = new THREE.Vector3(1, 0, 0).applyQuaternion(C.sh.quaternion), up = new THREE.Vector3(0, 1, 0).applyQuaternion(C.sh.quaternion);
+  const c = C.sh.position.clone().addScaledVector(right, (bx / w - .5) * sx).addScaledVector(up, (.5 - by / h) * sy); return { c, r: br / w * Math.abs(sx), right, up, view: C.view, mir: C.mir }; }
 export const SPRG = new THREE.Group(); // sprite planes live at scene root (added by main)
 export function makeChar2D(spec) {
   const C = makeChar({ ...spec, hat: 'none' }); C.is2D = true; C.spr = spec.sprite;
