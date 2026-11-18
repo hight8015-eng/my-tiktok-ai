@@ -91,8 +91,10 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    objects along the street (not across it into the buildings) and track them from the side.
    Proportions v4.5 (chibi sheet): 2.5 heads tall: head 1, torso ~1, legs ~0.5 head (LEG .42, LL .225, AL .28);
    bare white hands and plain oval feet by default (spec.glove / spec.cuff / spec.shoe / spec.sole dress them).
-   v4.6: shoulders sit right under the head (spec.shoulderX/Y), rest hands hang at the hips; sheet face by default:
-   big white oval eyes with pupils, nearly touching, wide smile (spec.dotEyes = old small dot eyes).
+   v4.6: shoulders sit right under the head (spec.shoulderX/Y), rest hands hang at the hips.
+   v4.8 hybrid look (user's choice): chibi proportions + pirate-ref face and hands: small dot eyes normally, eyes pop
+   into big white eyes only for shocked / scared / panic; ink dot hands and ink feet (spec.bigEyes = big eyes always,
+   spec.whiteHands = bare white hands). Extra faces: strain / ouch (> < eyes), dizzy (spirals), panic (tiny pupils).
    v4.7 body: the costume sprite is warped into an inverted pear (BODY = {w, h, top, bottom, head}; spec.classicBody
    to opt out); head 1.14x, torso .9x, shoulders on the upper torso (spec.shoulderX/Y).
    Object physics (P.hold entries): mass (0 none .. 1 heavy) = the object's axis lags hand velocity/acceleration

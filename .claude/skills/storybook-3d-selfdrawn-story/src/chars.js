@@ -25,11 +25,16 @@ const EX = {
   scream: { eyes: 'wide', bl: 26, br: -26, by: -16, mouth: 'bigO' },
   smug: { eyes: 'closed', bl: 10, br: -10, by: -4, mouth: 'smirk' },
   angry: { eyes: 'open', bl: -26, br: 26, by: 8, mouth: 'clench' },
+  // v4.8 from the pirate refs: squeezed >< eyes (pain / effort), spiral eyes (dizzy), white-eyed panic with tiny pupils
+  strain: { eyes: 'chev', bl: 18, br: -18, by: -4, mouth: 'wavy' },
+  ouch: { eyes: 'chev', bl: 24, br: -24, by: -6, mouth: 'clench' },
+  dizzy: { eyes: 'spiral', bl: 10, br: -10, by: -6, mouth: 'wavy' },
+  panic: { eyes: 'tiny', bl: 26, br: -26, by: -16, mouth: 'clench' },
 };
 function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a white ball head (no nose)
   const S = 512; x.clearRect(0, 0, S, S);
-  const BIG = !spec.dotEyes, EK = BIG ? 2.45 : 1; // v4.6 sheet face: eyes ~1/4 head wide, nearly touching; bigger mouth
-  const ey = S * (spec.eyeY ?? .5), ex = S * (BIG ? .152 : .125), ink = '#1c1420';
+  const BIG = !!spec.bigEyes, EK = BIG ? 2.45 : 1; // v4.8 hybrid: pirate-ref dot eyes by default (spec.bigEyes = sheet eyes everywhere) // v4.6 sheet face: eyes ~1/4 head wide, nearly touching; bigger mouth
+  const ey = S * (spec.eyeY ?? .5), ex = S * (BIG ? .152 : .13), ink = '#1c1420';
   x.fillStyle = spec.cheek || 'rgba(255,128,140,.38)'; for (const s of [-1, 1]) { x.beginPath(); x.ellipse(S / 2 + s * S * (BIG ? .37 : .2), ey + (BIG ? 128 : 62), 30, 17, 0, 0, 7); x.fill(); }
   const eyes = blink ? 'closed' : e.eyes; const lx = (look?.[0] || 0) * 9, ly = (look?.[1] || 0) * 7;
   x.lineCap = 'round'; x.lineJoin = 'round';
@@ -37,16 +42,20 @@ function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a wh
     const cx = S / 2 + s * ex, cy = ey; let kind = eyes; if (kind === 'wink') kind = s < 0 ? 'open' : 'closedUp';
     x.save(); if (BIG) { x.translate(cx, cy); x.scale(EK, EK); x.translate(-cx, -cy); }
     x.fillStyle = ink; x.strokeStyle = ink; x.lineWidth = BIG ? 9 : 19;
-    if ((kind === 'open' || kind === 'side') && !spec.dotEyes) { const dx = kind === 'side' ? 13 * (spec.sideDir || 1) : lx * 1.4; // v4.6 sheet eyes: big white ovals, ink outline, pupil
+    if (!BIG && (kind === 'wide' || kind === 'tiny')) { x.translate(cx, cy); x.scale(1.75, 1.75); x.translate(-cx, -cy); } // shock: dot eyes pop into big white eyes
+    if ((kind === 'open' || kind === 'side') && BIG) { const dx = kind === 'side' ? 13 * (spec.sideDir || 1) : lx * 1.4; // v4.6 sheet eyes: big white ovals, ink outline, pupil
       x.fillStyle = '#fbf8f2'; x.lineWidth = 6; x.beginPath(); x.ellipse(cx, cy - 2, 30, 38, 0, 0, 7); x.fill(); x.stroke();
       x.fillStyle = ink; x.beginPath(); x.ellipse(cx + dx + 3, cy + 6 + ly * 1.2, 13, 18, 0, 0, 7); x.fill(); x.fillStyle = '#ffffff'; x.beginPath(); x.arc(cx + dx - 1, cy - 2 + ly, 4.5, 0, 7); x.fill(); }
     else if (kind === 'open' || kind === 'side') { const dx = kind === 'side' ? 11 * (spec.sideDir || 1) : lx; x.beginPath(); x.ellipse(cx + dx, cy + ly, 15, 21, 0, 0, 7); x.fill(); }
+    else if (kind === 'chev') { x.lineWidth = BIG ? 10 : 16; x.beginPath(); x.moveTo(cx - 20 * s, cy - 16); x.lineTo(cx + 14 * s, cy); x.lineTo(cx - 20 * s, cy + 16); x.stroke(); } // > <
+    else if (kind === 'spiral') { x.lineWidth = BIG ? 6 : 9; x.beginPath(); for (let i = 0; i <= 60; i++) { const a = i / 60 * Math.PI * 5 * s, r = 3 + i / 60 * 30; x.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r * 1.1); } x.stroke(); }
+    else if (kind === 'tiny') { x.fillStyle = '#fbf8f2'; x.lineWidth = BIG ? 6 : 12; x.beginPath(); x.ellipse(cx, cy - 2, 30, 38, 0, 0, 7); x.fill(); x.stroke(); x.fillStyle = ink; x.beginPath(); x.arc(cx + lx * .5, cy + ly * .5, 6, 0, 7); x.fill(); }
     else if (kind === 'half') { x.save(); x.beginPath(); x.rect(cx - 40, cy - 2, 80, 60); x.clip(); x.beginPath(); x.ellipse(cx + lx, cy + 2, 16, 20, 0, 0, 7); x.fill(); x.restore(); x.beginPath(); x.moveTo(cx - 25, cy - 2); x.lineTo(cx + 25, cy - 2); x.stroke(); }
     else if (kind === 'closed') { x.beginPath(); x.moveTo(cx - 22, cy + 2); x.quadraticCurveTo(cx, cy + 14, cx + 22, cy + 2); x.stroke(); }
     else if (kind === 'closedUp' || kind === 'happy') { x.beginPath(); x.moveTo(cx - 22, cy + 8); x.quadraticCurveTo(cx, cy - 16, cx + 22, cy + 8); x.stroke(); }
     else if (kind === 'wide') { x.fillStyle = '#fbf8f2'; x.lineWidth = 13; x.beginPath(); x.ellipse(cx, cy, 30, 36, 0, 0, 7); x.fill(); x.stroke(); x.fillStyle = ink; x.beginPath(); x.arc(cx + lx * .6, cy + ly * .6, 9, 0, 7); x.fill(); }
     x.restore();
-    const ang = (s < 0 ? e.bl : e.br) * D2R; const by = cy - (BIG ? 128 : 48) + (e.by || 0) * EK;
+    const ang = (s < 0 ? e.bl : e.br) * D2R; const by = cy - (BIG ? 128 : /wide|tiny/.test(kind) ? 80 : 50) + (e.by || 0) * EK;
     x.strokeStyle = spec.browC || ink; x.lineWidth = spec.browW || (BIG ? 26 : 22); x.save(); x.translate(cx, by); x.rotate(s < 0 ? -ang : ang); x.beginPath(); x.moveTo(BIG ? -36 : -24, 0); x.lineTo(BIG ? 36 : 24, 0); x.stroke(); x.restore();
   }
   if (spec.fringe) { x.fillStyle = spec.fringe; x.strokeStyle = ink; x.lineWidth = 12; const top = ey - 190, L = S * .16, Rr = S * .84, n = 6; x.beginPath(); x.moveTo(L, top); x.lineTo(L, ey - 60);
@@ -58,7 +67,7 @@ function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a wh
     const n = 7; for (let i = 0; i <= n; i++) { const u = i / n, bx = L + (Rr - L) * u, by = top + Math.sin(Math.PI * u) * 120 + 18; if (i) x.quadraticCurveTo(bx - (Rr - L) / n / 2, by + 26, bx, by); else x.lineTo(bx, by); }
     x.lineTo(Rr, top); x.quadraticCurveTo(S / 2, top + 44, L, top); x.closePath(); x.fill(); x.stroke(); }
   let m = e.mouth; if (talk > 0) m = talk > .66 ? 'open' : talk > .33 ? 'talk' : (m === 'o' || m === 'yawn' ? m : 'flat');
-  x.strokeStyle = ink; x.fillStyle = '#3a1a24'; x.lineWidth = 15; const cx = S / 2; x.save(); if (BIG) { x.translate(cx, my); x.scale(1.9, 1.9); x.translate(-cx, -my); }
+  x.strokeStyle = ink; x.fillStyle = '#3a1a24'; x.lineWidth = 15; const cx = S / 2; x.save(); { x.translate(cx, my); x.scale(BIG ? 1.9 : 1.3, BIG ? 1.9 : 1.3); x.translate(-cx, -my); }
   if (m === 'smile') { const W = BIG ? 44 : 24, D = BIG ? 30 : 16; x.beginPath(); x.moveTo(cx - W, my - 10); x.quadraticCurveTo(cx, my + D, cx + W, my - 10); x.stroke(); } // v4.6 wide sheet smile
   else if (m === 'flat') { x.beginPath(); x.moveTo(cx - 18, my + 4); x.lineTo(cx + 18, my + 4); x.stroke(); }
   else if (m === 'smirk') { x.beginPath(); x.moveTo(cx - 22, my + 6); x.quadraticCurveTo(cx + 6, my + 12, cx + 28, my - 6); x.stroke(); }
@@ -119,11 +128,12 @@ export function makeChar(spec) { // v2: stick figure: white ball head, bean tors
   const tube = (len, r, parent) => { const m = mesh(new THREE.CapsuleGeometry(r, len, 3, 8), inkM, { p: [0, -len / 2, 0], parent }); return m; };
   // v4.2 model: thicker rubber-hose limbs with round joints, cartoon gloves (thumb + cuff) and rounded shoes. spec.classic = old hair-thin sticks
   const CL = !!spec.classic, rA = CL ? .007 : (spec.limbW || 1) * .018, rL = CL ? .008 : (spec.limbW || 1) * .022;
-  const skin = spec.glove || spec.skin || '#f7f2e8', gloveM = toon(skin, { grad: GRAD_FLAT, ol: OL * .8, emissive: skin, ei: .42 }), shoeM = toon(spec.shoe || skin, { grad: GRAD_2, ol: OL * .8, ...(spec.shoe ? {} : { emissive: skin, ei: .42 }) }), soleM = toon(spec.sole || '#e9e1d4', { grad: GRAD_FLAT, ol: OL * .6 }); // v4.5 default: bare hands + plain oval feet (spec.glove / spec.shoe / spec.cuff / spec.sole to dress them)
+  // v4.8 hybrid: ink dot hands + ink feet (pirate refs); spec.whiteHands = bare white hands, spec.glove / spec.shoe dress them
+  const W_ = spec.whiteHands, skin = spec.glove || (W_ ? spec.skin || '#f7f2e8' : '#231a28'), gloveM = W_ || spec.glove ? toon(skin, { grad: GRAD_FLAT, ol: OL * .8, emissive: skin, ei: .42 }) : inkM, shoeM = spec.shoe ? toon(spec.shoe, { grad: GRAD_2, ol: OL * .8 }) : W_ ? toon(skin, { grad: GRAD_2, ol: OL * .8, emissive: skin, ei: .42 }) : inkM, soleM = toon(spec.sole || '#e9e1d4', { grad: GRAD_FLAT, ol: OL * .6 }); // v4.5 default: bare hands + plain oval feet (spec.glove / spec.shoe / spec.cuff / spec.sole to dress them)
   const arm = (s) => { const up = group({ parent: torso }), fo = group({ parent: torso }); tube(AL, rA, up); tube(AL, rA * .9, fo);
     let hand; if (CL) hand = mesh(new THREE.SphereGeometry(.032, 12, 10), inkM, { p: [0, -AL, 0], parent: fo });
-    else { hand = group({ p: [0, -AL - .02, 0], parent: fo }); mesh(new THREE.SphereGeometry(.058, 16, 12), gloveM, { s: [1, 1.12, .78], parent: hand });
-      mesh(new THREE.SphereGeometry(.022, 10, 8), gloveM, { p: [s * -.045, .018, .02], s: [1, 1.5, 1], r: [0, 0, s * 35], parent: hand });
+    else { hand = group({ p: [0, -AL - .02, 0], parent: fo }); mesh(new THREE.SphereGeometry(W_ || spec.glove ? .058 : .042, 16, 12), gloveM, { s: W_ || spec.glove ? [1, 1.12, .78] : [1, 1, 1], parent: hand });
+      if (W_ || spec.glove) mesh(new THREE.SphereGeometry(.022, 10, 8), gloveM, { p: [s * -.045, .018, .02], s: [1, 1.5, 1], r: [0, 0, s * 35], parent: hand });
       if (spec.cuff) mesh(new THREE.CylinderGeometry(.04, .036, .03, 14), gloveM, { p: [0, .052, 0], parent: hand }); }
     let open = null; if (!CL) { open = group({ p: [0, -AL - .02, 0], parent: fo }); open.visible = false; // v4.3 open hand: palm + 4 spread fingers + thumb
       mesh(new THREE.SphereGeometry(.05, 14, 10), gloveM, { s: [1.05, 1, .6], parent: open }); if (spec.cuff) mesh(new THREE.CylinderGeometry(.04, .036, .03, 14), gloveM, { p: [0, .05, 0], parent: open });
