@@ -65,11 +65,12 @@ const _f = new THREE.Vector3(), _r = new THREE.Vector3(), _T = new THREE.Vector3
 function coverage(sh, ltR) { // v4.27: one clear change of angle per long shot - a close-up on the main character from ~30 deg to the same side, about 2x closer.
   // (small punch-ins of the same framing read as skipped frames / jump cuts, so they are not used)
   const i = SHOTS.indexOf(sh), nx = SHOTS[i + 1], d = (nx ? nx.t0 : 74.66 / SP) - sh.t0; if (sh.noCut || d < 2.6 || ltR < d * .55) return;
-  camera.updateMatrixWorld(); const cp = camera.position.clone(); camera.getWorldDirection(_f); let best = null, bd = 1e9;
-  for (const C of Object.values(CHARS)) { let o = C.g, v = true; while (o) { v = v && o.visible; o = o.parent; } if (!v || !C.g.parent) continue;
-    const h = C.is2D && C.sh && C.sh.visible ? C.sh.position.clone() : C.hc.getWorldPosition(new THREE.Vector3()), rel = h.clone().sub(cp), z = rel.dot(_f); if (z < .5) continue; const off = rel.clone().addScaledVector(_f, -z).length() / z; // angle off the view axis
-    if (off > .5) continue; const sc = off * 4 + z * .05; if (sc < bd) { bd = sc; best = h; } }
-  if (!best) return; const dist = cp.distanceTo(best); if (dist < 2.2) return;   // already a close-up
+  camera.updateMatrixWorld(); const cp = camera.position.clone(); camera.getWorldDirection(_f);
+  /* stateless + deterministic (segments render in separate browsers): the first character in cast order whose head is near the view axis */
+  let best = null; for (const C of Object.values(CHARS)) { let o = C.g, v = true; while (o) { v = v && o.visible; o = o.parent; } if (!v || !C.g.parent) continue;
+    const h = C.hc.getWorldPosition(new THREE.Vector3()).add(V(0, C.is2D ? .36 * C.g.getWorldScale(new THREE.Vector3()).x : 0, 0)), rel = h.clone().sub(cp), z = rel.dot(_f); if (z < .5) continue;
+    if (rel.clone().addScaledVector(_f, -z).length() / z > .6) continue; best = h; break; }
+  if (!best) return; const dist = cp.distanceTo(best); if (dist < 2.2) return;
   const back = cp.clone().sub(best).setY(0).normalize(), sg = i % 2 ? 1 : -1, a = sg * .5, ca = Math.cos(a), sa = Math.sin(a);
   const dir = new THREE.Vector3(back.x * ca - back.z * sa, 0, back.x * sa + back.z * ca), nd = Math.max(1.25, dist * .45);
   const tgt = best.clone().add(V(0, -.18, 0)); /* just below the face centre: face in the upper third */ camera.position.copy(tgt).addScaledVector(dir, nd).add(V(0, .06, 0)); camera.lookAt(tgt); camera.updateMatrixWorld(); POST.focus = camera.position.distanceTo(tgt); }
