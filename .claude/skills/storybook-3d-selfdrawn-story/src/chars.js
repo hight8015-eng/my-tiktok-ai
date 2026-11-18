@@ -189,6 +189,15 @@ export const dustAt = (p, k, size = 1) => { if (k >= 0 && k <= 1) OVL.push({ kin
 //   o = { n, seed, speed, up, grav, size, col, kind, life }  (age in seconds since the burst)
 export const debrisAt = (p, age, o = {}) => { if (age >= 0 && age <= (o.life ?? 2.2)) OVL.push({ kind: 'debris', p: p.clone ? p.clone() : new THREE.Vector3(...p), age, o }); };
 // smokeAt(origin, age, o): cel-shaded puffs that drift outward + up, grow soft and fade, leaving a haze. o = { n, seed, size, spread, col, rise, life }
+// v4.28 screen effects (drawn on the 2D overlay): tint / iris / burn / rain / flash / shock / runes / beam. k = 0..1 strength or progress
+const V3 = (p) => p ? (p.clone ? p.clone() : new THREE.Vector3(...p)) : null;
+export const tintAt = (col, k) => { if (k > 0) OVL.push({ kind: 'tint', col, k: Math.min(1, k) }); };          // whole frame tinted (blood sky, night, flashback)
+export const irisAt = (p, k, col = '#d0102a') => { if (k > 0 && k <= 1) OVL.push({ kind: 'iris', p: V3(p), k, col }); };   // a disc grows from a point (red eye) to fill the screen
+export const burnAt = (k) => { if (k > 0) OVL.push({ kind: 'burn', k: Math.min(1, k) }); };                 // burnt sepia edges closing in (into the past)
+export const rainAt = (t, k = 1, flash = 0) => { if (k > 0) OVL.push({ kind: 'rain', t, k: Math.min(1, k), flash }); };
+export const shockAt = (p, k, size = 1, col = '#ffffff') => { if (k >= 0 && k <= 1) OVL.push({ kind: 'shock', p: V3(p), k, size, col }); };
+export const runesAt = (p, t, k = 1, o = {}) => { if (k > 0) OVL.push({ kind: 'runes', p: V3(p), t, k: Math.min(1, k), o }); };
+export const beamAt = (a, b, t, k = 1, col = '#c070ff') => { if (k > 0) OVL.push({ kind: 'beam', p: V3(a), p2: V3(b), t, k: Math.min(1, k), col }); };
 export const smokeAt = (p, age, o = {}) => { if (age >= 0 && age <= (o.life ?? 3.2) * 1.1) OVL.push({ kind: 'smoke', p: p.clone ? p.clone() : new THREE.Vector3(...p), age, o }); };
 // ramp(lt, at, dur, k): slow-motion window: from `at` for `dur` seconds the clock runs at speed k (e.g. .25), then normal again
 export function ramp(lt, at, dur, k = .25) { return lt < at ? lt : lt < at + dur ? at + (lt - at) * k : at + dur * k + (lt - at - dur); }

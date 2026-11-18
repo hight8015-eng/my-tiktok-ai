@@ -128,6 +128,14 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    v4.25 PROPS MUST TELL THE STORY: dress each set for what happens in it (wedding = pews, flower arch, petals;
    battlefield = standards carried IN the army's ranks, broken spears, dropped shields, scorch marks; love scene =
    roses). Never scatter flags/props at random - every prop either belongs to the place or to the plot.
+   v4.28 FX + STORY PROPS (examples/lv_sets.js + examples/shots_fxdemo.js shows every one in use):
+   screen FX in chars.js: tintAt(col,k) irisAt(p,k) burnAt(k) rainAt(t,k,flash) shockAt(p,k) runesAt(p,t,k) beamAt(a,b,t,k);
+   3D FX in the set file: cracksAt(i,p,k,size) raysAt(p,k,t) fogAt(p,t,k) rocksAt(p,t,k) (+ smokeAt with a dark col = aura);
+   props PROP.*: wantedWall, prophecyStone, countdown(text), heroStatue (Thai text drawn lazily once Prompt is loaded),
+   boneThrone, mirror(+mirrorAt), sealChains(+chainsAt), hand props letter, blackSword, thornCrown, crystalStaff,
+   bouquet(wilt), ring, dagger, torchHand, pitchfork. Reset 3D FX at the start of every shot (they are not in reset()).
+   SFX: aud/sfx now has meme categories mboom, mding, mwhoosh, mrise, mfall, mroll, mrumble (auto-classified from the
+   user's meme compilations) + mvoice (39 speech/music meme lines: only when a specific one is chosen by ear).
    v4.13 extra physics: the head (and hat/headband art) lags and wobbles on starts/stops/turns; held props never sink
    into the body (hold entry noClip / clear); flyPath(..., {walls: [{axis: 'x'|'z', at, n, e}]}) bounces off walls;
    makeRope/updateRope (sagging, swaying rope/leash/chain) and makeFlag/waveFlag (flag, cloth, cape in the wind).

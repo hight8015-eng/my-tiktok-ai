@@ -87,6 +87,25 @@ function overlays(t, alpha) { // gloom lines + sparkles requested by poses/shots
     else if (o.kind === 'spark') { const q = scr(o.p); if (!q) { X.restore(); continue; } const r = 46 * o.size * (.6 + .4 * o.k), ro = t * 1.5;
       X.translate(q[0], q[1]); X.rotate(ro * .2); X.globalCompositeOperation = 'lighter'; const g = X.createRadialGradient(0, 0, 0, 0, 0, r * 1.3); g.addColorStop(0, 'rgba(255,250,220,.9)'); g.addColorStop(1, 'rgba(255,220,140,0)'); X.fillStyle = g; X.beginPath(); X.arc(0, 0, r * 1.3, 0, 7); X.fill();
       X.fillStyle = '#fffbe8'; for (const [rr, rot] of [[r, 0], [r * .55, Math.PI / 4]]) { X.save(); X.rotate(rot); X.beginPath(); for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, d = k % 2 ? rr * .16 : rr; X.lineTo(Math.cos(a) * d, Math.sin(a) * d); } X.closePath(); X.fill(); X.restore(); } }
+
+    else if (o.kind === 'tint') { X.globalAlpha = alpha * o.k; X.fillStyle = o.col; X.fillRect(0, 0, 1080, 1920); }
+    else if (o.kind === 'iris') { const q = (o.p && scr(o.p)) || [540, 860]; const r = 2300 * E.eIn(o.k) + 6; X.globalAlpha = alpha; const g = X.createRadialGradient(q[0], q[1], r * .82, q[0], q[1], r);
+      g.addColorStop(0, o.col); g.addColorStop(1, 'rgba(0,0,0,0)'); X.fillStyle = g; X.beginPath(); X.arc(q[0], q[1], r, 0, 7); X.fill(); }
+    else if (o.kind === 'burn') { const k = o.k, g = X.createRadialGradient(540, 900, 300 + 700 * (1 - k), 540, 900, 1250); g.addColorStop(0, 'rgba(60,30,10,0)'); g.addColorStop(.6, `rgba(90,45,15,${.55 * k})`); g.addColorStop(.85, `rgba(30,12,4,${.9 * k})`); g.addColorStop(1, `rgba(10,4,0,${k})`);
+      X.globalAlpha = alpha; X.fillStyle = g; X.fillRect(0, 0, 1080, 1920); X.globalCompositeOperation = 'multiply'; X.fillStyle = `rgba(255,214,160,${.6 * k})`; X.fillRect(0, 0, 1080, 1920); }
+    else if (o.kind === 'rain') { const r_ = E.rng(9), k = o.k; X.globalAlpha = alpha * .55 * k; X.strokeStyle = '#cfe0ff'; X.lineWidth = 2.2; X.beginPath();
+      for (let i = 0; i < 160; i++) { const x0 = r_() * 1180 - 50, sp = 1500 + r_() * 900, y = ((r_() * 2100 + o.t * sp) % 2100) - 100, x = x0 - (y + 100) * .12; X.moveTo(x, y); X.lineTo(x - 9, y + 70); } X.stroke();
+      if (o.flash > 0) { X.globalAlpha = alpha * o.flash; X.fillStyle = '#eef3ff'; X.fillRect(0, 0, 1080, 1920); } }
+    else if (o.kind === 'shock') { const q = scr(o.p); if (!q) { X.restore(); continue; } const k = o.k, r = 60 + 900 * o.size * E.eOut(k); X.globalAlpha = alpha * (1 - k);
+      X.globalCompositeOperation = 'lighter'; X.strokeStyle = o.col; X.lineWidth = 46 * (1 - k) + 4; X.beginPath(); X.ellipse(q[0], q[1], r, r * .42, 0, 0, 7); X.stroke(); X.lineWidth = 10 * (1 - k) + 2; X.beginPath(); X.ellipse(q[0], q[1], r * .7, r * .3, 0, 0, 7); X.stroke(); }
+    else if (o.kind === 'runes') { const q = scr(o.p); if (!q) { X.restore(); continue; } const r_ = E.rng(o.o.seed || 5), G = o.o.glyphs || 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ', n = o.o.n || 16, W_ = o.o.w || 360;
+      X.globalCompositeOperation = 'lighter'; X.textAlign = 'center'; X.textBaseline = 'middle'; X.shadowColor = o.o.col || '#ff3a5a'; X.shadowBlur = 24; X.fillStyle = o.o.col2 || '#ffd0e0';
+      for (let i = 0; i < n; i++) { const ph = (o.t * (.25 + r_() * .2) + r_()) % 1, x = q[0] + (r_() - .5) * W_ * (1 + ph * .4), y = q[1] - ph * (o.o.h || 520), a = Math.sin(ph * Math.PI) * o.k;
+        X.globalAlpha = alpha * a; X.font = `700 ${Math.round(46 + r_() * 30)}px serif`; X.fillText(G[Math.floor(r_() * G.length)], x, y); } X.shadowBlur = 0; }
+    else if (o.kind === 'beam') { const a = scr(o.p), b = scr(o.p2); if (!a || !b) { X.restore(); continue; } const r_ = E.rng(Math.floor(o.t * 24)); X.globalCompositeOperation = 'lighter'; X.lineCap = 'round';
+      for (const [w, c, al] of [[60, o.col, .25], [26, o.col, .6], [9, '#ffffff', .95]]) { X.globalAlpha = alpha * al * o.k; X.strokeStyle = c; X.lineWidth = w; X.beginPath(); X.moveTo(a[0], a[1]);
+        for (let s = 1; s <= 8; s++) { const u = s / 8, j = s < 8 ? (r_() - .5) * 26 : 0; X.lineTo(a[0] + (b[0] - a[0]) * u + j, a[1] + (b[1] - a[1]) * u + j); } X.stroke(); }
+      X.globalAlpha = alpha * o.k; const g = X.createRadialGradient(b[0], b[1], 0, b[0], b[1], 110); g.addColorStop(0, '#ffffff'); g.addColorStop(.3, o.col); g.addColorStop(1, 'rgba(0,0,0,0)'); X.fillStyle = g; X.beginPath(); X.arc(b[0], b[1], 110, 0, 7); X.fill(); }
     X.restore(); } }
 function speedLines(f) { // manga focus lines toward the shocked face, fading out
   const a = (1 - E.sstep(.35, .75, f.lt)) * E.sstep(0, .06, f.lt) * Math.min(1, FXL * 1.3); if (a <= 0 || FXL < .25) return; const r = E.rng(Math.floor(f.lt * 12) + 7);
