@@ -115,6 +115,8 @@ If the user wants characters made in Flow from their own prompt, use the sister 
      bar, no coloured words. Captions: plain bold white with dark outline, 1-2 words at a time on the voice
      (captions.words = 2 auto-splits longer chunks; for Thai write the timing chunks short by hand).
    - LENGTH 55-75 s, one narrator, fast and conversational.
+   - DEAD AIR: before timing, run `bash tools/tighten.sh vo_raw.mp3 vo.wav [speed 1.0-1.15]` - pauses over .35 s
+     shrink to .22 s, lead/tail silence trimmed, optional pitch-safe speed-up (1.1 = about 10 % shorter).
    RETENTION / VIRAL KIT (optional extras, all OFF by default; turn on only if a story needs it):
    - project.json "hook": { text, sub, dur } = a big yellow banner in the first ~2.5 s (the hook decides the swipe).
    - "captions": { pop: true, highlight: true } makes captions pop and colours *starred* words / numbers yellow;
