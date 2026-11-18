@@ -160,6 +160,14 @@ If the user wants characters made in Flow from their own prompt, use the sister 
      (over-the-shoulder, macro of hands/props, pull-back to sky) are fine - check the rest with stills.
    - 4-step camera for reveal beats: wide hold (the setting) -> push in (the one who acts) -> FAST zoom out (everyone
      reacts, eOut over ~.7 s) -> group shot. Characters in a confrontation face each other (check ry with a still).
+   v4.33 SFX ENGINE (researched; use hit() instead of add(sfx()) in the EPISODE block):
+   hit(cat, t, g, pan, tier='small'|'mid'|'big', lead='whoosh') - trims leading silence so the transient lands ON the
+   frame; small random pitch (+-1.5 st) and gain (+-2 dB) per play; round-robin variants; same file never within 8 s;
+   <= 4 per category; < .12 s collisions dropped, < .35 s softened; <= 3 'big' hits that get a pre-hit dip of beds +
+   music (~6 dB, .35 s) so the hit lands out of near-silence; lead='whoosh' puts the whoosh PEAK just before the hit.
+   Plan the sound like the picture: 1 sound per story beat, ~2.5-3.5 per 10 s with real quiet gaps, the biggest
+   hits only on the 2-3 story peaks, match weight to the visual (small move = small sound), let the music carry
+   emotion and SFX carry action. sfx_report() prints density, gaps and per-category use - read it every time.
    HELPER RENDER SESSIONS (user rule): before every full render, ASK the user whether to use helper sessions and how
    many (each is a separate cloud session on the user's usage quota). Default = render on this machine only. If they
    agree: push the project's src/ to render_jobs/<proj>/ on the work branch, create_session per helper with

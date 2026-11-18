@@ -92,11 +92,54 @@ def plip():
 # v4 recorded SFX library (aud/sfx, index aud/sfx/sfx.json): sfx('whoosh'), sfx('shine'), sfx('hit_dramatic', 1) ...
 # categories: whoosh riser wobble hit_dramatic drumroll crash bang rattle noise bell chime buzzer shine click whistle laugh voice_hum voice_react scream_long
 #             punch explosion metal_hit gong_comic shimmer harp kwing horn silly scream applause
+_addS = add
 SFXLIB = json.load(open(f'{W}/aud/sfx/sfx.json')) if os.path.exists(f'{W}/aud/sfx/sfx.json') else []
-def sfx(cat, i=0):
+class Snd(np.ndarray):  # a library sound that remembers which file/category it came from (for the SFX rules below)
+    pass
+_last_cat = {}
+def sfx(cat, i=None):
+    """v4.33: i=None -> round robin (never the same variant twice in a row); a number picks a variant as before"""
     L_ = [e for e in SFXLIB if e['cat'] == cat]
     if not L_: raise KeyError(f'no sfx in category {cat!r}: ' + ' '.join(sorted({e["cat"] for e in SFXLIB})))
-    return rd_wav(f"{W}/aud/sfx/{L_[i % len(L_)]['file']}")
+    if i is None: i = (_last_cat.get(cat, -1) + 1) % len(L_)
+    _last_cat[cat] = i % len(L_); e = L_[i % len(L_)]
+    a = rd_wav(f"{W}/aud/sfx/{e['file']}").view(Snd); a.meta = {'cat': cat, 'file': e['file']}; return a
+# ---------- v4.33 SFX RULES (research: game-audio variation + film/animation sync practice) ----------
+# 1 onset sync: leading silence is trimmed so the TRANSIENT lands on t (a few frames late/early breaks the illusion)
+# 2 variation: every play gets a small random pitch (+-1.5 semitones) and gain (+-2 dB) -> no 'machine-gun' repeats
+# 3 one thing at a time: a sound starting < .35 s after another is softened (-5 dB); < .12 s apart and quieter -> dropped
+# 4 the same FILE never twice within 8 s (another variant of the category is used); a category is used <= 4x per episode
+# 5 tiers: 'big' hits are rationed (<= 3 per episode) and get a pre-hit dip: beds + music drop ~6 dB for .35 s before
+#   them (silence makes the hit land); 'mid'/'small' are scaled .75/.5
+# 6 whoosh leads, hit lands: lead='whoosh' places a whoosh so its PEAK lands ~.04 s before t, then the hit on t
+_rs_sfx = np.random.RandomState(11); SFXLOG = []; DIPS = []
+def _onset(a):
+    m = np.abs(a if a.ndim == 1 else a.max(0)); pk = m.max() + 1e-9; idx = np.argmax(m > pk * .1); return max(0, idx - int(.004 * SR))
+def _peak(a):
+    m = np.abs(a if a.ndim == 1 else a.max(0)); k = int(.02 * SR); e = np.convolve(m, np.ones(k) / k, 'same'); return int(np.argmax(e))
+def _vary(a):
+    r = 2 ** (_rs_sfx.uniform(-1.5, 1.5) / 12); n = int(a.shape[-1] / r); x = np.linspace(0, a.shape[-1] - 1, n)
+    v = np.interp(x, np.arange(a.shape[-1]), a) if a.ndim == 1 else np.stack([np.interp(x, np.arange(a.shape[-1]), c) for c in a])
+    return v * 10 ** (_rs_sfx.uniform(-2, 2) / 20)
+def hit(cat, t, g=1.0, pan=0.0, tier='mid', lead=None, i=None):
+    """the way to place a library sound: hit('mboom', 48.85, .8, tier='big', lead='whoosh')"""
+    if tier == 'big' and sum(1 for x in SFXLOG if x[3] == 'big') >= 3: tier = 'mid'
+    if sum(1 for x in SFXLOG if x[1] == cat) >= 4: print(f'  [sfx] skip {cat} @ {t:.2f}: category already used 4x'); return
+    a = sfx(cat, i); tries = 0
+    while any(x[2] == a.meta['file'] and abs(x[0] - t) < 8 for x in SFXLOG) and tries < 6: a = sfx(cat); tries += 1
+    near = [x for x in SFXLOG if abs(x[0] - t) < .35]
+    if any(abs(x[0] - t) < .12 and x[4] >= g for x in near): print(f'  [sfx] drop {cat} @ {t:.2f}: collides with {near[0][1]}'); return
+    if near: g *= .56
+    if lead == 'whoosh':
+        w = sfx('whoosh'); w = _vary(np.asarray(w)[_onset(w):]); _addS(w, max(0, t - .04 - _peak(w) / SR), g * .45, -pan)
+    if tier == 'big': DIPS.append(t)
+    g *= {'big': 1.0, 'mid': .75, 'small': .5}[tier]
+    x = _vary(np.asarray(a)[_onset(a):]); _addS(x, t, g, pan); SFXLOG.append((t, cat, a.meta['file'], tier, g))
+def sfx_report():
+    if not SFXLOG: return
+    ts = sorted(x[0] for x in SFXLOG); from collections import Counter; c = Counter(x[1] for x in SFXLOG)
+    gaps = np.diff(ts) if len(ts) > 1 else [0]
+    print(f'  [sfx] {len(SFXLOG)} hits, {len(SFXLOG) / END * 10:.1f} per 10 s (aim 2.5-3.5), longest quiet gap {max(gaps):.1f} s, big {sum(1 for x in SFXLOG if x[3] == "big")}; per category {dict(c)}')
 # ===== EPISODE 1/2: ambience (river valley by day, quiet night, the workshop) =====
 t = np.arange(N) / SR
 sw = .6 + .4 * np.sin(2 * np.pi * t / 5.5) * np.sin(2 * np.pi * t / 2.3 + 1)
@@ -127,10 +170,6 @@ def coins(n=4, seed=0):
 def tok(): return thump(520, .12, 1.0)
 BELLS = []
 SFX = np.zeros((2, N)); L0, R0 = L.copy(), R.copy(); L[:] = 0; R[:] = 0
-_addS = add; _ons = []
-def add(sig, t, g=1.0, pan=0.0):   # v4.29 SFX guard: a hit within .35 s of another is softened
-    if any(abs(t - u) < .35 for u in _ons): g *= .55
-    _ons.append(t); return _addS(sig, t, g, pan)
 for i, tt in enumerate((1.86, 9.08, 12.62, 13.78, 26.22, 31.95, 33.05, 44.0, 52.85)):
     w_ = swoosh(i); add(w_, max(0, tt - min(.18, len(w_) / SR * .4)), .5)
 for tt, f in ((.5, 1500), (4.2, 1700), (6.6, 1450), (7.7, 1700), (49.8, 1500), (56.1, 1650), (57.4, 1450)): add(reverb(gull(f), 1.5, .4, int(tt * 7)), tt, .14, pan=(-.5 if int(tt) % 2 else .5))
@@ -171,13 +210,16 @@ env = lp(lp(np.abs(V), 6), 6); env = env / (env.max() + 1e-9); duck = 1 - .6 * n
 sfx_r = rms(SFX[:, np.abs(SFX).max(0) > 1e-3]); bed_r = rms(BED)
 SFX *= (vr * 10 ** (-16 / 20)) / max(sfx_r, 1e-9) * duck; BED *= (vr * 10 ** (-24 / 20)) / max(bed_r, 1e-9) * (.6 + .4 * duck)
 bell_r = rms(BELL[:, np.abs(BELL).max(0) > 1e-3]) if (np.abs(BELL).max() > 1e-3) else 1.0; BELL *= (vr * 10 ** (-7 / 20)) / max(bell_r, 1e-9) * (1 - .4 * (1 - duck))
+tt_ = np.arange(N) / SR; DIP = np.ones(N)   # v4.33 pre-hit dip: beds + music duck ~6 dB for .35 s before each 'big' hit
+for d in DIPS: DIP *= 1 - .5 * np.clip((tt_ - (d - .45)) / .1, 0, 1) * np.clip((d + .08 - tt_) / .08, 0, 1)
+BED *= DIP; sfx_report()
 mix = SFX + BED + BELL; mix[0] += V; mix[1] += V
 # v3: optional music bed (tools/music.py -> aud/music_bed.wav) for the (มีเพลง) version: ~12 dB under VO (rms), -6 dB more under speech, -4 dB under bells
 MIXM = None
 if os.path.exists(f'{W}/aud/music_bed.wav'):
     mb = rd_wav(f'{W}/aud/music_bed.wav').reshape(-1, 2).T; MUS = np.zeros((2, N)); k = min(mb.shape[1], N); MUS[:, :k] = mb[:, :k]
     be = lp(lp(np.abs(BELL).max(0), 4), 4); be = np.clip(be / (be.max() + 1e-9) * 3, 0, 1)
-    MUS *= (vr * 10 ** (-12 / 20)) / max(rms(MUS[:, np.abs(MUS).max(0) > 1e-3]), 1e-9) * duck * (1 - .37 * be)
+    MUS *= (vr * 10 ** (-12 / 20)) / max(rms(MUS[:, np.abs(MUS).max(0) > 1e-3]), 1e-9) * duck * (1 - .37 * be) * DIP
     MIXM = mix + MUS
 if os.environ.get('STEMS'):
     for nm, a in (('vo', np.stack([V, V])), ('sfx', SFX), ('bed', BED), ('bell', BELL)):
