@@ -106,7 +106,7 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    - project.json "hook": { text, sub, dur } = a big yellow banner in the first ~2.5 s (the hook decides the swipe).
    - captions pop in word by word; wrap a word in *stars* in timing caps (or list "hiWords") to colour it yellow;
      numbers are highlighted automatically. "captions": { y, size, pop, hi } to restyle.
-   - "progressBar": true draws a thin progress bar (keeps people to the end).
+   - no progress bar on story channels (user preference); "progressBar": true exists but leave it off.
    - finish.sh also writes โพสต์.txt (title, hook line, description, hashtags) via tools/postmeta.py; set
      "post": { title, hook, desc, tags, series, part } in project.json.
    - Shot rules that the algorithm rewards: something changes every 2-3 s (cut, camera move, FX, expression pop);
