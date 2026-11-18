@@ -227,14 +227,14 @@ E2('S25', 49.70, 'blur', (lt, t) => { // "แสงสีขาวกลืน�
   dawnLight(); FIELD.visible = true; FA.rock.visible = false; Wd.cityAt(false, t); DOME.visible = true; const k = sstep(0, 2.2, lt);
   DOME.position.set(-28, 4, -60); DOME.scale.setScalar(2 + k * 70); DOME.material.opacity = .85; tintAt('#ffffff', .55 * (1 - sstep(1.6, 2.4, lt)) + .25 * k);
   camF([10, 14, 30], [-28, 6, -60], [6, 18, 36], [-28, 12, -60], U(lt, 2.6, eOut), 46); });
-E2('S26', 52.36, 'blur', (lt, t) => { for (let i = 0; i < 3; i++) smokeAt(HALL.localToWorld(V((i - 1) * 2.4, .3, -6 - i * 2)), (lt * .5 + i * .4) % 2.5, { col: '#9a94a8', size: .8, life: 2.5 }); // "เมื่อแสงจางลง เทพปีศาจหายไปแล้ว" - empty, broken, quiet
+E2('S26', 52.36, 'blur', (lt, t) => { for (let i = 0; i < 3; i++) smokeAt(HALL.localToWorld(V((i - 1) * 2.6, .2, -12.5 - i * .8)), (lt * .5 + i * .4) % 2.5, { col: '#9a94a8', size: .3, life: 2.5 }); // "เมื่อแสงจางลง เทพปีศาจหายไปแล้ว" - empty, broken, quiet
   ruinLight(); Wd.hallAt(t); RUIN.visible = true; HA.glass.visible = false; DOOR.visible = false; tintAt('#ffffff', .6 * (1 - sstep(0, 1.2, lt)));
   Wd.raysAt(HALL.localToWorld(V(0, 0, -11)), .9, t); Wd.fogAt(HALL.localToWorld(V(0, 0, -7)), t, .6, '#e0dcff', 6);
   camH([0, 7.5, -1.5], [0, 1.0, -11], [0, 5.5, -4.0], [0, 1.0, -11], U(lt, 3.0, eIO), 50); });
-E2('S27', 55.41, 'cut', (lt, t) => { for (let i = 0; i < 3; i++) smokeAt(HALL.localToWorld(V((i - 1) * 2.4, .3, -7 - i * 1.5)), (lt * .5 + i * .4) % 2.5, { col: '#9a94a8', size: .8, life: 2.5 }); // "และเขาก็หายไปด้วย" - Elena alone in the ruins
+E2('S27', 55.41, 'cut', (lt, t) => { for (let i = 0; i < 3; i++) smokeAt(HALL.localToWorld(V((i - 1) * 2.6, .2, -12.5 - i * .8)), (lt * .5 + i * .4) % 2.5, { col: '#9a94a8', size: .3, life: 2.5 }); // "และเขาก็หายไปด้วย" - Elena alone in the ruins
   ruinLight(); Wd.hallAt(t); RUIN.visible = true; HA.glass.visible = false; DOOR.visible = false; Wd.raysAt(HALL.localToWorld(V(0, 0, -11)), .7, t);
-  put(E_(), HALL, { p: [0, .3, -10.2], ry: lerp(-40, 40, sstep(0, 1.6, lt)), ex: 'sad', tears: 1, gloom: .6, blink: blinkAt(t, 2) });
-  camH([2.6, 1.2, -6.2], [0, 1.3, -10.2], [1.6, 1.4, -7.4], [0, 1.4, -10.2], U(lt, 2.0, eIO), 46); });
+  put(E_(), HALL, { p: [0, .3, -10.2], ry: lerp(-40, 40, sstep(0, 1.6, lt)), ex: 'sad', tears: 1, blink: blinkAt(t, 2) });
+  camH([.75, 1.55, -7.2], [0, 1.4, -10.2], [.45, 1.6, -7.7], [0, 1.45, -10.2], U(lt, 2.0, eIO), 46); /* on the aisle, clear of the pews and their flower balls */ });
 E2('S28', 57.44, 'cut', (lt, t) => { MIND = 0; // "บนพื้น เหลือเพียงแหวนวงเดียว" - slow push to the ring
   ruinLight(); Wd.hallAt(t); RUIN.visible = true; HA.glass.visible = false; DOOR.visible = false; RING.visible = true; Wd.raysAt(HALL.localToWorld(V(.4, 0, -9.4)), .9, t);
   sparkAt(HALL.localToWorld(V(.45, .14, -9.35)), .5 + .5 * Math.sin(t * 4), .5);

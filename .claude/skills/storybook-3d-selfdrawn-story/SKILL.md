@@ -168,6 +168,14 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    Plan the sound like the picture: 1 sound per story beat, ~2.5-3.5 per 10 s with real quiet gaps, the biggest
    hits only on the 2-3 story peaks, match weight to the visual (small move = small sound), let the music carry
    emotion and SFX carry action. sfx_report() prints density, gaps and per-category use - read it every time.
+   LESSONS FROM VIEWER FEEDBACK (THE LAST VILLAIN ep2 crying scene, seen on the phone):
+   - Do NOT use P.gloom on a face close-up: its vertical lines read as scratches / a broken picture. Sadness = tears +
+     sad ex + head down + slower camera + music; gloom only on small/far characters, if at all.
+   - Foreground props near the camera become huge blobs (pew flower balls, candles, rubble). In emotional close-ups keep
+     the camera >= 1.2 m from every prop, or hide the prop for that shot. Check the bottom third of the frame.
+   - Smoke/dust in a sad aftermath scene stays far behind the character, small (size <= .3) and low; never across the
+     character or the lower frame.
+   - Watch the frames at the size of a phone: anything that pulls the eye away from the face in an emotional beat goes.
    HELPER RENDER SESSIONS (user rule): before every full render, ASK the user whether to use helper sessions and how
    many (each is a separate cloud session on the user's usage quota). Default = render on this machine only. If they
    agree: push the project's src/ to render_jobs/<proj>/ on the work branch, create_session per helper with
