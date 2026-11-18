@@ -10,7 +10,7 @@ const { chromium } = require('playwright'); const fs = require('fs'); const path
     const x=document.getElementById('c').getContext('2d'); x.drawImage(im,0,0,1080,1920);
     const g=x.createLinearGradient(0,0,0,760); g.addColorStop(0,'rgba(10,14,40,.55)'); g.addColorStop(1,'rgba(10,14,40,0)'); x.fillStyle=g; x.fillRect(0,0,1080,760);
     x.textAlign='center'; x.lineJoin='round';
-    const line=(t,y,size,fill,w,weight)=>{ x.font=weight+' '+size+'px P'; x.save(); x.shadowColor='rgba(0,0,0,.5)'; x.shadowBlur=14; x.shadowOffsetY=10; x.lineWidth=w; x.strokeStyle='#1b1220'; x.strokeText(t,540,y); x.restore(); x.fillStyle=fill; x.fillText(t,540,y); };
+    const line=(t,y,size,fill,w,weight)=>{ x.font=weight+' '+size+'px P'; const mw=x.measureText(t).width+w; if(mw>990){ const r=990/mw; size=Math.floor(size*r); w=Math.round(w*r); x.font=weight+' '+size+'px P'; } x.save(); x.shadowColor='rgba(0,0,0,.5)'; x.shadowBlur=14; x.shadowOffsetY=10; x.lineWidth=w; x.strokeStyle='#1b1220'; x.strokeText(t,540,y); x.restore(); x.fillStyle=fill; x.fillText(t,540,y); };
     if(${J(CV.sub || '')}) line(${J(CV.sub || '')},150,62,'#ffffff',12,700);  // keep y<=150: tall Thai tone marks of the big line below reach up to ~y 200
     line(${J(CV.l1 || '')},395,186,'#ffffff',22,700);
     line(${J(CV.l2 || '')},600,206,'#ffcf4a',24,700);
