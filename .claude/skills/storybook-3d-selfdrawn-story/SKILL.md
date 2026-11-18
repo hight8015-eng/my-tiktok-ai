@@ -74,6 +74,9 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    (anticipation, squash-and-stretch via P.squash, follow-through); hitStop(lt, at) freezes 4 frames on contact;
    impactAt / dustAt / sparkAt draw comic FX; P.smear = [1] adds a smear trail to the right hand (actPunch sets it).
    Poses are blended over 5 frames automatically, so snapping between preset poses is fine.
+   FX: debrisAt(p, age, {kind: 'rock'|'leaf'|'spark', n, speed, size, floor}) bursts, smokeAt(p, age, {size}) cel puff
+   clouds, ramp(lt, at, dur, k) slow motion. Fast camera moves get motion blur automatically. FX are drawn over the
+   frame (no depth), so put blasts between the camera and the characters, not behind them.
 9. **Finish:** `bash tools/finish.sh <out_dir> "<title>" 26`, then `bash tools/cover.sh <out_dir>/ปก.jpg`.
 10. **Deliver:** on the user's computer put the files in `~/Desktop/edit-video/<project>/<version>/`. On a phone,
     send them back in the chat.

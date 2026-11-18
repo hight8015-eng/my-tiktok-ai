@@ -18,9 +18,14 @@ let FX = null;
 function draw(sh, t, alpha = 1, mb = 0, dir = 1) { OVL.length = 0; E.POST.gseed = Math.floor(t * 12) % 97; E.POST.dof = 0; E.POST.mblur = [mb * 90 * dir, mb * 14]; E.POST.leakPh = t * .6;
   // v4 motion smoothing: evaluate the shot 5..1 frames back (no render) and blend character poses -> no 1-frame snaps
   const SW = [.05, .08, .12, .17, .23], lt0 = t - sh.t0; Object.values(CHARS).forEach(C => { C._acc = null; C._trail = []; });
-  if (!window.NOSMOOTH) for (let k = 5; k >= 1; k--) { const tk = t - k / 30; if (tk - sh.t0 < 0) continue; ANIM.rec = SW[5 - k]; ANIM.t = tk; runShot(sh, tk); }
+  let prevCam = null;
+  if (!window.NOSMOOTH) for (let k = 5; k >= 1; k--) { const tk = t - k / 30; if (tk - sh.t0 < 0) continue; ANIM.rec = SW[5 - k]; ANIM.t = tk; runShot(sh, tk); if (k === 1) { E.camera.updateMatrixWorld(); prevCam = { m: E.camera.matrixWorldInverse.clone(), pm: E.camera.projectionMatrix.clone() }; } }
   ANIM.wFinal = .35; ANIM.rec = window.NOSMOOTH ? undefined : .35; ANIM.t = t; OVL.length = 0; runShot(sh, t); ANIM.rec = undefined;
   if (!window.NOSMOOTH) Object.values(CHARS).forEach(applySmooth); updateSprites(E.camera);
+  if (prevCam && mb === 0 && !window.NOAUTO) { // v4 auto camera motion blur: how far the focus point slid on screen since the last frame
+    E.camera.updateMatrixWorld(); const fw = new E.THREE.Vector3(0, 0, -1).transformDirection(E.camera.matrixWorld), P = E.camera.position.clone().addScaledVector(fw, Math.max(1, E.POST.focus || 4));
+    const a = P.clone().project(E.camera), b = P.clone().applyMatrix4(prevCam.m).applyMatrix4(prevCam.pm), dx = (a.x - b.x) * 540, dy = -(a.y - b.y) * 960, L = Math.hypot(dx, dy);
+    if (L > 6) { const k = Math.min(1, (L - 6) / 30) * .6; E.POST.mblur = [dx * k, dy * k]; } }
   const nh = nearestHead(); if (E.POST.dof === 0 && nh && nh.z < 9 && !window.NOAUTO) { E.POST.focus = nh.z * .97; E.POST.dof = .7 * (1 - E.sstep(3.5, 9, nh.z)); }
   const lt = t - sh.t0, shock = nh && nh.C.f2 && /shocked|scared|scream/.test(nh.C.f2[0]) && nh.C.view !== 'B' && nh.z < 7 && lt < .75 && !window.NOAUTO; FX = shock ? { lt, x: nh.sx, y: nh.sy } : (alpha === 1 ? null : FX); if (window.NOFACE) Object.values(CHARS).forEach(C => { C.face.visible = false; C.sweat.visible = false; for (const L of [C.aL, C.aR, C.lL, C.lR]) { L.up.visible = false; L.fo.visible = false; } }); Wd.updateSky(t); E.render(); X.globalAlpha = alpha;
   if (FX && FX.lt < .32) { const k = 1 + .07 * (1 - E.eOut(FX.lt / .32)); X.drawImage(E.glc, FX.x * (1 - k), FX.y * (1 - k), 1080 * k, 1920 * k); } else X.drawImage(E.glc, 0, 0);
@@ -48,6 +53,24 @@ function overlays(t, alpha) { // gloom lines + sparkles requested by poses/shots
     else if (o.kind === 'dust') { const q = scr(o.p); if (!q) { X.restore(); continue; } const k = o.k, r_ = E.rng(3); X.translate(q[0], q[1]);
       for (let i = 0; i < 9; i++) { const sd = i < 5 ? -1 : 1, a = (r_() * .5 + .1) * Math.PI, dx = sd * Math.cos(a) * (60 + 200 * E.eOut(k)) * o.size, dy = -Math.sin(a) * 50 * E.eOut(k) * o.size, rr = (22 + 30 * r_()) * (0.6 + k) * o.size;
         X.globalAlpha = alpha * .8 * (1 - E.sstep(.3, 1, k)); X.fillStyle = '#d9d2e6'; X.strokeStyle = 'rgba(28,20,32,.6)'; X.lineWidth = 4; X.beginPath(); X.arc(dx, dy, rr, 0, 7); X.fill(); X.stroke(); } }
+    else if (o.kind === 'debris') { const O = o.o, r_ = E.rng((O.seed || 1) * 977), n = O.n || 18, sp = O.speed || 6, g = O.grav ?? 9.8, kind = O.kind || 'rock', age = o.age, life = O.life ?? 2.2;
+      for (let i = 0; i < n; i++) { const th = r_() * Math.PI * 2, up = (O.up ?? .55) + r_() * .5, v = sp * (.45 + .75 * r_()); const vx = Math.cos(th) * v * (1 - up * .5), vz = Math.sin(th) * v * (1 - up * .5), vy = v * up;
+        const flut = kind === 'leaf' ? Math.sin(age * 9 + i) * .35 : 0, gg = kind === 'leaf' ? g * .18 : g, drag = kind === 'leaf' ? Math.exp(-age * 2.2) : 1;
+        const w = new E.THREE.Vector3(o.p.x + vx * age * drag + flut, Math.max(O.floor ?? -1e9, o.p.y + vy * age * drag - .5 * gg * age * age), o.p.z + vz * age * drag); const q = scr(w); const r1 = r_(), r2 = r_(), r3 = r_(); if (!q) continue;
+        const d = E.camera.position.distanceTo(w), sz = (O.size || .12) * (.5 + r1) * 1100 / Math.max(.5, d), rot = r2 * 7 + age * (kind === 'leaf' ? 3 : 9) * (r3 - .5) * 2;
+        X.save(); X.translate(q[0], q[1]); X.rotate(rot); X.globalAlpha = alpha * (1 - E.sstep(life * .7, life, age));
+        if (kind === 'spark') { X.globalCompositeOperation = 'lighter'; X.fillStyle = O.col || '#ffd27a'; X.beginPath(); X.ellipse(0, 0, sz * .9, sz * .25, 0, 0, 7); X.fill(); }
+        else if (kind === 'leaf') { X.fillStyle = O.col || '#5fae4a'; X.strokeStyle = '#1c1420'; X.lineWidth = Math.max(2, sz * .08); X.beginPath(); X.moveTo(-sz * .6, 0); X.quadraticCurveTo(0, -sz * .45, sz * .6, 0); X.quadraticCurveTo(0, sz * .45, -sz * .6, 0); X.fill(); X.stroke(); }
+        else { X.fillStyle = O.col || '#8f86a0'; X.strokeStyle = '#1c1420'; X.lineWidth = Math.max(2, sz * .1); X.beginPath(); const m = 5 + (i % 3), rj = E.rng(i * 31 + 5); for (let j = 0; j < m; j++) { const a = j / m * 6.283, rr = sz * (.55 + .45 * rj()); X.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } X.closePath(); X.fill(); X.stroke();
+          X.fillStyle = 'rgba(255,255,255,.18)'; X.beginPath(); X.arc(-sz * .15, -sz * .15, sz * .3, 0, 7); X.fill(); }
+        X.restore(); } }
+    else if (o.kind === 'smoke') { const O = o.o, r_ = E.rng((O.seed || 1) * 131), n = O.n || 9, age = o.age, life = O.life ?? 2.6, base = scr(o.p); if (!base) { X.restore(); continue; }
+      const d = E.camera.position.distanceTo(o.p), S0 = (O.size || 1) * 900 / Math.max(.5, d), grow = E.eOut(Math.min(1, age / .55)), shrink = 1 - E.sstep(life * .45, life, age), col = O.col || '#e9dcc0';
+      const puffs = []; for (let i = 0; i < n; i++) { const a = r_() * Math.PI * 2, rr = r_(); puffs.push([Math.cos(a) * rr * .9, -Math.abs(Math.sin(a)) * rr * .6 - (O.rise ?? .25) * age, .35 + .4 * r_()]); }
+      puffs.sort((A, B) => A[1] - B[1]); X.globalAlpha = alpha;
+      const at = ([px, py, pr]) => [base[0] + px * S0 * grow, base[1] + py * S0 * (.6 + .6 * grow), S0 * pr * (.35 + .85 * grow) * shrink];
+      for (const pf of puffs) { const [cx, cy, R] = at(pf); if (R < 1) continue; X.fillStyle = '#1c1420'; X.beginPath(); X.arc(cx, cy, R + 6, 0, 7); X.fill(); }
+      for (const pf of puffs) { const [cx, cy, R] = at(pf); if (R < 1) continue; X.fillStyle = col; X.beginPath(); X.arc(cx, cy, R, 0, 7); X.fill(); X.fillStyle = 'rgba(70,50,90,.28)'; X.beginPath(); X.arc(cx + R * .22, cy + R * .25, R * .78, 0, 7); X.fill(); X.fillStyle = col; X.beginPath(); X.arc(cx - R * .12, cy - R * .14, R * .7, 0, 7); X.fill(); } }
     else if (o.kind === 'spark') { const q = scr(o.p); if (!q) { X.restore(); continue; } const r = 46 * o.size * (.6 + .4 * o.k), ro = t * 1.5;
       X.translate(q[0], q[1]); X.rotate(ro * .2); X.globalCompositeOperation = 'lighter'; const g = X.createRadialGradient(0, 0, 0, 0, 0, r * 1.3); g.addColorStop(0, 'rgba(255,250,220,.9)'); g.addColorStop(1, 'rgba(255,220,140,0)'); X.fillStyle = g; X.beginPath(); X.arc(0, 0, r * 1.3, 0, 7); X.fill();
       X.fillStyle = '#fffbe8'; for (const [rr, rot] of [[r, 0], [r * .55, Math.PI / 4]]) { X.save(); X.rotate(rot); X.beginPath(); for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, d = k % 2 ? rr * .16 : rr; X.lineTo(Math.cos(a) * d, Math.sin(a) * d); } X.closePath(); X.fill(); X.restore(); } }

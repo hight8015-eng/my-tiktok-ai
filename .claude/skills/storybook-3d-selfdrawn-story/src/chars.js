@@ -141,6 +141,13 @@ export const sparkAt = (p, k = 1, size = 1) => { if (k > 0) OVL.push({ kind: 'sp
 // impactAt(worldPos, k, size): comic hit flash (jagged star + ring); dustAt(worldPos, k, size): ground puff. k = 0..1 progress
 export const impactAt = (p, k, size = 1) => { if (k >= 0 && k <= 1) OVL.push({ kind: 'impact', p: p.clone ? p.clone() : new THREE.Vector3(...p), k, size }); };
 export const dustAt = (p, k, size = 1) => { if (k >= 0 && k <= 1) OVL.push({ kind: 'dust', p: p.clone ? p.clone() : new THREE.Vector3(...p), k, size }); };
+// debrisAt(origin, age, o): deterministic burst of chunks ('rock') / leaves ('leaf') / embers ('spark') thrown from origin.
+//   o = { n, seed, speed, up, grav, size, col, kind, life }  (age in seconds since the burst)
+export const debrisAt = (p, age, o = {}) => { if (age >= 0 && age <= (o.life ?? 2.2)) OVL.push({ kind: 'debris', p: p.clone ? p.clone() : new THREE.Vector3(...p), age, o }); };
+// smokeAt(origin, age, o): cel-shaded puff cloud that billows out and shrinks away. o = { n, seed, size, col, rise, life }
+export const smokeAt = (p, age, o = {}) => { if (age >= 0 && age <= (o.life ?? 2.6)) OVL.push({ kind: 'smoke', p: p.clone ? p.clone() : new THREE.Vector3(...p), age, o }); };
+// ramp(lt, at, dur, k): slow-motion window: from `at` for `dur` seconds the clock runs at speed k (e.g. .25), then normal again
+export function ramp(lt, at, dur, k = .25) { return lt < at ? lt : lt < at + dur ? at + (lt - at) * k : at + dur * k + (lt - at - dur); }
 // popAt(lt, at): squash-and-stretch head pop when an expression changes at shot time `at` (pass as P.pop)
 export const popAt = (lt, at, amp = .13) => { const u = (lt - at) / .32; return u < 0 || u > 1 ? 0 : amp * Math.sin(u * Math.PI) * (1 - u * .4); };
 const seedOf = (C) => C._sd ?? (C._sd = [...(C.spec.id || 'x')].reduce((a, c) => a + c.charCodeAt(0) * 7.13, 0) % 97);
