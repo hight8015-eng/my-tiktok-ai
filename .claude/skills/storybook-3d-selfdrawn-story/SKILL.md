@@ -108,6 +108,9 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    uniform.shape: 'torso' (shoulders + waist, for shirts/armour) | 'dress' (+ flare .1-.32, waistAt: A-line gown, robe,
    long coat); cast[].long 1.2-1.6 lengthens it down (>=1.3 hides the legs, shoes peek out). Ink is weighted: thick on
    the shadow side (lower right), thin where light hits. Hair gets darker strand lines (strands() in the mk script).
+   v4.21 PROPORTIONS (RicksClips refs, head width = 1): bean body ~1.35 heads tall, thin ink legs ~1.2 heads under the
+   body, arms from the shoulders with hands resting at the hem (pirate: LEG .96, LL .5, AL .36, body.h 1.4, sh .98, rest .26).
+   Long gowns: cast[].long ~1.75 (robe 1.8, coat 1.4). Frame heads with camera y ~1.6-1.9 for close-ups.
    v4.13 extra physics: the head (and hat/headband art) lags and wobbles on starts/stops/turns; held props never sink
    into the body (hold entry noClip / clear); flyPath(..., {walls: [{axis: 'x'|'z', at, n, e}]}) bounces off walls;
    makeRope/updateRope (sagging, swaying rope/leash/chain) and makeFlag/waveFlag (flag, cloth, cape in the wind).

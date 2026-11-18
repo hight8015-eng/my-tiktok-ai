@@ -146,7 +146,7 @@ export function makeChar(spec) { // v2: stick figure: white ball head, bean tors
       for (let i = 0; i < 4; i++) { const a = (-.5 + i / 3) * 1.05; mesh(new THREE.CapsuleGeometry(.014, .05, 3, 8), gloveM, { p: [Math.sin(a) * .06, -.055 - Math.cos(a) * .02, 0], r: [0, 0, a * 57], parent: open }); }
       mesh(new THREE.CapsuleGeometry(.015, .04, 3, 8), gloveM, { p: [s * -.06, -.005, .01], r: [0, 0, s * 70], parent: open }); }
     return { up, fo, hand, open, S: new THREE.Vector3(s * .22, .72, 0) }; };
-  const leg = (s) => { const up = group({ parent: hips }), fo = group({ parent: hips }); if (pnM) { if ((spec.long || 1) < 1.3) { tube(LL, WR.legR || .05, up, pnM); tube(LL, (WR.legR || .05) * .94, fo, btM); } } // long gown/robe: legs stay hidden, only the shoes peek out else { tube(LL, rL, up); tube(LL, rL, fo); } // v4.19 even-width legs: a tapered shin read as a pointy stake
+  const leg = (s) => { const up = group({ parent: hips }), fo = group({ parent: hips }); if (pnM) { if ((spec.long || 1) < 1.3) { tube(LL, WR.legR || .05, up, pnM); tube(LL, (WR.legR || .05) * .94, fo, btM); } } else { tube(LL, rL, up); tube(LL, rL, fo); } // long gown/robe: legs stay hidden, only the shoes peek out; v4.19 even-width legs (a tapered shin read as a pointy stake)
     let shoe; if (CL) shoe = mesh(new THREE.SphereGeometry(.045, 12, 8), inkM, { p: [0, -LL, .04], s: [.85, .55, 1.6], parent: fo });
     else { shoe = group({ p: [0, -LL - .005, .045], parent: fo }); shoe.scale.setScalar(ST_.footK || 1); mesh(new THREE.SphereGeometry(.07, 16, 10), shoeM, { p: [0, .028, .03], s: [1.12, .72, 1.6], parent: shoe }); // v4.19 rounder shoe that reads as an oval from the front
       if (spec.sole || spec.shoe) mesh(new THREE.CylinderGeometry(.068, .068, .02, 16), soleM, { p: [0, -.036, .025], s: [.95, 1, 1.85], parent: shoe }); }
@@ -160,7 +160,7 @@ export function makeChar(spec) { // v2: stick figure: white ball head, bean tors
 // v4.9 body styles (set window.CHAR_STYLE before main.js loads, or project.json -> style): 'pirate' (default, from the pirate refs: bean body
 //   ~1.25 heads, thin stick legs ~1 head, arms to the hips) | 'chibi' (2.5-head sheet: pear body, legs half a head)
 export const STYLE = (globalThis.CHAR_STYLE || 'pirate');
-const ST_ = { pirate: { LEG: .6, AL: .34, LL: .32, body: { w: 1.0, h: 1.12, top: 1.0, bottom: 1.0, head: 1.0, flat: true }, capsule: { w: .64, bottom: .8 }, sh: [.2, .74], rest: .1, limbW: .58, handR: .03, footK: .9, limbNoOutline: true },
+const ST_ = { pirate: { LEG: .96, AL: .36, LL: .5, body: { w: 1.0, h: 1.4, top: 1.0, bottom: 1.0, head: 1.0, flat: true }, capsule: { w: .64, bottom: .8 }, sh: [.2, .98], rest: .26, limbW: .58, handR: .03, footK: .9, limbNoOutline: true },
   chibi: { LEG: .42, AL: .28, LL: .225, body: { w: .86, h: .9, top: .7, bottom: 1.1, head: 1.14 }, sh: [.17, .7], rest: .32 } }[STYLE] || {};
 export const LEG = ST_.LEG ?? .6, AL = ST_.AL ?? .34, LL = ST_.LL ?? .32; // v3: longer but hair-thin limbs // v2: short chubby figures like the ref (about 3 heads tall)
 // ---- IK ----
