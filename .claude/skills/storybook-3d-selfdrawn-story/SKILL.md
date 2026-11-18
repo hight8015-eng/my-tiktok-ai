@@ -64,6 +64,11 @@ If the user wants characters made in Flow from their own prompt, use the sister 
 7. **Render:** `bash tools/render_all.sh 4` (about 40 min for 60 s on 4 cores). Run it in the background.
 8. **Audio:** edit the EPISODE blocks in `tools/audio.py` and `tools/music.py`, then
    `python3 tools/music.py . && STEMS=1 python3 tools/audio.py .`. Measure the stems.
+   Prefer the recorded library in `aud/sfx` (51 sounds, index `aud/sfx/sfx.json`) over synthesized ones:
+   `add(sfx('whoosh', i), t, g)`. Categories: whoosh, riser, wobble, hit_dramatic, drumroll, crash, bang, rattle,
+   noise, bell, chime, buzzer, shine, click, whistle, laugh, voice_hum, voice_react, scream_long.
+   Pair them with the auto visuals: speed lines/zoom punch -> whoosh or bang, sparkAt -> shine, popAt -> wobble,
+   gloom -> voice_hum, a reveal -> hit_dramatic.
 9. **Finish:** `bash tools/finish.sh <out_dir> "<title>" 26`, then `bash tools/cover.sh <out_dir>/ปก.jpg`.
 10. **Deliver:** on the user's computer put the files in `~/Desktop/edit-video/<project>/<version>/`. On a phone,
     send them back in the chat.

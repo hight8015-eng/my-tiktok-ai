@@ -1,0 +1,359 @@
+[
+ {
+  "n": 1,
+  "cat": "whoosh",
+  "th": "วูบ / สะบัด",
+  "file": "whoosh_01.wav",
+  "src": "Anime_Sound_Effects_02"
+ },
+ {
+  "n": 2,
+  "cat": "whoosh",
+  "th": "วูบ / สะบัด",
+  "file": "whoosh_02.wav",
+  "src": "Anime_Sound_Effects_05"
+ },
+ {
+  "n": 3,
+  "cat": "whoosh",
+  "th": "วูบ / สะบัด",
+  "file": "whoosh_03.wav",
+  "src": "Anime_Sound_Effects_06"
+ },
+ {
+  "n": 4,
+  "cat": "whoosh",
+  "th": "วูบ / สะบัด",
+  "file": "whoosh_04.wav",
+  "src": "Anime_Sound_Effects_07"
+ },
+ {
+  "n": 5,
+  "cat": "whoosh",
+  "th": "วูบ / สะบัด",
+  "file": "whoosh_05.wav",
+  "src": "Anime_Sound_Effects_08"
+ },
+ {
+  "n": 6,
+  "cat": "whoosh",
+  "th": "วูบ / สะบัด",
+  "file": "whoosh_06.wav",
+  "src": "Anime_Sound_Effects_03"
+ },
+ {
+  "n": 7,
+  "cat": "riser",
+  "th": "ลมพุ่งขึ้น + กระแทก",
+  "file": "riser_07.wav",
+  "src": "Anime_Sound_Effects_01"
+ },
+ {
+  "n": 8,
+  "cat": "wobble",
+  "th": "ดึ๋ง / สั่นเด้ง",
+  "file": "wobble_08.wav",
+  "src": "Anime_Sound_Effects_04"
+ },
+ {
+  "n": 9,
+  "cat": "wobble",
+  "th": "ดึ๋ง / สั่นเด้ง",
+  "file": "wobble_09.wav",
+  "src": "Anime_Sound_Effects_09"
+ },
+ {
+  "n": 10,
+  "cat": "hit_dramatic",
+  "th": "ตูม! ดราม่า (ก้องยาว)",
+  "file": "hit_dramatic_10.wav",
+  "src": "ad41_01"
+ },
+ {
+  "n": 11,
+  "cat": "hit_dramatic",
+  "th": "ตูม! ดราม่า (ก้องยาว)",
+  "file": "hit_dramatic_11.wav",
+  "src": "ad41_03"
+ },
+ {
+  "n": 12,
+  "cat": "drumroll",
+  "th": "รัวกลอง",
+  "file": "drumroll_12.wav",
+  "src": "ad41_02"
+ },
+ {
+  "n": 13,
+  "cat": "crash",
+  "th": "พัง / ชน",
+  "file": "crash_13.wav",
+  "src": "a85_01"
+ },
+ {
+  "n": 14,
+  "cat": "crash",
+  "th": "พัง / ชน",
+  "file": "crash_14.wav",
+  "src": "a85_02"
+ },
+ {
+  "n": 15,
+  "cat": "bang",
+  "th": "ปัง!",
+  "file": "bang_15.wav",
+  "src": "a85_03"
+ },
+ {
+  "n": 16,
+  "cat": "rattle",
+  "th": "สั่นรัว",
+  "file": "rattle_16.wav",
+  "src": "110_01"
+ },
+ {
+  "n": 17,
+  "cat": "noise",
+  "th": "เสียงซ่า / ลม",
+  "file": "noise_17.wav",
+  "src": "110_02"
+ },
+ {
+  "n": 18,
+  "cat": "noise",
+  "th": "เสียงซ่า / ลม",
+  "file": "noise_18.wav",
+  "src": "ad78_02"
+ },
+ {
+  "n": 19,
+  "cat": "bell",
+  "th": "กริ๊ง ระฆัง",
+  "file": "bell_19.wav",
+  "src": "Bell_02_01"
+ },
+ {
+  "n": 20,
+  "cat": "chime",
+  "th": "ติ๊ง! ถูกต้อง / ไอเดีย",
+  "file": "chime_20.wav",
+  "src": "Collect_answer_01"
+ },
+ {
+  "n": 21,
+  "cat": "chime",
+  "th": "ติ๊ง! ถูกต้อง / ไอเดีย",
+  "file": "chime_21.wav",
+  "src": "a08_01"
+ },
+ {
+  "n": 22,
+  "cat": "buzzer",
+  "th": "บัซเซอร์ / ผิด",
+  "file": "buzzer_22.wav",
+  "src": "a08_02"
+ },
+ {
+  "n": 23,
+  "cat": "buzzer",
+  "th": "บัซเซอร์ / ผิด",
+  "file": "buzzer_23.wav",
+  "src": "a08_03"
+ },
+ {
+  "n": 24,
+  "cat": "buzzer",
+  "th": "บัซเซอร์ / ผิด",
+  "file": "buzzer_24.wav",
+  "src": "ad78_01"
+ },
+ {
+  "n": 25,
+  "cat": "shine",
+  "th": "วิ้ง! ประกาย",
+  "file": "shine_25.wav",
+  "src": "Anime_Shine_Sound_Effect_01"
+ },
+ {
+  "n": 26,
+  "cat": "click",
+  "th": "คลิก / พิมพ์",
+  "file": "click_26.wav",
+  "src": "clicking01_01"
+ },
+ {
+  "n": 27,
+  "cat": "whistle",
+  "th": "นกหวีด / สไลด์",
+  "file": "whistle_27.wav",
+  "src": "192_01"
+ },
+ {
+  "n": 28,
+  "cat": "whistle",
+  "th": "นกหวีด / สไลด์",
+  "file": "whistle_28.wav",
+  "src": "192_02"
+ },
+ {
+  "n": 29,
+  "cat": "whistle",
+  "th": "นกหวีด / สไลด์",
+  "file": "whistle_29.wav",
+  "src": "192_03"
+ },
+ {
+  "n": 30,
+  "cat": "whistle",
+  "th": "นกหวีด / สไลด์",
+  "file": "whistle_30.wav",
+  "src": "192_04"
+ },
+ {
+  "n": 31,
+  "cat": "laugh",
+  "th": "หัวเราะ (เดา)",
+  "file": "laugh_31.wav",
+  "src": "148_01"
+ },
+ {
+  "n": 32,
+  "cat": "laugh",
+  "th": "หัวเราะ (เดา)",
+  "file": "laugh_32.wav",
+  "src": "148_02"
+ },
+ {
+  "n": 33,
+  "cat": "laugh",
+  "th": "หัวเราะ (เดา)",
+  "file": "laugh_33.wav",
+  "src": "144_01"
+ },
+ {
+  "n": 34,
+  "cat": "voice_hum",
+  "th": "อืมม / ครวญ (เดา)",
+  "file": "voice_hum_34.wav",
+  "src": "144_02"
+ },
+ {
+  "n": 35,
+  "cat": "voice_hum",
+  "th": "อืมม / ครวญ (เดา)",
+  "file": "voice_hum_35.wav",
+  "src": "144_03"
+ },
+ {
+  "n": 36,
+  "cat": "voice_hum",
+  "th": "อืมม / ครวญ (เดา)",
+  "file": "voice_hum_36.wav",
+  "src": "144_04"
+ },
+ {
+  "n": 37,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_37.wav",
+  "src": "141_01"
+ },
+ {
+  "n": 38,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_38.wav",
+  "src": "141_02"
+ },
+ {
+  "n": 39,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_39.wav",
+  "src": "141_03"
+ },
+ {
+  "n": 40,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_40.wav",
+  "src": "141_04"
+ },
+ {
+  "n": 41,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_41.wav",
+  "src": "141_05"
+ },
+ {
+  "n": 42,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_42.wav",
+  "src": "149_01"
+ },
+ {
+  "n": 43,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_43.wav",
+  "src": "149_02"
+ },
+ {
+  "n": 44,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_44.wav",
+  "src": "149_03"
+ },
+ {
+  "n": 45,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_45.wav",
+  "src": "149_04"
+ },
+ {
+  "n": 46,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_46.wav",
+  "src": "149_05"
+ },
+ {
+  "n": 47,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_47.wav",
+  "src": "cd292_01"
+ },
+ {
+  "n": 48,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_48.wav",
+  "src": "cd292_02"
+ },
+ {
+  "n": 49,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_49.wav",
+  "src": "cd292_03"
+ },
+ {
+  "n": 50,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_50.wav",
+  "src": "cd292_04"
+ },
+ {
+  "n": 51,
+  "cat": "scream_long",
+  "th": "กรีดร้อง / คำราม ยาว",
+  "file": "scream_long_51.wav",
+  "src": "141_06"
+ }
+]

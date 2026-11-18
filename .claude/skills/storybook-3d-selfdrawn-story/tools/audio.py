@@ -89,6 +89,13 @@ def pluck(f=330):
     t = np.arange(int(.5 * SR)) / SR; return (np.sin(2 * np.pi * f * t) + .5 * np.sin(4 * np.pi * f * t)) * np.exp(-t / .09) * .6
 def plip():
     t = np.arange(int(.15 * SR)) / SR; f = 900 + 1800 * t / .15; return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t / .04) * .5
+# v4 recorded SFX library (aud/sfx, index aud/sfx/sfx.json): sfx('whoosh'), sfx('shine'), sfx('hit_dramatic', 1) ...
+# categories: whoosh riser wobble hit_dramatic drumroll crash bang rattle noise bell chime buzzer shine click whistle laugh voice_hum voice_react scream_long
+SFXLIB = json.load(open(f'{W}/aud/sfx/sfx.json')) if os.path.exists(f'{W}/aud/sfx/sfx.json') else []
+def sfx(cat, i=0):
+    L_ = [e for e in SFXLIB if e['cat'] == cat]
+    if not L_: raise KeyError(f'no sfx in category {cat!r}: ' + ' '.join(sorted({e["cat"] for e in SFXLIB})))
+    return rd_wav(f"{W}/aud/sfx/{L_[i % len(L_)]['file']}")
 # ===== EPISODE 1/2: ambience (river valley by day, quiet night, the workshop) =====
 t = np.arange(N) / SR
 sw = .6 + .4 * np.sin(2 * np.pi * t / 5.5) * np.sin(2 * np.pi * t / 2.3 + 1)
