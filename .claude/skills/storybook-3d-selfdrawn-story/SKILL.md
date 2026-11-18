@@ -111,6 +111,12 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    v4.21 PROPORTIONS (RicksClips refs, head width = 1): bean body ~1.35 heads tall, thin ink legs ~1.2 heads under the
    body, arms from the shoulders with hands resting at the hem (pirate: LEG .96, LL .5, AL .36, body.h 1.4, sh .98, rest .26).
    Long gowns: cast[].long ~1.75 (robe 1.8, coat 1.4). Frame heads with camera y ~1.6-1.9 for close-ups.
+   v4.23 SET DRESSING (RicksClips refs: every set is full of props). examples/lv_sets.js has a prop library to append
+   to a story's world.js: barrel, crate, wheel/cart, tent, spearRack, shield, armorStand, lantern, candles, skull, bone,
+   cloud, castle, grassField (instanced tufts), stones, cloth() banners/flags waving via clothAt(t), crestTex banners,
+   and ambientAt(t, 'dust'|'firefly'|'ember'|'spark'|'star') floating particles. Wrap S() so every shot calls
+   Wd.ambientAt + Wd.clothAt. Aim for 5-10 props in every frame: foreground clutter at the sides, a mid prop near the
+   characters, a far landmark (castle, peaks with snow, clouds).
    v4.13 extra physics: the head (and hat/headband art) lags and wobbles on starts/stops/turns; held props never sink
    into the body (hold entry noClip / clear); flyPath(..., {walls: [{axis: 'x'|'z', at, n, e}]}) bounces off walls;
    makeRope/updateRope (sagging, swaying rope/leash/chain) and makeFlag/waveFlag (flag, cloth, cape in the wind).
