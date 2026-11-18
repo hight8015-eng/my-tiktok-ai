@@ -206,6 +206,10 @@ If the user wants characters made in Flow from their own prompt, use the sister 
                           ultimate:true = bigger, after-images + the frame is CUT along a line and slides apart
      FX.lightning         branching bolt, re-strikes every 3 frames, flicker gap, white flash
      FX.explosion         white-hot -> yellow -> orange -> charcoal fireballs, flash, then soft smoke
+     FX.pile              v5.1 many bodies colliding WITH EACH OTHER (sphere contacts, joint 1/240 s integration):
+                          crate towers collapsing, rock slides, rubble heaps (example: examples/shots_physdemo2.js)
+     FX.impactFrame       v5.1 anime impact frame: 2 inverted black & white frames + bold radial lines on THE big hit
+                          of a scene (max 1-2 per clip; never longer than ~.07 s - flashing)
    Rules: hide each demo/effect group outside its shot (sets are reused); reset Wd.rocksAt/raysAt/fogAt per shot; flat
    effects on the ground sit >= .035 above it (roads/carpets are thin boxes); anticipation (tremble, wind-up, held
    breath) before every release, follow-through after; fast pieces get velocity stretch instead of strobing.

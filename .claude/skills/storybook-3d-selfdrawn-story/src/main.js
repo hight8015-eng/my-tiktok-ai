@@ -67,6 +67,11 @@ function overlays(t, alpha) { // gloom lines + sparkles requested by poses/shots
         X.globalAlpha = 1; X.drawImage(SPL, c * sh * side, s_ * sh * side); X.restore(); }
       const lw = 14 * (1 - E.sstep(.05, .6, k)) + 2; X.save(); X.globalCompositeOperation = 'lighter'; X.globalAlpha = alpha * (1 - E.sstep(.4, 1, k)); X.strokeStyle = '#ffffff'; X.shadowColor = '#bfe4ff'; X.shadowBlur = 40; X.lineWidth = lw;
       X.beginPath(); X.moveTo(cx - c * 1400, cy - s_ * 1400); X.lineTo(cx + c * 1400, cy + s_ * 1400); X.stroke(); X.restore(); }
+    else if (o.kind === 'impactframe') { // v5.1 anime impact frame: inverted picture + bold black radial lines aimed at the hit (2 frames, never longer: flashing)
+      const q = scr(o.p) || [540, 900]; X.globalCompositeOperation = 'difference'; X.fillStyle = '#ffffff'; X.fillRect(0, 0, 1080, 1920); X.globalCompositeOperation = 'saturation'; X.fillStyle = '#808080'; X.fillRect(0, 0, 1080, 1920); /* black & white */
+      X.globalCompositeOperation = 'source-over';
+      const r_ = E.rng(13); X.fillStyle = '#000000'; for (let i = 0; i < o.lines; i++) { const a = r_() * 6.283, w = .012 + r_() * .03, r0 = 140 + r_() * 260; X.beginPath(); X.moveTo(q[0] + Math.cos(a) * r0, q[1] + Math.sin(a) * r0);
+        X.lineTo(q[0] + Math.cos(a - w) * 2400, q[1] + Math.sin(a - w) * 2400); X.lineTo(q[0] + Math.cos(a + w) * 2400, q[1] + Math.sin(a + w) * 2400); X.closePath(); X.fill(); } }
     else if (o.kind === 'gloom') { const C = o.C; C.head.updateWorldMatrix(true, false); const hp = C.head.getWorldPosition(new E.THREE.Vector3()), q = scr(hp); if (!q) { X.restore(); continue; }
       const top = scr(hp.clone().add(new E.THREE.Vector3(0, .5 * C.spec.s, 0))), R = top ? Math.max(40, Math.abs(q[1] - top[1])) : 120; X.strokeStyle = 'rgba(40,30,70,.75)'; X.lineCap = 'round';
       for (let i = 0; i < 9; i++) { const xx = q[0] + (i - 4) * R * .2, ph = ((t * .9 + i * .37) % 1), y0 = q[1] - R * 1.5 + ph * R * .5, L = R * (.5 + .3 * ((i * 7) % 3) / 2);

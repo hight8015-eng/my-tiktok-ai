@@ -213,3 +213,24 @@ export function explosion(par, o) { const at = V(o.at), size = o.size || 2, R = 
       const c = h > .75 ? [1, 1, .85] : h > .45 ? [1, .82, .3] : h > .2 ? [.95, .45, .15] : [.3, .27, .3]; b.m.material.color.setRGB(...c); b.m.material.opacity = Math.max(0, Math.min(1, (1.3 - b.s * .3 - a) * 2.5)); b.m.visible = b.m.material.opacity > .02; }   // fireballs fade out; the soft smoke puffs take over
     if (a > .35) for (let i = 0; i < 5; i++) smokeAt(par ? par.localToWorld(at.clone().add(new THREE.Vector3((i - 2) * .3 * size, size * .4, 0))) : at, a - .35 - i * .05, { col: '#4a4450', size: size * .5, life: 2 });
     if (a < .5) OVL.push({ kind: 'tint', col: '#ffe0a0', k: .35 * (1 - a / .5) }); } }; }
+
+// ---------------- 10. pile: many bodies that collide WITH EACH OTHER (spheres, positional correction), e.g. a collapsing
+// stack of crates, a rock slide, a heap of coins. Integrated jointly from t0 at 1/240 s, sampled like body(). ----------------
+export function pile(par, o) { const R = rng(o.seed || 41), n = o.list.length, r = o.list.map(b => (b.size || .4) * (b.kind === 'crate' ? .58 : .5)), dur = o.dur || 4, steps = Math.ceil(dur / DT), gnd = o.ground ?? 0;
+  const p = o.list.map(b => V(b.p0)), v = o.list.map(b => V(b.v0 || [0, 0, 0])), w = o.list.map(() => new THREE.Vector3((R() - .5) * 2, (R() - .5) * 2, (R() - .5) * 2)), q = o.list.map(() => new THREE.Quaternion()), sleep = new Array(n).fill(0);
+  const tracks = o.list.map(() => ({ P: new Float32Array(steps * 3), Q: new Float32Array(steps * 4), ev: [], n: steps, t0: o.t0 })), d = new THREE.Vector3();
+  for (let i = 0; i < steps; i++) { const t = o.t0 + i * DT;
+    for (let a = 0; a < n; a++) { if (t < (o.list[a].t0 ?? o.t0)) continue; v[a].y -= G * DT; p[a].addScaledVector(v[a], DT);
+      if (p[a].y - r[a] < gnd) { if (v[a].y < -1.2) tracks[a].ev.push({ t, p: p[a].clone(), speed: -v[a].y }); p[a].y = gnd + r[a]; v[a].y = -v[a].y * (o.rest ?? .25); v[a].x *= .8; v[a].z *= .8; w[a].set(v[a].z / r[a], w[a].y * .6, -v[a].x / r[a]); } }
+    for (let a = 0; a < n; a++) for (let b = a + 1; b < n; b++) { d.subVectors(p[b], p[a]); const L = d.length(), m = r[a] + r[b]; if (L >= m || L < 1e-6) continue;   // overlap -> push apart, exchange momentum along the normal
+      d.divideScalar(L); const pen = m - L; p[a].addScaledVector(d, -pen / 2); p[b].addScaledVector(d, pen / 2);
+      const rel = v[b].clone().sub(v[a]).dot(d); if (rel < 0) { const j = -(1 + (o.rest ?? .25)) * rel / 2; v[a].addScaledVector(d, -j); v[b].addScaledVector(d, j); v[a].multiplyScalar(.985); v[b].multiplyScalar(.985);
+        if (-rel > 2.5) tracks[a].ev.push({ t, p: p[a].clone().addScaledVector(d, r[a]), speed: -rel }); } }
+    for (let a = 0; a < n; a++) { const s = v[a].lengthSq(); sleep[a] = s < .02 && p[a].y - r[a] < gnd + .02 ? sleep[a] + 1 : 0; if (sleep[a] > 30) { v[a].multiplyScalar(.6); w[a].multiplyScalar(.6); }
+      const ang = w[a].length(); if (ang > 1e-5) { _q2.setFromAxisAngle(_v.copy(w[a]).divideScalar(ang), ang * DT); q[a].premultiply(_q2); }
+      const T = tracks[a]; T.P.set([p[a].x, p[a].y, p[a].z], i * 3); T.Q.set([q[a].x, q[a].y, q[a].z, q[a].w], i * 4); } }
+  const meshes = o.list.map(b => { const m = propMesh(b.kind || 'rock', b.size || .4); (par || SCENE).add(m); return m; }), Vv = new THREE.Vector3();
+  return { meshes, events: tracks.flatMap(T => T.ev).sort((a, b) => a.t - b.t), at(t) { meshes.forEach((m, a) => { m.visible = t >= (o.showFrom ?? -1e9); if (!m.visible) return;
+      if (t < o.t0) { m.position.copy(V(o.list[a].p0)); m.quaternion.identity(); return; } sample(tracks[a], t, m.position, m.quaternion); }); } }; }
+// ---------------- 11. anime IMPACT FRAME: 1-2 inverted high-contrast frames + radial action lines on the biggest hit ----------------
+export function impactFrame(o) { return { at(t) { const a = t - o.t0; if (a >= 0 && a < (o.dur ?? .07)) OVL.push({ kind: 'impactframe', p: V(o.at), k: 1, u: a / (o.dur ?? .07), lines: o.lines ?? 46 });   /* k = 1: the overlay loop uses k as opacity */ } }; }
