@@ -238,3 +238,51 @@ function stones(par, n, area, seed = 5, col = '#a89a84') { const R = rng(seed), 
   const R = rng(41); for (let i = 0; i < 10; i++) { const x = -26 + i * 5.6 + R() * 2, z = -22 - R() * 6; cylBetween([x, 0, z], [x, 2, z], .25, PM('#5a4030'), VILL, 6); mesh(new THREE.ConeGeometry(1.8, 4, 8), PM('#2f5a3a'), { p: [x, 3.6, z], parent: VILL }); }
   mesh(rbox(1.2, .08, .8), PM(WOOD), { p: [1.2, .75, -1.6], parent: VI.hut }); for (const [x, z] of [[.7, -1.9], [1.7, -1.9], [.7, -1.3], [1.7, -1.3]]) cylBetween([x, 0, z], [x, .72, z], .03, PM(WOOD2), VI.hut, 4);
   candles(VI.hut, [1.3, .79, -1.6], 1); mesh(rbox(1.6, .06, .35), PM(WOOD), { p: [-.4, 2.2, -2.75], parent: VI.hut }); for (let k = 0; k < 5; k++) mesh(rbox(.14, .3 + (k % 2) * .08, .22), PM(['#8a3a3a', '#3a5a8a', '#6a8a3a'][k % 3]), { p: [-1 + k * .2, 2.4, -2.75], parent: VI.hut }); }
+
+// ---------- v4.24 more props (refs: bunting, market stalls, baskets, herbs, torches, campfires) ----------
+function bunting(par, a, b, n = 14, cols = ['#b0303a', '#e2b23c', '#24468e']) { cylBetween(a, b, .012, PM('#3a3040'), par, 4);
+  for (let k = 0; k < n; k++) { const u = (k + .5) / n, x = a[0] + (b[0] - a[0]) * u, z = a[2] + (b[2] - a[2]) * u, y = a[1] + (b[1] - a[1]) * u - Math.sin(u * Math.PI) * .6;
+    const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-.16, 0, 0), new THREE.Vector3(.16, 0, 0), new THREE.Vector3(0, -.34, 0)]); g.computeVertexNormals();
+    const m = mesh(g, toon(cols[k % cols.length], { side: THREE.DoubleSide }), { p: [x, y, z], r: [0, Math.atan2(b[0] - a[0], b[2] - a[2]) * 57.3 + 90, 0], parent: par, cast: false }); } }
+function basket(par, p, fill = '#d8822a', s = 1) { const g = group({ p, s: [s, s, s], parent: par }); mesh(new THREE.CylinderGeometry(.32, .24, .26, 14, 1, true), toon('#b8863a', { side: THREE.DoubleSide }), { p: [0, .13, 0], parent: g });
+  mesh(new THREE.TorusGeometry(.32, .025, 6, 16), PM('#9a6a2a'), { p: [0, .26, 0], r: [90, 0, 0], parent: g }); const R = rng(Math.round(p[0] * 10 + p[2]));
+  for (let k = 0; k < 9; k++) { const a = k / 9 * 6.283, r = k ? .17 : 0; mesh(new THREE.SphereGeometry(.09, 10, 8), PM(fill), { p: [Math.cos(a) * r, .26 + (k ? 0 : .06), Math.sin(a) * r], parent: g }); } return g; }
+function sack(par, p, s = 1) { const g = group({ p, s: [s, s, s], parent: par }); mesh(new THREE.SphereGeometry(.3, 12, 10), PM('#c8b088'), { p: [0, .3, 0], s: [1, 1.2, .9], parent: g }); mesh(new THREE.ConeGeometry(.1, .18, 8), PM('#b89a70'), { p: [0, .72, 0], parent: g }); return g; }
+function stall(par, p, ry = 0, c1 = '#b0303a') { const g = group({ p, r: [0, ry, 0], parent: par }); mesh(rbox(2.2, .9, .8), toon('#ffffff', { map: woodTex }), { p: [0, .45, 0], parent: g });
+  for (const x of [-1.05, 1.05]) for (const z of [-.35, .35]) cylBetween([x, 0, z], [x, 2.1, z], .04, PM(WOOD2), g, 5);
+  mesh(rbox(2.5, .05, 1.3), toon('#ffffff', { map: stripeTex2('#efe6d2', c1, 10) }), { p: [0, 2.15, .15], r: [14, 0, 0], parent: g });
+  basket(g, [-.6, .9, 0], '#d8442a', .9); basket(g, [.1, .9, 0], '#c88a3a', .9); basket(g, [.75, .9, 0], '#7ab04a', .9); sack(g, [1.4, 0, .4], .9); sack(g, [-1.4, 0, .3], .8); return g; }
+function woodpile(par, p, ry = 0) { const g = group({ p, r: [0, ry, 0], parent: par }); for (let r = 0; r < 3; r++) for (let k = 0; k < 4 - r; k++) mesh(new THREE.CylinderGeometry(.1, .1, .9, 8), PM(k % 2 ? '#8a5a36' : '#9a6a40'), { p: [(k - (3 - r) / 2) * .21, .1 + r * .18, 0], r: [90, 0, 0], parent: g });
+  const ax = group({ p: [.6, 0, .2], r: [0, 0, -20], parent: g }); cylBetween([0, 0, 0], [0, .7, 0], .025, PM(WOOD), ax, 5); mesh(rbox(.2, .12, .03), PM('#9aa0ae'), { p: [.08, .65, 0], parent: ax }); return g; }
+function torch(par, p, ry = 0) { const g = group({ p, r: [0, ry, 0], parent: par }); cylBetween([0, 0, 0], [0, .5, .15], .03, PM('#3a3040'), g, 5); mesh(new THREE.CylinderGeometry(.07, .05, .14, 8), PM('#5a4030'), { p: [0, .55, .17], parent: g });
+  const f = mesh(new THREE.ConeGeometry(.08, .28, 8), basic('#ffb03a', { transparent: true, opacity: .95 }), { p: [0, .74, .17], parent: g, cast: false }); f.userData.noInk = true; FLAMES.push(f);
+  const gl = glowSprite('#ff8a2a', 1.8, { opacity: .55 }); gl.position.set(0, .75, .17); g.add(gl); return g; }
+function campfire(par, p) { const g = group({ p, parent: par }); for (let k = 0; k < 8; k++) { const a = k / 8 * 6.283; mesh(new THREE.DodecahedronGeometry(.14, 0), PM('#7a7484'), { p: [Math.cos(a) * .45, .06, Math.sin(a) * .45], parent: g }); }
+  for (let k = 0; k < 3; k++) mesh(new THREE.CylinderGeometry(.05, .05, .7, 6), PM('#6a4426'), { p: [0, .12, 0], r: [80, k * 60, 0], parent: g });
+  for (let k = 0; k < 3; k++) { const f = mesh(new THREE.ConeGeometry(.16 - k * .03, .55 - k * .1, 8), basic(['#ff8a2a', '#ffb03a', '#ffe08a'][k], { transparent: true, opacity: .9 }), { p: [0, .32, 0], parent: g, cast: false }); f.userData.noInk = true; FLAMES.push(f); }
+  for (const x of [-.55, .55]) cylBetween([x, 0, 0], [x, 1.1, 0], .03, PM(WOOD2), g, 4); cylBetween([-.6, 1.05, 0], [.6, 1.05, 0], .025, PM(WOOD2), g, 4);
+  mesh(new THREE.SphereGeometry(.22, 12, 8, 0, 6.283, Math.PI / 2, Math.PI / 2), PM('#3a3a44'), { p: [0, .78, 0], parent: g }); const gl = glowSprite('#ff7a2a', 3, { opacity: .5 }); gl.position.set(0, .5, 0); g.add(gl); return g; }
+function herbs(par, p) { const g = group({ p, parent: par }); cylBetween([0, 0, 0], [0, -.25, 0], .01, PM('#3a3040'), g, 3); const R = rng(Math.round(p[0] * 9));
+  for (let k = 0; k < 5; k++) mesh(new THREE.ConeGeometry(.06, .35, 5), PM(['#5a8a4a', '#7a9a4a', '#4a7a3a'][k % 3]), { p: [(R() - .5) * .14, -.42, (R() - .5) * .1], r: [180 + (R() - .5) * 20, 0, (R() - .5) * 20], parent: g }); return g; }
+function flowerBox(par, p, l = 1.2) { const g = group({ p, parent: par }); mesh(rbox(l, .22, .3), PM('#7a4a2a'), { p: [0, .11, 0], parent: g }); const R = rng(Math.round(p[0] * 13));
+  for (let k = 0; k < 7; k++) { const x = (k / 6 - .5) * (l - .2); mesh(new THREE.SphereGeometry(.1, 8, 6), PM('#3e7a4a'), { p: [x, .3, 0], parent: g }); mesh(new THREE.SphereGeometry(.05, 8, 6), PM(['#e2445a', '#f2c94c', '#e8a0d0'][k % 3]), { p: [x + .03, .4, .06], parent: g }); } return g; }
+const FLAMES = [];
+export function flamesAt(t) { FLAMES.forEach((f, i) => { f.scale.set(1 + .12 * Math.sin(t * 11 + i * 2), 1 + .25 * Math.sin(t * 8.3 + i * 1.3), 1 + .12 * Math.cos(t * 9 + i)); }); }
+{ // HALL: bunting across the nave + flower urns by the altar
+  for (const z of [2, -3.5, -8.5]) bunting(HALL, [-5.6, 6.2, z], [5.6, 6.2, z], 16, ['#6a2a8c', '#e2b23c', '#f4ecd8']);
+  for (const x of [-3.4, 3.4]) { mesh(new THREE.CylinderGeometry(.3, .2, .6, 12), PM('#d8d2e4'), { p: [x, .3 + .9, -11.4], parent: HALL }); for (let k = 0; k < 5; k++) mesh(new THREE.SphereGeometry(.12, 8, 6), PM(['#e2445a', '#f4ecd8', '#f2c94c'][k % 3]), { p: [x + (k - 2) * .1, 1.65 + (k % 2) * .08, -11.4], parent: HALL }); } }
+{ // FIELD camp: campfire, haystacks, a barrel of swords
+  campfire(FIELD, [-7.6, 0, 1.2]); campfire(FIELD, [9.6, 0, 6]);
+  for (const [x, z] of [[6.2, -5.5], [-9.2, 4.8]]) mesh(new THREE.SphereGeometry(.9, 12, 8), PM('#d9b85a'), { p: [x, .45, z], s: [1, .75, 1], parent: FIELD });
+  const bs = barrel(FIELD, [4.3, 0, .9], .9); for (let k = 0; k < 4; k++) { cylBetween([(k - 1.5) * .1, .9, 0], [(k - 1.5) * .16, 1.8, (k % 2) * .08], .018, PM('#dfe3ec'), bs, 4); }
+  for (let i = 0; i < 6; i++) sack(FIELD, [-8.4 + (i % 3) * .5, 0, 3 + (i / 3 | 0) * .5], .8); }
+{ // BALCONY: flower boxes on the railing
+  for (const x of [-2.7, 0, 2.7]) flowerBox(BALC, [x, 1.09, -2.8], 1.1); }
+{ // CRYPT: wall torches ring the ritual circle
+  for (const [x, z] of [[-8, -4], [8, -4], [-9, -10], [9, -10], [-5, -16], [5, -16]]) { mesh(rbox(1.2, 3, .4), PM('#4a4460'), { p: [x, 1.5, z - .3], parent: CRYPT }); torch(CRYPT, [x, 1.6, z - .1], 0); } }
+{ // VILLAGE: market stalls, woodpile, string lights; hut: hanging herbs, pots on a shelf, bread basket, broom
+  stall(VILL, [-6.5, 0, -4.2], 8, '#b0303a'); stall(VILL, [9.5, 0, -4.6], -10, '#24468e'); woodpile(VILL, [-1, 0, -4.6], 0);
+  for (const x of [-14, -4, 6]) { const a = [x, 2.4, -1.5], b = [x + 10, 2.4, -1.5]; cylBetween(a, b, .01, PM('#3a3040'), VILL, 3); for (let k = 1; k < 10; k++) { const l = mesh(new THREE.SphereGeometry(.07, 8, 6), basic(['#ffcf6a', '#ff8a5a', '#fff2b0'][k % 3]), { p: [x + k, 2.4 - Math.sin(k / 10 * Math.PI) * .35, -1.5], parent: VILL, cast: false }); l.userData.noInk = true; } }
+  for (const x of [-2, -1.4, -.8, .4, 1]) herbs(VI.hut, [x, 3.95, -1.8]);
+  for (const [x, c] of [[-1.8, '#5a5a68'], [-1.45, '#a0583a'], [-1.1, '#5a5a68']]) mesh(new THREE.CylinderGeometry(.13, .1, .22, 10), PM(c), { p: [x, 2.36, -2.75], parent: VI.hut });
+  basket(VI.hut, [1.0, .79, -1.5], '#c88a3a', .6); const br = group({ p: [2.6, 0, -2.6], r: [0, 0, 12], parent: VI.hut }); cylBetween([0, 0, 0], [0, 1.4, 0], .025, PM(WOOD), br, 4); mesh(new THREE.ConeGeometry(.16, .4, 8), PM('#d9b85a'), { p: [0, .15, 0], r: [180, 0, 0], parent: br }); }

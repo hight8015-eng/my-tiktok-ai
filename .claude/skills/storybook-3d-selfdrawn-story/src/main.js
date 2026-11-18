@@ -134,7 +134,7 @@ function progress(t) { if (!project.progressBar) return; const u = Math.min(1, t
 const DIS = .28, WH = .22;
 function keyZoom(t) { if (!project.keyZoom) return 1; const c = timing.caps.find(c => t >= c[0] && t < c[1]); if (!c) return 1; const hi = /\*(.+?)\*/.test(c[2]) || /[0-9๐-๙]/.test(c[2]) || (project.hiWords || []).some(w => c[2].includes(w));
   const a = t - c[0]; return hi ? 1 + .028 * FXL * Math.sin(Math.PI * Math.min(1, a / .45)) : 1; } // gentle push-in on highlighted words
-window.frame = (t, opts = {}) => { ZP = keyZoom(t);
+window.frame = (t, opts = {}) => { ZP = keyZoom(t); globalThis.FRAME_T = t; // v4.24 shots can tell the frame being drawn from the smoothing look-backs
   let i = SHOTS.length - 1; for (let k = 0; k < SHOTS.length; k++) if (t < SHOTS[k].t1) { i = k; break; }
   const sh = SHOTS[i], lt = t - sh.t0;
   const nx0 = SHOTS[i + 1], dir = i % 2 ? 1 : -1;
