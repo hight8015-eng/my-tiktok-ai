@@ -46,17 +46,18 @@ function trails(alpha) { // v4 smear trails behind fast hands/feet (positions fr
 function overlays(t, alpha) { // gloom lines + sparkles requested by poses/shots this frame
   trails(alpha);
   for (const o of OVL) { X.save(); X.globalAlpha = alpha * Math.min(1, o.k);
-    if (o.kind === 'tears') { const B = headBall(o.C); if (!B || B.view === 'B') { X.restore(); continue; } const q = scr(B.c), qr = scr(B.c.clone().addScaledVector(B.right, B.r)); if (!q || !qr) { X.restore(); continue; }
-      const r = Math.hypot(qr[0] - q[0], qr[1] - q[1]), k = o.k, sh = B.view === 'Q' ? (B.mir ? -1 : 1) * .2 : B.view === 'S' ? (B.mir ? -1 : 1) * .45 : 0, eyes = B.view === 'S' ? [sh] : [-.3 + sh, .3 + sh];
-      X.lineCap = 'round'; X.lineJoin = 'round';
-      for (const ex of eyes) { const x0 = q[0] + ex * r, y0 = q[1] - .02 * r;
-        X.globalAlpha = alpha * Math.min(1, k * 2.5) * .85; X.fillStyle = '#9fd8ff'; X.beginPath(); X.ellipse(x0, y0 + .1 * r, .13 * r, .045 * r, 0, 0, 7); X.fill();   // glistening lower lid
-        X.fillStyle = '#ffffff'; X.beginPath(); X.ellipse(x0 + .05 * r, y0 + .085 * r, .035 * r, .016 * r, 0, 0, 7); X.fill();
-        if (k > .35) { const L = r * (.25 + .75 * Math.min(1, (k - .35) / .45)), ph = o.t * 2.3 + ex * 7; X.globalAlpha = alpha * .9;
-          for (const [w, c] of [[.085 * r, '#7cc4f4'], [.03 * r, '#e8f6ff']]) { X.strokeStyle = c; X.lineWidth = w; X.beginPath(); X.moveTo(x0 + (ex < 0 ? -.03 : .03) * r, y0 + .12 * r);
-            for (let s_ = 1; s_ <= 8; s_++) { const u = s_ / 8; X.lineTo(x0 + (ex < 0 ? -.03 : .03) * r + Math.sin(u * 5 + ph) * .025 * r + u * (ex < 0 ? -.05 : .05) * r, y0 + .12 * r + u * L); } X.stroke(); }
-          if (k > .7) for (let d = 0; d < 2; d++) { const u = (o.t * 1.1 + d * .5 + (ex < 0 ? 0 : .25)) % 1, y = y0 + .12 * r + L + u * r * 1.3; X.globalAlpha = alpha * (1 - u) * .9; X.fillStyle = '#9fd8ff';
-            X.beginPath(); X.ellipse(x0 + (ex < 0 ? -.08 : .08) * r, y, .045 * r, .065 * r, 0, 0, 7); X.fill(); X.fillStyle = '#ffffff'; X.beginPath(); X.arc(x0 + (ex < 0 ? -.09 : .07) * r, y - .02 * r, .012 * r, 0, 7); X.fill(); } } } }
+    if (o.kind === 'tears') { const B = headBall(o.C); if (!B || B.view === 'B') { X.restore(); continue; } const q0 = scr(B.c), qr = scr(B.c.clone().addScaledVector(B.right, B.r)); if (!q0 || !qr) { X.restore(); continue; }
+      const r = Math.hypot(qr[0] - q0[0], qr[1] - q0[1]), k = o.k; X.lineCap = 'round'; X.lineJoin = 'round';
+      for (const sd of [-1, 1]) { const a = sd * .247 + B.phi; if (Math.cos(a) < .25) continue;   // v4.34 eyes exactly where drawFace puts them (u = .5 +- .13 of the face strip, wrapped on the ball)
+        const ew = B.c.clone().addScaledVector(B.right, B.r * Math.sin(a) * B.sgn).addScaledVector(B.up, -B.faceY * B.r), q = scr(ew); if (!q) continue;
+        const out = Math.sign(Math.sin(a) * B.sgn) || sd, x0 = q[0], y0 = q[1], fs = Math.cos(a);   // fs: narrower when the eye turns away
+        X.globalAlpha = alpha * Math.min(1, k * 2.5) * .85; X.fillStyle = '#9fd8ff'; X.beginPath(); X.ellipse(x0, y0 + .055 * r, .085 * r * fs, .032 * r, 0, 0, 7); X.fill();   // glistening rim under the eye
+        X.fillStyle = '#ffffff'; X.beginPath(); X.ellipse(x0 + .025 * r * out, y0 + .045 * r, .022 * r * fs, .011 * r, 0, 0, 7); X.fill();
+        if (k > .35) { const L = r * (.25 + .7 * Math.min(1, (k - .35) / .45)), ph = o.t * 2.3 + sd * 7, xs = x0 + .02 * r * out, ys = y0 + .07 * r; X.globalAlpha = alpha * .9;
+          for (const [w, c] of [[.07 * r, '#7cc4f4'], [.026 * r, '#e8f6ff']]) { X.strokeStyle = c; X.lineWidth = w; X.beginPath(); X.moveTo(xs, ys);
+            for (let s_ = 1; s_ <= 8; s_++) { const u = s_ / 8; X.lineTo(xs + Math.sin(u * 5 + ph) * .018 * r + u * .035 * r * out, ys + u * L); } X.stroke(); }
+          if (k > .7) for (let d = 0; d < 2; d++) { const u = (o.t * 1.1 + d * .5 + (sd < 0 ? 0 : .25)) % 1, y = ys + L + u * r * 1.2; X.globalAlpha = alpha * (1 - u) * .9; X.fillStyle = '#9fd8ff';
+            X.beginPath(); X.ellipse(xs + .05 * r * out, y, .04 * r, .058 * r, 0, 0, 7); X.fill(); X.fillStyle = '#ffffff'; X.beginPath(); X.arc(xs + .04 * r * out, y - .018 * r, .011 * r, 0, 7); X.fill(); } } } }
     else if (o.kind === 'gloom') { const C = o.C; C.head.updateWorldMatrix(true, false); const hp = C.head.getWorldPosition(new E.THREE.Vector3()), q = scr(hp); if (!q) { X.restore(); continue; }
       const top = scr(hp.clone().add(new E.THREE.Vector3(0, .5 * C.spec.s, 0))), R = top ? Math.max(40, Math.abs(q[1] - top[1])) : 120; X.strokeStyle = 'rgba(40,30,70,.75)'; X.lineCap = 'round';
       for (let i = 0; i < 9; i++) { const xx = q[0] + (i - 4) * R * .2, ph = ((t * .9 + i * .37) % 1), y0 = q[1] - R * 1.5 + ph * R * .5, L = R * (.5 + .3 * ((i * 7) % 3) / 2);

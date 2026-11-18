@@ -175,6 +175,9 @@ If the user wants characters made in Flow from their own prompt, use the sister 
      the camera >= 1.2 m from every prop, or hide the prop for that shot. Check the bottom third of the frame.
    - Smoke/dust in a sad aftermath scene stays far behind the character, small (size <= .3) and low; never across the
      character or the lower frame.
+   - v4.34 tears start exactly at the eyes: the overlay wraps drawFace's eye position (u = .5 +- .13 of the face strip)
+     onto the head ball with the view angle (PHI) and mirroring, so it follows 3/4 and side views; any new face overlay
+     (blush, sweat, sparkle in the eye) must use the same headBall(C) eye math, never a fixed offset.
    - Watch the frames at the size of a phone: anything that pulls the eye away from the face in an emotional beat goes.
    HELPER RENDER SESSIONS (user rule): before every full render, ASK the user whether to use helper sessions and how
    many (each is a separate cloud session on the user's usage quota). Default = render on this machine only. If they

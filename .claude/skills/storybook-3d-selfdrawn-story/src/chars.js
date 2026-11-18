@@ -571,7 +571,7 @@ function headTex(C, key, view) {
 export function headBall(C) { if (!C.is2D || !C.sh || !C.sh.visible || !SPR.meta) return null; const M = SPR.meta[C.spr + '-' + (C.view || 'F')]; if (!M) return null;
   const [hx0, hy0, hx1, hy1] = M.head, [bx, by, br] = M.ballH, w = hx1 - hx0, h = hy1 - hy0, sx = C.sh.scale.x, sy = C.sh.scale.y;
   const right = new THREE.Vector3(1, 0, 0).applyQuaternion(C.sh.quaternion), up = new THREE.Vector3(0, 1, 0).applyQuaternion(C.sh.quaternion);
-  const c = C.sh.position.clone().addScaledVector(right, (bx / w - .5) * sx).addScaledVector(up, (.5 - by / h) * sy); return { c, r: br / w * Math.abs(sx), right, up, view: C.view, mir: C.mir }; }
+  const c = C.sh.position.clone().addScaledVector(right, (bx / w - .5) * sx).addScaledVector(up, (.5 - by / h) * sy); return { c, r: br / w * Math.abs(sx), right, up, view: C.view, mir: C.mir, sgn: Math.sign(sx) || 1, phi: PHI[C.view || 'F'] || 0, faceY: C.spec.faceY || 0, faceV: C.spec.faceV || 1 }; }
 export const SPRG = new THREE.Group(); // sprite planes live at scene root (added by main)
 export function makeChar2D(spec) {
   const C = makeChar({ ...spec, hat: 'none' }); C.is2D = true; C.spr = spec.sprite;
