@@ -579,7 +579,7 @@ function rigShader(sh, mat) { Object.assign(sh.uniforms, RIG); sh.uniforms.uBall
       if (uRimAmt > 0.) gl_FragColor.rgb += uRimCol * uRimAmt * rimA(uRimDir);
       if (uRim2Amt > 0.) gl_FragColor.rgb += uRim2Col * uRim2Amt * rimA(vec2(-uRimDir.x, uRimDir.y)); }`); }
 function sprMesh(pear = false) {
-  const m = new THREE.MeshLambertMaterial({ alphaTest: .5, side: THREE.DoubleSide, emissive: 0xffffff, emissiveIntensity: .32 }); noOutline(m); m.userData.uBall = { value: new THREE.Vector4(.5, .5, .4, .4) }; m.userData.uIsHead = { value: 0 }; m.userData.uMask = { value: null }; m.onBeforeCompile = (sh) => rigShader(sh, m); m.customProgramCacheKey = () => 'rig2';
+  const m = new THREE.MeshLambertMaterial({ alphaTest: .5, side: THREE.DoubleSide, emissive: 0xffffff, emissiveIntensity: globalThis.SPRITE_EMISSIVE ?? .32 });   /* v6.6 night stories raise it so characters never sink into the dark */ noOutline(m); m.userData.uBall = { value: new THREE.Vector4(.5, .5, .4, .4) }; m.userData.uIsHead = { value: 0 }; m.userData.uMask = { value: null }; m.onBeforeCompile = (sh) => rigShader(sh, m); m.customProgramCacheKey = () => 'rig2';
   const me = new THREE.Mesh(pear ? pearGeo() : new THREE.PlaneGeometry(1, 1), m); me.castShadow = false; me.receiveShadow = false;
   me.userData.sprN = new THREE.ShaderMaterial({ uniforms: { map: { value: null } }, vertexShader: sprNVS, fragmentShader: sprNFS, side: THREE.DoubleSide });
   return me;

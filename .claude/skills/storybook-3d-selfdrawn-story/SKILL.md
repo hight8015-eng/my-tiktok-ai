@@ -342,6 +342,14 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
   hard shadow).
 
+## Characters must always read at night (v6.6, user: 'characters are hard to see')
+- 'Black' clothes at night are painted charcoal blue-grey (#45425a-ish) with darker lapels and a bright trim, never
+  near-black: the eye reads them as black against the darker set. Hair/hood art no darker than ~#3a3448.
+- globalThis.SPRITE_EMISSIVE (default .32) = the sprites' self-light; night stories ~.6. Rig base >= .95, shadow
+  <= .2, cel ~.55, rims .5-.6 (rimW .007) so the silhouette separates from the background.
+- Value rule: the character must be lighter (or rim-lit) against a darker background in EVERY shot; check a
+  grey-scale thumbnail of each shot before rendering. Silhouette shots keep a visible rim and some interior detail.
+
 ## SFX library v3 + rooftop/gun kit (v6.5)
 - Library now ~300 sounds (projects/sfx_library, sfx.json): + 64 CC0 sounds from the SFXMint sample set on Hugging Face
   (AI-generated, CC0: rain, fire crackle, neon hum, heartbeat, wind whisper, drones, sirens, CCTV motor, glitch,

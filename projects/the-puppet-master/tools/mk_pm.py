@@ -183,16 +183,16 @@ def hat_bandana(d,view='F'):
     if view!='B': poly(d,cr([(CX+232,450),(CX+320,430),(CX+300,500),(CX+250,480)],4),r); poly(d,cr([(CX+232,470),(CX+300,540),(CX+250,560)],4),shade(r,.85))
 # ---- Hooded gunman (C08): deep hood, face mostly in shadow ----
 def back_hood(d,view='F'):
-    c=hexc('#1c1a24'); poly(d,cr([(CX-300,820),(CX-290,560),(CX-230,380),(CX,300),(CX+230,380),(CX+290,560),(CX+300,820)],6),c)
+    c=hexc('#3a3448'); poly(d,cr([(CX-300,820),(CX-290,560),(CX-230,380),(CX,300),(CX+230,380),(CX+290,560),(CX+300,820)],6),c)
 def hood(d,view='F'):
-    c=hexc('#1c1a24')
+    c=hexc('#3a3448')
     if view=='B': poly(d,cr([(CX-290,800),(CX-285,520),(CX-220,370),(CX,300),(CX+220,370),(CX+285,520),(CX+290,800)],6),c); return
     poly(d,cr([(CX-280,760),(CX-275,520),(CX-210,380),(CX,320),(CX+210,380),(CX+275,520),(CX+280,760),(CX+215,700),(CX+215,520),(CX+150,470),(CX,455),(CX-150,470),(CX-215,520),(CX-215,700)],6),c)
     hl(d,[(CX-200,420),(CX-120,370),(CX-100,385),(CX-185,440)],c)
 CH={'C01':(hair_aren,villager,(hexc('#1b1820'),)),'C02':(cap_guard,villager,(hexc('#2c3a5c'),)),
     'C03':(hair_fire,villager,(hexc('#c8bfa8'),)),'C04':(hair_buzz,villager,(hexc('#6a5a4a'),)),
     'C05':(hair_mohawk,villager,(hexc('#2a2a30'),)),'C06':(hat_beanie,villager,(hexc('#4a4038'),)),
-    'C07':(hat_bandana,villager,(hexc('#38404a'),)),'C08':(hood,villager,(hexc('#1c1a24'),),back_hood)}
+    'C07':(hat_bandana,villager,(hexc('#38404a'),)),'C08':(hood,villager,(hexc('#3a3448'),),back_hood)}
 for cid,spec in CH.items():
     hat,cos,args=spec[:3]; back=spec[3] if len(spec)>3 else None
     for v in 'FQSB':
