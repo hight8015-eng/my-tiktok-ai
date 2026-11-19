@@ -321,6 +321,9 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   overdo it.
 - Fire and smoke rise, spread, slow and fade as they rise; hotter parts rise faster; parts don't move in sync; a
   looping fire must not visibly "pulse"; never redraw the shape at random between frames.
+- Smoke (and hair/ribbons, minus the heat): a sine wave travelling up the column, x = sin(y - t); small and fast
+  at the source, larger, slower and spreading as it rises; vary the shapes, add masses (blobs) along the curl,
+  turbulence curls at the edges; fade by thinning into wisps or breaking into small rings, never a flat alpha fade.
 - Bounces: each bounce lower and shorter than the last; the first frame leaving the ground moves the most; as
   little ground time as possible (except an intentionally squishy landing).
 
