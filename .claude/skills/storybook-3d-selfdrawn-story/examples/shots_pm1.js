@@ -2,7 +2,7 @@
 import { THREE, scene, camera, clamp, lerp, sstep, eIO, eOut, eIn, eSine, D2R, noise1, rng, POST, mesh, rbox, toon, basic, group, cylBetween } from './engine.js';
 import * as Wd from './world.js';
 import * as ZC from './zc.js';
-import { CHARS, OVL, pose, popAt, sparkAt, dustAt, debrisAt, smokeAt, tintAt, rainAt, shockAt, whisperAt, makeRope, updateRope } from './chars.js';
+import { CHARS, OVL, setRig, pose, popAt, sparkAt, dustAt, debrisAt, smokeAt, tintAt, rainAt, shockAt, whisperAt, makeRope, updateRope } from './chars.js';
 const { TRUCK, GATE, STREET, ALLEY, Z } = ZC;
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 export const TM = { env: [] };
@@ -38,7 +38,7 @@ function redEyesOld(C, k, t) { scene.updateMatrixWorld(); const h = C.head.getWo
   EYES.forEach((e, i) => { e.position.copy(h).addScaledVector(d, .42 * s).addScaledVector(r, (i ? 1 : -1) * .13 * s).add(V(0, .16 * s, 0)); e.material.opacity = k * (.75 + .15 * Math.sin(t * 9 + i)); e.scale.setScalar(.42 * s * (.6 + .4 * k)); }); }
 const HF = group({ parent: scene }); HF.userData.fl = [0, 1, 2].map(i => { const f = mesh(new THREE.ConeGeometry(.09 - i * .02, .32 - i * .06, 8), basic(['#ff6a1a', '#ffb02a', '#fff2b0'][i]), { p: [0, .14, 0], parent: HF, cast: false }); f.userData.noInk = true; return f; });
 HF.userData.glow = Wd.glowSprite('#ff8a3a', 1.6, { opacity: .7 }); HF.userData.glow.position.set(0, .15, 0); HF.add(HF.userData.glow);
-function handFire(t, k) { HF.visible = k > .01; HF.scale.setScalar(.2 + .8 * k); HF.userData.fl.forEach((f, i) => { const s = 1 + .22 * Math.sin(t * (11 + i * 3) + i) + .12 * noise1(t * 7 + i * 5); f.scale.set(1, s, 1); f.position.y = .12 + .04 * s; f.rotation.z = .12 * noise1(t * 3 + i); }); HF.userData.glow.material.opacity = .7 * k * (.85 + .15 * Math.sin(t * 13)); }
+function handFire(t, k) { HF.visible = k > .01; HF.scale.setScalar(.2 + .8 * k); HF.userData.fl.forEach((f, i) => { const s = 1 + .22 * Math.sin(t * (11 + i * 3) + i) + .12 * noise1(t * 7 + i * 5); f.scale.set(1, s, 1); f.position.y = .12 + .04 * s; f.rotation.z = .12 * noise1(t * 3 + i); }); HF.userData.glow.material.opacity = .32 * k * (.85 + .15 * Math.sin(t * 13)); }   /* the flame lights the holder through the rig (warm key), the glow sprite only halos the flame */
 const THREAD = makeRope('#ff2a3a', .008, 20); THREAD.material.emissive = new THREE.Color('#ff2a3a'); THREAD.material.emissiveIntensity = 1; scene.add(THREAD);
 const SEED = Wd.glowSprite('#ff3040', .5, { opacity: 0 }); scene.add(SEED);
 const hw = (C, side = 1) => { scene.updateMatrixWorld(); return C.torso.localToWorld(V(side * .3, .45, .2)); };
@@ -46,11 +46,19 @@ const headW = (C, up = .1) => { scene.updateMatrixWorld(); return C.head.getWorl
 // ---------- lights ----------
 function nightCity(o = {}) { Wd.applyLight('night', { top: '#0a0a1c', mid: '#1c1838', hor: '#3a2448', glow: '#ff3a6a', glowAmt: .25, hemiS: '#a898e0', hemiG: '#4a3050', hemiI: 2.35, sunC: '#b8c4ff', sunI: 1.35, fog: '#1a1428', fogN: 14, fogF: 90, stars: .2, moon: .7, cloud: '#2a2440', ...o }); }
 const neonPt = (i, p, col, I = 6, d = 12) => { const l = Wd.pts[i]; l.position.copy(p); l.color.set(col); l.intensity = I; l.distance = d; };
-function streetLight(lt) { nightCity(); Wd.setShadowFocus(-600, 1, -10, 14); neonPt(0, STREET.localToWorld(V(-6, 3.5, -4)), '#ff2f6a', 7); neonPt(1, STREET.localToWorld(V(6, 3.5, -12)), '#2fe0ff', 7); neonPt(2, STREET.localToWorld(V(-5, 3, -20)), '#ffd23a', 6); neonPt(3, STREET.localToWorld(V(5.5, 3, -30)), '#c070ff', 6, 14); }
-function alleyLight(o = {}) { nightCity({ hemiI: 1.9, sunI: .9, fog: '#1c1628', fogN: 10, fogF: 48, ...o }); Wd.setShadowFocus(0, 1, -606, 8); neonPt(0, ALLEY.localToWorld(V(-1.4, 3.3, -7)), '#ffc87a', 6, 9); neonPt(1, ALLEY.localToWorld(V(0, 2.5, 3)), '#ff2f6a', 5, 12); neonPt(3, ALLEY.localToWorld(V(.5, 3, -13)), '#7a8aff', 3.5, 9); }
-function truckLight() { nightCity({ hemiI: 1.9, sunI: .8, fog: '#14121c', fogN: 10, fogF: 40, stars: 0, moon: 0 }); Wd.setShadowFocus(0, 1, 600, 5); neonPt(0, TRUCK.localToWorld(V(0, 2, -.5)), '#ffcf8a', 3, 6); neonPt(1, TRUCK.localToWorld(V(0, 1.7, -2.6)), '#9ab8ff', 2.5, 5); }
-function gateLight() { nightCity({ fogN: 20, fogF: 140, glowAmt: .45 }); Wd.setShadowFocus(600, 1, -18, 16); neonPt(0, GATE.localToWorld(V(0, 15, -34)), '#ff2340', 9, 30); neonPt(1, GATE.localToWorld(V(0, 2, -14)), '#fff0c8', 3, 10); }
-const mono = (k) => { POST.sat = lerp(POST.sat, .12, k); };   // the world drains to grey when Aren uses his power (red stays: it is drawn on top)
+/* character light rigs per set, motivated by the visible sources (neon magenta sign left, cyan sign right; the alley's
+   warm lamp left + cool city light right; truck: cold window top light; gate: red ZERO CITY sign from above + white searchlight rim) */
+const RIGS = {
+  street: { base: .82, key: ['#ff4a9a', .32], keySide: -1, fill: ['#2fd0ff', .26], top: ['#c8b8ff', .12], rim: ['#5fe8ff', 0.42], rimDir: [1, .35], rim2: ['#ff4a8a', 0.19], shadow: .3, rimW: .007 },
+  alley: { base: .74, key: ['#ffb060', .4], keySide: -1, fill: ['#5a6aff', .2], top: ['#ffd8a0', .1], rim: ['#ff3a5a', 0.35], rimDir: [1, .2], rim2: ['#ffb060', 0.16], shadow: .45, rimW: .007 },
+  truck: { base: .78, key: ['#a8c4ff', .25], keySide: 1, fill: ['#ffcf8a', .18], top: ['#c8d8ff', .3], rim: ['#c8d8ff', 0.3], rimDir: [0, 1], shadow: .3, rimW: .007 },
+  gate: { base: .8, key: ['#ff3040', .38], keySide: -1, fill: ['#8aa0ff', .16], top: ['#ff6070', .25], rim: ['#fff0d8', 0.4], rimDir: [1, .5], shadow: .35, rimW: .007 },
+  power: { base: .62, key: ['#ff2030', .3], keySide: -1, fill: ['#000000', 0], top: ['#ffffff', .05], rim: ['#ff2a3a', 0.55], rimDir: [1, .2], rim2: ['#ff2a3a', 0.28], shadow: .6, rimW: .009 } };
+function streetLight(lt) { setRig(RIGS.street); nightCity(); Wd.setShadowFocus(-600, 1, -10, 14); neonPt(0, STREET.localToWorld(V(-6, 3.5, -4)), '#ff2f6a', 7); neonPt(1, STREET.localToWorld(V(6, 3.5, -12)), '#2fe0ff', 7); neonPt(2, STREET.localToWorld(V(-5, 3, -20)), '#ffd23a', 6); neonPt(3, STREET.localToWorld(V(5.5, 3, -30)), '#c070ff', 6, 14); }
+function alleyLight(o = {}) { setRig(RIGS.alley); nightCity({ hemiI: 1.9, sunI: .9, fog: '#1c1628', fogN: 10, fogF: 48, ...o }); Wd.setShadowFocus(0, 1, -606, 8); neonPt(0, ALLEY.localToWorld(V(-1.4, 3.3, -7)), '#ffc87a', 6, 9); neonPt(1, ALLEY.localToWorld(V(0, 2.5, 3)), '#ff2f6a', 5, 12); neonPt(3, ALLEY.localToWorld(V(.5, 3, -13)), '#7a8aff', 3.5, 9); }
+function truckLight() { setRig(RIGS.truck); nightCity({ hemiI: 1.9, sunI: .8, fog: '#14121c', fogN: 10, fogF: 40, stars: 0, moon: 0 }); Wd.setShadowFocus(0, 1, 600, 5); neonPt(0, TRUCK.localToWorld(V(0, 2, -.5)), '#ffcf8a', 3, 6); neonPt(1, TRUCK.localToWorld(V(0, 1.7, -2.6)), '#9ab8ff', 2.5, 5); }
+function gateLight() { setRig(RIGS.gate); nightCity({ fogN: 20, fogF: 140, glowAmt: .45 }); Wd.setShadowFocus(600, 1, -18, 16); neonPt(0, GATE.localToWorld(V(0, 15, -34)), '#ff2340', 9, 30); neonPt(1, GATE.localToWorld(V(0, 2, -14)), '#fff0c8', 3, 10); }
+const mono = (k) => { POST.sat = lerp(POST.sat, .12, k); if (k > .5) setRig(RIGS.power); };   /* the power: hard red rim, the rest falls into shadow */   // the world drains to grey when Aren uses his power (red stays: it is drawn on top)
 // ===================================================================== SHOTS
 export const SHOTS = [];
 function reset(t) { SH.a = 0; SH.t = t; Object.values(CHARS).forEach(C => { C.g.visible = false; }); Wd.hideSets(); Wd.hideSea(); ZC.hideZC(); Wd.pts.forEach(l => { l.intensity = 0; });
@@ -113,10 +121,10 @@ S('S12', 21.37, 'blur', STREET, (lt, t) => { streetLight(lt);
   put(ST(), STREET, { p: [-2.6, .18, -15], ry: 60, ex: lt < 1 ? 'confident' : 'evil', hL: [-.05, .5, .38], hR: [.05, .52, .4], pL: [-1, -.2, 0], pR: [1, -.2, 0], head: [-6, 0, 0] });
     camS([3.2, 1.4, -9.5], [-6, 2, -16], [2.5, 1.6, -10.2], [-3, 1.6, -15.4], U(lt, 2.3), 46); });
 // ---------------- 13 "ชายข้างๆ ผมจุดไฟขึ้นจากมือ" : the fire man ignites his palm (anticipation: palm up, a spark, then the flame) ----------------
-S('S13', 23.74, 'cut', STREET, (lt, t) => { streetLight(lt); const ig = clamp((lt - .45) / .35); neonPt(3, STREET.localToWorld(V(-.9, 1.6, -9)), '#ff8a3a', 2.2 * ig, 4);
+S('S13', 23.74, 'cut', STREET, (lt, t) => { streetLight(lt); const ig = clamp((lt - .45) / .35); neonPt(3, STREET.localToWorld(V(-.9, 1.6, -9)), '#ff8a3a', 1.1 * ig, 4);
   put(FI(), STREET, { p: [-.9, .18, -9.4], ry: 30, ex: ig > .5 ? 'grinTeeth' : 'sly', hR: lp([.3, .3, .1], [.2, .6, .38], antic(lt, .12, .35, .12, .1, 2)), pR: [1, -.3, 0], squash: -.04 * settle(lt - .45, 10, 5) });
   put(AR(), STREET, { p: [.5, .18, -8.6], ry: -40, ...pf(lt, [[0, 'calm'], [.75, 'shocked']]), lean: -7 * clamp((lt - .72) / .12) + 5 * settle(lt - .84, 8, 3.5), head: [-10 * settle(lt - .74, 10, 4), 0, 0] });
-  scene.updateMatrixWorld(); HF.position.copy(hw(FI(), 1)).add(V(-.08, .12, .08)); handFire(t, backOut(ig, 2.4)); if (ig > 0 && ig < 1) sparkAt(HF.position.clone(), 1 - ig, .4);
+  scene.updateMatrixWorld(); HF.position.copy(hw(FI(), 1)).add(V(-.08, .12, .08)); handFire(t, backOut(ig, 2.4)); setRig({ ...RIGS.street, key: ['#ff9a3a', .25 + .35 * ig], keySide: 1, rim: ['#ffb060', .5 * ig], rimDir: [1, -.2] });   /* motivated: the new flame becomes the key light */ if (ig > 0 && ig < 1) sparkAt(HF.position.clone(), 1 - ig, .4);
   camS([.9, 1.55, -6.4], [-.5, 1.35, -9.2], [.7, 1.5, -6.8], [-.6, 1.4, -9.2], U(lt, 2.2), 42); }, { shutter: 3 });
 // ---------------- 14 "อีกคนยกรถทั้งคันได้ด้วยแขนเดียว" : the strong man lifts the car one-handed ----------------
 S('S14', 26.09, 'cut', STREET, (lt, t) => { streetLight(lt); const lift = backOut((lt - .5) / 1.1, .7), lift2 = backOut((lt - .6) / 1.1, .7);

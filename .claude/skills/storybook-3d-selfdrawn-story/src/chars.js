@@ -540,8 +540,33 @@ function pearGeo() { const g = new THREE.PlaneGeometry(1, 1, 12, 16), P = g.attr
   for (let i = 0; i < P.count; i++) { const v = P.getY(i) + .5, sstep_ = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
     const prof = BODY.bottom + (BODY.top - BODY.bottom) * sstep_(.22, 1, v), tuck = BODY.flat ? 1 : 1 - .14 * (1 - sstep_(0, .16, v)); P.setX(i, P.getX(i) * prof * tuck); }
   P.needsUpdate = true; return g; }
+/* v5.6 CHARACTER LIGHT RIG (refs: Joker still = warm key one side, cool light other side, light from the top, rim on both
+   shoulders; low-key portrait = one hard side light, the rest falls to black). The 2D sprites are flat planes, so the
+   lighting is painted in the shader in SCREEN space (mirroring safe): key colour on one side, fill colour on the other,
+   a top light, a darkening floor and a rim = a thin coloured edge on the side facing each rim light. All zero = old look.
+   Set per shot with setRig({...}) (shots.js), reset each frame with setRig(). */
+export const RIG = { uBase: { value: 1 }, uKeyCol: { value: new THREE.Color('#ffffff') }, uKeyAmt: { value: 0 }, uKeySide: { value: -1 }, uFillCol: { value: new THREE.Color('#ffffff') }, uFillAmt: { value: 0 },
+  uTopCol: { value: new THREE.Color('#ffffff') }, uTopAmt: { value: 0 }, uRimCol: { value: new THREE.Color('#ffffff') }, uRimAmt: { value: 0 }, uRimDir: { value: new THREE.Vector2(1, .3) },
+  uRim2Col: { value: new THREE.Color('#ffffff') }, uRim2Amt: { value: 0 }, uRimW: { value: .012 }, uShadow: { value: 0 } };
+export function setRig(o = {}) { const d = { base: 1, key: ['#ffffff', 0], keySide: -1, fill: ['#ffffff', 0], top: ['#ffffff', 0], rim: ['#ffffff', 0], rimDir: [1, .3], rim2: ['#ffffff', 0], rimW: .012, shadow: 0, ...o };
+  RIG.uBase.value = d.base; RIG.uKeyCol.value.set(d.key[0]); RIG.uKeyAmt.value = d.key[1]; RIG.uKeySide.value = d.keySide; RIG.uFillCol.value.set(d.fill[0]); RIG.uFillAmt.value = d.fill[1];
+  RIG.uTopCol.value.set(d.top[0]); RIG.uTopAmt.value = d.top[1]; RIG.uRimCol.value.set(d.rim[0]); RIG.uRimAmt.value = d.rim[1]; RIG.uRimDir.value.set(...d.rimDir).normalize(); RIG.uRim2Col.value.set(d.rim2[0]); RIG.uRim2Amt.value = d.rim2[1]; RIG.uRimW.value = d.rimW; RIG.uShadow.value = d.shadow; }
+function rigShader(sh) { Object.assign(sh.uniforms, RIG);
+  sh.vertexShader = sh.vertexShader.replace('void main() {', 'varying vec2 vScr;\nvoid main() {').replace('#include <project_vertex>', `#include <project_vertex>
+    { mat4 M = projectionMatrix * modelViewMatrix; vec4 c0 = M * vec4(0., 0., 0., 1.), c1 = M * vec4(position, 1.), cx = M * vec4(.5, 0., 0., 1.), cy = M * vec4(0., .5, 0., 1.);
+      vScr = vec2((c1.x / c1.w - c0.x / c0.w) / max(1e-5, abs(cx.x / cx.w - c0.x / c0.w)), (c1.y / c1.w - c0.y / c0.w) / max(1e-5, abs(cy.y / cy.w - c0.y / c0.w))); }`);
+  sh.fragmentShader = sh.fragmentShader.replace('void main() {', `varying vec2 vScr; uniform float uBase, uKeyAmt, uKeySide, uFillAmt, uTopAmt, uRimAmt, uRim2Amt, uRimW, uShadow; uniform vec3 uKeyCol, uFillCol, uTopCol, uRimCol, uRim2Col; uniform vec2 uRimDir;
+    float rimA(vec2 dir) { vec2 sg = vec2(sign(dFdx(vMapUv.x) + 1e-9), sign(dFdy(vMapUv.y) + 1e-9)); vec2 o = vec2(dir.x * sg.x, dir.y * sg.y) * uRimW; float e = 0.;
+      for (int i = 1; i <= 3; i++) e += 1. - step(.5, texture2D(map, vMapUv + o * float(i) / 3.).a); return clamp(e / 2., 0., 1.); }
+    void main() {`).replace('#include <dithering_fragment>', `#include <dithering_fragment>
+    { float s = clamp(vScr.x * uKeySide * -.5 + .5, 0., 1.); s = s * s * (3. - 2. * s);
+      vec3 lit = vec3(uBase) + uKeyCol * uKeyAmt * s + uFillCol * uFillAmt * (1. - s) + uTopCol * uTopAmt * smoothstep(-.3, 1., vScr.y);
+      lit *= 1. - uShadow * (1. - s) * .6 - uShadow * smoothstep(.2, -1., vScr.y) * .25;
+      gl_FragColor.rgb *= lit;
+      if (uRimAmt > 0.) gl_FragColor.rgb += uRimCol * uRimAmt * rimA(uRimDir);
+      if (uRim2Amt > 0.) gl_FragColor.rgb += uRim2Col * uRim2Amt * rimA(vec2(-uRimDir.x, uRimDir.y)); }`); }
 function sprMesh(pear = false) {
-  const m = new THREE.MeshLambertMaterial({ alphaTest: .5, side: THREE.DoubleSide, emissive: 0xffffff, emissiveIntensity: .32 }); noOutline(m);
+  const m = new THREE.MeshLambertMaterial({ alphaTest: .5, side: THREE.DoubleSide, emissive: 0xffffff, emissiveIntensity: .32 }); noOutline(m); m.onBeforeCompile = rigShader; m.customProgramCacheKey = () => 'rig1';
   const me = new THREE.Mesh(pear ? pearGeo() : new THREE.PlaneGeometry(1, 1), m); me.castShadow = false; me.receiveShadow = false;
   me.userData.sprN = new THREE.ShaderMaterial({ uniforms: { map: { value: null } }, vertexShader: sprNVS, fragmentShader: sprNFS, side: THREE.DoubleSide });
   return me;

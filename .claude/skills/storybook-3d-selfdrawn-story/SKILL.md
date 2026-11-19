@@ -327,6 +327,21 @@ If the user wants characters made in Flow from their own prompt, use the sister 
 - Bounces: each bounce lower and shorter than the last; the first frame leaving the ground moves the most; as
   little ground time as possible (except an intentionally squishy landing).
 
+## Character lighting + glow (v5.6, user refs: Joker still, low-key portrait)
+- setRig({...}) (chars.js) lights the 2D character sprites in screen space: base (overall level), key [col, amt] on
+  keySide (-1 left / 1 right), fill [col, amt] on the other side, top [col, amt] (light from above), rim [col, amt]
+  with rimDir [x, y] (+ rim2 on the opposite side), rimW (edge width), shadow (0..1 darkens the unlit side + the
+  bottom). Call it in each set's light function; setRig() with no args = the old flat look.
+- Rules: MOTIVATED light (every colour comes from a source you can see: sign, lamp, window, flame, fire barrel);
+  warm vs cool split (warm practical on one side, cool city/moon light on the other); a rim separates the character
+  from a dark background; light from the top for drama; low-key = one hard side light, the rest falls to black (use
+  for villains / power moments: shadow .6). When a new light appears in the shot (a flame, a gun flash) it becomes the
+  key: switch keySide + colour with it. Keep rims subtle (amt .3-.5, rimW ~.007): strong rims read as a neon sticker
+  outline / RGB glitch. Glow sprites only halo the source; they must not wash over the character.
+- PM presets in examples/shots_pm1.js (RIGS): street (magenta key / cyan fill + cyan rim), alley (warm lamp key /
+  blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
+  hard shadow).
+
 ## FX study 3 (v5.5, 6 user clips: live-action power edit, green-screen meteors + explosion, flame tornado, power-% montage, stick fight)
 - Power-up chain (one beat each, ~0.5-1 s): hands glow -> aura bursts around the body -> top-down shot -> an object flies
   AT the lens -> eye glow close-up -> wide -> the hit. Escalate scale shot by shot, never show the biggest first.
