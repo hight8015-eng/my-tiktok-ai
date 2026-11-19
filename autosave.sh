@@ -97,7 +97,7 @@ ok=0
 for w in 2 4 8 16; do
   if git push -q -u origin "$BRANCH" 2>>"$LOG"; then ok=1; break; fi
   # remote has commits we lack: merge, never force
-  git fetch -q origin "$BRANCH" 2>>"$LOG" && git merge -q --no-edit FETCH_HEAD 2>>"$LOG"
+  git fetch -q origin "$BRANCH" 2>>"$LOG" && { git merge -q --no-edit -X ours FETCH_HEAD 2>>"$LOG" || git merge --abort 2>/dev/null; }
   sleep "$w"
 done
 [ $ok = 1 ] && say "saved $N files and pushed" || say "saved $N files locally; push failed (will retry next time)"
