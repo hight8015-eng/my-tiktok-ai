@@ -1,0 +1,4 @@
+#!/bin/bash
+one() { cd $1; a=$2; b=$3; f=$(printf "out/seg/s_%05d_%05d.mp4" $a $b); node src/render.js video $f.tmp.mp4 $a $b > out/seg/fx$a.log 2>&1 && mv $f.tmp.mp4 $f && echo "OK $f"; }
+one /tmp/claude-0/-home-user-my-tiktok-ai/7ab5bec5-d0dd-574d-90b8-8dcb840304db/scratchpad/lv2 1500 1600 & one /tmp/claude-0/-home-user-my-tiktok-ai/7ab5bec5-d0dd-574d-90b8-8dcb840304db/scratchpad/lv2 1600 1700 & one /tmp/claude-0/-home-user-my-tiktok-ai/7ab5bec5-d0dd-574d-90b8-8dcb840304db/scratchpad/lv2 1700 1800 & one /tmp/claude-0/-home-user-my-tiktok-ai/7ab5bec5-d0dd-574d-90b8-8dcb840304db/scratchpad/lv3 600 700 & one /tmp/claude-0/-home-user-my-tiktok-ai/7ab5bec5-d0dd-574d-90b8-8dcb840304db/scratchpad/lv3 700 800 & wait
+touch /tmp/claude-0/-home-user-my-tiktok-ai/7ab5bec5-d0dd-574d-90b8-8dcb840304db/scratchpad/FIX_DONE

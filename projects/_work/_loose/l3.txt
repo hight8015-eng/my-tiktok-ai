@@ -1,0 +1,2 @@
+file '/tmp/claude-0/-home-user-my-tiktok-ai/7ab5bec5-d0dd-574d-90b8-8dcb840304db/scratchpad/lv3/out/m_1080.mp4'
+file '/tmp/claude-0/-home-user-my-tiktok-ai/7ab5bec5-d0dd-574d-90b8-8dcb840304db/scratchpad/lv3/out/m_1125.mp4'
