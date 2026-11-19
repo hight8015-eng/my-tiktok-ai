@@ -227,7 +227,7 @@ function caption(t, sh) {
   if (CAP.style === 'classic') return captionClassic(t, c);
   let txt = c[2], mode = 0; if (/^~.*~$/.test(txt)) { mode = 1; txt = txt.slice(1, -1); } else if (/^\^.*\^$/.test(txt)) { mode = 2; txt = txt.slice(1, -1); }
   const segs = capSegs(txt.replace(/[~^]/g, '')), size = CAP.size * (mode === 1 ? .78 : mode === 2 ? 1.22 : 1), a = t - c[0], an = CAP.anim || 'pop';
-  const k = an === 'pop' ? .86 + .14 * E.eOut(Math.min(1, a / .13)) + .025 * Math.sin(Math.PI * Math.min(1, a / .2)) : 1, al = an === 'none' ? 1 : Math.min(1, a / .1);
+  const k = an === 'pop' ? .86 + .14 * E.eOut(Math.min(1, a / .13)) + .025 * Math.sin(Math.PI * Math.min(1, a / .2)) : 1, al = an === 'none' ? 1 : Math.min(1, a / .1) * E.clamp((c[1] - t) / .12); // v7.4 user: every chunk fades out at its end
   const dy = an === 'pop' || an === 'slide' ? 16 * (1 - E.eOut(Math.min(1, a / .16))) : 0, dx = an === 'slide' ? -30 * (1 - E.eOut(Math.min(1, a / .18))) : 0;
   const y = capY(sh, size); X.save(); X.globalAlpha = al * (mode === 1 ? .82 : 1); X.translate(CAPX + dx + (mode === 2 ? 5 * Math.sin(a * 70) * Math.exp(-a * 9) : 0), y + dy); X.scale(k, k);
   if (mode === 1) X.transform(1, 0, -.12, 1, 0, 0);

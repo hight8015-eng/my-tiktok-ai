@@ -239,9 +239,9 @@ S('W32', 88.2, 'cut', STREET, (lt, t) => { streetLight(lt); MIND = 2.0; put(AR()
 export function initShots(timing) { TM.env = timing.env; TM.vis = timing.vis; for (let i = 0; i < SHOTS.length; i++) SHOTS[i].t1 = i + 1 < SHOTS.length ? SHOTS[i + 1].t0 : timing.end; }
 export function runShot(sh, t) { reset(t); sh.fn(t - sh.t0, t); }
 export const WHITEK = { k: 0 };
-export const COVER = { id: 'COVER', t0: 0, fn: (lt, t, o = {}) => { reset(10); ALLEY.visible = true; alleyLight(); ZC.alleyAt(10, 0);
-  put(AR(), ALLEY, { p: [-1.2, 0, -7.4], ry: 30, ex: 'sinister' }); redEyes(AR(), .9, 10);
-  const cm = o.cam || [.9, 1.45, -4.6], g = o.tgt || [-1.1, 1.75, -7.4]; MIND = 0; camA(cm, g, cm, g, 0, o.fov || 44); } };
+export const COVER = { id: 'COVER', t0: 0, fn: (lt, t, o = {}) => { reset(30); WAREHOUSE.visible = true; whLight(); HOLE.visible = CRACK.visible = true; PILLAR.visible = true;
+  put(VI(), WAREHOUSE, { p: [-.15, 0, -4.65], ry: 0, ex: 'angry', hR: [.42, 1.5, .95], pR: [1, -.4, -.2], hL: [-.3, .4, .2] }); put(AR(), WAREHOUSE, { p: [0, 0, -3.0], ry: 180, ex: 'sinister' }); redEyes(AR(), .8, 30); faceLight(AR(), '#ffd0a8', -1);
+  MIND = 0; const cm = o.cam || [-1.3, 2.0, -7.6], g = o.tgt || [.1, 2.0, -3.0]; camW(cm, g, cm, g, 0, o.fov || 44); ZC.warehouseAt(30, camera); } };
 export const BENCH = { id: 'BENCH', t0: 0, fn: (lt, t, o = {}) => { reset(0); if (o.roof) { ZC.ROOF.visible = true; ZC.roofAt(3); alleyLight(); setRig(RIGS.alley); put(GM(), ZC.ROOF, { p: [0, 0, -6.2], ry: 180, ex: 'evil' }); const c = o.cam, g = o.tgt; look(V(...c).add(ZC.ROOF.position), V(...g).add(ZC.ROOF.position), o.fov || 50); ZC.zcLate(3, camera); return; } STREET.visible = true; streetLight(0); if (o.rig) setRig({ ...RIGS.street, ...o.rig }); const ids = ['aren', 'guard', 'fire', 'strong', 'thug1', 'thug2', 'thug3', 'gunman'];
   if (o.act) { const L = o.act, n = L.length, sp = o.sp ?? .85; ids.forEach((id) => put(CHARS[id], STREET, { p: [0, -50, -30], visible: false }));
     L.forEach((a, i) => { const id = o.who ? o.who[i % o.who.length] : ids[i % ids.length]; const pz = o.beats ? perform(o.lt, o.beats, { seed: i }) : typeof a === 'string' && POSES[a] && !o.faceOnly ? perform(5, [[0, a]], { seed: i, still: true }) : a.includes('|') ? { ex: a.split('|')[0], talk: a.split('|')[1] } : { ex: a };
