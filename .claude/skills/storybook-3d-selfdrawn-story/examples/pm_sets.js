@@ -142,4 +142,78 @@ export function laserAt(from, to, k) { Z.gun.visible = Z.laser.visible = k > 0; 
   Z.laser.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize()); Z.dot.position.copy(b); }
 
 export function hideZC() { TRUCK.visible = GATE.visible = STREET.visible = ALLEY.visible = false; Z.tag.visible = false; Z.truckDoors.forEach(d => { d.visible = true; }); Z.outside.visible = false; Z.truckSlit.visible = true; Z.truckSlit.scale.x = 1; Z.dark.visible = true; }
-export function zcAt(t) { firesAt(t); }
+export function zcAt(t) { firesAt(t); propsAt(t); }
+
+// ======================= v2 SET DRESSING (story props, user: "more props that fit each scene") =======================
+const stencil = (par, txt, p, ry, w = 1.2, h = .4, col = '#d8d0b8', bg = '#4a5060') => sign(par, txt, p, ry, { w, h, col: bg, bg, txtC: col, fs: .6, glow: false });
+function cctv(par, p, ry = 0, tilt = -20) { const g = group({ p, r: [0, ry, 0], parent: par }); mesh(rbox(.08, .08, .3), toon('#3a3a44'), { p: [0, 0, -.15], parent: g });
+  const b = group({ p: [0, -.08, 0], r: [tilt, 0, 0], parent: g }); mesh(rbox(.16, .14, .34), toon('#d8dce4'), { p: [0, 0, .12], parent: b }); mesh(new THREE.CylinderGeometry(.05, .05, .04, 10), toon('#141418'), { p: [0, 0, .3], r: [90, 0, 0], parent: b });
+  const led = mesh(new THREE.SphereGeometry(.018, 6, 4), basic('#ff2030'), { p: [.05, .05, .29], parent: b, cast: false }); led.userData.noInk = true; CAMS.push({ g: b, led, ry }); return g; }
+const CAMS = [];
+function tvStack(par, p, ry = 0) { const g = group({ p, r: [0, ry, 0], parent: par }); const scr = [];
+  [[0, .3, .9, .7], [.95, .3, .7, .55], [.45, 1.0, .8, .6], [-.1, 1.0, .5, .45]].forEach(([x, y, w, h]) => { mesh(rbox(w, h, .5), toon('#2a2630'), { p: [x, y + h / 2, 0], parent: g }); const s = mesh(new THREE.PlaneGeometry(w * .8, h * .72), basic('#9ab0d0'), { p: [x, y + h / 2, .26], parent: g, cast: false }); s.userData.noInk = true; scr.push(s); });
+  TVS.push(...scr); glow(g, [.4, .8, .6], '#9ab8ff', 2.4, .3); return g; }
+const TVS = [];
+function vending(par, p, ry, col = '#d83a4a') { const g = group({ p, r: [0, ry, 0], parent: par }); mesh(rbox(1, 1.9, .8), toon(col), { p: [0, .95, 0], parent: g });
+  const f = mesh(new THREE.PlaneGeometry(.7, 1.1), basic('#fff6e0'), { p: [-.08, 1.15, .41], parent: g, cast: false }); f.userData.noInk = true;
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) mesh(new THREE.CylinderGeometry(.045, .045, .14, 8), toon(['#3a8ae0', '#e0b03a', '#3ac07a', '#e04a8a'][(r + c) % 4]), { p: [-.35 + c * .17, .72 + r * .27, .43], parent: g, cast: false });
+  mesh(rbox(.22, .5, .05), toon('#2a2630'), { p: [.38, 1.2, .42], parent: g }); glow(g, [0, 1.2, .8], '#fff0d0', 2.4, .35); return g; }
+function moto(par, p, ry, col = '#2a5a9a') { const g = group({ p, r: [0, ry, 0], parent: par }); for (const z of [-.55, .55]) mesh(new THREE.TorusGeometry(.28, .08, 8, 16), toon('#141418'), { p: [0, .32, z], r: [0, 90, 0], parent: g });
+  mesh(rbox(.3, .32, .9), toon(col), { p: [0, .62, 0], parent: g }); mesh(rbox(.26, .1, .5), toon('#1a1a1e'), { p: [0, .82, -.15], parent: g }); cylBetween([0, .62, .5], [0, 1.05, .62], .025, toon('#8a8e9a'), g, 6); cylBetween([-.3, 1.05, .62], [.3, 1.05, .62], .02, toon('#1a1a1e'), g, 6); return g; }
+function stall(par, p, ry) { const g = group({ p, r: [0, ry, 0], parent: par }); mesh(rbox(2, .9, .9), toon('#8a5a3a'), { p: [0, .45, 0], parent: g });
+  for (const x of [-.95, .95]) cylBetween([x, .9, .4], [x, 2.3, .4], .03, toon('#3a3040'), g, 6); const aw = mesh(rbox(2.3, .08, 1.3), toon('#c8343a'), { p: [0, 2.35, .2], r: [-12, 0, 0], parent: g }); for (let i = 0; i < 6; i++) mesh(rbox(.18, .1, 1.31), toon('#f0e6d8'), { p: [-1 + i * .4, 2.36, .2], r: [-12, 0, 0], parent: g });
+  mesh(new THREE.CylinderGeometry(.28, .22, .22, 14), toon('#9aa0aa'), { p: [-.45, 1.02, 0], parent: g }); [[.2, '#e0a050'], [.55, '#c06040']].forEach(([x, c]) => mesh(rbox(.28, .06, .2), toon(c), { p: [x, .93, 0], parent: g }));
+  for (const x of [-.7, .7]) { const l = mesh(new THREE.SphereGeometry(.13, 10, 8), lit('#ff6a3a', 1.2), { p: [x, 2.05, .75], s: [1, 1.25, 1], parent: g, cast: false }); glow(g, [x, 2.0, .9], '#ff8a4a', 1.6, .5); }
+  sign(g, 'ก๋วยเตี๋ยว', [0, 2.75, .65], 0, { w: 1.6, h: .45, col: '#ffd23a', fs: .55 }); STEAMS.push(par.localToWorld ? [g, [-.45, 1.2, 0]] : null); return g; }
+const STEAMS = [];
+function acUnit(par, p, ry) { const g = group({ p, r: [0, ry, 0], parent: par }); mesh(rbox(.7, .5, .4), toon('#b8bcc4'), { parent: g }); mesh(new THREE.CircleGeometry(.17, 14), toon('#3a3e48'), { p: [.1, 0, .21], parent: g, cast: false }); for (let k = -2; k <= 2; k++) mesh(rbox(.3, .02, .01), toon('#6a6e78'), { p: [.1, k * .06, .215], parent: g, cast: false }); return g; }
+function tireStack(par, p, n = 3) { for (let i = 0; i < n; i++) mesh(new THREE.TorusGeometry(.32, .13, 8, 16), toon('#1c1c22'), { p: [p[0] + (i % 2) * .04, .13 + i * .24, p[2]], r: [90, 0, 0], parent: par }); }
+function barrier(par, p, ry = 0) { const g = group({ p, r: [0, ry, 0], parent: par }); mesh(new THREE.CylinderGeometry(.18, .4, .8, 4, 1), toon('#c8c4b8'), { p: [0, .4, 0], s: [3.4, 1, 1], r: [0, 45, 0], parent: g }); mesh(rbox(1.8, .14, .02), toon('#e0b020'), { p: [0, .5, .33], parent: g }); for (let k = 0; k < 4; k++) mesh(rbox(.18, .14, .03), toon('#1c1c22'), { p: [-.6 + k * .4, .5, .34], r: [0, 0, 35], parent: g }); return g; }
+function sandbags(par, p, ry = 0) { const g = group({ p, r: [0, ry, 0], parent: par }); for (let r = 0; r < 3; r++) for (let c = 0; c < 4 - r; c++) mesh(new THREE.CapsuleGeometry(.14, .3, 4, 8), toon('#a8946a'), { p: [-.5 + c * .36 + r * .18, .14 + r * .24, 0], r: [0, 0, 90], parent: g }); return g; }
+function cones(par, p, n, dz) { for (let i = 0; i < n; i++) { const g = group({ p: [p[0], 0, p[2] + i * dz], parent: par }); mesh(new THREE.ConeGeometry(.16, .5, 12), toon('#ff6a2a'), { p: [0, .27, 0], parent: g }); mesh(new THREE.CylinderGeometry(.1, .12, .08, 12), toon('#f4f0e8'), { p: [0, .3, 0], parent: g }); mesh(rbox(.36, .04, .36), toon('#2a2a30'), { p: [0, .02, 0], parent: g }); } }
+function pallet(par, p, ry = 0, lean = 0) { const g = group({ p, r: [lean, ry, 0], parent: par }); for (let k = 0; k < 5; k++) mesh(rbox(.14, .03, 1), toon('#a8885a'), { p: [-.4 + k * .2, .1, 0], parent: g }); for (const z of [-.42, 0, .42]) mesh(rbox(1, .08, .1), toon('#8a6a42'), { p: [0, .04, z], parent: g }); return g; }
+function bottles(par, p, n = 5, seed = 3) { const R = rng(seed); for (let i = 0; i < n; i++) { const s = R() > .4; mesh(new THREE.CylinderGeometry(.03, .04, .22, 8), toon(['#2a6a3a', '#7a4a1a', '#3a5a8a'][i % 3], { transparent: true, opacity: .8 }), { p: [p[0] + (R() - .5) * .8, s ? .11 : .04, p[2] + (R() - .5) * .8], r: s ? [0, 0, 0] : [90, R() * 180, 0], parent: par, cast: false }); } }
+function poster(par, p, ry, txt, col = '#e8dcc0', ink = '#3a2a1a') { return sign(par, txt, p, ry, { w: .6, h: .8, col, bg: col, txtC: ink, fs: .22, glow: false }); }
+function boxes(par, p, ry = 0) { const g = group({ p, r: [0, ry, 0], parent: par }); [[0, 0, 0, .55], [.5, 0, .1, .45], [.2, .55, 0, .4], [-.1, 0, .5, .4]].forEach(([x, y, z, s]) => mesh(rbox(s, s * .8, s), toon('#b89a6a'), { p: [x, y + s * .4, z], r: [0, (x * 50) | 0, 0], parent: g })); return g; }
+function wire(par, a, b, sag = .8, col = '#141018') { const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2 - sag, (a[2] + b[2]) / 2]; cylBetween(a, mid, .012, toon(col), par, 4); cylBetween(mid, b, .012, toon(col), par, 4); }
+// ---- TRUCK: the prison van has a story: shackles, ID stencil, a cage partition, a tin cup, scratched tally marks
+{ const T = TRUCK;
+  for (const s of [-1, 1]) for (let z = -2.2; z <= 2.2; z += 1.1) { mesh(rbox(.06, .12, .12), toon('#6a6e78'), { p: [s * 1.24, 1.0, z], parent: T }); for (let i = 0; i < 4; i++) mesh(new THREE.TorusGeometry(.035, .01, 6, 10), toon('#9aa0aa'), { p: [s * 1.2, .93 - i * .06, z], r: [0, i % 2 ? 90 : 0, 0], parent: T, cast: false }); mesh(new THREE.TorusGeometry(.06, .015, 6, 14), toon('#9aa0aa'), { p: [s * 1.2, .68, z], r: [90, 0, 0], parent: T, cast: false }); }
+  stencil(T, 'PRISON TRANSPORT 07', [1.25, 1.9, -.8], -90, 2.0, .3); stencil(T, 'ห้ามพูดคุย', [-1.25, 1.9, 1.0], 90, 1.4, .32, '#e8c040');
+  for (let x = -1.2; x <= 1.2; x += .14) cylBetween([x, .1, -2.4], [x, 2.25, -2.4], .012, toon('#5a5e68'), T, 4); cylBetween([-1.25, 1.2, -2.4], [1.25, 1.2, -2.4], .02, toon('#5a5e68'), T, 4);   // cage partition behind the driver
+  mesh(new THREE.CylinderGeometry(.06, .05, .12, 12, 1, true), toon('#9aa0aa', { side: THREE.DoubleSide }), { p: [.3, .06, .8], parent: T, cast: false }); mesh(rbox(.4, .02, .55), toon('#c8b890'), { p: [-.2, .02, -1.2], r: [0, 25, 0], parent: T, cast: false });
+  const tl = canvasTex(256, 128, (x, W, H) => { x.fillStyle = '#4a5060'; x.fillRect(0, 0, W, H); x.strokeStyle = '#c8ccd4'; x.lineWidth = 5; for (let k = 0; k < 4; k++) { const x0 = 20 + k * 58; for (let i = 0; i < 4; i++) { x.beginPath(); x.moveTo(x0 + i * 10, 30); x.lineTo(x0 + i * 10 + 3, 100); x.stroke(); } x.beginPath(); x.moveTo(x0 - 6, 90); x.lineTo(x0 + 42, 40); x.stroke(); } });
+  mesh(new THREE.PlaneGeometry(.6, .3), basic('#ffffff', { map: tl }), { p: [-1.25, 1.45, -.4], r: [0, 90, 0], parent: T, cast: false }).userData.noInk = true;
+  Z.cup = mesh(new THREE.CylinderGeometry(.05, .04, .1, 10), toon('#8a8e98'), { p: [.95, .74, .25], parent: T }); }
+// ---- GATE: a checkpoint at the end of the world: barriers, sandbags, cones, cameras, warning boards, razor wire
+{ const G = GATE;
+  barrier(G, [-3.4, 0, -25], 0); barrier(G, [-1.4, 0, -25.6], 0); sandbags(G, [4.4, 0, -26.2], 0); sandbags(G, [-5.4, 0, -27], 20); cones(G, [2.2, 0, -10], 5, -2.6); tireStack(G, [-5.8, 0, -10], 3); boxes(G, [5.6, 0, -12], 30);
+  cctv(G, [4.2, 2.9, -28.2], 200); cctv(G, [-6.2, 3.2, -22], 140, -25); cylBetween([-6.2, 0, -22.3], [-6.2, 3.3, -22.3], .06, toon('#3a3a44'), G, 8);
+  sign(G, 'ห้ามหลบหนี', [-6.88, 3.0, -8], 90, { w: 1.8, h: .55, col: '#ffd23a', bg: '#c83030', txtC: '#ffffff', fs: .55, glow: false }); sign(G, 'NO RETURN', [6.88, 3.0, -14], -90, { w: 1.8, h: .55, col: '#ffd23a', bg: '#1c1c22', txtC: '#ffd23a', fs: .5, glow: false });
+  for (let x = -55; x <= 55; x += .8) mesh(new THREE.TorusGeometry(.5, .03, 4, 10), toon('#8a8e9a'), { p: [x, 46.9, -37.4], r: [0, 90, 0], parent: G, cast: false });
+  for (const x of [-3.2, 3.2]) { const g = group({ p: [x, 0, -32], parent: G }); mesh(rbox(.5, .5, .5), toon('#3a3a44'), { p: [0, .25, 0], parent: g }); mesh(new THREE.CylinderGeometry(.3, .22, .3, 12), lit('#fff4d0', 1), { p: [0, .65, 0], r: [-35, 0, 0], parent: g, cast: false }); glow(g, [0, 1.2, .6], '#fff0d0', 3.5, .4); }
+  poster(G, [-6.82, 1.6, -4], 90, '047'); }
+// ---- STREET: a lived-in neon block: noodle stall with steam, vending machines, bikes, stacked TVs, AC units, cameras, hydrant
+{ const S = STREET;
+  stall(S, [-6.6, .18, -6.5], 90); vending(S, [6.7, .18, -4.5], -90, '#d83a4a'); vending(S, [6.7, .18, -5.6], -90, '#2a7ad8'); vending(S, [-6.8, .18, -30], 90, '#3ab07a');
+  moto(S, [5.8, .18, -18], 15, '#2a5a9a'); moto(S, [5.9, .18, -19.4], -10, '#c83a3a'); moto(S, [-5.8, .18, -36], 160, '#e0b030');
+  tvStack(S, [-6.9, .18, -22], 90); tireStack(S, [6.6, .18, -24], 4); pallet(S, [6.9, .18, -32], -90, -70);
+  for (const [s, z, y] of [[-1, -3, 5.2], [1, -11, 4.6], [-1, -15, 6.4], [1, -27, 5.6], [-1, -33, 4.8], [1, -40, 6.8]]) acUnit(S, [s * 7.8, y, z], s > 0 ? -90 : 90);
+  cctv(S, [4.9, 4.4, -6], 220); cctv(S, [-4.9, 4.4, -20], 140); cctv(S, [4.9, 4.4, -34], 220);
+  { const h = group({ p: [-5.3, .18, -12.5], parent: S }); mesh(new THREE.CylinderGeometry(.14, .17, .55, 12), toon('#c83030'), { p: [0, .28, 0], parent: h }); mesh(new THREE.SphereGeometry(.15, 10, 8), toon('#c83030'), { p: [0, .58, 0], parent: h }); for (const s of [-1, 1]) mesh(new THREE.CylinderGeometry(.05, .05, .12, 8), toon('#a82828'), { p: [s * .17, .35, 0], r: [0, 0, 90], parent: h }); }
+  poster(S, [7.86, 1.7, -2.5], -90, 'ห้องเช่า'); poster(S, [-7.86, 1.7, -27], 90, 'FIGHT', '#2a2a30', '#ff4a4a'); bottles(S, [-6.2, .18, -14], 6, 4);
+  for (let i = 0; i < 5; i++) { const z = -8 - i * 9; wire(S, [-7.8, 7 + (i % 2), z], [7.8, 7.5, z - 2], 1.1); }
+  for (let i = 0; i < 6; i++) { const z = -4 - i * 8, s = i % 2 ? 1 : -1, g = group({ p: [s * 7.3, 3 + (i % 3) * .5, z], r: [0, s > 0 ? -90 : 90, 0], parent: S }); cylBetween([-.5, 0, 0], [.5, 0, 0], .015, toon('#2a2632'), g, 4);   // hanging laundry
+    ['#e8e0d0', '#5a8ac8', '#c85a5a'].forEach((c, k) => mesh(rbox(.24, .32, .01), toon(c, { side: THREE.DoubleSide }), { p: [-.3 + k * .3, -.18, 0], parent: g, cast: false })); }
+  sign(S, '←', [-7.5, 2.6, -36.5], 90, { w: .9, h: .5, col: '#2fe0ff', fs: .8 }); }
+// ---- ALLEY: cardboard bed of someone who lives here, pallets, a broken chair, bottles, AC dripping, a camera watching (red LED)
+{ const A = ALLEY;
+  pallet(A, [-1.75, 0, -2.2], 90, -75); pallet(A, [1.7, 0, -11.5], -90, -72); boxes(A, [1.3, 0, -15], 15); bottles(A, [-.8, 0, -10.5], 7, 9);
+  mesh(rbox(.8, .05, 1.8), toon('#a88a5a'), { p: [-1.45, .03, -14.5], parent: A }); mesh(rbox(.6, .25, .35), toon('#5a5a6a'), { p: [-1.45, .15, -13.8], parent: A });   // cardboard bed + rolled blanket
+  { const c = group({ p: [1.2, 0, -8.6], r: [0, 30, 75], parent: A }); mesh(rbox(.45, .05, .45), toon('#6a4a3a'), { p: [0, .45, 0], parent: c }); for (const [x, z] of [[-.2, -.2], [.2, -.2], [-.2, .2]]) cylBetween([x, 0, z], [x, .45, z], .02, toon('#4a3428'), c, 4); }   // broken chair on its side
+  acUnit(A, [1.7, 4.4, -9], -90); acUnit(A, [-1.7, 5.2, -12], 90); acUnit(A, [-1.7, 2.8, -1], 90);
+  cctv(A, [-1.75, 4.6, -10.5], 120, -30); poster(A, [-1.88, 1.6, -9.5], 90, 'หายตัว'); poster(A, [1.88, 1.7, -4], -90, 'WANTED', '#d8ccb0');
+  for (let i = 0; i < 4; i++) wire(A, [-1.9, 6 + i * .4, -2 - i * 3.5], [1.9, 6.3 + i * .3, -3.5 - i * 3.5], .5);
+  sign(A, 'BAR', [-1.88, 3.6, 2.2], 90, { w: 1.2, h: .45, col: '#ff2f6a', fs: .65 }); }
+export function propsAt(t) { CAMS.forEach((c, i) => { c.g.rotation.y = .35 * Math.sin(t * .4 + i * 1.7); c.led.visible = Math.sin(t * 6 + i) > -.2; });
+  TVS.forEach((s, i) => { const k = .55 + .45 * Math.abs(Math.sin(t * (13 + i * 3) + i)); s.material.color.setRGB(.55 * k, .65 * k, .85 * k + .1); }); }
