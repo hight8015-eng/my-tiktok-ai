@@ -84,3 +84,6 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
   fire man vs strong man guard, clash, punches, fire burst, one falls, winner stands over him, bystanders step back.
   62-71: threads to several passers-by who stop walking when touched; everyone breathes/blinks/gazes; cover = gun at head +
   red-eyed smile; redo music/SFX sync to the new picture.
+  5. (user) The camera does NOT follow/move all the time: MIX camera moves with the studied transitions (cut, blur, dis,
+     whip, sweep, push, fgwipe) so the edit feels natural and flowing - a move links nearby beats, a transition marks a
+     change of place/time/energy; vary them, never the same device twice in a row.

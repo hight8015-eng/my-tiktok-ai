@@ -348,6 +348,9 @@ If the user wants characters made in Flow from their own prompt, use the sister 
    (ref: courtroom clip - judge, pan across the room to the crowd, then over the shoulder to the accused).
 3. Motion, emotion, gesture and face must agree and look natural: every acting shot uses perform()/hold()/gaze(); no frozen poses.
 4. Narration that describes an ACTION is shown literally on screen (e.g. 'they fight for power' = a real fight).
+4b. The camera does NOT follow all the time: mix camera moves with the studied transitions (cut, blur, dis, whip, sweep,
+   push, fgwipe). A move links nearby beats; a transition marks a change of place, time or energy; never the same device
+   twice in a row; the edit must feel natural and flowing.
 5. Walk paths are checked against every prop (dumpster, crates, bags): nobody passes through objects; a walk must visibly
    travel through the frame (the camera never tracks at exactly the walk speed), arms swing.
 6. Never let a near object (dumpster, a head) fill the lower frame; never place a camera inside a wall (MIND pushes the
