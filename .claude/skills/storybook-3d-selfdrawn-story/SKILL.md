@@ -342,6 +342,14 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
   hard shadow).
 
+## Soft light, no blobs (v5.9, user: 'light should not be lumps; bright naturally, fading soft at the ends')
+- setSmoothLight(true) (engine.js) interpolates the toon ramp: lamp/neon point-light pools fade out instead of making
+  hard rings. Point lights: decay ~1.6 and a long distance so they reach zero softly.
+- Every glow texture uses an inverse-square-like falloff (1 -> .62 at 12% -> .26 at 30% -> .08 -> .02 -> 0); never a
+  linear gradient (it reads as a disc). Puddles = a dark soft wet patch + the reflected colour, both feathered
+  (RAD texture), never a solid ellipse. Reflection streaks: low opacity (~.3), feathered sides and ends.
+- A light source next to a character must not wash the body: keep its rig key small (~.15-.3) and base < 1.
+
 ## Light direction on faces (v5.8, user refs: 9 light directions on a head, anime hair shadows)
 - setRig({ dir: [x, y, z], cel: 0..1, term, shadeCol }): dir is the light direction in SCREEN space (x right, y up,
   z toward the camera). The head ball is shaded as a sphere with a hard anime terminator, and the hair/hat casts its

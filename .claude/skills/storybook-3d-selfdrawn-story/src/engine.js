@@ -40,6 +40,8 @@ export function noise3(x, y, z) { // cheap value noise 3D
 function gradTex(levels) { const d = new Uint8Array(levels.length * 4); levels.forEach((v, i) => { d.set([v, v, v, 255], i * 4); }); const t = new THREE.DataTexture(d, levels.length, 1, THREE.RGBAFormat); t.minFilter = t.magFilter = THREE.NearestFilter; t.needsUpdate = true; return t; }
 export const GRAD = gradTex([178, 232, 255]);
 export const GRAD_FLAT = gradTex([222, 255]), GRAD_2 = gradTex([196, 255]);
+/* v5.9 smooth light: interpolate the toon ramp so lamp / neon pools fade out naturally instead of hard discs (characters are sprites, unaffected) */
+export function setSmoothLight(on = true) { for (const g of [GRAD, GRAD_2]) { g.minFilter = g.magFilter = on ? THREE.LinearFilter : THREE.NearestFilter; g.needsUpdate = true; } }
 const MC = new Map();
 export function toon(color, o = {}) {
   const key = JSON.stringify([color, { ...o, grad: o.grad ? o.grad.uuid : 0 }]);

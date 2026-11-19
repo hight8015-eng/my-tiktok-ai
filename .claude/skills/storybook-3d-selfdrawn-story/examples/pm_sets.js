@@ -5,7 +5,7 @@
 //   ALLEY  narrow brick alley           [0, 0, -600]
 import { THREE, scene, toon, basic, canvasTex, mesh, rbox, group, cylBetween, rng, noise1 } from './engine.js';
 import * as Wd from './world.js';
-import { beam, beamMat, spill, streak, glowAt } from './glow.js';
+import { beam, beamMat, spill, streak, glowAt, RAD } from './glow.js';
 export const TRUCK = group({ p: [0, 0, 600], parent: scene }), GATE = group({ p: [600, 0, 0], parent: scene }), STREET = group({ p: [-600, 0, 0], parent: scene }), ALLEY = group({ p: [0, 0, -600], parent: scene });
 export const Z = {};
 const glow = (par, p, col, size, op = .6) => { const s = Wd.glowSprite(col, size, { opacity: op }); s.position.set(...p); par.add(s); return s; };
@@ -25,7 +25,9 @@ function building(par, p, w, h, d, col, seed, face = 1) { const R = rng(seed), g
     mesh(rbox(.6, .8, .04), dark ? toon(wc) : lit(wc, .9), { p: [(c + .5) * w / cols - w / 2, 1.6 + r * 1.7, face * (d / 2 + .02)], parent: g, cast: false }); }
   mesh(rbox(w + .2, .25, d + .2), toon('#221a2c'), { p: [0, h + .12, 0], parent: g });   // roof lip
   return g; }
-function puddle(par, p, r, col) { const m = mesh(new THREE.CircleGeometry(r, 20), basic(col, { transparent: true, opacity: .55 }), { p, r: [-90, 0, 0], parent: par, cast: false, recv: false }); m.scale.y = .6; m.userData.noInk = true; return m; }
+function puddle(par, p, r, col) { /* v5.9 a wet patch: darker soft base + the neon colour reflected, both feathered to nothing at the edge */
+  const d = mesh(new THREE.PlaneGeometry(r * 2.6, r * 2.6), basic('#05040a', { transparent: true, opacity: .35, map: RAD, depthWrite: false }), { p, r: [-90, 0, 0], parent: par, cast: false, recv: false }); d.scale.y = .6; d.userData.noInk = true; d.renderOrder = 2;
+  const m = mesh(new THREE.PlaneGeometry(r * 2.2, r * 2.2), basic(col, { transparent: true, opacity: .32, map: RAD, add: true, depthWrite: false }), { p: [p[0], p[1] + .005, p[2]], r: [-90, 0, 0], parent: par, cast: false, recv: false }); m.scale.y = .6; m.userData.noInk = true; m.renderOrder = 3; return m; }
 function lamp(par, p, col = '#ffcf8a') { const g = group({ p, parent: par }); cylBetween([0, 0, 0], [0, 4.2, 0], .07, toon('#2a2632'), g, 8); cylBetween([0, 4.2, 0], [.8, 4.4, 0], .05, toon('#2a2632'), g, 6);
   mesh(new THREE.ConeGeometry(.28, .3, 10, 1, true), toon('#2a2632', { side: THREE.DoubleSide }), { p: [.8, 4.3, 0], parent: g }); mesh(new THREE.SphereGeometry(.13, 10, 8), lit(col, 1.4), { p: [.8, 4.18, 0], parent: g, cast: false });
   g.userData.glow = glow(g, [.8, 4.1, 0], col, 3.2, .5); return g; }
@@ -230,7 +232,7 @@ export function propsAt(t) { CAMS.forEach((c, i) => { c.g.rotation.y = .35 * Mat
 }
 { // STREET: every sign gets a wet-road reflection streak and a colour pool; lamps get light cones; the stall glows warm
   const SIGC = ['#ff2f6a', '#2fe0ff', '#3aff8a', '#ff9a2a', '#ff2340', '#c070ff', '#ff4a3a', '#ffd23a'];
-  SIGC.forEach((c, i) => { const s = i % 2 ? 1 : -1, z = -2 - i * 7.5; streak(STREET, [s * 4.4, .03, z], 1.4, 9, c, .6); spill(STREET, [s * 6.4, .05, z], 2.2, c, .28); spill(STREET, [s * 7.82, 3.2 + (i % 3) * 1.4, z], 1.8, c, .25, [0, s > 0 ? -90 : 90, 0]); });
+  SIGC.forEach((c, i) => { const s = i % 2 ? 1 : -1, z = -2 - i * 7.5; streak(STREET, [s * 4.4, .03, z], 1.6, 9, c, .32); spill(STREET, [s * 6.4, .05, z], 2.2, c, .28); spill(STREET, [s * 7.82, 3.2 + (i % 3) * 1.4, z], 1.8, c, .25, [0, s > 0 ? -90 : 90, 0]); });
   Z.lamps.forEach((l, i) => { const sx = l.position.x + (i % 2 === 0 ? -.8 : .8); beam(STREET, [sx, 4.15, l.position.z], [sx, 0, l.position.z], 1.5, i % 2 ? '#ffcf8a' : '#9ad8ff', .3); spill(STREET, [sx, .05, l.position.z], 1.8, i % 2 ? '#ffcf8a' : '#9ad8ff', .3); });
   spill(STREET, [-5.8, .2, -6.5], 2.4, '#ff8a4a', .3);   // the noodle stall's lanterns
   [[-6.6, -11], [6.8, -27], [-7, -41]].forEach(([x, z]) => spill(STREET, [x, .05, z], 2.2, '#ff8a3a', .35));   // fire barrels
