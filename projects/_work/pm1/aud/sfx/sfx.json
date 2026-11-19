@@ -1,0 +1,2668 @@
+[
+ {
+  "n": 1,
+  "cat": "whoosh",
+  "th": "วูบ / สะบัด",
+  "file": "whoosh_01.wav",
+  "src": "Anime_Sound_Effects_02"
+ },
+ {
+  "n": 2,
+  "cat": "whoosh",
+  "th": "วูบ / สะบัด",
+  "file": "whoosh_02.wav",
+  "src": "Anime_Sound_Effects_05"
+ },
+ {
+  "n": 3,
+  "cat": "whoosh",
+  "th": "วูบ / สะบัด",
+  "file": "whoosh_03.wav",
+  "src": "Anime_Sound_Effects_06"
+ },
+ {
+  "n": 4,
+  "cat": "whoosh",
+  "th": "วูบ / สะบัด",
+  "file": "whoosh_04.wav",
+  "src": "Anime_Sound_Effects_07"
+ },
+ {
+  "n": 5,
+  "cat": "whoosh",
+  "th": "วูบ / สะบัด",
+  "file": "whoosh_05.wav",
+  "src": "Anime_Sound_Effects_08"
+ },
+ {
+  "n": 6,
+  "cat": "whoosh",
+  "th": "วูบ / สะบัด",
+  "file": "whoosh_06.wav",
+  "src": "Anime_Sound_Effects_03"
+ },
+ {
+  "n": 7,
+  "cat": "riser",
+  "th": "ลมพุ่งขึ้น + กระแทก",
+  "file": "riser_07.wav",
+  "src": "Anime_Sound_Effects_01"
+ },
+ {
+  "n": 8,
+  "cat": "wobble",
+  "th": "ดึ๋ง / สั่นเด้ง",
+  "file": "wobble_08.wav",
+  "src": "Anime_Sound_Effects_04"
+ },
+ {
+  "n": 9,
+  "cat": "wobble",
+  "th": "ดึ๋ง / สั่นเด้ง",
+  "file": "wobble_09.wav",
+  "src": "Anime_Sound_Effects_09"
+ },
+ {
+  "n": 10,
+  "cat": "hit_dramatic",
+  "th": "ตูม! ดราม่า (ก้องยาว)",
+  "file": "hit_dramatic_10.wav",
+  "src": "ad41_01"
+ },
+ {
+  "n": 11,
+  "cat": "hit_dramatic",
+  "th": "ตูม! ดราม่า (ก้องยาว)",
+  "file": "hit_dramatic_11.wav",
+  "src": "ad41_03"
+ },
+ {
+  "n": 12,
+  "cat": "drumroll",
+  "th": "รัวกลอง",
+  "file": "drumroll_12.wav",
+  "src": "ad41_02"
+ },
+ {
+  "n": 13,
+  "cat": "crash",
+  "th": "พัง / ชน",
+  "file": "crash_13.wav",
+  "src": "a85_01"
+ },
+ {
+  "n": 14,
+  "cat": "crash",
+  "th": "พัง / ชน",
+  "file": "crash_14.wav",
+  "src": "a85_02"
+ },
+ {
+  "n": 15,
+  "cat": "bang",
+  "th": "ปัง!",
+  "file": "bang_15.wav",
+  "src": "a85_03"
+ },
+ {
+  "n": 16,
+  "cat": "rattle",
+  "th": "สั่นรัว",
+  "file": "rattle_16.wav",
+  "src": "110_01"
+ },
+ {
+  "n": 17,
+  "cat": "noise",
+  "th": "เสียงซ่า / ลม",
+  "file": "noise_17.wav",
+  "src": "110_02"
+ },
+ {
+  "n": 18,
+  "cat": "noise",
+  "th": "เสียงซ่า / ลม",
+  "file": "noise_18.wav",
+  "src": "ad78_02"
+ },
+ {
+  "n": 19,
+  "cat": "bell",
+  "th": "กริ๊ง ระฆัง",
+  "file": "bell_19.wav",
+  "src": "Bell_02_01"
+ },
+ {
+  "n": 20,
+  "cat": "chime",
+  "th": "ติ๊ง! ถูกต้อง / ไอเดีย",
+  "file": "chime_20.wav",
+  "src": "Collect_answer_01"
+ },
+ {
+  "n": 21,
+  "cat": "chime",
+  "th": "ติ๊ง! ถูกต้อง / ไอเดีย",
+  "file": "chime_21.wav",
+  "src": "a08_01"
+ },
+ {
+  "n": 22,
+  "cat": "buzzer",
+  "th": "บัซเซอร์ / ผิด",
+  "file": "buzzer_22.wav",
+  "src": "a08_02"
+ },
+ {
+  "n": 23,
+  "cat": "buzzer",
+  "th": "บัซเซอร์ / ผิด",
+  "file": "buzzer_23.wav",
+  "src": "a08_03"
+ },
+ {
+  "n": 24,
+  "cat": "buzzer",
+  "th": "บัซเซอร์ / ผิด",
+  "file": "buzzer_24.wav",
+  "src": "ad78_01"
+ },
+ {
+  "n": 25,
+  "cat": "shine",
+  "th": "วิ้ง! ประกาย",
+  "file": "shine_25.wav",
+  "src": "Anime_Shine_Sound_Effect_01"
+ },
+ {
+  "n": 26,
+  "cat": "click",
+  "th": "คลิก / พิมพ์",
+  "file": "click_26.wav",
+  "src": "clicking01_01"
+ },
+ {
+  "n": 27,
+  "cat": "whistle",
+  "th": "นกหวีด / สไลด์",
+  "file": "whistle_27.wav",
+  "src": "192_01"
+ },
+ {
+  "n": 28,
+  "cat": "whistle",
+  "th": "นกหวีด / สไลด์",
+  "file": "whistle_28.wav",
+  "src": "192_02"
+ },
+ {
+  "n": 29,
+  "cat": "whistle",
+  "th": "นกหวีด / สไลด์",
+  "file": "whistle_29.wav",
+  "src": "192_03"
+ },
+ {
+  "n": 30,
+  "cat": "whistle",
+  "th": "นกหวีด / สไลด์",
+  "file": "whistle_30.wav",
+  "src": "192_04"
+ },
+ {
+  "n": 31,
+  "cat": "laugh",
+  "th": "หัวเราะ (เดา)",
+  "file": "laugh_31.wav",
+  "src": "148_01"
+ },
+ {
+  "n": 32,
+  "cat": "laugh",
+  "th": "หัวเราะ (เดา)",
+  "file": "laugh_32.wav",
+  "src": "148_02"
+ },
+ {
+  "n": 33,
+  "cat": "laugh",
+  "th": "หัวเราะ (เดา)",
+  "file": "laugh_33.wav",
+  "src": "144_01"
+ },
+ {
+  "n": 34,
+  "cat": "voice_hum",
+  "th": "อืมม / ครวญ (เดา)",
+  "file": "voice_hum_34.wav",
+  "src": "144_02"
+ },
+ {
+  "n": 35,
+  "cat": "voice_hum",
+  "th": "อืมม / ครวญ (เดา)",
+  "file": "voice_hum_35.wav",
+  "src": "144_03"
+ },
+ {
+  "n": 36,
+  "cat": "voice_hum",
+  "th": "อืมม / ครวญ (เดา)",
+  "file": "voice_hum_36.wav",
+  "src": "144_04"
+ },
+ {
+  "n": 37,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_37.wav",
+  "src": "141_01"
+ },
+ {
+  "n": 38,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_38.wav",
+  "src": "141_02"
+ },
+ {
+  "n": 39,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_39.wav",
+  "src": "141_03"
+ },
+ {
+  "n": 40,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_40.wav",
+  "src": "141_04"
+ },
+ {
+  "n": 41,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_41.wav",
+  "src": "141_05"
+ },
+ {
+  "n": 42,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_42.wav",
+  "src": "149_01"
+ },
+ {
+  "n": 43,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_43.wav",
+  "src": "149_02"
+ },
+ {
+  "n": 44,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_44.wav",
+  "src": "149_03"
+ },
+ {
+  "n": 45,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_45.wav",
+  "src": "149_04"
+ },
+ {
+  "n": 46,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_46.wav",
+  "src": "149_05"
+ },
+ {
+  "n": 47,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_47.wav",
+  "src": "cd292_01"
+ },
+ {
+  "n": 48,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_48.wav",
+  "src": "cd292_02"
+ },
+ {
+  "n": 49,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_49.wav",
+  "src": "cd292_03"
+ },
+ {
+  "n": 50,
+  "cat": "voice_react",
+  "th": "เสียงคนอุทาน (เดา)",
+  "file": "voice_react_50.wav",
+  "src": "cd292_04"
+ },
+ {
+  "n": 51,
+  "cat": "scream_long",
+  "th": "กรีดร้อง / คำราม ยาว",
+  "file": "scream_long_51.wav",
+  "src": "141_06"
+ },
+ {
+  "n": 52,
+  "cat": "punch",
+  "th": "ต่อย / ชก",
+  "file": "punch_52.wav",
+  "src": "Punches_01"
+ },
+ {
+  "n": 53,
+  "cat": "punch",
+  "th": "ต่อย / ชก",
+  "file": "punch_53.wav",
+  "src": "Punches_02"
+ },
+ {
+  "n": 54,
+  "cat": "punch",
+  "th": "ต่อย / ชก",
+  "file": "punch_54.wav",
+  "src": "Punches_03"
+ },
+ {
+  "n": 55,
+  "cat": "punch",
+  "th": "ต่อย / ชก",
+  "file": "punch_55.wav",
+  "src": "Punches_04"
+ },
+ {
+  "n": 56,
+  "cat": "punch",
+  "th": "ต่อย / ชก",
+  "file": "punch_56.wav",
+  "src": "Punches_05"
+ },
+ {
+  "n": 57,
+  "cat": "punch",
+  "th": "ต่อย / ชก",
+  "file": "punch_57.wav",
+  "src": "Punches_06"
+ },
+ {
+  "n": 58,
+  "cat": "punch",
+  "th": "ต่อย / ชก",
+  "file": "punch_58.wav",
+  "src": "Punches_07"
+ },
+ {
+  "n": 59,
+  "cat": "punch",
+  "th": "ต่อย / ชก",
+  "file": "punch_59.wav",
+  "src": "Punches_08"
+ },
+ {
+  "n": 60,
+  "cat": "explosion",
+  "th": "ระเบิด",
+  "file": "explosion_60.wav",
+  "src": "Explosion_Medium_2_01"
+ },
+ {
+  "n": 61,
+  "cat": "metal_hit",
+  "th": "โลหะกระทบ",
+  "file": "metal_hit_61.wav",
+  "src": "Metal_Hit_03_01"
+ },
+ {
+  "n": 62,
+  "cat": "gong_comic",
+  "th": "ฆ้องตลก",
+  "file": "gong_comic_62.wav",
+  "src": "Comical_Metal_Gong_01"
+ },
+ {
+  "n": 63,
+  "cat": "shimmer",
+  "th": "วิ้งเวทมนตร์ / ระยิบ",
+  "file": "shimmer_63.wav",
+  "src": "Shimmering01_01"
+ },
+ {
+  "n": 64,
+  "cat": "shimmer",
+  "th": "วิ้งเวทมนตร์ / ระยิบ",
+  "file": "shimmer_64.wav",
+  "src": "Shimmering02_01"
+ },
+ {
+  "n": 65,
+  "cat": "harp",
+  "th": "พิณ (ฝัน / ย้อนอดีต)",
+  "file": "harp_65.wav",
+  "src": "harp01_01"
+ },
+ {
+  "n": 66,
+  "cat": "harp",
+  "th": "พิณ (ฝัน / ย้อนอดีต)",
+  "file": "harp_66.wav",
+  "src": "harp06_01"
+ },
+ {
+  "n": 67,
+  "cat": "kwing",
+  "th": "กวิ้งๆ",
+  "file": "kwing_67.wav",
+  "src": "kwing_kwing_01"
+ },
+ {
+  "n": 68,
+  "cat": "horn",
+  "th": "แตรตลก / เป็ด",
+  "file": "horn_68.wav",
+  "src": "horn_duck_1_01"
+ },
+ {
+  "n": 69,
+  "cat": "horn",
+  "th": "แตรตลก / เป็ด",
+  "file": "horn_69.wav",
+  "src": "horn_duck_2_01"
+ },
+ {
+  "n": 70,
+  "cat": "horn",
+  "th": "แตรตลก / เป็ด",
+  "file": "horn_70.wav",
+  "src": "horn_3_01"
+ },
+ {
+  "n": 71,
+  "cat": "silly",
+  "th": "เสียงตลกสั้น",
+  "file": "silly_71.wav",
+  "src": "silly_1_01"
+ },
+ {
+  "n": 72,
+  "cat": "scream",
+  "th": "กรีดร้อง (ผู้ชาย)",
+  "file": "scream_72.wav",
+  "src": "Screams_Male_01_01"
+ },
+ {
+  "n": 73,
+  "cat": "applause",
+  "th": "เสียงฝูงชน / ปรบมือ",
+  "file": "applause_73.wav",
+  "src": "Filmmusik_-_Sound_Effect_01"
+ },
+ {
+  "n": 1,
+  "cat": "mboom",
+  "th": "บูม (ตุ้บหนัก เน้นมุก/หักมุม)",
+  "file": "mboom_100.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mboom",
+  "th": "บูม (ตุ้บหนัก เน้นมุก/หักมุม)",
+  "file": "mboom_101.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mboom",
+  "th": "บูม (ตุ้บหนัก เน้นมุก/หักมุม)",
+  "file": "mboom_102.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mding",
+  "th": "ติ๊ง (ไอเดีย/เฉลย)",
+  "file": "mding_103.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mding",
+  "th": "ติ๊ง (ไอเดีย/เฉลย)",
+  "file": "mding_104.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mding",
+  "th": "ติ๊ง (ไอเดีย/เฉลย)",
+  "file": "mding_105.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mding",
+  "th": "ติ๊ง (ไอเดีย/เฉลย)",
+  "file": "mding_106.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mfall",
+  "th": "ตกลง (พลาด/ผิดหวัง)",
+  "file": "mfall_107.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mfall",
+  "th": "ตกลง (พลาด/ผิดหวัง)",
+  "file": "mfall_108.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mrise",
+  "th": "ขึ้นสูง (บิลด์อัพ/ตกใจ)",
+  "file": "mrise_109.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mrise",
+  "th": "ขึ้นสูง (บิลด์อัพ/ตกใจ)",
+  "file": "mrise_110.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mrise",
+  "th": "ขึ้นสูง (บิลด์อัพ/ตกใจ)",
+  "file": "mrise_111.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mroll",
+  "th": "รัวกลอง/ต่อเนื่อง",
+  "file": "mroll_112.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mroll",
+  "th": "รัวกลอง/ต่อเนื่อง",
+  "file": "mroll_113.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mrumble",
+  "th": "กระหึ่มต่ำ (พลังมืด/ตึงเครียด)",
+  "file": "mrumble_114.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mrumble",
+  "th": "กระหึ่มต่ำ (พลังมืด/ตึงเครียด)",
+  "file": "mrumble_115.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mrumble",
+  "th": "กระหึ่มต่ำ (พลังมืด/ตึงเครียด)",
+  "file": "mrumble_116.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mrumble",
+  "th": "กระหึ่มต่ำ (พลังมืด/ตึงเครียด)",
+  "file": "mrumble_117.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mrumble",
+  "th": "กระหึ่มต่ำ (พลังมืด/ตึงเครียด)",
+  "file": "mrumble_118.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mrumble",
+  "th": "กระหึ่มต่ำ (พลังมืด/ตึงเครียด)",
+  "file": "mrumble_119.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mrumble",
+  "th": "กระหึ่มต่ำ (พลังมืด/ตึงเครียด)",
+  "file": "mrumble_120.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mrumble",
+  "th": "กระหึ่มต่ำ (พลังมืด/ตึงเครียด)",
+  "file": "mrumble_121.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_122.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_123.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_124.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_125.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_126.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_127.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_128.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_129.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_130.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_131.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_132.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_133.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_134.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_135.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_136.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_137.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_138.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_139.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_140.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_141.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_142.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_143.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_144.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_145.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_146.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_147.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_148.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_149.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_150.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_151.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_152.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_153.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_154.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_155.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_156.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_157.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_158.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_159.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mvoice",
+  "th": "เสียงพูด/เพลงมีม (ใช้เมื่อเลือกเอง)",
+  "file": "mvoice_160.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mwhoosh",
+  "th": "วูบ (สะบัด/เปลี่ยนฉาก)",
+  "file": "mwhoosh_161.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mwhoosh",
+  "th": "วูบ (สะบัด/เปลี่ยนฉาก)",
+  "file": "mwhoosh_162.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "n": 1,
+  "cat": "mwhoosh",
+  "th": "วูบ (สะบัด/เปลี่ยนฉาก)",
+  "file": "mwhoosh_163.wav",
+  "src": "meme compilation (user upload)"
+ },
+ {
+  "cat": "sword",
+  "th": "ดาบ (ชักดาบ/ฟัน)",
+  "file": "sword_n01.wav",
+  "src": "study8_clip1",
+  "label": "Sword",
+  "dur": 1.47,
+  "snr_db": 37.7,
+  "voice": "",
+  "floor_db": -30.2,
+  "n": 74
+ },
+ {
+  "cat": "sword",
+  "th": "ดาบ (ชักดาบ/ฟัน)",
+  "file": "sword_n02.wav",
+  "src": "study8_clip1",
+  "label": "Sword 2",
+  "dur": 1.6,
+  "snr_db": 20.5,
+  "voice": "",
+  "floor_db": -37.2,
+  "n": 75
+ },
+ {
+  "cat": "stomp",
+  "th": "กระทืบพื้น",
+  "file": "stomp_n01.wav",
+  "src": "study8_clip1",
+  "label": "Stomp",
+  "dur": 1.91,
+  "snr_db": 49.9,
+  "voice": "",
+  "floor_db": -71.6,
+  "n": 76
+ },
+ {
+  "cat": "hit",
+  "th": "ต่อยโดน",
+  "file": "hit_n01.wav",
+  "src": "study8_clip1",
+  "label": "Hit",
+  "dur": 2.42,
+  "snr_db": 23.1,
+  "voice": "",
+  "floor_db": -40.1,
+  "n": 77
+ },
+ {
+  "cat": "punch",
+  "th": "รัวหมัด",
+  "file": "punch_n01.wav",
+  "src": "study8_clip1",
+  "label": "Punching",
+  "dur": 0.8,
+  "snr_db": 60.5,
+  "voice": "",
+  "floor_db": -50.0,
+  "n": 78
+ },
+ {
+  "cat": "bonebreak",
+  "th": "กระดูกหัก",
+  "file": "bonebreak_n01.wav",
+  "src": "study8_clip1",
+  "label": "Breaking bones",
+  "dur": 0.41,
+  "snr_db": 180.0,
+  "voice": "",
+  "floor_db": -57.8,
+  "n": 79
+ },
+ {
+  "cat": "slash",
+  "th": "ฟัน",
+  "file": "slash_n01.wav",
+  "src": "study8_clip1",
+  "label": "Slash",
+  "dur": 1.48,
+  "snr_db": 69.6,
+  "voice": "",
+  "floor_db": -86.0,
+  "n": 80
+ },
+ {
+  "cat": "thrust",
+  "th": "แทง",
+  "file": "thrust_n01.wav",
+  "src": "study8_clip1",
+  "label": "Piercing thrust",
+  "dur": 0.76,
+  "snr_db": 37.1,
+  "voice": "",
+  "floor_db": -51.7,
+  "n": 81
+ },
+ {
+  "cat": "metal_hit",
+  "th": "โลหะกระทบ",
+  "file": "metal_hit_n01.wav",
+  "src": "study8_clip1",
+  "label": "Metal hit",
+  "dur": 0.58,
+  "snr_db": 68.2,
+  "voice": "",
+  "floor_db": -53.3,
+  "n": 82
+ },
+ {
+  "cat": "glass",
+  "th": "กระจกแตก",
+  "file": "glass_n01.wav",
+  "src": "study8_clip1",
+  "label": "Broken glass",
+  "dur": 1.02,
+  "snr_db": 58.5,
+  "voice": "",
+  "floor_db": -50.9,
+  "n": 83
+ },
+ {
+  "cat": "reverse_crash",
+  "th": "ดูดกลับ-ระเบิด",
+  "file": "reverse_crash_n01.wav",
+  "src": "study8_clip1",
+  "label": "Reverse crash",
+  "dur": 3.2,
+  "snr_db": 29.7,
+  "voice": "",
+  "floor_db": -41.2,
+  "n": 84
+ },
+ {
+  "cat": "meme_fah",
+  "th": "ฟาาาา (มีม)",
+  "file": "meme_fah_n01.wav",
+  "src": "study8_clip4",
+  "label": "Fahhh",
+  "dur": 0.25,
+  "snr_db": 27.2,
+  "voice": "",
+  "floor_db": -30.7,
+  "note": "narrated clip: cut between words, may hold a faint voice tail; meme-ish, use sparingly",
+  "n": 85
+ },
+ {
+  "cat": "meme_core",
+  "th": "คอร์ (มีม)",
+  "file": "meme_core_n01.wav",
+  "src": "study8_clip4",
+  "label": "Core",
+  "dur": 0.94,
+  "snr_db": 35.5,
+  "voice": "",
+  "floor_db": -56.0,
+  "note": "narrated clip: cut between words, may hold a faint voice tail; meme-ish, use sparingly",
+  "n": 86
+ },
+ {
+  "cat": "bell_doom",
+  "th": "ระฆังมรณะ",
+  "file": "bell_doom_n01.wav",
+  "src": "study8_clip4",
+  "label": "Undertaker bell",
+  "dur": 1.0,
+  "snr_db": 31.7,
+  "voice": "",
+  "floor_db": -51.3,
+  "note": "narrated clip: cut between words, may hold a faint voice tail; meme-ish, use sparingly",
+  "n": 87
+ },
+ {
+  "cat": "bass_drop",
+  "th": "เบสดรอป",
+  "file": "bass_drop_n01.wav",
+  "src": "study8_clip4",
+  "label": "Bass drop",
+  "dur": 1.18,
+  "snr_db": 20.6,
+  "voice": "",
+  "floor_db": -49.2,
+  "note": "narrated clip: cut between words, may hold a faint voice tail; meme-ish, use sparingly",
+  "n": 88
+ },
+ {
+  "cat": "timer",
+  "th": "นาฬิกาบอมบ์",
+  "file": "timer_n01.wav",
+  "src": "study8_clip4",
+  "label": "Bomb timer",
+  "dur": 0.92,
+  "snr_db": 27.2,
+  "voice": "",
+  "floor_db": -40.7,
+  "note": "narrated clip: cut between words, may hold a faint voice tail; meme-ish, use sparingly",
+  "n": 89
+ },
+ {
+  "cat": "meme_thug",
+  "th": "Thug life (มีม)",
+  "file": "meme_thug_n01.wav",
+  "src": "study8_clip4",
+  "label": "Thug life",
+  "dur": 1.9,
+  "snr_db": 15.0,
+  "voice": "",
+  "floor_db": -36.5,
+  "note": "narrated clip: cut between words, may hold a faint voice tail; meme-ish, use sparingly",
+  "n": 90
+ },
+ {
+  "cat": "vine_boom",
+  "th": "Vine boom",
+  "file": "vine_boom_n01.wav",
+  "src": "study8_clip4",
+  "label": "Dramatic vine",
+  "dur": 0.96,
+  "snr_db": 12.8,
+  "voice": "",
+  "floor_db": -17.7,
+  "note": "narrated clip: cut between words, may hold a faint voice tail; meme-ish, use sparingly",
+  "n": 91
+ },
+ {
+  "cat": "violin_screech",
+  "th": "ไวโอลินแหลม (ตกใจ)",
+  "file": "violin_screech_n01.wav",
+  "src": "study8_clip4",
+  "label": "Violin screech",
+  "dur": 1.84,
+  "snr_db": 22.2,
+  "voice": "",
+  "floor_db": -32.3,
+  "note": "narrated clip: cut between words, may hold a faint voice tail; meme-ish, use sparingly",
+  "n": 92
+ },
+ {
+  "cat": "imposter",
+  "th": "Imposter (มีม)",
+  "file": "imposter_n01.wav",
+  "src": "study8_clip4",
+  "label": "Imposter",
+  "dur": 1.58,
+  "snr_db": 20.8,
+  "voice": "",
+  "floor_db": -37.8,
+  "note": "narrated clip: cut between words, may hold a faint voice tail; meme-ish, use sparingly",
+  "n": 93
+ },
+ {
+  "cat": "cartoon_bloop",
+  "th": "บลูป การ์ตูน",
+  "file": "cartoon_bloop_n01.wav",
+  "src": "study8_clip5",
+  "label": "Bloop cartoon",
+  "dur": 0.2,
+  "snr_db": 81.4,
+  "voice": "",
+  "floor_db": -67.9,
+  "n": 94
+ },
+ {
+  "cat": "message",
+  "th": "ข้อความเด้ง",
+  "file": "message_n01.wav",
+  "src": "study8_clip5",
+  "label": "Message",
+  "dur": 0.57,
+  "snr_db": 76.6,
+  "voice": "",
+  "floor_db": -54.7,
+  "n": 95
+ },
+ {
+  "cat": "censor",
+  "th": "ตี๊ด เซ็นเซอร์",
+  "file": "censor_n01.wav",
+  "src": "study8_clip5",
+  "label": "Censor",
+  "dur": 0.29,
+  "snr_db": 88.8,
+  "voice": "",
+  "floor_db": -54.4,
+  "n": 96
+ },
+ {
+  "cat": "cash",
+  "th": "เงินเข้า ติ๊ง",
+  "file": "cash_n01.wav",
+  "src": "study8_clip5",
+  "label": "Cash ting",
+  "dur": 1.0,
+  "snr_db": 55.3,
+  "voice": "",
+  "floor_db": -56.2,
+  "n": 97
+ },
+ {
+  "cat": "click",
+  "th": "คลิก",
+  "file": "click_n01.wav",
+  "src": "study8_clip5",
+  "label": "Click",
+  "dur": 0.17,
+  "snr_db": 83.5,
+  "voice": "",
+  "floor_db": -60.3,
+  "n": 98
+ },
+ {
+  "cat": "whoosh",
+  "th": "วูบ",
+  "file": "whoosh_n01.wav",
+  "src": "study8_clip5",
+  "label": "Rake swing whoosh",
+  "dur": 0.65,
+  "snr_db": 76.1,
+  "voice": "",
+  "floor_db": -49.3,
+  "n": 99
+ },
+ {
+  "cat": "suspense_hit",
+  "th": "ตึ้ง ระทึก",
+  "file": "suspense_hit_n01.wav",
+  "src": "study8_clip5",
+  "label": "Sudden suspense",
+  "dur": 1.05,
+  "snr_db": 60.5,
+  "voice": "",
+  "floor_db": -49.1,
+  "n": 100
+ },
+ {
+  "cat": "whoosh",
+  "th": "วูบ",
+  "file": "whoosh_n02.wav",
+  "src": "study8_clip5",
+  "label": "Short whoosh",
+  "dur": 0.67,
+  "snr_db": 78.2,
+  "voice": "",
+  "floor_db": -50.8,
+  "n": 101
+ },
+ {
+  "cat": "counting",
+  "th": "นับ ติ๊ก",
+  "file": "counting_n01.wav",
+  "src": "study8_clip5",
+  "label": "Counting",
+  "dur": 1.22,
+  "snr_db": 20.3,
+  "voice": "",
+  "floor_db": -26.5,
+  "n": 102
+ },
+ {
+  "cat": "paper",
+  "th": "กระดาษ",
+  "file": "paper_n01.wav",
+  "src": "study8_clip5",
+  "label": "Paper ripping",
+  "dur": 0.7,
+  "snr_db": 42.1,
+  "voice": "",
+  "floor_db": -64.4,
+  "n": 103
+ },
+ {
+  "cat": "riser",
+  "th": "ไต่ระดับ",
+  "file": "riser_n01.wav",
+  "src": "study8_clip5",
+  "label": "Riser 1",
+  "dur": 1.1,
+  "snr_db": 61.6,
+  "voice": "",
+  "floor_db": -67.5,
+  "n": 104
+ },
+ {
+  "cat": "heavy_hit",
+  "th": "ของหนักกระแทก",
+  "file": "heavy_hit_n01.wav",
+  "src": "study8_clip5",
+  "label": "Heavy object hit",
+  "dur": 1.02,
+  "snr_db": 69.4,
+  "voice": "",
+  "floor_db": -46.9,
+  "n": 105
+ },
+ {
+  "cat": "boom",
+  "th": "บูม",
+  "file": "boom_n01.wav",
+  "src": "study8_clip5",
+  "label": "Boom",
+  "dur": 1.97,
+  "snr_db": 18.6,
+  "voice": "",
+  "floor_db": -33.8,
+  "n": 106
+ },
+ {
+  "cat": "cork",
+  "th": "จุกขวด ป๊อก",
+  "file": "cork_n01.wav",
+  "src": "study8_clip5",
+  "label": "Bottle cork",
+  "dur": 0.43,
+  "snr_db": 79.0,
+  "voice": "",
+  "floor_db": -90.3,
+  "n": 107
+ },
+ {
+  "cat": "energy_shot",
+  "th": "ยิงแสง/พลัง",
+  "file": "energy_shot_n01.wav",
+  "src": "study8_clip5",
+  "label": "Shot light energy",
+  "dur": 1.62,
+  "snr_db": 41.3,
+  "voice": "",
+  "floor_db": -48.7,
+  "n": 108
+ },
+ {
+  "cat": "riser",
+  "th": "ไต่ระดับ",
+  "file": "riser_n02.wav",
+  "src": "study8_clip5",
+  "label": "Riser 2",
+  "dur": 2.17,
+  "snr_db": 40.6,
+  "voice": "",
+  "floor_db": -60.7,
+  "n": 109
+ },
+ {
+  "cat": "whoosh_soft",
+  "th": "วูบนุ่ม",
+  "file": "whoosh_soft_n01.wav",
+  "src": "study8_clip6",
+  "label": "Glide",
+  "dur": 0.74,
+  "snr_db": 76.2,
+  "voice": "",
+  "floor_db": -51.1,
+  "n": 110
+ },
+ {
+  "cat": "zoom",
+  "th": "ซูมยาว",
+  "file": "zoom_n01.wav",
+  "src": "study8_clip6",
+  "label": "Long zoom",
+  "dur": 1.08,
+  "snr_db": 42.9,
+  "voice": "",
+  "floor_db": -48.6,
+  "n": 111
+ },
+ {
+  "cat": "swoosh",
+  "th": "สวูช",
+  "file": "swoosh_n01.wav",
+  "src": "study8_clip6",
+  "label": "Swoosh",
+  "dur": 1.12,
+  "snr_db": 32.6,
+  "voice": "",
+  "floor_db": -39.2,
+  "n": 112
+ },
+ {
+  "cat": "whip_pan",
+  "th": "วิปแพน (เปลี่ยนฉาก)",
+  "file": "whip_pan_n01.wav",
+  "src": "study8_clip6",
+  "label": "Whip pan",
+  "dur": 2.96,
+  "snr_db": 85.0,
+  "voice": "",
+  "floor_db": -180.0,
+  "n": 113
+ },
+ {
+  "cat": "whoosh_breath",
+  "th": "วูบลมหายใจ",
+  "file": "whoosh_breath_n01.wav",
+  "src": "study8_clip6",
+  "label": "Breath whoosh",
+  "dur": 1.92,
+  "snr_db": 60.5,
+  "voice": "",
+  "floor_db": -52.2,
+  "n": 114
+ },
+ {
+  "cat": "swoosh",
+  "th": "สวูช",
+  "file": "swoosh_n02.wav",
+  "src": "study8_clip6",
+  "label": "Delayed swoosh",
+  "dur": 1.28,
+  "snr_db": 176.4,
+  "voice": "",
+  "floor_db": -47.5,
+  "n": 115
+ },
+ {
+  "cat": "swish",
+  "th": "สะบัดเร็ว",
+  "file": "swish_n01.wav",
+  "src": "study8_clip6",
+  "label": "Fast swish",
+  "dur": 0.21,
+  "snr_db": 176.7,
+  "voice": "",
+  "floor_db": -38.9,
+  "n": 116
+ },
+ {
+  "cat": "whip",
+  "th": "แส้",
+  "file": "whip_n01.wav",
+  "src": "study8_clip6",
+  "label": "Loud whip",
+  "dur": 0.92,
+  "snr_db": 176.9,
+  "voice": "",
+  "floor_db": -180.0,
+  "n": 117
+ },
+ {
+  "cat": "swoosh",
+  "th": "สวูช",
+  "file": "swoosh_n03.wav",
+  "src": "study8_clip6",
+  "label": "Standard swoosh",
+  "dur": 1.02,
+  "snr_db": 83.0,
+  "voice": "",
+  "floor_db": -35.3,
+  "n": 118
+ },
+ {
+  "cat": "whip",
+  "th": "แส้",
+  "file": "whip_n02.wav",
+  "src": "study8_clip6",
+  "label": "Standard whip",
+  "dur": 0.98,
+  "snr_db": 98.0,
+  "voice": "",
+  "floor_db": -180.0,
+  "n": 119
+ },
+ {
+  "cat": "whoosh_trail",
+  "th": "วูบหางยาว",
+  "file": "whoosh_trail_n01.wav",
+  "src": "study8_clip6",
+  "label": "Trail swoosh",
+  "dur": 2.2,
+  "snr_db": 58.2,
+  "voice": "",
+  "floor_db": -50.3,
+  "n": 120
+ },
+ {
+  "cat": "paper",
+  "th": "กระดาษ",
+  "file": "paper_n02.wav",
+  "src": "study8_clip7",
+  "label": "Tear the paper",
+  "dur": 0.59,
+  "snr_db": 56.6,
+  "voice": "",
+  "floor_db": -54.0,
+  "n": 121
+ },
+ {
+  "cat": "shutter",
+  "th": "ชัตเตอร์",
+  "file": "shutter_n01.wav",
+  "src": "study8_clip7",
+  "label": "Camera shutter",
+  "dur": 0.19,
+  "snr_db": 177.9,
+  "voice": "",
+  "floor_db": -58.9,
+  "n": 122
+ },
+ {
+  "cat": "film_roll",
+  "th": "ฟิล์มหมุน",
+  "file": "film_roll_n01.wav",
+  "src": "study8_clip7",
+  "label": "Film rolling",
+  "dur": 2.47,
+  "snr_db": 36.6,
+  "voice": "",
+  "floor_db": -40.8,
+  "n": 123
+ },
+ {
+  "cat": "camera_flash",
+  "th": "แฟลช",
+  "file": "camera_flash_n01.wav",
+  "src": "study8_clip7",
+  "label": "Camera flash",
+  "dur": 1.31,
+  "snr_db": 35.2,
+  "voice": "",
+  "floor_db": -48.5,
+  "n": 124
+ },
+ {
+  "cat": "draw_line",
+  "th": "ลากเส้น",
+  "file": "draw_line_n01.wav",
+  "src": "study8_clip7",
+  "label": "Make a line",
+  "dur": 0.6,
+  "snr_db": 84.9,
+  "voice": "",
+  "floor_db": -180.0,
+  "n": 125
+ },
+ {
+  "cat": "draw_circle",
+  "th": "วาดวงกลม",
+  "file": "draw_circle_n01.wav",
+  "src": "study8_clip7",
+  "label": "Make a circle",
+  "dur": 0.36,
+  "snr_db": 89.0,
+  "voice": "",
+  "floor_db": -46.8,
+  "n": 126
+ },
+ {
+  "cat": "paper",
+  "th": "กระดาษ",
+  "file": "paper_n03.wav",
+  "src": "study8_clip7",
+  "label": "Flip paper",
+  "dur": 0.49,
+  "snr_db": 76.6,
+  "voice": "",
+  "floor_db": -44.5,
+  "n": 127
+ },
+ {
+  "cat": "paper",
+  "th": "กระดาษ",
+  "file": "paper_n04.wav",
+  "src": "study8_clip7",
+  "label": "Crumpled paper",
+  "dur": 2.86,
+  "snr_db": 43.4,
+  "voice": "",
+  "floor_db": -55.9,
+  "n": 128
+ },
+ {
+  "cat": "click",
+  "th": "คลิก",
+  "file": "click_n02.wav",
+  "src": "study8_clip7",
+  "label": "Mouse click",
+  "dur": 0.59,
+  "snr_db": 93.1,
+  "voice": "",
+  "floor_db": -180.0,
+  "n": 129
+ },
+ {
+  "cat": "boom",
+  "th": "บูม",
+  "file": "boom_n02.wav",
+  "src": "study8_clip7",
+  "label": "Movie boom",
+  "dur": 3.76,
+  "snr_db": 33.5,
+  "voice": "",
+  "floor_db": -47.1,
+  "n": 130
+ },
+ {
+  "cat": "film_roll",
+  "th": "ฟิล์มหมุน",
+  "file": "film_roll_n02.wav",
+  "src": "study8_clip8",
+  "label": "Film projector",
+  "dur": 1.26,
+  "snr_db": 31.8,
+  "voice": "",
+  "floor_db": -39.8,
+  "n": 131
+ },
+ {
+  "cat": "riser",
+  "th": "ไต่ระดับ",
+  "file": "riser_n03.wav",
+  "src": "study8_clip8",
+  "label": "Glass riser",
+  "dur": 2.85,
+  "snr_db": 32.3,
+  "voice": "",
+  "floor_db": -48.2,
+  "n": 132
+ },
+ {
+  "cat": "reverse_whoosh",
+  "th": "วูบดูดกลับ",
+  "file": "reverse_whoosh_n01.wav",
+  "src": "study8_clip8",
+  "label": "Reverse whoosh",
+  "dur": 2.1,
+  "snr_db": 24.9,
+  "voice": "",
+  "floor_db": -44.6,
+  "n": 133
+ },
+ {
+  "cat": "riser_tension",
+  "th": "ไต่ระดับ ตึงเครียด",
+  "file": "riser_tension_n01.wav",
+  "src": "study8_clip8",
+  "label": "Tension riser",
+  "dur": 7.0,
+  "snr_db": 24.5,
+  "voice": "",
+  "floor_db": -38.2,
+  "n": 134
+ },
+ {
+  "cat": "typewriter",
+  "th": "พิมพ์ดีด",
+  "file": "typewriter_n01.wav",
+  "src": "study8_clip8",
+  "label": "Typewriter",
+  "dur": 0.41,
+  "snr_db": 60.1,
+  "voice": "",
+  "floor_db": -55.4,
+  "n": 135
+ },
+ {
+  "cat": "cloth",
+  "th": "ผ้าสะบัด",
+  "file": "cloth_n01.wav",
+  "src": "study8_clip2",
+  "label": "KNY cloth",
+  "dur": 0.28,
+  "snr_db": 26.2,
+  "voice": "",
+  "floor_db": -39.6,
+  "n": 136
+ },
+ {
+  "cat": "cloth",
+  "th": "ผ้าสะบัด",
+  "file": "cloth_n02.wav",
+  "src": "study8_clip2",
+  "label": "KNY grip",
+  "dur": 0.36,
+  "snr_db": 33.1,
+  "voice": "",
+  "floor_db": -48.2,
+  "n": 137
+ },
+ {
+  "cat": "hit",
+  "th": "ต่อยโดน",
+  "file": "hit_n02.wav",
+  "src": "study8_clip2",
+  "label": "KNY strike",
+  "dur": 0.31,
+  "snr_db": 61.9,
+  "voice": "",
+  "floor_db": -51.7,
+  "n": 138
+ },
+ {
+  "cat": "clash",
+  "th": "ดาบปะทะ",
+  "file": "clash_n01.wav",
+  "src": "study8_clip2",
+  "label": "KNY clash",
+  "dur": 0.31,
+  "snr_db": 165.2,
+  "voice": "",
+  "floor_db": -58.4,
+  "n": 139
+ },
+ {
+  "cat": "clash",
+  "th": "ดาบปะทะ",
+  "file": "clash_n02.wav",
+  "src": "study8_clip2",
+  "label": "KNY clash 2",
+  "dur": 0.3,
+  "snr_db": 165.5,
+  "voice": "",
+  "floor_db": -43.5,
+  "n": 140
+ },
+ {
+  "cat": "slash",
+  "th": "ฟัน",
+  "file": "slash_n02.wav",
+  "src": "study8_clip2",
+  "label": "KNY kick slash",
+  "dur": 0.79,
+  "snr_db": 41.4,
+  "voice": "",
+  "floor_db": -51.4,
+  "n": 141
+ },
+ {
+  "cat": "sword",
+  "th": "ดาบ (ชักดาบ/ฟัน)",
+  "file": "sword_n03.wav",
+  "src": "study8_clip2",
+  "label": "KNY sword swing",
+  "dur": 1.06,
+  "snr_db": 40.9,
+  "voice": "",
+  "floor_db": -48.0,
+  "n": 142
+ },
+ {
+  "cat": "clash",
+  "th": "ดาบปะทะ",
+  "file": "clash_n03.wav",
+  "src": "study8_clip2",
+  "label": "KNY clash 3",
+  "dur": 0.51,
+  "snr_db": 40.3,
+  "voice": "",
+  "floor_db": -52.4,
+  "n": 143
+ },
+ {
+  "cat": "slash",
+  "th": "ฟัน",
+  "file": "slash_n03.wav",
+  "src": "study8_clip2",
+  "label": "KNY slash",
+  "dur": 0.99,
+  "snr_db": 31.3,
+  "voice": "",
+  "floor_db": -48.9,
+  "n": 144
+ },
+ {
+  "cat": "clash",
+  "th": "ดาบปะทะ",
+  "file": "clash_n04.wav",
+  "src": "study8_clip2",
+  "label": "KNY spark clash",
+  "dur": 0.43,
+  "snr_db": 44.7,
+  "voice": "",
+  "floor_db": -49.0,
+  "n": 145
+ },
+ {
+  "cat": "slash",
+  "th": "ฟัน",
+  "file": "slash_n04.wav",
+  "src": "study8_clip2",
+  "label": "KNY slash sparks",
+  "dur": 2.32,
+  "snr_db": 35.3,
+  "voice": "",
+  "floor_db": -53.3,
+  "n": 146
+ },
+ {
+  "cat": "fire_burst",
+  "th": "ไฟพุ่ง",
+  "file": "fire_burst_n01.wav",
+  "src": "study8_clip2",
+  "label": "KNY fire burst",
+  "dur": 0.41,
+  "snr_db": 46.5,
+  "voice": "",
+  "floor_db": -54.3,
+  "n": 147
+ },
+ {
+  "cat": "fire_ignite",
+  "th": "ไฟลุก",
+  "file": "fire_ignite_n01.wav",
+  "src": "study8_clip2",
+  "label": "KNY flame sword",
+  "dur": 1.72,
+  "snr_db": 41.3,
+  "voice": "",
+  "floor_db": -56.9,
+  "n": 148
+ },
+ {
+  "cat": "fight_hit",
+  "th": "ตีกัน (ตัวก้าน)",
+  "file": "fight_hit_n01.wav",
+  "src": "study8_clip3",
+  "label": "Stick fight hit 1",
+  "dur": 0.92,
+  "snr_db": 20.0,
+  "voice": "",
+  "floor_db": -29.8,
+  "note": "from a full fight mix: other hits overlap, use only as a reference / quiet layer",
+  "n": 149
+ },
+ {
+  "cat": "fight_hit",
+  "th": "ตีกัน (ตัวก้าน)",
+  "file": "fight_hit_n02.wav",
+  "src": "study8_clip3",
+  "label": "Stick fight hit 2",
+  "dur": 0.67,
+  "snr_db": 18.9,
+  "voice": "",
+  "floor_db": -26.9,
+  "note": "from a full fight mix: other hits overlap, use only as a reference / quiet layer",
+  "n": 150
+ },
+ {
+  "cat": "fight_hit",
+  "th": "ตีกัน (ตัวก้าน)",
+  "file": "fight_hit_n03.wav",
+  "src": "study8_clip3",
+  "label": "Stick fight hit 3",
+  "dur": 0.39,
+  "snr_db": 17.0,
+  "voice": "",
+  "floor_db": -22.7,
+  "note": "from a full fight mix: other hits overlap, use only as a reference / quiet layer",
+  "n": 151
+ },
+ {
+  "cat": "fight_hit",
+  "th": "ตีกัน (ตัวก้าน)",
+  "file": "fight_hit_n04.wav",
+  "src": "study8_clip3",
+  "label": "Stick fight hit 4",
+  "dur": 0.53,
+  "snr_db": 19.8,
+  "voice": "",
+  "floor_db": -24.1,
+  "note": "from a full fight mix: other hits overlap, use only as a reference / quiet layer",
+  "n": 152
+ },
+ {
+  "cat": "fight_hit",
+  "th": "ตีกัน (ตัวก้าน)",
+  "file": "fight_hit_n05.wav",
+  "src": "study8_clip3",
+  "label": "Stick fight hit 5",
+  "dur": 0.37,
+  "snr_db": 9.5,
+  "voice": "",
+  "floor_db": -50.6,
+  "note": "from a full fight mix: other hits overlap, use only as a reference / quiet layer",
+  "n": 153
+ },
+ {
+  "cat": "fight_hit",
+  "th": "ตีกัน (ตัวก้าน)",
+  "file": "fight_hit_n06.wav",
+  "src": "study8_clip3",
+  "label": "Stick fight hit 6",
+  "dur": 0.54,
+  "snr_db": 35.7,
+  "voice": "",
+  "floor_db": -51.4,
+  "note": "from a full fight mix: other hits overlap, use only as a reference / quiet layer",
+  "n": 154
+ },
+ {
+  "n": 155,
+  "cat": "amb_rain",
+  "th": "ฝนตก (บรรยากาศ)",
+  "file": "amb_rain_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) ambience-rain-03",
+  "dur": 10.0,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 156,
+  "cat": "crowd_angry",
+  "th": "ฝูงชนโกรธ",
+  "file": "crowd_angry_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) angry-crowd-01",
+  "dur": 5.8,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 157,
+  "cat": "body_fall",
+  "th": "คนล้มกระแทกพื้น",
+  "file": "body_fall_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) body-fall-01",
+  "dur": 0.76,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 158,
+  "cat": "step_metal",
+  "th": "ก้าวบนแผ่นเหล็ก",
+  "file": "step_metal_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) boot-step-on-metal-plate-01",
+  "dur": 0.94,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 159,
+  "cat": "crowd",
+  "th": "เสียงคนพลุกพล่าน",
+  "file": "crowd_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) busy-market-crowd-murmur-walla-01",
+  "dur": 12.0,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 160,
+  "cat": "cctv",
+  "th": "กล้องวงจรปิดหมุน/โฟกัส",
+  "file": "cctv_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) camera-focus-motor-01",
+  "dur": 1.59,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 161,
+  "cat": "gun_click",
+  "th": "คลิกโลหะ (ง้างปืน)",
+  "file": "gun_click_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) carabiner-gate-click-01",
+  "dur": 1.34,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 162,
+  "cat": "boom",
+  "th": "บูมหนัง",
+  "file": "boom_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) cinematic-boom-01",
+  "dur": 2.76,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 163,
+  "cat": "computer",
+  "th": "คอมประมวลผล",
+  "file": "computer_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) data-processing-01",
+  "dur": 2.78,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 164,
+  "cat": "amb_fire",
+  "th": "ไฟปะทุ (ถังไฟ)",
+  "file": "amb_fire_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) distant-bonfire-fire-crackling-01",
+  "dur": 3.55,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 165,
+  "cat": "door",
+  "th": "ประตูปิด",
+  "file": "door_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) door-close-01",
+  "dur": 0.52,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 166,
+  "cat": "door_creak",
+  "th": "ประตูเอี๊ยด",
+  "file": "door_creak_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) door-creak-01",
+  "dur": 0.49,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 167,
+  "cat": "door_lock",
+  "th": "ล็อกประตู",
+  "file": "door_lock_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) door-lock-01",
+  "dur": 0.33,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 168,
+  "cat": "siren",
+  "th": "ไซเรน",
+  "file": "siren_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) dub-siren-01",
+  "dur": 3.1,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 169,
+  "cat": "meme_dundun",
+  "th": "ดัน ดัน ดั๊น (มีม)",
+  "file": "meme_dundun_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) dun-dun-dun-01",
+  "dur": 2.99,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 170,
+  "cat": "energy",
+  "th": "พลังระเบิด",
+  "file": "energy_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) energy-burst-01",
+  "dur": 1.33,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 171,
+  "cat": "neon_hum",
+  "th": "ไฟนีออนหึ่ง",
+  "file": "neon_hum_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) fire-electric-hum-39",
+  "dur": 6.0,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 172,
+  "cat": "fire_burst",
+  "th": "ไฟพุ่ง",
+  "file": "fire_burst_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) fire-electric-whoosh-flame-36",
+  "dur": 4.68,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 173,
+  "cat": "zap",
+  "th": "ไฟฟ้าช็อต",
+  "file": "zap_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) fire-electric-zap-36",
+  "dur": 5.57,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 174,
+  "cat": "steps",
+  "th": "ฝีเท้าพื้นปูน",
+  "file": "steps_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) footsteps-concrete-03",
+  "dur": 2.78,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 175,
+  "cat": "glass_crack",
+  "th": "กระจกร้าว",
+  "file": "glass_crack_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) glass-crack-41",
+  "dur": 1.0,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 176,
+  "cat": "glass",
+  "th": "กระจกแตก",
+  "file": "glass_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) glass-shatter-01",
+  "dur": 0.62,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 177,
+  "cat": "drone_dark",
+  "th": "โดรนมืด (บรรยากาศสยอง)",
+  "file": "drone_dark_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) hollow-metallic-dark-horror-drone-01",
+  "dur": 6.0,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 178,
+  "cat": "creak_horror",
+  "th": "เอี๊ยดสยอง",
+  "file": "creak_horror_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) horror-creak-17",
+  "dur": 8.37,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 179,
+  "cat": "heartbeat",
+  "th": "หัวใจเต้น",
+  "file": "heartbeat_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) horror-heartbeat-34",
+  "dur": 10.17,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 180,
+  "cat": "whisper_wind",
+  "th": "ลมกระซิบ",
+  "file": "whisper_wind_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) horror-wind-whisper-04",
+  "dur": 4.64,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 181,
+  "cat": "crate_break",
+  "th": "ลังไม้แตก",
+  "file": "crate_break_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) impact-crate-break-08",
+  "dur": 0.94,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 182,
+  "cat": "heavy_hit",
+  "th": "กระแทกหนัก",
+  "file": "heavy_hit_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) impact-slam-35",
+  "dur": 0.18,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 183,
+  "cat": "gate_iron",
+  "th": "ประตูเหล็กใหญ่",
+  "file": "gate_iron_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) iron-gate-01",
+  "dur": 1.17,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 184,
+  "cat": "keys",
+  "th": "พวงกุญแจ",
+  "file": "keys_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) keys-jingling-01",
+  "dur": 2.05,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 185,
+  "cat": "knife",
+  "th": "แทงมีด",
+  "file": "knife_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) knife-stab-01",
+  "dur": 0.3,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 186,
+  "cat": "amb_lab",
+  "th": "บรรยากาศห้องแล็บ",
+  "file": "amb_lab_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) laboratory-ambience-01",
+  "dur": 3.81,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 187,
+  "cat": "lighter",
+  "th": "จุดไฟแช็ก",
+  "file": "lighter_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) lighter-flick-01",
+  "dur": 0.43,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 188,
+  "cat": "reveal",
+  "th": "เปิดเผย/โลโก้",
+  "file": "reveal_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) logo-reveal-01",
+  "dur": 2.58,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 189,
+  "cat": "march",
+  "th": "เดินแถว",
+  "file": "march_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) marching-footsteps-01",
+  "dur": 5.54,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 190,
+  "cat": "match",
+  "th": "ขีดไม้ขีด",
+  "file": "match_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) match-strike-01",
+  "dur": 2.22,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 191,
+  "cat": "lever",
+  "th": "คันโยก",
+  "file": "lever_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) mechanical-lever-36",
+  "dur": 3.38,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 192,
+  "cat": "siren",
+  "th": "ไซเรน",
+  "file": "siren_m02.wav",
+  "src": "sfxmint CC0 (AI-generated) mechanical-siren-02",
+  "dur": 5.13,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 193,
+  "cat": "amb_night",
+  "th": "บรรยากาศกลางคืน",
+  "file": "amb_night_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) night-ambience-01",
+  "dur": 17.8,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 194,
+  "cat": "shutter",
+  "th": "ชัตเตอร์",
+  "file": "shutter_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) office-camera-08",
+  "dur": 0.16,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 195,
+  "cat": "door_lock_e",
+  "th": "ล็อกประตูไฟฟ้า",
+  "file": "door_lock_e_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) owner-continuous-20260922-electronic-door-lock",
+  "dur": 0.85,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 196,
+  "cat": "energy",
+  "th": "พลังเต้นเป็นจังหวะ",
+  "file": "energy_m02.wav",
+  "src": "sfxmint CC0 (AI-generated) owner-continuous-20260922-energy-pulse",
+  "dur": 0.73,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 197,
+  "cat": "pa_feedback",
+  "th": "ลำโพงหอน",
+  "file": "pa_feedback_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) pa-feedback-01",
+  "dur": 1.63,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 198,
+  "cat": "radio",
+  "th": "วิทยุจับคลื่น",
+  "file": "radio_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) radio-carrier-lock-01",
+  "dur": 3.76,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 199,
+  "cat": "suspense_hit",
+  "th": "ตึ้ง เปิดเผย",
+  "file": "suspense_hit_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) reveal-impact-01",
+  "dur": 1.12,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 200,
+  "cat": "rock_crumble",
+  "th": "หินถล่ม",
+  "file": "rock_crumble_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) rock-crumbling-01",
+  "dur": 2.33,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 201,
+  "cat": "scan",
+  "th": "สแกน",
+  "file": "scan_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) sci-fi-scan-01",
+  "dur": 1.48,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 202,
+  "cat": "ui_popup",
+  "th": "หน้าต่างเด้ง",
+  "file": "ui_popup_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) short-ui-modal-03",
+  "dur": 1.09,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 203,
+  "cat": "hit_video",
+  "th": "ตึ้ง (คลิปสั้น)",
+  "file": "hit_video_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) short-video-impact-01",
+  "dur": 0.6,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 204,
+  "cat": "whoosh",
+  "th": "วูบ",
+  "file": "whoosh_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) short-video-whoosh-01",
+  "dur": 0.46,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 205,
+  "cat": "gunshot",
+  "th": "ยิงปืน (ลูกซอง)",
+  "file": "gunshot_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) shotgun-01",
+  "dur": 1.21,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 206,
+  "cat": "scrape_metal",
+  "th": "โลหะขูด",
+  "file": "scrape_metal_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) steel-spike-scrape-01",
+  "dur": 0.99,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 207,
+  "cat": "stone_grind",
+  "th": "ประตูหินเลื่อน",
+  "file": "stone_grind_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) stone-door-grind-02",
+  "dur": 3.22,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 208,
+  "cat": "bonebreak",
+  "th": "กระดูกหัก",
+  "file": "bonebreak_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) stylized-bone-crack-01",
+  "dur": 0.71,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 209,
+  "cat": "train",
+  "th": "รถไฟ",
+  "file": "train_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) subway-train-01",
+  "dur": 7.36,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 210,
+  "cat": "tape_hiss",
+  "th": "เทปซ่า (ย้อนอดีต)",
+  "file": "tape_hiss_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) tape-hiss-01",
+  "dur": 5.81,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 211,
+  "cat": "drone_tension",
+  "th": "โดรนตึงเครียด",
+  "file": "drone_tension_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) tension-drone-01",
+  "dur": 14.59,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 212,
+  "cat": "tinnitus",
+  "th": "หูอื้อหลังเสียงปืน",
+  "file": "tinnitus_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) tinnitus-tone-01",
+  "dur": 2.22,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 213,
+  "cat": "glitch",
+  "th": "กลิตช์",
+  "file": "glitch_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) transition-glitch-08",
+  "dur": 3.52,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 214,
+  "cat": "riser",
+  "th": "ไต่ระดับ",
+  "file": "riser_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) transition-riser-01",
+  "dur": 0.94,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 215,
+  "cat": "truck_horn",
+  "th": "แตรรถบรรทุก",
+  "file": "truck_horn_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) truck-horn-01",
+  "dur": 1.85,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 216,
+  "cat": "war_drum",
+  "th": "กลองศึก",
+  "file": "war_drum_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) war-drum-01",
+  "dur": 5.74,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 217,
+  "cat": "drip",
+  "th": "น้ำหยด",
+  "file": "drip_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) water-drip-03",
+  "dur": 0.59,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 218,
+  "cat": "plop",
+  "th": "น้ำหยดลงแอ่ง",
+  "file": "plop_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) water-plop-01",
+  "dur": 0.45,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 219,
+  "cat": "gunshot",
+  "th": "ยิงปืนพก (alley)",
+  "file": "gunshot_pistol_s01.wav",
+  "src": "synth (physical model)",
+  "dur": 1.1
+ },
+ {
+  "n": 220,
+  "cat": "gunshot",
+  "th": "ยิงปืนพก (alley)",
+  "file": "gunshot_pistol_s02.wav",
+  "src": "synth (physical model)",
+  "dur": 1.1
+ },
+ {
+  "n": 221,
+  "cat": "gunshot",
+  "th": "ยิงปืนพก (alley)",
+  "file": "gunshot_pistol_s03.wav",
+  "src": "synth (physical model)",
+  "dur": 1.1
+ },
+ {
+  "n": 222,
+  "cat": "gunshot",
+  "th": "ยิงปืนพก (open)",
+  "file": "gunshot_pistol_s01.wav",
+  "src": "synth (physical model)",
+  "dur": 1.1
+ },
+ {
+  "n": 223,
+  "cat": "gunshot",
+  "th": "ยิงปืนพก (open)",
+  "file": "gunshot_pistol_s02.wav",
+  "src": "synth (physical model)",
+  "dur": 1.1
+ },
+ {
+  "n": 224,
+  "cat": "gunshot",
+  "th": "ยิงปืนพก (open)",
+  "file": "gunshot_pistol_s03.wav",
+  "src": "synth (physical model)",
+  "dur": 1.1
+ },
+ {
+  "n": 225,
+  "cat": "bullet_whiz",
+  "th": "กระสุนเฉียด",
+  "file": "bullet_whiz_s01.wav",
+  "src": "synth (physical model)",
+  "dur": 0.35
+ },
+ {
+  "n": 226,
+  "cat": "bullet_whiz",
+  "th": "กระสุนเฉียด",
+  "file": "bullet_whiz_s02.wav",
+  "src": "synth (physical model)",
+  "dur": 0.35
+ },
+ {
+  "n": 227,
+  "cat": "bullet_whiz",
+  "th": "กระสุนเฉียด",
+  "file": "bullet_whiz_s03.wav",
+  "src": "synth (physical model)",
+  "dur": 0.35
+ },
+ {
+  "n": 228,
+  "cat": "ricochet",
+  "th": "กระสุนแฉลบ",
+  "file": "ricochet_s01.wav",
+  "src": "synth (physical model)",
+  "dur": 0.75
+ },
+ {
+  "n": 229,
+  "cat": "ricochet",
+  "th": "กระสุนแฉลบ",
+  "file": "ricochet_s02.wav",
+  "src": "synth (physical model)",
+  "dur": 0.75
+ },
+ {
+  "n": 230,
+  "cat": "ricochet",
+  "th": "กระสุนแฉลบ",
+  "file": "ricochet_s03.wav",
+  "src": "synth (physical model)",
+  "dur": 0.75
+ },
+ {
+  "n": 231,
+  "cat": "casing",
+  "th": "ปลอกกระสุนตกพื้น",
+  "file": "casing_s01.wav",
+  "src": "synth (physical model)",
+  "dur": 1.0
+ },
+ {
+  "n": 232,
+  "cat": "casing",
+  "th": "ปลอกกระสุนตกพื้น",
+  "file": "casing_s02.wav",
+  "src": "synth (physical model)",
+  "dur": 1.0
+ },
+ {
+  "n": 233,
+  "cat": "casing",
+  "th": "ปลอกกระสุนตกพื้น",
+  "file": "casing_s03.wav",
+  "src": "synth (physical model)",
+  "dur": 1.0
+ },
+ {
+  "n": 234,
+  "cat": "gun_cock",
+  "th": "ง้างปืน",
+  "file": "gun_cock_s01.wav",
+  "src": "synth (physical model)",
+  "dur": 0.5
+ },
+ {
+  "n": 235,
+  "cat": "gun_cock",
+  "th": "ง้างปืน",
+  "file": "gun_cock_s02.wav",
+  "src": "synth (physical model)",
+  "dur": 0.5
+ },
+ {
+  "n": 236,
+  "cat": "gun_cock",
+  "th": "ง้างปืน",
+  "file": "gun_cock_s03.wav",
+  "src": "synth (physical model)",
+  "dur": 0.5
+ }
+]
