@@ -12,7 +12,11 @@ const BL = document.createElement('canvas'); BL.width = 270; BL.height = 480; co
 const BW = document.createElement('canvas'); BW.width = 135; BW.height = 240; const BWX = BW.getContext('2d');
 function bloom(a = .24) { const G = globalThis.GLOW || {}; a = G.a ?? a; BX.filter = 'brightness(.9) contrast(3.4) saturate(1.3) blur(7px)'; BX.drawImage(out, 0, 0, 270, 480); BX.filter = 'none';
   const wide = G.wide ?? 0; if (wide > 0) { BWX.filter = 'brightness(.8) contrast(4) saturate(1.5) blur(9px)'; BWX.drawImage(out, 0, 0, 135, 240); BWX.filter = 'none'; }
-  X.save(); X.globalCompositeOperation = 'screen'; X.globalAlpha = a; X.drawImage(BL, 0, 0, 1080, 1920); if (wide > 0) { X.globalAlpha = wide; X.drawImage(BW, 0, 0, 1080, 1920); } X.restore(); }
+  X.save(); X.globalCompositeOperation = 'screen'; X.globalAlpha = a; X.drawImage(BL, 0, 0, 1080, 1920); if (wide > 0) { X.globalAlpha = wide; X.drawImage(BW, 0, 0, 1080, 1920); }
+  const df = G.diffuse ?? 0; if (df > 0) { /* v6.0 diffusion ('tutorial glow' / Orton): a soft blurred copy of the WHOLE frame screened on top: highlights bleed, the image gets a dreamy haze, darks stay dark */
+    BWX.filter = 'blur(6px) saturate(1.15)'; BWX.drawImage(out, 0, 0, 135, 240); BWX.filter = 'none'; X.globalAlpha = df; X.drawImage(BW, 0, 0, 1080, 1920);
+    X.globalCompositeOperation = 'soft-light'; X.globalAlpha = df * .8; X.drawImage(BW, 0, 0, 1080, 1920); }
+  X.restore(); }
 // v4 auto-cinematics (no effect on story/staging): shallow focus on the nearest character, shock speed lines + zoom punch
 const _hv = new E.THREE.Vector3(), _cv = new E.THREE.Vector3();
 function nearestHead() { let best = null; E.camera.getWorldPosition(_cv); const fw = new E.THREE.Vector3(0, 0, -1).transformDirection(E.camera.matrixWorld);
@@ -126,6 +130,12 @@ function overlays(t, alpha) { // gloom lines + sparkles requested by poses/shots
       X.translate(q[0], q[1]); X.rotate(ro * .2); X.globalCompositeOperation = 'lighter'; const g = X.createRadialGradient(0, 0, 0, 0, 0, r * 1.3); g.addColorStop(0, 'rgba(255,250,220,.9)'); g.addColorStop(1, 'rgba(255,220,140,0)'); X.fillStyle = g; X.beginPath(); X.arc(0, 0, r * 1.3, 0, 7); X.fill();
       X.fillStyle = '#fffbe8'; for (const [rr, rot] of [[r, 0], [r * .55, Math.PI / 4]]) { X.save(); X.rotate(rot); X.beginPath(); for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, d = k % 2 ? rr * .16 : rr; X.lineTo(Math.cos(a) * d, Math.sin(a) * d); } X.closePath(); X.fill(); X.restore(); } }
 
+    else if (o.kind === 'lightwrap') { /* v6.0 painted light layer (refs: lantern light-painting tutorial): a soft radial light from a source in the scene,
+         laid OVER everything near it (characters included) - soft-light lifts what it touches, a little screen adds the glow */
+      const q = scr(o.p); if (q) { const d = Math.max(.6, E.camera.position.distanceTo(o.p)), R = Math.min(1800, o.r * 1100 / d), g = X.createRadialGradient(q[0], q[1], 0, q[0], q[1], R);
+        g.addColorStop(0, o.col); g.addColorStop(.18, o.col + 'b0'); g.addColorStop(.45, o.col + '40'); g.addColorStop(.75, o.col + '10'); g.addColorStop(1, o.col + '00');
+        X.fillStyle = g; X.globalCompositeOperation = 'soft-light'; X.globalAlpha = alpha * o.k; X.beginPath(); X.arc(q[0], q[1], R, 0, 7); X.fill();
+        X.globalCompositeOperation = 'screen'; X.globalAlpha = alpha * o.k * .3; X.beginPath(); X.arc(q[0], q[1], R, 0, 7); X.fill(); } }
     else if (o.kind === 'dot') { const q = scr(o.p); if (q) { X.globalCompositeOperation = 'lighter'; const r = o.r || 26, g = X.createRadialGradient(q[0], q[1], 0, q[0], q[1], r * 2.6); g.addColorStop(0, 'rgba(255,240,240,1)'); g.addColorStop(.18, 'rgba(255,40,60,.95)'); g.addColorStop(1, 'rgba(255,20,40,0)');
       X.globalAlpha = alpha * o.k; X.fillStyle = g; X.beginPath(); X.arc(q[0], q[1], r * 2.6, 0, 7); X.fill(); } }
     else if (o.kind === 'whisper') { /* PM: a planted thought. A thin red wavy thread from the speaker's head to the target's head, the line

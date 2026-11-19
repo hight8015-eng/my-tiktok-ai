@@ -2,7 +2,7 @@
 import { THREE, setSmoothLight, scene, camera, clamp, lerp, sstep, eIO, eOut, eIn, eSine, D2R, noise1, rng, POST, mesh, rbox, toon, basic, group, cylBetween } from './engine.js';
 import * as Wd from './world.js';
 import * as ZC from './zc.js';
-import { CHARS, OVL, setRig, pose, popAt, sparkAt, dustAt, debrisAt, smokeAt, tintAt, rainAt, shockAt, whisperAt, makeRope, updateRope } from './chars.js';
+import { CHARS, OVL, setRig, lightAt, pose, popAt, sparkAt, dustAt, debrisAt, smokeAt, tintAt, rainAt, shockAt, whisperAt, makeRope, updateRope } from './chars.js';
 const { TRUCK, GATE, STREET, ALLEY, Z } = ZC;
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 export const TM = { env: [] };
@@ -33,7 +33,7 @@ const settle = (x, f = 11, d = 5) => x <= 0 ? 0 : Math.exp(-d * x) * Math.sin(f 
 const walk = (lt, rate = 1.7, stride = .22) => ({ walk: { ph: lt * rate * Math.PI * 2, stride } });
 // ---------- props ----------
 const EYES = [0, 1].map(() => { const s = Wd.glowSprite('#ff2030', .5, { opacity: 0 }); scene.add(s); return s; });
-function redEyes(C, k, t) { if (k > 0) OVL.push({ kind: 'redeyes', C, k: Math.min(1, k), t }); }
+function redEyes(C, k, t) { if (k > 0) { OVL.push({ kind: 'redeyes', C, k: Math.min(1, k), t }); lightAt(headW(C, .3), '#ff2030', .9, .6 * k); } }
 function redEyesOld(C, k, t) { scene.updateMatrixWorld(); const h = C.head.getWorldPosition(V()), d = V().subVectors(camera.position, h).normalize(), r = V().crossVectors(d, V(0, 1, 0)).normalize(), s = C.spec.s;
   EYES.forEach((e, i) => { e.position.copy(h).addScaledVector(d, .42 * s).addScaledVector(r, (i ? 1 : -1) * .13 * s).add(V(0, .16 * s, 0)); e.material.opacity = k * (.75 + .15 * Math.sin(t * 9 + i)); e.scale.setScalar(.42 * s * (.6 + .4 * k)); }); }
 const HF = group({ parent: scene }); HF.userData.fl = [0, 1, 2].map(i => { const f = mesh(new THREE.ConeGeometry(.09 - i * .02, .32 - i * .06, 8), basic(['#ff6a1a', '#ffb02a', '#fff2b0'][i]), { p: [0, .14, 0], parent: HF, cast: false }); f.userData.noInk = true; return f; });
@@ -56,12 +56,12 @@ const RIGS = {
   silhouette: { dir: [0, .2, -1], cel: 1, shadeCol: '#3a3448',  base: .28, key: ['#000000', 0], fill: ['#000000', 0], top: ['#ffd8a0', .08], rim: ['#ffc87a', .9], rimDir: [1, .4], rim2: ['#ffc87a', .7], shadow: .8, rimW: .008 },   /* a figure in front of a bright source: dark body, bright edges */
   power: { dir: [0, -.8, .5], cel: .9, shadeCol: '#6a2a3a',  base: .62, key: ['#ff2030', .3], keySide: -1, fill: ['#000000', 0], top: ['#ffffff', .05], rim: ['#ff2a3a', 0.55], rimDir: [1, .2], rim2: ['#ff2a3a', 0.28], shadow: .6, rimW: .009 } };
 function streetLight(lt) { setRig(RIGS.street); nightCity(); Wd.setShadowFocus(-600, 1, -10, 14); neonPt(0, STREET.localToWorld(V(-6, 3.5, -4)), '#ff2f6a', 7); neonPt(1, STREET.localToWorld(V(6, 3.5, -12)), '#2fe0ff', 7); neonPt(2, STREET.localToWorld(V(-5, 3, -20)), '#ffd23a', 6); neonPt(3, STREET.localToWorld(V(5.5, 3, -30)), '#c070ff', 6, 14); }
-function alleyLight(o = {}) { setRig(RIGS.alley); nightCity({ hemiI: 1.9, sunI: .9, fog: '#1c1628', fogN: 10, fogF: 48, ...o }); Wd.setShadowFocus(0, 1, -606, 8); neonPt(0, ALLEY.localToWorld(V(-1.4, 3.3, -7)), '#ffc87a', 6, 9); neonPt(1, ALLEY.localToWorld(V(0, 2.5, 3)), '#ff2f6a', 5, 12); neonPt(3, ALLEY.localToWorld(V(.5, 3, -13)), '#7a8aff', 3.5, 9); }
+function alleyLight(o = {}) { setRig(RIGS.alley); lightAt(ALLEY.localToWorld(V(-1.3, 3.0, -7)), '#ffbe70', 2.6, .55); nightCity({ hemiI: 1.9, sunI: .9, fog: '#1c1628', fogN: 10, fogF: 48, ...o }); Wd.setShadowFocus(0, 1, -606, 8); neonPt(0, ALLEY.localToWorld(V(-1.4, 3.3, -7)), '#ffc87a', 6, 9); neonPt(1, ALLEY.localToWorld(V(0, 2.5, 3)), '#ff2f6a', 5, 12); neonPt(3, ALLEY.localToWorld(V(.5, 3, -13)), '#7a8aff', 3.5, 9); }
 function truckLight() { setRig(RIGS.truck); nightCity({ hemiI: 1.9, sunI: .8, fog: '#14121c', fogN: 10, fogF: 40, stars: 0, moon: 0 }); Wd.setShadowFocus(0, 1, 600, 5); neonPt(0, TRUCK.localToWorld(V(0, 2, -.5)), '#ffcf8a', 3, 6); neonPt(1, TRUCK.localToWorld(V(0, 1.7, -2.6)), '#9ab8ff', 2.5, 5); }
-function gateLight() { setRig(RIGS.gate); nightCity({ fogN: 20, fogF: 140, glowAmt: .45 }); Wd.setShadowFocus(600, 1, -18, 16); neonPt(0, GATE.localToWorld(V(0, 15, -34)), '#ff2340', 9, 30); neonPt(1, GATE.localToWorld(V(0, 2, -14)), '#fff0c8', 3, 10); }
+function gateLight() { setRig(RIGS.gate); lightAt(GATE.localToWorld(V(0, 15, -35)), '#ff3048', 9, .45); nightCity({ fogN: 20, fogF: 140, glowAmt: .45 }); Wd.setShadowFocus(600, 1, -18, 16); neonPt(0, GATE.localToWorld(V(0, 15, -34)), '#ff2340', 9, 30); neonPt(1, GATE.localToWorld(V(0, 2, -14)), '#fff0c8', 3, 10); }
 const mono = (k) => { POST.sat = lerp(POST.sat, .12, k); if (k > .5) setRig(RIGS.power); };   /* the power: hard red rim, the rest falls into shadow */   // the world drains to grey when Aren uses his power (red stays: it is drawn on top)
 // ===================================================================== SHOTS
-globalThis.GLOW = { a: .26, wide: .2 }; setSmoothLight(true);   /* two-scale glow: neon/sign halos reach further */
+globalThis.GLOW = { a: .26, wide: .2, diffuse: .14 }; setSmoothLight(true);   /* two-scale glow: neon/sign halos reach further */
 export const SHOTS = [];
 function reset(t) { SH.a = 0; SH.t = t; Object.values(CHARS).forEach(C => { C.g.visible = false; }); Wd.hideSets(); Wd.hideSea(); ZC.hideZC(); Wd.pts.forEach(l => { l.intensity = 0; });
   EYES.forEach(e => { e.material.opacity = 0; }); HF.visible = false; THREAD.visible = false; SEED.material.opacity = 0; ZC.laserAt([0, 0, 0], [0, 0, 1], 0);
@@ -126,7 +126,7 @@ S('S12', 21.37, 'blur', STREET, (lt, t) => { streetLight(lt);
 S('S13', 23.74, 'cut', STREET, (lt, t) => { streetLight(lt); const ig = clamp((lt - .45) / .35); neonPt(3, STREET.localToWorld(V(-.9, 1.6, -9)), '#ff8a3a', 1.1 * ig, 4);
   put(FI(), STREET, { p: [-.9, .18, -9.4], ry: 30, ex: ig > .5 ? 'grinTeeth' : 'sly', hR: lp([.3, .3, .1], [.2, .6, .38], antic(lt, .12, .35, .12, .1, 2)), pR: [1, -.3, 0], squash: -.04 * settle(lt - .45, 10, 5) });
   put(AR(), STREET, { p: [.5, .18, -8.6], ry: -40, ...pf(lt, [[0, 'calm'], [.75, 'shocked']]), lean: -7 * clamp((lt - .72) / .12) + 5 * settle(lt - .84, 8, 3.5), head: [-10 * settle(lt - .74, 10, 4), 0, 0] });
-  scene.updateMatrixWorld(); HF.position.copy(hw(FI(), 1)).add(V(-.08, .12, .08)); handFire(t, backOut(ig, 2.4)); setRig({ ...RIGS.street, key: ['#ff9a3a', .12 + .18 * ig], keySide: 1, base: .74, rim: ['#ffb060', .5 * ig], rimDir: [1, -.2], dir: [.6, -.45, .6], cel: .25 + .6 * ig });   /* the flame below the face: under-light grin */   /* motivated: the new flame becomes the key light */ if (ig > 0 && ig < 1) sparkAt(HF.position.clone(), 1 - ig, .4);
+  scene.updateMatrixWorld(); HF.position.copy(hw(FI(), 1)).add(V(-.08, .12, .08)); lightAt(HF.position.clone(), '#ff9a40', 1.6, .85 * ig); handFire(t, backOut(ig, 2.4)); setRig({ ...RIGS.street, key: ['#ff9a3a', .12 + .18 * ig], keySide: 1, base: .74, rim: ['#ffb060', .5 * ig], rimDir: [1, -.2], dir: [.6, -.45, .6], cel: .25 + .6 * ig });   /* the flame below the face: under-light grin */   /* motivated: the new flame becomes the key light */ if (ig > 0 && ig < 1) sparkAt(HF.position.clone(), 1 - ig, .4);
   camS([.9, 1.55, -6.4], [-.5, 1.35, -9.2], [.7, 1.5, -6.8], [-.6, 1.4, -9.2], U(lt, 2.2), 42); }, { shutter: 3 });
 // ---------------- 14 "อีกคนยกรถทั้งคันได้ด้วยแขนเดียว" : the strong man lifts the car one-handed ----------------
 S('S14', 26.09, 'cut', STREET, (lt, t) => { streetLight(lt); const lift = backOut((lt - .5) / 1.1, .7), lift2 = backOut((lt - .6) / 1.1, .7);
@@ -240,7 +240,7 @@ S('S37', 68.77, 'cut', ALLEY, (lt, t) => { alleyLight({ hemiI: .8 }); MIND = 0; 
 // ---------------- 40 "เล็งมาที่หัวผมแล้ว" : the red dot lands on his forehead; his eyes slide to it ----------------
 S('S38', 70.14, 'cut', ALLEY, (lt, t) => { alleyLight({ hemiI: .85 }); MIND = 2.8;
   put(AR(), ALLEY, { p: [-1.2, 0, -7.4], ry: 40, ...pf(lt, [[0, 'sly'], [.7, 'sneaky']]), head: [0, -9 * eIO(clamp((lt - 1.0) / .8)), 0] }); const hd = ALLEY.worldToLocal(headW(AR(), .42));
-  ZC.laserAt([.45, 1.45, -16.35], [hd.x, hd.y, hd.z + .02], 1); SH.a = 0; OVL.push({ kind: 'dot', p: headW(AR(), .42), k: .85 + .15 * Math.sin(t * 20), r: 16 });
+  ZC.laserAt([.45, 1.45, -16.35], [hd.x, hd.y, hd.z + .02], 1); SH.a = 0; OVL.push({ kind: 'dot', p: headW(AR(), .42), k: .85 + .15 * Math.sin(t * 20), r: 16 }); lightAt(headW(AR(), .42), '#ff2030', .5, .7);
   camA([.3, 1.6, -5.6], [-1.2, 1.52, -7.4], [.15, 1.58, -5.8], [-1.2, 1.52, -7.4], U(lt, 2.5, eOut), 38); }, { rain: .6 });
 
 export function initShots(timing) { TM.env = timing.env; for (let i = 0; i < SHOTS.length; i++) SHOTS[i].t1 = i + 1 < SHOTS.length ? SHOTS[i + 1].t0 : timing.end; }

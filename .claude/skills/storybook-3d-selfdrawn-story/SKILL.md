@@ -342,6 +342,16 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
   hard shadow).
 
+## Glow edit (v6.0, user refs: 'Tutorial glow' before/after, lantern light-painting tutorial, runway over-exposure)
+- GLOW.diffuse (main.js bloom): a soft blurred copy of the whole frame screened + soft-light on top = the 'glow edit'
+  look: highlights bleed, a light haze, darks stay dark. .1-.18 for night stories; 0 for bright daytime fables.
+- lightAt(worldPos, '#rrggbb', radius, k) (chars.js): a PAINTED LIGHT LAYER like the lantern tutorial: a soft radial
+  light around a source, laid over everything near it (characters too): soft-light lifts what it touches + a little
+  screen glow, inverse-square falloff. Put one on every important source: flame in a hand, lamp over a character,
+  big sign, red eyes (lights the face red), laser dot. Animate k for flicker.
+- Order of light layers (tutorial): dark base -> key light area -> painted light from the source -> rim -> glow/bloom
+  -> diffusion. Each layer alone is subtle; together they read as real light.
+
 ## Soft light, no blobs (v5.9, user: 'light should not be lumps; bright naturally, fading soft at the ends')
 - setSmoothLight(true) (engine.js) interpolates the toon ramp: lamp/neon point-light pools fade out instead of making
   hard rings. Point lights: decay ~1.6 and a long distance so they reach zero softly.
