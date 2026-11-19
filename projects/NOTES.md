@@ -56,3 +56,10 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
   timing.json + vis done. Next: shots for ep2 (real seconds, SP = 1), rooftop friend character, stills, ASK helpers.
 - EP2 DELIVERED (2026-11-19): output/THE PUPPET MASTER ตอน 2 (4 files), 71.33 s, -13.9 LUFS. Sources: projects/the-puppet-master/ep2
   (shots_ep2.js, audio_ep2.py, timing). Frame check: only intended speed-line/turn spikes. Next: ep3 when the user sends the voice.
+- EP2 FIX LIST (user review 22:13): (1) walk-out 41-49 s: Aren slides (camera tracks at walk speed), stiff arms, E22 too
+  close + dumpster in front, E23 Aren missing; HE WALKS THROUGH THE DUMPSTER (dumpster x -1.8..-0.7, z -5..-3 -> walk at
+  x = -0.1, never x -0.9). (2) 58-62 s fight: no action, not facing, fire man cut, strong man >< face, winner shot static,
+  fallen man cut off. Also: almost every shot static (use acting.js perform/hold/gaze everywhere), no shot showing alley +
+  roof together, tracer too faint + small flinch, thread shot shows 1 thread and the follower off-frame, cover hides the gun.
+  Re-render only the changed segments (rq.sh is resumable: delete those segments' .ok) then finish again.
+  RULE: check every walk path against props (dumpster, crates, bags) - characters must never pass through objects.
