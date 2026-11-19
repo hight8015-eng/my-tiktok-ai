@@ -130,6 +130,9 @@ function overlays(t, alpha) { // gloom lines + sparkles requested by poses/shots
       X.translate(q[0], q[1]); X.rotate(ro * .2); X.globalCompositeOperation = 'lighter'; const g = X.createRadialGradient(0, 0, 0, 0, 0, r * 1.3); g.addColorStop(0, 'rgba(255,250,220,.9)'); g.addColorStop(1, 'rgba(255,220,140,0)'); X.fillStyle = g; X.beginPath(); X.arc(0, 0, r * 1.3, 0, 7); X.fill();
       X.fillStyle = '#fffbe8'; for (const [rr, rot] of [[r, 0], [r * .55, Math.PI / 4]]) { X.save(); X.rotate(rot); X.beginPath(); for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, d = k % 2 ? rr * .16 : rr; X.lineTo(Math.cos(a) * d, Math.sin(a) * d); } X.closePath(); X.fill(); X.restore(); } }
 
+    else if (o.kind === 'sparkline') { const a = scr(o.p), b = scr(o.p2); if (a && b) { X.globalCompositeOperation = 'lighter'; X.globalAlpha = alpha * o.k; X.lineCap = 'round';
+      X.strokeStyle = o.col; X.lineWidth = o.w * 2.4; X.globalAlpha = alpha * o.k * .35; X.beginPath(); X.moveTo(b[0], b[1]); X.lineTo(a[0], a[1]); X.stroke();   /* soft glow */
+      X.globalAlpha = alpha * o.k; X.lineWidth = o.w; X.beginPath(); X.moveTo(b[0], b[1]); X.lineTo(a[0], a[1]); X.stroke(); } }
     else if (o.kind === 'lightwrap') { /* v6.0 painted light layer (refs: lantern light-painting tutorial): a soft radial light from a source in the scene,
          laid OVER everything near it (characters included) - soft-light lifts what it touches, a little screen adds the glow */
       const q = scr(o.p); if (q) { const d = Math.max(.6, E.camera.position.distanceTo(o.p)), R = Math.min(1800, o.r * 1100 / d), g = X.createRadialGradient(q[0], q[1], 0, q[0], q[1], R);

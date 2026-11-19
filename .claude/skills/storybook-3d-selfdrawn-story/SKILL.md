@@ -352,6 +352,9 @@ If the user wants characters made in Flow from their own prompt, use the sister 
 - beat(env, envPrev): small head nods ON stressed syllables; gestures land a hair BEFORE the word.
 - trauma(t, [[hitTime, amount]]): camera shake = trauma^2 x smooth noise, trauma decays linearly (small hits
   almost invisible, big hits dramatic); replaces hand-tuned SH.a ramps.
+- fxphys.sparks({ at: WORLD pos (set.localToWorld!), normal, t0, n, speed, cone, life, floor, seed }).at(t): ballistic
+  sparks (gravity, drag, bounce losing energy), drawn as velocity streaks with a glow, cooling white -> yellow ->
+  orange -> red, own lifetimes/sizes, burst in a cone around the surface normal. Bullet on brick, sword clash, metal.
 - Rules: the root (hips/torso) starts every move; lighter parts drag and settle later; heavier = slower start,
   smaller overshoot, longer settle; anticipation the opposite way first; nothing stops all at once.
 

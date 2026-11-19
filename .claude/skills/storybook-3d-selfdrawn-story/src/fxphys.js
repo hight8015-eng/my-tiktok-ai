@@ -236,3 +236,19 @@ export function pile(par, o) { const R = rng(o.seed || 41), n = o.list.length, r
       if (t < o.t0) { m.position.copy(V(o.list[a].p0)); m.quaternion.identity(); return; } sample(tracks[a], t, m.position, m.quaternion); }); } }; }
 // ---------------- 11. anime IMPACT FRAME: 1-2 inverted high-contrast frames + radial action lines on the biggest hit ----------------
 export function impactFrame(o) { return { at(t) { const a = t - o.t0; if (a >= 0 && a < (o.dur ?? .07)) OVL.push({ kind: 'impactframe', p: V(o.at), k: 1, u: a / (o.dur ?? .07), lines: o.lines ?? 46 });   /* k = 1: the overlay loop uses k as opacity */ } }; }
+
+
+// ---------------- v6.7 sparks: metal on metal / bullet on brick. Each spark is a tiny ballistic body (gravity, air
+// drag, bounces off the floor losing most energy), drawn as a streak along its velocity (motion blur), cooling
+// white -> yellow -> orange -> red as it ages; sizes and lifetimes vary; bursts come in a cone around the normal. ----------------
+export function sparks(o) { const R = rng(o.seed || 61), n = o.n || 22, at = V(o.at), nrm = V(o.normal || [0, 1, 0]).normalize(), g = 9.8, list = [];
+  const tA = new THREE.Vector3(), tB = new THREE.Vector3(); const up = Math.abs(nrm.y) < .9 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(1, 0, 0);
+  const u1 = new THREE.Vector3().crossVectors(nrm, up).normalize(), u2 = new THREE.Vector3().crossVectors(nrm, u1);
+  for (let i = 0; i < n; i++) { const a = R() * 6.283, c = (o.cone ?? .7) * Math.sqrt(R()), sp = (o.speed || 6) * (.35 + R() * .9);
+    const d = nrm.clone().multiplyScalar(Math.cos(c)).addScaledVector(u1, Math.sin(c) * Math.cos(a)).addScaledVector(u2, Math.sin(c) * Math.sin(a));
+    list.push({ v0: d.multiplyScalar(sp), life: (o.life || .6) * (.4 + R() * .9), w: 2 + R() * 3, delay: R() * .04 }); }
+  const floor = o.floor ?? 0, P = new THREE.Vector3(), Vv = new THREE.Vector3();
+  const pos = (s, t) => { let p = at.clone(), v = s.v0.clone(), tt = 0; const dt = 1 / 240; while (tt < t) { v.y -= g * dt; v.multiplyScalar(1 - 1.2 * dt); p.addScaledVector(v, dt); if (p.y < floor && v.y < 0) { p.y = floor; v.y *= -.3; v.x *= .6; v.z *= .6; } tt += dt; } Vv.copy(v); return p; };
+  return { at(t) { const a = t - o.t0; if (a < 0 || a > (o.life || .6) * 1.4) return;
+    for (const s of list) { const u = (a - s.delay) / s.life; if (u < 0 || u > 1) continue; const p = pos(s, a - s.delay), q = p.clone().addScaledVector(Vv, -1 / 45);   // tail = where it was 2/3 of a frame ago
+      const col = u < .15 ? '#fffbe8' : u < .4 ? '#ffd84a' : u < .7 ? '#ff8a1c' : '#d8301a'; OVL.push({ kind: 'sparkline', p, p2: q, k: 1 - u * u, w: s.w * (1 - .5 * u), col }); } } }; }
