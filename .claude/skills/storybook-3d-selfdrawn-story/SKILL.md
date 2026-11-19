@@ -342,6 +342,23 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
   hard shadow).
 
+## SFX library v2 + pairing (v6.4, 8 user SFX compilation clips -> 81 clean sounds, catalogue sfx.json)
+- Cutting: use the on-screen label timings (a label crop + frame-difference finds every change), or for narrated
+  packs the word timestamps (cut BETWEEN the narrator's words). tools/sfx_clean.py: 35 Hz high-pass + spectral noise
+  gate + trim + fades. Then run speech recognition on every cut: any words = voice bleed -> drop it (dropped:
+  'Alien'). A source SNR < ~25 dB means music/voice/other hits underneath: keep only as a quiet layer.
+- Pairings that work (projects/sfx_library/ตัวอย่างการจับคู่เสียง.mp3):
+  whip_pan -> boom (scene change into a reveal) | riser -> heavy_hit (build then land) | reverse_whoosh -> bass_drop
+  (suck in, drop on the cut) | cloth -> whoosh -> hit (punch with anticipation: cloth .25 s, whoosh peak just before
+  the hit) | sword draw -> slash -> spark clash | fire_burst -> fire_ignite (layered .25 s) | riser_tension ->
+  SILENCE (.3-.5 s) -> violin_screech (horror sting) | typewriter -> suspense_hit (text/file reveal) | timer -> boom
+  | shutter + camera_flash (photo / CCTV still).
+- Never pair: two booms within 1 s; a meme sound (fah, core, thug, imposter, vine) under a serious beat; a riser
+  that does not resolve into a hit or a cut; whoosh AFTER the hit.
+- Story use: suspense_hit / bell_doom / bass_drop = reveals; typewriter / message / click = screens & files (PM ep
+  7-8); film_roll / shutter / camera_flash = CCTV & flashbacks; cloth / clash / slash / fire_* = fights; cash /
+  counting = money & deals.
+
 ## Flicker + shake rules (v6.3, found in the PM ep1 frame check)
 - Never flicker a light on/off at a fast regular rate when it drives big lit areas (bulb + glow + beam + pool +
   lightAt): the whole frame pulses every few frames and reads as stutter. Use a rare, soft dip from noise
