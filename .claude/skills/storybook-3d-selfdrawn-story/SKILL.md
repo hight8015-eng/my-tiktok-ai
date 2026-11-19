@@ -327,6 +327,24 @@ If the user wants characters made in Flow from their own prompt, use the sister 
 - Bounces: each bounce lower and shorter than the last; the first frame leaving the ground moves the most; as
   little ground time as possible (except an intentionally squishy landing).
 
+## FX study 3 (v5.5, 6 user clips: live-action power edit, green-screen meteors + explosion, flame tornado, power-% montage, stick fight)
+- Power-up chain (one beat each, ~0.5-1 s): hands glow -> aura bursts around the body -> top-down shot -> an object flies
+  AT the lens -> eye glow close-up -> wide -> the hit. Escalate scale shot by shot, never show the biggest first.
+- Ground cut / trench: the cut line glows white-hot, then cools along its length (white -> orange -> dull red -> dark)
+  over 2-4 s; chunks are thrown UP and fall back for a long time; heavy smoke rolls out LOW along the ground from both
+  edges and keeps billowing after everything else stops; camera eases back slowly while it settles.
+- Meteor / missile: a small bright head with sparks, the smoke trail starts thin and dark right behind it and widens,
+  lightens and drifts the further back it is; several at different speeds and sizes, parallel, never in sync.
+- Explosion: the fireball grows fast, then dark smoke wraps it from the edges inward; fire stays visible only through
+  gaps; the column rises, slows and thins. Fire inside smoke, not smoke beside fire.
+- Magic vortex: ground ring decal first, then the column grows; layers = bright core + spiral streaks + flame skirt at
+  the base + sparkle particles; streaks twist upward faster than the column turns.
+- Format idea: 'X% of power' escalation montage (1% -> 100%), one caption per level, each level a bigger effect.
+- Stick fight (closest to our style): grey world + ONE accent colour for the power (red) - same as PM; hits take 2-3
+  frames, then the victim hangs in the air; white flash circle + spark lines on contact; grey ghost trails behind fast
+  limbs; dust ring on a ground slam; long red slash streaks; ~14% of frames are holds (key poses held on twos), the
+  camera keeps moving on ones so it never reads as stutter.
+
 ## Motion helpers (v5.4, applying the study clips; see examples/shots_pm1.js)
 - backOut(u, s): ease that overshoots the target a little and settles (s .7 heavy / 1.7 normal / 2.4 snappy).
 - antic(lt, at, dur, pre, amt, s): anticipation: a small move the other way for `pre` s, then backOut to the pose.
