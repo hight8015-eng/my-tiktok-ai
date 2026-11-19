@@ -91,3 +91,4 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
 - User: the roof friend's face must be clearly visible (medium close-up + face light) - fixed in ep2 v2 F06/F11/F14.
 - EP2 v2 user notes (fix from ep3 on, no re-render): captions centred + in sync; level camera so guns read; hair/hats/hoods must turn with the head (ref projects/refs/hair_hat_turn_ref.mp4, study before ep3).
 - Motion still not smooth (user): turns pop back->front in 1 frame (ref projects/refs/ep2_motion_issue.mp4). Fix the sprite turn (S/Q in-betweens + crossfade + hair) before ep3.
+- Framing rule (user): characters and held props must never be cut by the frame edge; level camera on prop beats.

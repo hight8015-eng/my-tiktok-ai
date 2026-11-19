@@ -368,6 +368,8 @@ If the user wants characters made in Flow from their own prompt, use the sister 
 - (ep2 v2 review) Captions: keep the caption line CENTRED (x 540, not the safe-zone centre 480) and in sync - chunks of
   1-2 words lag behind fast speech: use ASR word times for the chunk boundaries (not syllable-ratio guesses).
 - (ep2 v2) Dutch/tilted camera angles hid the gun barrel: keep the camera level on prop beats; frame the barrel side-on.
+  FRAMING: the character AND the prop they hold stay fully inside the frame (no head/hand/gun cut by the edge);
+  check stills of every shot for cut-offs before rendering.
 - (ep2 v2) Hair, hats and hoods do NOT rotate with the head/body angle (sprite art stays front-facing) = unnatural.
   Study projects/refs/hair_hat_turn_ref.mp4 (user ref: hair/hat turning with the view angle) and build per-angle
   hair/hat views or a 3D cap that follows head yaw/pitch. TODO before the next episode.
