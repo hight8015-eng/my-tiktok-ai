@@ -1,0 +1,132 @@
+{
+ "darkest_child_spedup": {
+  "title": "Darkest Child - Kevin MacLeod (sped up)",
+  "mood": "dark, ominous, horror build, villain lair",
+  "license": "CC BY 4.0 (credit: \"Darkest Child\" Kevin MacLeod, incompetech.com) - best to re-download the original",
+  "bpm": 103.0,
+  "lufs": -17.4,
+  "dur": 30.2,
+  "file": "user/darkest_child_spedup.mp3",
+  "bpm_note": "approx (spectral-flux estimate); confirm by ear or beatfit before syncing hits"
+ },
+ "almost_closing_time_spedup": {
+  "title": "Almost Closing Time - Kyle Allen (sped up)",
+  "mood": "chill lounge jazz, shop/cafe, everyday calm",
+  "license": "copyrighted - TikTok sound only",
+  "bpm": 120.0,
+  "lufs": -19.7,
+  "dur": 30.3,
+  "file": "user/almost_closing_time_spedup.mp3",
+  "bpm_note": "approx (spectral-flux estimate); confirm by ear or beatfit before syncing hits"
+ },
+ "town_talk": {
+  "title": "Town Talk - Gerhard Narholz",
+  "mood": "light bouncy comedy, town life, gossip",
+  "license": "production library (Sonoton) - copyrighted",
+  "bpm": 102.5,
+  "lufs": -10.2,
+  "dur": 67.9,
+  "file": "user/town_talk.mp3",
+  "bpm_note": "approx (spectral-flux estimate); confirm by ear or beatfit before syncing hits"
+ },
+ "waltzing_flutes_slowed": {
+  "title": "Waltzing Flutes - Manfred Minnich (slowed)",
+  "mood": "dreamy waltz, nostalgic, eerie-innocent",
+  "license": "production library - copyrighted",
+  "bpm": 154.5,
+  "lufs": -14.2,
+  "dur": 67.9,
+  "file": "user/waltzing_flutes_slowed.mp3",
+  "bpm_note": "approx (spectral-flux estimate); confirm by ear or beatfit before syncing hits"
+ },
+ "60sec_commercial_slowed": {
+  "title": "60 Second Commercial - Michael Reynolds (slowed)",
+  "mood": "retro, ironic calm, liminal",
+  "license": "production library - copyrighted",
+  "bpm": 120.0,
+  "lufs": -9.5,
+  "dur": 67.9,
+  "file": "user/60sec_commercial_slowed.mp3",
+  "bpm_note": "approx (spectral-flux estimate); confirm by ear or beatfit before syncing hits"
+ },
+ "prima_bossa_nova_spedup": {
+  "title": "Prima Bossa Nova - Anthony Mawer (sped up)",
+  "mood": "bossa nova, playful, sneaky-cool, lounge",
+  "license": "production library (KPM) - copyrighted",
+  "bpm": 137.5,
+  "lufs": -9.5,
+  "dur": 97.6,
+  "file": "user/prima_bossa_nova_spedup.mp3",
+  "bpm_note": "approx (spectral-flux estimate); confirm by ear or beatfit before syncing hits"
+ },
+ "playground_of_the_stars": {
+  "title": "Saints Row OST - Playground of the Stars",
+  "mood": "upbeat game, city, montage",
+  "license": "game OST - copyrighted",
+  "bpm": 124.0,
+  "lufs": -19.3,
+  "dur": 67.9,
+  "file": "user/playground_of_the_stars.mp3",
+  "bpm_note": "approx (spectral-flux estimate); confirm by ear or beatfit before syncing hits"
+ },
+ "almost_closing_time_slowed": {
+  "title": "Almost Closing Time - Kyle Allen (slowed)",
+  "mood": "slow chill, late night, melancholy calm",
+  "license": "copyrighted - TikTok sound only",
+  "bpm": 120.0,
+  "lufs": -20.3,
+  "dur": 67.9,
+  "file": "user/almost_closing_time_slowed.mp3",
+  "bpm_note": "approx (spectral-flux estimate); confirm by ear or beatfit before syncing hits"
+ },
+ "solitaire_slowed": {
+  "title": "Solitaire - Gerd Kadenbach (slowed)",
+  "mood": "lonely, reflective, sad calm",
+  "license": "production library - copyrighted",
+  "bpm": 138.0,
+  "lufs": -23.1,
+  "dur": 67.9,
+  "file": "user/solitaire_slowed.mp3",
+  "bpm_note": "approx (spectral-flux estimate); confirm by ear or beatfit before syncing hits"
+ },
+ "darkest_child": {
+  "title": "Darkest Child - Kevin MacLeod",
+  "mood": "dark, ominous, suspense, horror",
+  "license": "CC BY 4.0 (credit Kevin MacLeod, incompetech.com)",
+  "bpm": 90.5,
+  "lufs": -11.9,
+  "dur": 109.0,
+  "file": "user/darkest_child.mp3",
+  "bpm_note": "approx (spectral-flux estimate); confirm by ear or beatfit before syncing hits"
+ },
+ "60sec_commercial": {
+  "title": "60 Second Commercial - Michael Reynolds",
+  "mood": "upbeat cheesy retro, comedy, ad parody",
+  "license": "production library - copyrighted",
+  "bpm": 120.0,
+  "lufs": -15.3,
+  "dur": 64.9,
+  "file": "user/60sec_commercial.mp3",
+  "bpm_note": "approx (spectral-flux estimate); confirm by ear or beatfit before syncing hits"
+ },
+ "waltzing_flutes_spedup": {
+  "title": "Waltzing Flutes - Manfred Minnich (sped up)",
+  "mood": "whimsical, playful, comedic chaos",
+  "license": "production library - copyrighted",
+  "bpm": 110.5,
+  "lufs": -13.2,
+  "dur": 39.8,
+  "file": "user/waltzing_flutes_spedup.mp3",
+  "bpm_note": "approx (spectral-flux estimate); confirm by ear or beatfit before syncing hits"
+ },
+ "good_man_broken_heart": {
+  "title": "A Good Man With a Broken Heart - LoVibe",
+  "mood": "sad emotional lofi, heartbreak, regret",
+  "license": "copyrighted (Spotify release) - TikTok sound only",
+  "bpm": 92.0,
+  "lufs": -8.7,
+  "dur": 64.0,
+  "file": "user/good_man_broken_heart.mp3",
+  "bpm_note": "approx (spectral-flux estimate); confirm by ear or beatfit before syncing hits"
+ }
+}

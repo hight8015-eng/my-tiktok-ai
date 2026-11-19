@@ -375,6 +375,10 @@ maths (pick the tempo so hits land on beats), trailer structure (build -> silenc
   STINGERS (10): hit_boom braam riser_hit reverse_hit shimmer_up dread piano_low comedy_bonk heartbeat2 victory_hit.
   S = Score(END); S.cue(name, t0, dur, bpm, key, k); S.sting(name, t); S.duck(env); S.write('aud/music_bed.wav').
   Preview medley: output/ตัวอย่างเพลงประกอบ 21 แบบ.mp3.
+- USER TRACKS (projects/music_library/user/*.mp3 + user_music.json: title, mood, licence, approx bpm, LUFS): 13 tracks the
+  user found (Kevin MacLeod 'Darkest Child' = CC BY 4.0, credit in the post; the rest are production-library / OST /
+  Spotify songs = copyrighted: on TikTok add them as the in-app sound, on YouTube/FB expect Content ID claims -> prefer
+  score.py cues or the CC BY track there). Loudness-match them (they range -8.7 to -23 LUFS) before ducking under the voice.
 
 ## Acting: faces + body language (v6.8, src/acting.js + chars.js faces; user: 'faces and poses must fit the situation')
 Research basis: Ekman FACS (action units), Ed Hooks 'Acting for Animators', Disney 12 principles, Preston Blair sheets.
