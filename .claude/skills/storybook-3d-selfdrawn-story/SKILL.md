@@ -416,7 +416,7 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   + role, left, first appearance only), type (phone/system message typed at 18 cps with a cursor).
 - bigWord(SET, 'WORD', [x,y,z], { h, k, col, op }) (text3d.js): a big glowing word standing IN the set behind the
   characters (depth-tested: people in front cover it). Hook (first 2 s) and cliffhanger ONLY. Keep it inside the frame.
-- Check: output/ระบบตัวหนังสือใหม่.jpg. 'classic' style = the old plain centred captions.
+- Check: output/ระบบตัวหนังสือใหม่.jpg. KEEP (user favourites): the place label (title + underline + sub) and the whisper-thought text (whisperAt). 'classic' style = the old plain centred captions.
 
 ## Lip sync (v6.9, tools/lipsync.py + chars.js visemes; user: 'mouth must match the speech rhythm, natural, never off-beat')
 - Run `python3 tools/lipsync.py .` after tools/timing.py: it reads aud/vo.wav at 100 Hz (loudness, low/mid band ratio =

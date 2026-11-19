@@ -93,3 +93,4 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
 - Motion still not smooth (user): turns pop back->front in 1 frame (ref projects/refs/ep2_motion_issue.mp4). Fix the sprite turn (S/Q in-betweens + crossfade + hair) before ep3.
 - Framing rule (user): characters and held props must never be cut by the frame edge; level camera on prop beats.
 - Captions: every chunk FADES OUT at its end (0.12 s) - user request, main.js v7.4. EP3: segments 0-3 started before this change -> re-render them (delete out/seg s_00000..s_00400 .ok) before finishing.
+- User LIKES and wants to KEEP: (1) the documentary place label (title + white underline + sub line, top-left) and (2) the whisper-thought text floating from Aren to the target (whisperAt, pink-red glow). Use them every episode where they fit.
