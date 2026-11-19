@@ -80,6 +80,7 @@ const EX = {
   sinister: { eyes: 'half', lidT: -10, bl: -22, br: 22, by: 6, mouth: 'smileBig', sh: .55 },
   stoic: { eyes: 'open', lid: .2, bl: -4, br: 4, by: 2, mouth: 'flat' },
   determinedHard: { eyes: 'open', low: .35, lidT: -6, bl: -18, br: 18, by: 6, mouth: 'tight' },
+  veiled: { eyes: 'none', nobrow: true, dark: .94, bl: 0, br: 0, by: 0, mouth: 'smirk', mw: .8 },             // v7.4 face hidden in shadow, only a thin smile (the man in the black cloak)
 };
 const EXK = ['bl', 'br', 'by', 'byL', 'byR', 'arch', 'lid', 'lidT', 'low', 'pup', 'mx', 'mw', 'mr', 'sh', 'blush', 'vein', 'drop', 'spark', 'wet'];
 const EXD = { pup: 1, mw: 1 };
@@ -130,6 +131,7 @@ function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a wh
     if (e.wet > 0 && kind !== 'chev' && kind !== 'spiral') { x.strokeStyle = `rgba(150,205,255,${Math.min(1, e.wet)})`; x.lineWidth = 6; x.beginPath(); x.moveTo(cx - 18, cy + 26); x.quadraticCurveTo(cx, cy + 34, cx + 18, cy + 26); x.stroke(); x.strokeStyle = ink; }
     x.restore();
     const ang = (s < 0 ? e.bl : e.br) * D2R; const by = cy - (BIG ? 128 : /wide|tiny/.test(kind) ? 80 : 50) + ((e.by || 0) + ((s < 0 ? e.byL : e.byR) || 0)) * EK, arc_ = (e.arch || 0) * EK;
+    if (e.nobrow) continue;
     x.strokeStyle = spec.browC || ink; x.lineWidth = spec.browW || (BIG ? 16 : 11); x.save(); x.translate(cx, by); x.rotate(s < 0 ? -ang : ang); x.beginPath(); x.moveTo(BIG ? -36 : -24, 0); if (arc_) x.quadraticCurveTo(0, -arc_ * 2, BIG ? 36 : 24, 0); else x.lineTo(BIG ? 36 : 24, 0); x.stroke(); x.restore();
   }
   if (e.vein > 0) { x.save(); x.translate(S * .8, ey - (BIG ? 120 : 64)); x.strokeStyle = `rgba(214,30,48,${Math.min(1, e.vein)})`; x.lineWidth = 9; // anger mark
@@ -144,10 +146,11 @@ function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a wh
   if (spec.beard) { x.fillStyle = spec.beard; x.strokeStyle = ink; x.lineWidth = 12; const top = ey + 34, L = S * .25, Rr = S * .75; x.beginPath(); x.moveTo(L, top);
     const n = 7; for (let i = 0; i <= n; i++) { const u = i / n, bx = L + (Rr - L) * u, by = top + Math.sin(Math.PI * u) * 120 + 18; if (i) x.quadraticCurveTo(bx - (Rr - L) / n / 2, by + 26, bx, by); else x.lineTo(bx, by); }
     x.lineTo(Rr, top); x.quadraticCurveTo(S / 2, top + 44, L, top); x.closePath(); x.fill(); x.stroke(); }
+  if (e.dark > 0) { x.fillStyle = `rgba(12,10,20,${e.dark})`; x.beginPath(); x.ellipse(S / 2, ey + 30, S * .44, S * .46, 0, 0, 7); x.fill(); } // v7.4 face lost in shadow (veiled)
   let m = e.mouth; const mood = /smile|grin|laugh|teeth/.test(e.mouth) ? 1 : /frown|cry|wavy|grimace|clench|pout/.test(e.mouth) ? -1 : 0;
   if (typeof talk === 'string') { if (talk !== 'X') m = 'v' + talk; } // v6.9 viseme lip sync (tools/lipsync.py): X rest, M pressed, a/A open, E wide, O round, S teeth
   else if (talk > 0) m = talk > .66 ? 'open' : talk > .33 ? 'talk' : (m === 'o' || m === 'yawn' ? m : 'flat');
-  x.strokeStyle = ink; x.fillStyle = '#3a1a24'; x.lineWidth = 10; const cx = S / 2; x.save(); { x.translate(cx + (e.mx || 0) * (BIG ? 1.9 : 1.3), my); x.rotate((e.mr || 0) * D2R); x.scale((BIG ? 1.9 : 1.3) * (e.mw ?? 1) * (e.mflip && !talk ? -1 : 1), BIG ? 1.9 : 1.3); x.translate(-cx, -my); }
+  x.strokeStyle = e.dark ? '#e8dcf0' : ink; x.fillStyle = '#3a1a24'; x.lineWidth = 10; const cx = S / 2; x.save(); { x.translate(cx + (e.mx || 0) * (BIG ? 1.9 : 1.3), my); x.rotate((e.mr || 0) * D2R); x.scale((BIG ? 1.9 : 1.3) * (e.mw ?? 1) * (e.mflip && !talk ? -1 : 1), BIG ? 1.9 : 1.3); x.translate(-cx, -my); }
   if (m === 'smile') { const W = BIG ? 44 : 24, D = BIG ? 30 : 16; x.beginPath(); x.moveTo(cx - W, my - 10); x.quadraticCurveTo(cx, my + D, cx + W, my - 10); x.stroke(); } // v4.6 wide sheet smile
   else if (m === 'flat') { x.beginPath(); x.moveTo(cx - 18, my + 4); x.lineTo(cx + 18, my + 4); x.stroke(); }
   else if (m === 'smirk') { x.beginPath(); x.moveTo(cx - 22, my + 6); x.quadraticCurveTo(cx + 6, my + 12, cx + 28, my - 6); x.stroke(); }
@@ -751,7 +754,9 @@ export function updateSprites(cam) {
     s_f.set(0, 0, 1).transformDirection(C.torso.matrixWorld); s_f.y = 0; s_f.normalize();
     s_v.copy(s_cp).sub(anc); s_v.y = 0; s_v.normalize();
     const th = Math.atan2(s_f.z * s_v.x - s_f.x * s_v.z, s_f.dot(s_v)) * 180 / Math.PI, a = Math.abs(th);
-    const view = a < 24 ? 'F' : a < 60 ? 'Q' : a < 128 ? 'S' : 'B', mir = (view === 'Q' || view === 'S') && th < 0;
+    let view = a < 24 ? 'F' : a < 60 ? 'Q' : a < 128 ? 'S' : 'B'; { const O = 'FQSB', i1 = O.indexOf(view), i0 = C._vw ? O.indexOf(C._vw) : i1, ft = Math.round((ANIM.t || 0) * 30);   // v7.4 a turn steps through every view (B->S->Q->F), >= 2 frames each: no back->front pop
+      if (C._vf !== ft) { const rec = ft - (C._vft ?? -99); if (i1 !== i0 && rec >= 0 && rec < 2) view = C._vw; else if (Math.abs(i1 - i0) > 1) view = O[i0 + Math.sign(i1 - i0)]; if (view !== C._vw) C._vft = ft; C._vw = view; C._vf = ft; } else view = C._vw || view; }
+    const mir = (view === 'Q' || view === 'S') && th < 0;
     const db = Math.min(Math.abs(a - 24), Math.abs(a - 60), Math.abs(a - 128)), turnW = db < 9 ? .82 + .18 * (db / 9) * (db / 9) : 1; // v4.1 turn squash
     const key = C.spr + '-' + view, M = SPR.meta[key]; const yaw = Math.atan2(s_v.x, s_v.z);
     s_r.set(Math.cos(yaw), 0, -Math.sin(yaw));

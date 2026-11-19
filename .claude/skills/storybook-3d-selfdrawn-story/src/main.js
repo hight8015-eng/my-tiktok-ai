@@ -209,7 +209,7 @@ function capSlice(c, t) { const w = c[2].split(/\s+/).filter(Boolean); if (w.len
 // markers inside a caption: *word* = highlight, ~text~ = whisper (smaller, softer), ^text^ = shout (bigger, a short shake);
 // project.hiWords = words always highlighted (names, powers, numbers are automatic).
 // SAFE ZONE (TikTok / Reels / Shorts UI): keep text inside x 60..900, y 230..1440; captions never go below 1440.
-const SAFE = { x0: 60, x1: 900, y0: 230, y1: 1440 }; const CAPX = (SAFE.x0 + SAFE.x1) / 2; const CAPPOS = new Map();
+const SAFE = { x0: 60, x1: 900, y0: 230, y1: 1440 }; const CAPX = 540; const CAPPOS = new Map(); // v7.4 user: captions centred on screen (width still kept inside the safe zone)
 function capSegs(txt) { const hw = project.hiWords || []; const out = []; let rest = txt;
   rest.split(/(\*[^*]+\*)/).forEach(p => { if (!p) return; if (p[0] === '*') { out.push([p.slice(1, -1), 1]); return; }
     let parts = [[p, 0]]; for (const w of hw) parts = parts.flatMap(([q, h]) => h ? [[q, h]] : q.split(w).flatMap((x, i, A) => i < A.length - 1 ? [[x, 0], [w, 1]] : [[x, 0]]));
