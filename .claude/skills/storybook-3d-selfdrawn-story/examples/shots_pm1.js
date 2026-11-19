@@ -25,6 +25,11 @@ const AR = () => CHARS.aren, GU = () => CHARS.guard, FI = () => CHARS.fire, ST =
 /* expression changes behind a blink with a small head dip */
 function pf(lt, keys) { let i = 0; for (let k = 0; k < keys.length; k++) if (lt >= keys[k][0]) i = k; const o = { ex: keys[i][1] };
   for (let k = 1; k < keys.length; k++) { const d = lt - keys[k][0]; if (d > -.06 && d < .1) o.blink = true; if (d >= 0 && d < .32) o.head = [7 * Math.sin(Math.PI * d / .32), 0, 0]; } return o; }
+/* motion principles (the user's study clips): anticipation (a small move the other way first), overshoot + settle
+   (back ease), damped wobble for follow-through, offsets so parts never move in sync */
+const backOut = (u, s = 1.7) => { u = clamp(u); const c3 = s + 1; return 1 + c3 * (u - 1) ** 3 + s * (u - 1) ** 2; };
+const antic = (lt, at, dur, pre = .18, amt = .12, s = 1.7) => lt < at - pre ? 0 : lt < at ? -amt * eSine((lt - at + pre) / pre) : -amt + (1 + amt) * backOut((lt - at) / dur, s);
+const settle = (x, f = 11, d = 5) => x <= 0 ? 0 : Math.exp(-d * x) * Math.sin(f * x);
 const walk = (lt, rate = 1.7, stride = .22) => ({ walk: { ph: lt * rate * Math.PI * 2, stride } });
 // ---------- props ----------
 const EYES = [0, 1].map(() => { const s = Wd.glowSprite('#ff2030', .5, { opacity: 0 }); scene.add(s); return s; });
@@ -71,7 +76,7 @@ S('S03', 3.8, 'dis', TRUCK, (lt, t) => { truckLight(); SH.a = .25; SH.t = t;
   Z.truckChain.rotation.z = Math.sin(t * 1.9) * .25; camT([.35, 1.25, -1.6], [-.9, 1.05, .2], [.2, 1.2, -1.4], [-.95, 1.05, .2], U(lt, 2), 46); });
 // ---------------- 3  "ที่ข้อมือมีป้ายเหล็กสลักเลข 047" : the wrist tag close-up ----------------
 S('S04', 5.93, 'cut', TRUCK, (lt, t) => { truckLight(); MIND = 0; SH.a = .18; SH.t = t;
-  const raise = U(lt, .8, eOut); put(AR(), TRUCK, { p: [-.95, .3, .2], ry: 90, sit: true, seat: .45, ex: 'worried', hR: lp([.2, .2, .3], [.12, .62, .42], raise), pR: [1, -.4, -.2], head: [14, 0, 0] });
+  const raise = antic(lt, .25, .7, .2, .1); put(AR(), TRUCK, { p: [-.95, .3, .2], ry: 90, sit: true, seat: .45, ex: 'worried', hR: lp([.2, .2, .3], [.12, .62, .42], raise), pR: [1, -.4, -.2], head: [14, 0, 0] });
   scene.updateMatrixWorld(); const w = AR().torso.localToWorld(V(.12, .55, .42)); Z.tag.visible = true; Z.tag.position.copy(w).add(V(0, -.07 + .01 * Math.sin(t * 5), 0)); Z.tag.rotation.set(0, Math.PI / 2 + Math.sin(t * 2.3) * .25, Math.sin(t * 3.1) * .12);
   const lc = TRUCK.worldToLocal(w.clone()); camT([lc.x + .55, lc.y + .02, lc.z + .06], [lc.x, lc.y - .07, lc.z + .03], [lc.x + .42, lc.y + .05, lc.z + .04], [lc.x, lc.y - .07, lc.z + .03], U(lt, 2.8), 32); });
 // ---------------- 4  "ไม่มีใครบอกว่าผมทำผิดอะไร" : wide inside the truck, the others stare at him ----------------
@@ -80,7 +85,7 @@ S('S05', 9.16, 'cut', TRUCK, (lt, t) => { truckLight(); SH.a = .3; SH.t = t;
   put(PX(2), TRUCK, { p: [.95, .3, -.6], ry: -90, sit: true, seat: .45, ex: 'evil', head: [0, 0, 0] }); put(PX(3), TRUCK, { p: [.95, .3, 1.0], ry: -90, sit: true, seat: .45, ex: 'angry' }); put(PX(1), TRUCK, { p: [-.95, .3, 1.6], ry: 90, sit: true, seat: .45, ex: 'sly', head: [0, -40, 0] });
   Z.truckChain.rotation.z = Math.sin(t * 1.9) * .25; camT([0, 1.9, 2.5], [0, 1.0, -.2], [0, 1.75, 2.2], [0, 1.0, 0], U(lt, 2), 52); });
 // ---------------- 5  "รถหยุดหน้ากำแพงสูงร้อยเมตร" : the truck brakes in front of the giant wall, low angle ----------------
-S('S06', 11.47, 'blur', GATE, (lt, t) => { gateLight(); const k = U(lt, 1.4, eOut), z = lerp(-4, -18, k); Z.truckX.position.set(0, 0, z); Z.truckX.rotation.x = -Math.sin(Math.min(1, Math.max(0, lt - 1.25) / .45) * Math.PI) * .03;   // nose dips on the brake
+S('S06', 11.47, 'blur', GATE, (lt, t) => { gateLight(); const k = U(lt, 1.4, eOut), z = lerp(-4, -18, k); Z.truckX.position.set(0, 0, z); Z.truckX.rotation.x = -.04 * settle(lt - 1.25, 9, 3.5);   // nose dips on the brake
   if (lt > 1.2) dustAt(GATE.localToWorld(V(0, .2, z + 3)), (lt - 1.2) / 1.2, 1.6);
   camG([4.5, .5, 4], [0, 9, -30], [3.2, .6, 1], [0, 16, -36], U(lt, 2.1), 50); }, { shutter: 3 });
 // ---------------- 6  "ป้ายเหนือประตูเขียนว่า" : tilt up the wall, searchlights sweep ----------------
@@ -91,7 +96,7 @@ S('S08', 15.26, 'cut', GATE, (lt, t) => { gateLight(); Z.truckX.position.set(0, 
   camG([-3, 14.5, -24], [0, 16.2, -36.2], [-2, 15.4, -26], [0, 16.2, -36.2], U(lt, 1.4), 44); }, { rain: .5 });
 // ---------------- 8  "ลงไป" : the rear doors open, the guard points out ----------------
 S('S09', 16.71, 'whip', TRUCK, (lt, t) => { truckLight(); const op = U(lt, .3, eOut); Z.truckDoors.forEach((d, i) => { d.position.x = (i ? 1 : -1) * (.65 + 1.4 * op); }); Z.truckSlit.visible = op < .05; Z.outside.visible = true; neonPt(2, TRUCK.localToWorld(V(0, 1.6, 3.4)), '#ff7a5a', 6 * U(lt, .3), 8);
-  put(GU(), TRUCK, { p: [0, .05, 3.6], ry: 180, ex: 'angry', talk: talkAt(t) ? 1 : 0, hR: [.25, .75, .45], pR: [1, 0, -.4] });
+  put(GU(), TRUCK, { p: [0, .05, 3.6], ry: 180, ex: 'angry', talk: talkAt(t) ? 1 : 0, hR: lp([.3, .35, .1], [.25, .75, .45], antic(lt, .2, .35, .15, .15, 2.2)), pR: [1, 0, -.4], lean: 4 * settle(lt - .2, 9, 4) });
   put(AR(), TRUCK, { p: [-.95, .3, .2], ry: 90, sit: true, seat: .45, ex: 'frown', head: [0, 50, 0] }); put(PX(2), TRUCK, { p: [.95, .3, -.6], ry: -90, sit: true, seat: .45, ex: 'frown', head: [0, -50, 0] });
   camT([-.3, 1.4, -1.8], [0, 1.4, 3.4], [-.25, 1.4, -1.5], [0, 1.45, 3.4], U(lt, .8), 46); });
 // ---------------- 9  "ยินดีต้อนรับสู่เมืองนรก" : the gate grinds open, red light floods out, prisoners walk in ----------------
@@ -101,7 +106,7 @@ S('S10', 17.55, 'cut', GATE, (lt, t) => { gateLight(); Z.truckX.position.set(0, 
   camG([4.6, 1.7, -19.5], [-.4, 2.6, -30], [4.3, 1.6, -20.5], [-.4, 3.0, -30], U(lt, 1.6), 50); });
 // ---------------- 10 "ที่นี่มีกฎแค่ข้อเดียว" : the guard, one finger up ----------------
 S('S11', 19.39, 'cut', GATE, (lt, t) => { gateLight(); Z.truckX.position.set(0, 0, -18); ZC.gateAt(t, 1);
-  put(GU(), GATE, { p: [3.4, 0, -22], ry: -20, ex: 'sly', talk: talkAt(t), hR: lp([.3, .4, .2], [.22, .9, .35], U(lt, .5, eOut)), pR: [1, -.2, -.3] });
+  put(GU(), GATE, { p: [3.4, 0, -22], ry: -20, ex: 'sly', talk: talkAt(t), hR: lp([.3, .4, .2], [.22, .9, .35], antic(lt, .25, .45, .18, .12, 2)), pR: [1, -.2, -.3] });
   camG([1.9, 1.6, -18.6], [3.4, 1.55, -22], [2.1, 1.6, -18.9], [3.4, 1.6, -22], U(lt, 1.6), 42); });
 // ---------------- 11-12 "ใครแข็งแกร่ง คนนั้นได้อยู่ต่อ" : through the gate, graffiti, the strong man cracks his knuckles ----------------
 S('S12', 21.37, 'blur', STREET, (lt, t) => { streetLight(lt);
@@ -109,19 +114,20 @@ S('S12', 21.37, 'blur', STREET, (lt, t) => { streetLight(lt);
     camS([3.2, 1.4, -9.5], [-6, 2, -16], [2.5, 1.6, -10.2], [-3, 1.6, -15.4], U(lt, 2.3), 46); });
 // ---------------- 13 "ชายข้างๆ ผมจุดไฟขึ้นจากมือ" : the fire man ignites his palm (anticipation: palm up, a spark, then the flame) ----------------
 S('S13', 23.74, 'cut', STREET, (lt, t) => { streetLight(lt); const ig = clamp((lt - .45) / .35); neonPt(3, STREET.localToWorld(V(-.9, 1.6, -9)), '#ff8a3a', 2.2 * ig, 4);
-  put(FI(), STREET, { p: [-.9, .18, -9.4], ry: 30, ex: ig > .5 ? 'grinTeeth' : 'sly', hR: lp([.3, .3, .1], [.2, .6, .38], U(lt, .4, eOut)), pR: [1, -.3, 0] });
-  put(AR(), STREET, { p: [.5, .18, -8.6], ry: -40, ...pf(lt, [[0, 'calm'], [.75, 'shocked']]), lean: ig > .5 ? 4 : 0 });
-  scene.updateMatrixWorld(); HF.position.copy(hw(FI(), 1)).add(V(-.08, .12, .08)); handFire(t, eOut(ig)); if (ig > 0 && ig < 1) sparkAt(HF.position.clone(), 1 - ig, .4);
+  put(FI(), STREET, { p: [-.9, .18, -9.4], ry: 30, ex: ig > .5 ? 'grinTeeth' : 'sly', hR: lp([.3, .3, .1], [.2, .6, .38], antic(lt, .12, .35, .12, .1, 2)), pR: [1, -.3, 0], squash: -.04 * settle(lt - .45, 10, 5) });
+  put(AR(), STREET, { p: [.5, .18, -8.6], ry: -40, ...pf(lt, [[0, 'calm'], [.75, 'shocked']]), lean: -7 * clamp((lt - .72) / .12) + 5 * settle(lt - .84, 8, 3.5), head: [-10 * settle(lt - .74, 10, 4), 0, 0] });
+  scene.updateMatrixWorld(); HF.position.copy(hw(FI(), 1)).add(V(-.08, .12, .08)); handFire(t, backOut(ig, 2.4)); if (ig > 0 && ig < 1) sparkAt(HF.position.clone(), 1 - ig, .4);
   camS([.9, 1.55, -6.4], [-.5, 1.35, -9.2], [.7, 1.5, -6.8], [-.6, 1.4, -9.2], U(lt, 2.2), 42); }, { shutter: 3 });
 // ---------------- 14 "อีกคนยกรถทั้งคันได้ด้วยแขนเดียว" : the strong man lifts the car one-handed ----------------
-S('S14', 26.09, 'cut', STREET, (lt, t) => { streetLight(lt); const lift = U(lt - .5, 1.1, eOut);
-  put(ST(), STREET, { p: [1.6, .18, -14], ry: -80, ex: lift > .1 ? 'confident' : 'strain', hR: [.38, .45 + 1.0 * lift, .1], pR: [1, -.2, 0], hL: [-.3, .3, .1], squash: lt < .5 ? -.06 * U(lt, .5) : 0, lean: lt < .5 ? 6 : -4 });
-  Z.car.position.set(3.2, 1.6 * lift + .02 * Math.sin(t * 6) * lift, -14); Z.car.rotation.z = .25 * lift - .04 * Math.sin(lift * Math.PI);
+S('S14', 26.09, 'cut', STREET, (lt, t) => { streetLight(lt); const lift = backOut((lt - .5) / 1.1, .7), lift2 = backOut((lt - .6) / 1.1, .7);
+  put(ST(), STREET, { p: [1.75, .18, -14], ry: 80, ex: lift > .1 ? 'confident' : 'strain', hR: [.05, .4 + 1.05 * lift, .38], pR: [1, -.2, 0], hL: [-.3, .3, .1], squash: lt < .5 ? -.06 * U(lt, .5) : -.03 * settle(lt - .5, 9, 4), lean: lt < .5 ? 8 * U(lt, .5) : -4 + 6 * settle(lt - .5, 7, 3) });
+  neonPt(3, STREET.localToWorld(V(1.0, 3.2, -11.5)), '#ffd8a0', 5, 9);
+  Z.car.position.set(3.2, 1.6 * lift + .02 * Math.sin(t * 6) * lift, -14); Z.car.rotation.z = .25 * lift2 - .05 * settle(lt - 1.5, 7, 3);
   if (lt > .5 && lt < 1.4) dustAt(STREET.localToWorld(V(3.2, .1, -14)), (lt - .5) / .9, 1.4); if (lt > .5 && lt < .8) debrisAt(STREET.localToWorld(V(3.2, .2, -14)), lt - .5, { n: 8, seed: 4, speed: 2.5, kind: 'rock', life: 1.5 });
-  camS([-1.5, 1.0, -9], [2.4, 1.6, -14], [-1.2, .9, -9.6], [2.4, 2.2, -14], U(lt, 2.1), 46); }, { shutter: 3 });
+  camS([1.6, 1.1, -8.4], [2.6, 1.5, -14], [1.9, 1.0, -8.9], [2.6, 2.1, -14], U(lt, 2.1), 50); }, { shutter: 3 });
 // ---------------- 15-16 "ส่วนผม… ไม่มีอะไรเกิดขึ้นเลย" : Aren strains at his palm; nothing; a laugh behind him ----------------
 S('S15', 28.68, 'cut', STREET, (lt, t) => { streetLight(lt); MIND = 2.8;
-  put(AR(), STREET, { p: [.4, .18, -9], ry: -15, ...pf(lt, [[0, 'determined'], [.5, 'strain'], [1.55, 'shocked'], [2.0, 'worried']]), hR: [.18, .58, .4], pR: [1, -.3, 0], hL: [-.28, .3, .1], squash: lt > .5 && lt < 1.5 ? -.03 : 0 });
+  put(AR(), STREET, { p: [.4, .18, -9], ry: -15, ...pf(lt, [[0, 'determined'], [.5, 'strain'], [1.55, 'shocked'], [2.0, 'worried']]), hR: [.18, .58, .4], pR: [1, -.3, 0], hL: [-.28, .3, .1], squash: lt > .5 && lt < 1.5 ? -.03 : 0, side: lt > .5 && lt < 1.5 ? Math.sin(t * 38) * 1.3 : 0, lean: lt > 1.5 ? 5 * settle(lt - 1.5, 7, 3) : 0 });
   put(T1(), STREET, { p: [-1.6, .18, -12], ry: 20, ex: lt > 1.6 ? 'grinTeeth' : 'sly', talk: lt > 1.6 ? 1 : 0 });
   if (lt > .9 && lt < 1.5) smokeAt(hw(AR(), 1).add(V(0, .1, 0)), lt - .9, { n: 4, size: .15, life: .8, col: '#9a96a8', seed: 3, sway: .05 });   // a sad little puff instead of a flame
   camS([1.1, 1.55, -6.3], [.3, 1.5, -9], [.9, 1.5, -6.6], [.3, 1.5, -9], U(lt, 2.2), 42); });
@@ -167,7 +173,7 @@ S('S24', 45.77, 'cut', ALLEY, (lt, t) => { alleyLight(); MIND = 2.8; mono(U(lt, 
   camA([.9, 1.6, -5.9], [-1.45, 1.5, -7], [.75, 1.58, -6.05], [-1.45, 1.5, -7], U(lt, 1.6), 40); });
 // ---------------- 26 "พวกนายไม่ได้อยากทำแบบนี้หรอก" : eyes snap open red, the thought travels into the leader's head ----------------
 S('S25', 47.59, 'cut', ALLEY, (lt, t) => { alleyLight(); mono(1);
-  put(AR(), ALLEY, { p: [-1.45, 0, -7], ry: 135, ex: 'determined' }); [T1, T2, T3].forEach((f, i) => put(f(), ALLEY, { p: [(i - 1) * .7 + .4, 0, -6 + i % 2 * .4], ry: 230, ex: 'evil' }));
+  put(AR(), ALLEY, { p: [-1.45, 0, -7], ry: 135, ex: 'determined', head: [-9 * settle(lt, 11, 5), 0, 0] }); [T1, T2, T3].forEach((f, i) => put(f(), ALLEY, { p: [(i - 1) * .7 + .4, 0, -6 + i % 2 * .4], ry: 230, ex: 'evil' }));
   redEyes(AR(), U(lt, .25, eOut), t); whisperAt(headW(AR(), .38), headW(T1(), .4), 'พวกนายไม่ได้อยากทำแบบนี้หรอก', clamp(lt / 1.85), t, { fs: 64, dy: 260 });
   camA([.5, 1.65, -11.4], [-.6, 1.5, -6.7], [.45, 1.65, -11.0], [-.6, 1.5, -6.7], U(lt, 1.8), 50); });
 // ---------------- 27 "ทั้งสามคนหยุดนิ่ง" : they freeze mid-step ----------------
@@ -180,7 +186,8 @@ S('S27', 51.09, 'cut', ALLEY, (lt, t) => { alleyLight(); MIND = 2.8; mono(.4);
   camA([-1.7, 1.6, -4.4], [-.3, 1.55, -6], [-1.6, 1.6, -4.55], [-.3, 1.55, -6], U(lt, 1.2), 40); });
 // ---------------- 29-30 "แล้วหันหลังเดินจากไป เหมือนไม่เคยเห็นผม" ----------------
 S('S28', 52.39, 'cut', ALLEY, (lt, t) => { alleyLight(); const tu = U(lt, .6);
-  [T1, T2, T3].forEach((f, i) => put(f(), ALLEY, { p: [(i - 1) * .7 + .4, 0, -6 + i % 2 * .4 + Math.max(0, lt - .6) * 1.1], ry: lerp(230, 360, tu), ex: 'calm', ...(lt > .6 ? walk(lt + i * .2, 1.4, .2) : {}) }));
+  [T1, T2, T3].forEach((f, i) => { const d = i * .09 + (i === 1 ? .05 : 0), tb = backOut((lt - d) / .6, 1.1), th = backOut((lt - d + .12) / .45, 1.1);
+    put(f(), ALLEY, { p: [(i - 1) * .7 + .4, 0, -6 + i % 2 * .4 + Math.max(0, lt - .6 - d) * 1.1], ry: lerp(230, 360, tb), head: [0, clamp((th - tb) * 130, -40, 40), 0], ex: 'calm', ...(lt > .6 + d ? walk(lt - d, 1.4, .2) : {}) }); });
   put(AR(), ALLEY, { p: [-1.45, 0, -7], ry: 60, ex: 'shocked' });
   camA([-.6, 1.5, -10.5], [0, 1.3, -4], [-.4, 1.5, -10.2], [0, 1.3, -3], U(lt, 2.4), 46); }, { shutter: 3 });
 S('S29', 53.97, 'cut', ALLEY, (lt, t) => { alleyLight(); MIND = 2.8;
@@ -188,7 +195,7 @@ S('S29', 53.97, 'cut', ALLEY, (lt, t) => { alleyLight(); MIND = 2.8;
   camA([.2, 1.5, -8.7], [-1.45, 1.42, -7], [.1, 1.5, -8.5], [-1.45, 1.42, -7], U(lt, 1.2), 40); });
 // ---------------- 31 "ตอนนั้นเองที่ผมรู้" : he looks at his own hand ----------------
 S('S30', 55.31, 'cut', ALLEY, (lt, t) => { alleyLight(); MIND = 2.8;
-  put(AR(), ALLEY, { p: [-1.2, 0, -7.4], ry: 30, ex: 'calm', hR: [.16, .6, .42], pR: [1, -.3, 0], head: [16, 0, 0] });
+  put(AR(), ALLEY, { p: [-1.2, 0, -7.4], ry: 30, ex: 'calm', hR: lp([.3, .3, .1], [.16, .6, .42], antic(lt, .2, .6, .15, .08, 1.4)), pR: [1, -.3, 0], head: [16 * U(lt - .1, .6), 0, 0] });
   camA([-.4, 1.9, -5.9], [-1.15, 1.35, -7.2], [-.5, 1.85, -6.1], [-1.15, 1.35, -7.2], U(lt, 1.4), 42); });
 // ---------------- 32 "พลังของผมสั่งใครไม่ได้" : red threads hang from his fingers, loose: they control nobody ----------------
 S('S31', 56.81, 'cut', ALLEY, (lt, t) => { alleyLight(); MIND = 2.8; mono(.5);
@@ -202,7 +209,7 @@ S('S32', 58.84, 'blur', STREET, (lt, t) => { streetLight(lt); POST.sat = .55; MI
   camS([1.6, 1.8, -7.6], [0, 1.6, -10], [1.5, 1.75, -7.8], [0, 1.6, -10], U(lt, 2.3), 42); });
 // ---------------- 34-35 "แล้วเขาจะเชื่อ ว่ามันเป็นความคิดของตัวเอง" : he nods, sure it was his own idea ----------------
 S('S33', 61.43, 'cut', STREET, (lt, t) => { streetLight(lt); POST.sat = .8; MIND = 2.8;
-  put(PX(1), STREET, { p: [0, .18, -10], ry: 20, ...pf(lt, [[0, 'calm'], [.8, 'confident']]), hR: lt > .8 ? [.08, .62, .34] : [.3, .3, .1], pR: [1, -.3, 0], head: [lt > 1 ? 10 * Math.sin((lt - 1) * 9) * Math.exp(-(lt - 1) * 2) : 0, 0, 0] });
+  put(PX(1), STREET, { p: [0, .18, -10], ry: 20, ...pf(lt, [[0, 'calm'], [.8, 'confident']]), hR: lp([.3, .3, .1], [.08, .62, .34], antic(lt, .8, .4, .15, .1, 1.6)), pR: [1, -.3, 0], head: [lt > 1 ? 10 * Math.sin((lt - 1) * 9) * Math.exp(-(lt - 1) * 2) : 0, 0, 0] });
   camS([.9, 1.6, -7.7], [0, 1.55, -10], [.85, 1.6, -7.9], [0, 1.55, -10], U(lt, 2.8), 40); });
 // ---------------- 36 "ผมยิ้มเป็นครั้งแรก" : the first smile, neon on wet brick ----------------
 S('S34', 64.21, 'cut', ALLEY, (lt, t) => { alleyLight(); MIND = 2.8;
@@ -217,12 +224,12 @@ S('S36', 67.08, 'cut', ALLEY, (lt, t) => { alleyLight({ hemiI: .9 }); Z.dark.vis
   put(GM(), ALLEY, { p: [.6, 0, -16.5], ry: 0, ex: 'calm' }); put(AR(), ALLEY, { p: [-1.2, 0, -7.4], ry: 40, ex: 'sly' });
   camA([1.25, 1.75, -18.4], [-1.0, 1.35, -7.4], [1.1, 1.7, -18.0], [-1.0, 1.35, -7.4], U(lt, 1.4), 40); });
 // ---------------- 39 "มีปืนกระบอกหนึ่ง" : the barrel slides out of the dark, the laser clicks on ----------------
-S('S37', 68.77, 'cut', ALLEY, (lt, t) => { alleyLight({ hemiI: .8 }); MIND = 0; const out = U(lt, .6, eOut), on = lt > .7 ? 1 : 0;
+S('S37', 68.77, 'cut', ALLEY, (lt, t) => { alleyLight({ hemiI: .8 }); MIND = 0; const out = backOut(lt / .6, 1.3), on = lt > .7 ? 1 : 0;
   const from = [.45, 1.45, -16.8 + .45 * out]; ZC.laserAt(from, on ? [-1.2, 1.55, -7.4] : [from[0], from[1], from[2] + .05], 1); Z.laser.visible = !!on;
   neonPt(2, ALLEY.localToWorld(V(1.2, 1.9, -16)), '#ffc8b0', 1.4, 3); camA([1.45, 1.55, -16.0], [.45, 1.45, -16.2], [1.38, 1.53, -15.95], [.45, 1.45, -16.1], U(lt, 1.2), 34); });
 // ---------------- 40 "เล็งมาที่หัวผมแล้ว" : the red dot lands on his forehead; his eyes slide to it ----------------
 S('S38', 70.14, 'cut', ALLEY, (lt, t) => { alleyLight({ hemiI: .85 }); MIND = 2.8;
-  put(AR(), ALLEY, { p: [-1.2, 0, -7.4], ry: 40, ...pf(lt, [[0, 'sly'], [.7, 'sneaky']]) }); const hd = ALLEY.worldToLocal(headW(AR(), .42));
+  put(AR(), ALLEY, { p: [-1.2, 0, -7.4], ry: 40, ...pf(lt, [[0, 'sly'], [.7, 'sneaky']]), head: [0, -9 * eIO(clamp((lt - 1.0) / .8)), 0] }); const hd = ALLEY.worldToLocal(headW(AR(), .42));
   ZC.laserAt([.45, 1.45, -16.35], [hd.x, hd.y, hd.z + .02], 1); SH.a = 0; OVL.push({ kind: 'dot', p: headW(AR(), .42), k: .85 + .15 * Math.sin(t * 20), r: 16 });
   camA([.3, 1.6, -5.6], [-1.2, 1.52, -7.4], [.15, 1.58, -5.8], [-1.2, 1.52, -7.4], U(lt, 2.5, eOut), 38); }, { rain: .6 });
 

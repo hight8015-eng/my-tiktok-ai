@@ -327,6 +327,15 @@ If the user wants characters made in Flow from their own prompt, use the sister 
 - Bounces: each bounce lower and shorter than the last; the first frame leaving the ground moves the most; as
   little ground time as possible (except an intentionally squishy landing).
 
+## Motion helpers (v5.4, applying the study clips; see examples/shots_pm1.js)
+- backOut(u, s): ease that overshoots the target a little and settles (s .7 heavy / 1.7 normal / 2.4 snappy).
+- antic(lt, at, dur, pre, amt, s): anticipation: a small move the other way for `pre` s, then backOut to the pose.
+  Use it for every hand raise, point, reach, gun draw. settle(x, f, d): damped wobble after an impact/stop
+  (truck nose dip, body after a lift, head jolt when the eyes snap open, a startle).
+- Overlap: when a group turns, each person starts ~.1 s apart; the head leads the body (head yaw = difference of
+  two backOut clocks). Held/lifted objects lag the hand by ~.1 s. A heavy lift: dip (squash) before, small
+  overshoot, then a slow settle. Strain = a fast 1-2 deg tremble.
+
 ## Smoothness + particles (v5.3, research + the study clips)
 - Real shutter motion blur: `shutter: 3` on a shot (or `SHUTTER=3 node render.js video ...` for a whole range)
   averages 3 sub-frames over half a frame (180 deg, `SHUTTER_ANGLE`), like a film camera. Use it on fast action
