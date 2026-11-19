@@ -43,9 +43,11 @@ function draw(sh, t, alpha = 1, mb = 0, dir = 1) { OVL.length = 0; bigWordsReset
     if (L > 6 && L < 400) { const k = Math.min(1, (L - 6) / 30) * .6, cap = Math.min(1, 40 / (L * k)); E.POST.mblur = [dx * k * cap, dy * k * cap]; } } // v4.19 capped: a camera jump (cut/teleport) must never smear the whole frame
   const nh = nearestHead(); if (E.POST.dof === 0 && nh && nh.z < 9 && !window.NOAUTO) { E.POST.focus = nh.z * .97; E.POST.dof = .7 * (1 - E.sstep(3.5, 9, nh.z)); }
   const lt = t - sh.t0, shock = nh && nh.C.f2 && /shocked|scared|scream/.test(nh.C.f2[0]) && nh.C.view !== 'B' && nh.z < 7 && lt < .75 && !window.NOAUTO; FX = shock ? { lt, x: nh.sx, y: nh.sy } : (alpha === 1 ? null : FX); if (window.NOFACE) Object.values(CHARS).forEach(C => { C.face.visible = false; C.sweat.visible = false; for (const L of [C.aL, C.aR, C.lL, C.lR]) { L.up.visible = false; L.fo.visible = false; } }); Wd.updateSky(t); E.render(); X.globalAlpha = alpha;
+  X.save(); X.translate(OFF[0], OFF[1]);
   if (!(FX && FX.lt < .32) && ZP > 1.0005) { X.drawImage(E.glc, 540 * (1 - ZP), 860 * (1 - ZP), 1080 * ZP, 1920 * ZP); } else
   if (FX && FX.lt < .32) { const k = 1 + .07 * (1 - E.eOut(FX.lt / .32)); X.drawImage(E.glc, FX.x * (1 - k), FX.y * (1 - k), 1080 * k, 1920 * k); } else X.drawImage(E.glc, 0, 0);
-  X.globalAlpha = 1; if (FX) speedLines(FX); overlays(t, alpha); }
+  X.globalAlpha = 1; if (FX) speedLines(FX); overlays(t, alpha); X.restore(); }
+const OFF = [0, 0]; // v7.2 screen offset for push transitions
 function scr(v) { const p = v.clone().project(E.camera); return p.z > 1 ? null : [(p.x + 1) * 540, (1 - p.y) * 960]; }
 function trails(alpha) { // v4 smear trails behind fast hands/feet (positions from the smoothing samples)
   for (const C of Object.values(CHARS)) { const T = C._trail; if (!C.g.visible || !T || T.length < 4) continue;
@@ -87,6 +89,9 @@ function overlays(t, alpha) { // gloom lines + sparkles requested by poses/shots
       X.globalCompositeOperation = 'source-over';
       const r_ = E.rng(13); X.fillStyle = '#000000'; for (let i = 0; i < o.lines; i++) { const a = r_() * 6.283, w = .012 + r_() * .03, r0 = 140 + r_() * 260; X.beginPath(); X.moveTo(q[0] + Math.cos(a) * r0, q[1] + Math.sin(a) * r0);
         X.lineTo(q[0] + Math.cos(a - w) * 2400, q[1] + Math.sin(a - w) * 2400); X.lineTo(q[0] + Math.cos(a + w) * 2400, q[1] + Math.sin(a + w) * 2400); X.closePath(); X.fill(); } }
+    else if (o.kind === 'scribble') { const B = o.C ? headBall(o.C) : null; const q = o.C ? (B ? scr(B.c) : null) : scr(o.p); if (!q) { X.restore(); continue; } const R = o.r * 1080, n = 46, m = Math.floor(n * Math.min(1, o.k)); // v7.2 red marker circling a key person/object (documentary ref)
+      X.strokeStyle = o.col || 'rgba(235,30,40,.85)'; X.lineWidth = 11; X.lineCap = 'round'; X.globalCompositeOperation = 'source-over'; X.beginPath();
+      for (let j = 0; j <= m; j++) { const u = j / n, a = -1.9 + u * Math.PI * 2.25, wob = 1 + .06 * Math.sin(u * 23 + o.seed) + .04 * Math.sin(u * 51); const x = q[0] + Math.cos(a) * R * wob * 1.08, y = q[1] + Math.sin(a) * R * wob * .9 - u * R * .12; j ? X.lineTo(x, y) : X.moveTo(x, y); } X.stroke(); }
     else if (o.kind === 'gloom') { const C = o.C; C.head.updateWorldMatrix(true, false); const hp = C.head.getWorldPosition(new E.THREE.Vector3()), q = scr(hp); if (!q) { X.restore(); continue; }
       const top = scr(hp.clone().add(new E.THREE.Vector3(0, .5 * C.spec.s, 0))), R = top ? Math.max(40, Math.abs(q[1] - top[1])) : 120; X.strokeStyle = 'rgba(40,30,70,.75)'; X.lineCap = 'round';
       for (let i = 0; i < 9; i++) { const xx = q[0] + (i - 4) * R * .2, ph = ((t * .9 + i * .37) % 1), y0 = q[1] - R * 1.5 + ph * R * .5, L = R * (.5 + .3 * ((i * 7) % 3) / 2);
@@ -293,7 +298,12 @@ const frame1 = (t, opts = {}) => { ZP = keyZoom(t); globalThis.FRAME_T = t; // v
   const sh = SHOTS[i], lt = t - sh.t0;
   const nx0 = SHOTS[i + 1], dir = i % 2 ? 1 : -1;
   const bIn = sh.tr === 'whip' && lt < WH ? 1 - lt / WH : 0, bOut = nx0 && nx0.tr === 'whip' && nx0.t0 - t < .12 ? 1 - (nx0.t0 - t) / .12 : 0;
-  if (i > 0 && sh.tr === 'blur' && lt < BLR) { const k = E.eSine(lt / BLR), m = Math.sin(Math.PI * k) * .9; draw(SHOTS[i - 1], t, 1, m, dir); draw(sh, t, k, m, dir); } // v4.29 motion-blur dissolve (refs): both shots smear along the move while they cross
+  const PUSHD = .34, FGW = .42; // v7.2 documentary-ref transitions: 'push' (new shot shoves the old one off: o.dir L/R/U/D) and 'fgwipe' (a dark foreground shape crosses the lens, the cut hides behind it)
+  if (i > 0 && sh.tr === 'push' && lt < PUSHD) { const k = E.eIO(lt / PUSHD), d = sh.dir || 'L', v = { L: [1080, 0], R: [-1080, 0], U: [0, 1920], D: [0, -1920] }[d], m = Math.sin(Math.PI * k) * .9, hz = d === 'L' || d === 'R';
+    OFF[0] = -k * v[0]; OFF[1] = -k * v[1]; draw(SHOTS[i - 1], t, 1, hz ? m : 0, -Math.sign(v[0] || 1)); OFF[0] = (1 - k) * v[0]; OFF[1] = (1 - k) * v[1]; draw(sh, t, 1, hz ? m : 0, -Math.sign(v[0] || 1)); OFF[0] = OFF[1] = 0; }
+  else if (i > 0 && sh.tr === 'fgwipe' && lt < FGW) { const k = lt / FGW; draw(k < .5 ? SHOTS[i - 1] : sh, t);
+    const x = 1500 - k * 3000; X.save(); const g = X.createLinearGradient(x - 900, 0, x + 900, 0); g.addColorStop(0, 'rgba(8,6,14,0)'); g.addColorStop(.3, 'rgba(8,6,14,.97)'); g.addColorStop(.7, 'rgba(8,6,14,.97)'); g.addColorStop(1, 'rgba(8,6,14,0)'); X.fillStyle = g; X.fillRect(x - 900, 0, 1800, 1920); X.restore(); }
+  else if (i > 0 && sh.tr === 'blur' && lt < BLR) { const k = E.eSine(lt / BLR), m = Math.sin(Math.PI * k) * .9; draw(SHOTS[i - 1], t, 1, m, dir); draw(sh, t, k, m, dir); } // v4.29 motion-blur dissolve (refs): both shots smear along the move while they cross
   else if (i > 0 && (sh.tr === 'dis' || sh.tr === 'sweep') && lt < DIS) { draw(SHOTS[i - 1], t); draw(sh, t, E.eSine(lt / DIS)); }
   else if (i > 0 && sh.tr === 'whip' && lt < .1) { draw(SHOTS[i - 1], t, 1, 1, -dir); draw(sh, t, lt / .1, bIn, dir); }
   else draw(sh, t, 1, Math.max(bIn, bOut), bOut > bIn ? -dir : dir);

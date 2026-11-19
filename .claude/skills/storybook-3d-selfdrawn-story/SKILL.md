@@ -342,6 +342,18 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
   hard shadow).
 
+## Camera + transitions, documentary edit (v7.2, user ref: AI-image documentary with titles; main.js)
+- Never a dead frame: every shot keeps a slow push-in or drift (camDrift + camS/camA ease); 3-4 s per shot, cut on the
+  voice's phrase boundary; keep the push/pan DIRECTION consistent through a sequence (a story moving forward = left).
+- New transitions (S(id, t0, tr, SET, fn, { dir })): 'push' = the new shot shoves the old one out (dir L/R/U/D, .34 s,
+  eased, motion blur along the move; captions stay still) - use for 'meanwhile / next place'; 'fgwipe' = a dark
+  foreground shape crosses the lens and the cut hides behind it (.42 s) - use for moving through a space / following
+  someone. Existing: cut (default), blur (motion-blur dissolve), dis (dissolve = time passes), whip, sweep.
+  Vertical push (U/D) = going down into the past / up to the reveal.
+- scribbleAt(C or worldPos, k, r): a red marker ring drawn on over ~.5 s around a KEY person/object (pass the character
+  so it rings the head); pair with a title label ('A machinist,' small + the name bold) in the empty side of the frame.
+- Check: output/ทดลองทรานซิชันแบบสารคดี.jpg.
+
 ## Text system (v7.1, main.js captions/labels + src/text3d.js; 5 user refs: safe zones, keyword pill, presets, documentary titles, text behind people)
 - Captions are NEEDED (many watch muted) but calm: one 1-2 word chunk at a time, soft POP (86% -> 100% in 4 frames, rises
   16 px), no SFX per word. project.json captions: { style: 'story', anim: 'pop'|'slide'|'fade'|'none', hiStyle: 'color'|'pill', y }.

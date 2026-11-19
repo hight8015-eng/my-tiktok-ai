@@ -293,6 +293,7 @@ export const debrisAt = (p, age, o = {}) => { if (age >= 0 && age <= (o.life ?? 
 const V3 = (p) => p ? (p.clone ? p.clone() : new THREE.Vector3(...p)) : null;
 export const tintAt = (col, k) => { if (k > 0) OVL.push({ kind: 'tint', col, k: Math.min(1, k) }); };          // whole frame tinted (blood sky, night, flashback)
 export const irisAt = (p, k, col = '#d0102a') => { if (k > 0 && k <= 1) OVL.push({ kind: 'iris', p: V3(p), k, col }); };   // a disc grows from a point (red eye) to fill the screen
+export const scribbleAt = (p, k, r = .12, col, seed = 1) => { if (k > 0) OVL.push({ kind: 'scribble', ...(p && p.g ? { C: p } : { p: V3(p) }), k, r, col, seed }); }; // pass a CHARACTER to ring its head (resolved at draw time) // v7.2 red marker ring drawn on over ~.5 s (k 0..1); r = radius in screen widths
 export const burnAt = (k) => { if (k > 0) OVL.push({ kind: 'burn', k: Math.min(1, k) }); };                 // burnt sepia edges closing in (into the past)
 export const lightAt = (p, col, r = 1.5, k = 1) => { if (k > 0) OVL.push({ kind: 'lightwrap', p: V3(p), col, r, k: Math.min(1, k) }); };   // col = '#rrggbb'
 export const whisperAt = (p, p2, txt, k, t, o = {}) => { if (k > 0 && k < 1) OVL.push({ kind: 'whisper', p: p ? V3(p) : null, p2: V3(p2), txt, k, t, ...o }); };
