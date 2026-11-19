@@ -27,7 +27,8 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
 - `autosave.sh` runs by itself after every Claude turn (Stop hook in `.claude/settings.json`) and saves:
   every scratchpad story project -> `projects/_work/<name>/` (src, tools, chars, voice, timing, sheets, sfx.json),
   loose scripts -> `projects/_work/_loose/`, finished episodes (ปก.jpg, โพสต์.txt) -> `projects/_delivered/`,
-  and the skill mirror; then commits and pushes to claude/skill-installation-kkpo2q. Log: `.autosave.log`.
+  and the skill mirror; then commits and pushes to this session's branch AND the default branch
+  claude/skill-installation-kkpo2q (every new session starts from it). Log: `.autosave.log`.
 - Not saved (rebuildable): renders, frames, wavs, generated sprites. `bash autosave.sh --video` also saves the mp4s.
 - New session: `bash autosave.sh --restore` copies `projects/_work` back into the scratchpad.
 
@@ -40,4 +41,6 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
   motion.js, acting.js perform + faces by situation, brighter rigs) -> stills check -> ASK how many helper sessions ->
   render -> frame check -> music with score.py (spot cues, beatfit hit points, stingers, duck) + SFX (hit rules, snap
   musical sfx) -> finish -> deliver 4 files. Do NOT re-render ep1.
-- New session start: `bash autosave.sh --restore` copies projects/_work back into the scratchpad.
+- New session start: restore runs by itself (SessionStart hook -> `autosave.sh --restore`). No need to ask for it.
+- Token saving: SKILL.md keeps the core workflow; detail rules v5.2-v6.9 are in the skill's `references/*.md`
+  (index table in SKILL.md). Read only the files the current step needs.
