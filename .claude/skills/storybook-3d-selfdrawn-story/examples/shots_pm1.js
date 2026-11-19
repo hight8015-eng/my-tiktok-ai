@@ -49,12 +49,12 @@ const neonPt = (i, p, col, I = 6, d = 12) => { const l = Wd.pts[i]; l.position.c
 /* character light rigs per set, motivated by the visible sources (neon magenta sign left, cyan sign right; the alley's
    warm lamp left + cool city light right; truck: cold window top light; gate: red ZERO CITY sign from above + white searchlight rim) */
 const RIGS = {
-  street: { base: .82, key: ['#ff4a9a', .32], keySide: -1, fill: ['#2fd0ff', .26], top: ['#c8b8ff', .12], rim: ['#5fe8ff', 0.42], rimDir: [1, .35], rim2: ['#ff4a8a', 0.19], shadow: .3, rimW: .007 },
-  alley: { base: .74, key: ['#ffb060', .4], keySide: -1, fill: ['#5a6aff', .2], top: ['#ffd8a0', .1], rim: ['#ff3a5a', 0.35], rimDir: [1, .2], rim2: ['#ffb060', 0.16], shadow: .45, rimW: .007 },
-  truck: { base: .78, key: ['#a8c4ff', .25], keySide: 1, fill: ['#ffcf8a', .18], top: ['#c8d8ff', .3], rim: ['#c8d8ff', 0.3], rimDir: [0, 1], shadow: .3, rimW: .007 },
-  gate: { base: .8, key: ['#ff3040', .38], keySide: -1, fill: ['#8aa0ff', .16], top: ['#ff6070', .25], rim: ['#fff0d8', 0.4], rimDir: [1, .5], shadow: .35, rimW: .007 },
-  silhouette: { base: .28, key: ['#000000', 0], fill: ['#000000', 0], top: ['#ffd8a0', .08], rim: ['#ffc87a', .9], rimDir: [1, .4], rim2: ['#ffc87a', .7], shadow: .8, rimW: .008 },   /* a figure in front of a bright source: dark body, bright edges */
-  power: { base: .62, key: ['#ff2030', .3], keySide: -1, fill: ['#000000', 0], top: ['#ffffff', .05], rim: ['#ff2a3a', 0.55], rimDir: [1, .2], rim2: ['#ff2a3a', 0.28], shadow: .6, rimW: .009 } };
+  street: { dir: [-.7, .45, .5], cel: .7,  base: .82, key: ['#ff4a9a', .32], keySide: -1, fill: ['#2fd0ff', .26], top: ['#c8b8ff', .12], rim: ['#5fe8ff', 0.42], rimDir: [1, .35], rim2: ['#ff4a8a', 0.19], shadow: .3, rimW: .007 },
+  alley: { dir: [-.6, .7, .4], cel: .8,  base: .74, key: ['#ffb060', .4], keySide: -1, fill: ['#5a6aff', .2], top: ['#ffd8a0', .1], rim: ['#ff3a5a', 0.35], rimDir: [1, .2], rim2: ['#ffb060', 0.16], shadow: .45, rimW: .007 },
+  truck: { dir: [.1, .9, .35], cel: .7,  base: .78, key: ['#a8c4ff', .25], keySide: 1, fill: ['#ffcf8a', .18], top: ['#c8d8ff', .3], rim: ['#c8d8ff', 0.3], rimDir: [0, 1], shadow: .3, rimW: .007 },
+  gate: { dir: [0, .9, .4], cel: .7,  base: .8, key: ['#ff3040', .38], keySide: -1, fill: ['#8aa0ff', .16], top: ['#ff6070', .25], rim: ['#fff0d8', 0.4], rimDir: [1, .5], shadow: .35, rimW: .007 },
+  silhouette: { dir: [0, .2, -1], cel: 1, shadeCol: '#3a3448',  base: .28, key: ['#000000', 0], fill: ['#000000', 0], top: ['#ffd8a0', .08], rim: ['#ffc87a', .9], rimDir: [1, .4], rim2: ['#ffc87a', .7], shadow: .8, rimW: .008 },   /* a figure in front of a bright source: dark body, bright edges */
+  power: { dir: [0, -.8, .5], cel: .9, shadeCol: '#6a2a3a',  base: .62, key: ['#ff2030', .3], keySide: -1, fill: ['#000000', 0], top: ['#ffffff', .05], rim: ['#ff2a3a', 0.55], rimDir: [1, .2], rim2: ['#ff2a3a', 0.28], shadow: .6, rimW: .009 } };
 function streetLight(lt) { setRig(RIGS.street); nightCity(); Wd.setShadowFocus(-600, 1, -10, 14); neonPt(0, STREET.localToWorld(V(-6, 3.5, -4)), '#ff2f6a', 7); neonPt(1, STREET.localToWorld(V(6, 3.5, -12)), '#2fe0ff', 7); neonPt(2, STREET.localToWorld(V(-5, 3, -20)), '#ffd23a', 6); neonPt(3, STREET.localToWorld(V(5.5, 3, -30)), '#c070ff', 6, 14); }
 function alleyLight(o = {}) { setRig(RIGS.alley); nightCity({ hemiI: 1.9, sunI: .9, fog: '#1c1628', fogN: 10, fogF: 48, ...o }); Wd.setShadowFocus(0, 1, -606, 8); neonPt(0, ALLEY.localToWorld(V(-1.4, 3.3, -7)), '#ffc87a', 6, 9); neonPt(1, ALLEY.localToWorld(V(0, 2.5, 3)), '#ff2f6a', 5, 12); neonPt(3, ALLEY.localToWorld(V(.5, 3, -13)), '#7a8aff', 3.5, 9); }
 function truckLight() { setRig(RIGS.truck); nightCity({ hemiI: 1.9, sunI: .8, fog: '#14121c', fogN: 10, fogF: 40, stars: 0, moon: 0 }); Wd.setShadowFocus(0, 1, 600, 5); neonPt(0, TRUCK.localToWorld(V(0, 2, -.5)), '#ffcf8a', 3, 6); neonPt(1, TRUCK.localToWorld(V(0, 1.7, -2.6)), '#9ab8ff', 2.5, 5); }
@@ -126,7 +126,7 @@ S('S12', 21.37, 'blur', STREET, (lt, t) => { streetLight(lt);
 S('S13', 23.74, 'cut', STREET, (lt, t) => { streetLight(lt); const ig = clamp((lt - .45) / .35); neonPt(3, STREET.localToWorld(V(-.9, 1.6, -9)), '#ff8a3a', 1.1 * ig, 4);
   put(FI(), STREET, { p: [-.9, .18, -9.4], ry: 30, ex: ig > .5 ? 'grinTeeth' : 'sly', hR: lp([.3, .3, .1], [.2, .6, .38], antic(lt, .12, .35, .12, .1, 2)), pR: [1, -.3, 0], squash: -.04 * settle(lt - .45, 10, 5) });
   put(AR(), STREET, { p: [.5, .18, -8.6], ry: -40, ...pf(lt, [[0, 'calm'], [.75, 'shocked']]), lean: -7 * clamp((lt - .72) / .12) + 5 * settle(lt - .84, 8, 3.5), head: [-10 * settle(lt - .74, 10, 4), 0, 0] });
-  scene.updateMatrixWorld(); HF.position.copy(hw(FI(), 1)).add(V(-.08, .12, .08)); handFire(t, backOut(ig, 2.4)); setRig({ ...RIGS.street, key: ['#ff9a3a', .25 + .35 * ig], keySide: 1, rim: ['#ffb060', .5 * ig], rimDir: [1, -.2] });   /* motivated: the new flame becomes the key light */ if (ig > 0 && ig < 1) sparkAt(HF.position.clone(), 1 - ig, .4);
+  scene.updateMatrixWorld(); HF.position.copy(hw(FI(), 1)).add(V(-.08, .12, .08)); handFire(t, backOut(ig, 2.4)); setRig({ ...RIGS.street, key: ['#ff9a3a', .25 + .35 * ig], keySide: 1, rim: ['#ffb060', .5 * ig], rimDir: [1, -.2], dir: [.6, -.45, .6], cel: .25 + .6 * ig });   /* the flame below the face: under-light grin */   /* motivated: the new flame becomes the key light */ if (ig > 0 && ig < 1) sparkAt(HF.position.clone(), 1 - ig, .4);
   camS([.9, 1.55, -6.4], [-.5, 1.35, -9.2], [.7, 1.5, -6.8], [-.6, 1.4, -9.2], U(lt, 2.2), 42); }, { shutter: 3 });
 // ---------------- 14 "อีกคนยกรถทั้งคันได้ด้วยแขนเดียว" : the strong man lifts the car one-handed ----------------
 S('S14', 26.09, 'cut', STREET, (lt, t) => { streetLight(lt); const lift = backOut((lt - .5) / 1.1, .7), lift2 = backOut((lt - .6) / 1.1, .7);
@@ -249,6 +249,6 @@ export const WHITEK = { k: 0 };
 export const COVER = { id: 'COVER', t0: 0, fn: (lt, t, o = {}) => { reset(10); ALLEY.visible = true; alleyLight(); ZC.alleyAt(10, 0);
   put(AR(), ALLEY, { p: [-1.2, 0, -7.4], ry: 30, ex: 'sly' }); redEyes(AR(), .9, 10); THREAD.visible = true; const a = hw(AR(), 1); updateRope(THREAD, a, a.clone().add(V(.4, -.9, .2)), { sag: .1, t: 10 });
   const cm = o.cam || [.9, 1.45, -4.6], g = o.tgt || [-1.1, 1.75, -7.4]; MIND = 0; camA(cm, g, cm, g, 0, o.fov || 44); } };
-export const BENCH = { id: 'BENCH', t0: 0, fn: (lt, t, o = {}) => { reset(0); STREET.visible = true; streetLight(0); const ids = ['aren', 'guard', 'fire', 'strong', 'thug1', 'thug2', 'thug3', 'gunman'];
+export const BENCH = { id: 'BENCH', t0: 0, fn: (lt, t, o = {}) => { reset(0); STREET.visible = true; streetLight(0); if (o.rig) setRig({ ...RIGS.street, ...o.rig }); const ids = ['aren', 'guard', 'fire', 'strong', 'thug1', 'thug2', 'thug3', 'gunman'];
   ids.forEach((id, i) => put(CHARS[id], STREET, { p: [(i - 3.5) * .85, .18, -9], ry: o.ry ?? 0, ex: ['sly', 'angry', 'grinTeeth', 'confident', 'evil', 'sneaky', 'frown', 'calm'][i] }));
   const bc = o.cam || [0, 1.4, -2.6], bt = o.tgt || [0, 1.1, -9]; camS(bc, bt, bc, bt, 0, o.fov || 44); } };

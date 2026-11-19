@@ -8,7 +8,7 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.ttf': 'font/ttf
   const args = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'];
   const b = await chromium.launch({ args, headless: true });
   const p = await b.newPage({ viewport: { width: 540, height: 960 } });
-  p.on('pageerror', e => console.error('PAGEERR', e.message)); p.on('console', m => { const s = m.text(); if (/GPU stall|GL Driver|WebGL/.test(s)) return; console.log('[pg]', s.slice(0, 400)); });
+  p.on('pageerror', e => console.error('PAGEERR', e.message)); p.on('console', m => { const s = m.text(); if (/GPU stall|GL Driver/.test(s)) return; console.log('[pg]', s.slice(0, 400)); });
   await p.goto(`http://127.0.0.1:${port}/index.html`); await Promise.race([p.waitForFunction(() => window.ready, null, { timeout: 180000 }), new Promise((_, rej) => p.on('pageerror', e => rej(e)))]);
   const nocap = !!process.env.NOCAP; if (process.env.NOFACE) await p.evaluate(() => { window.NOFACE = true; }); if (process.env.NOSMOOTH) await p.evaluate(() => { window.NOSMOOTH = true; }); if (process.env.SHUTTER) await p.evaluate(([n, a]) => { window.SHUTTER = n; if (a) window.SHUTTER_ANGLE = a; }, [+process.env.SHUTTER, +(process.env.SHUTTER_ANGLE || 0)]);
   if (mode === 'stills') { fs.mkdirSync(out, { recursive: true });

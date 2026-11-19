@@ -342,6 +342,18 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
   hard shadow).
 
+## Light direction on faces (v5.8, user refs: 9 light directions on a head, anime hair shadows)
+- setRig({ dir: [x, y, z], cel: 0..1, term, shadeCol }): dir is the light direction in SCREEN space (x right, y up,
+  z toward the camera). The head ball is shaded as a sphere with a hard anime terminator, and the hair/hat casts its
+  shape onto the face (marches toward the light through the ivory mask, sprites/*-mask.png ALPHA channel). The body
+  is shaded as a cylinder. Mirroring and every view work (screen space).
+- Read the refs: top-front light = bangs throw a jagged shadow across the brow (most anime); side light = half the
+  face in shadow (split, tension); under-light = shadow up over the eyes (villain / horror / power: PM 'power' rig,
+  and the fire man's flame); back light = whole face in shadow + rim (silhouette). Keep the shadow mid-tone
+  (shadeCol ~#7a7090) so faces still read; match dir to the visible source (sign, lamp, window, flame).
+- GLSL: never name a variable `cast` (reserved word -> the shader fails and every sprite disappears). render.js
+  now prints WebGL errors to the log.
+
 ## Glow + visible light (v5.7, user refs: Blade Runner haze, stage beams, window god rays, a match in a blue room, glowing doorway)
 - src/glow.js: beam(par, from, to, r, col, op) = volumetric cone (soft edges, brightest at the source, falls off with
   distance; beamMat() to retexture an existing cone); spill(par, p, r, col, op, rot) = the source's colour pooling on

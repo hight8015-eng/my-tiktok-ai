@@ -547,15 +547,16 @@ function pearGeo() { const g = new THREE.PlaneGeometry(1, 1, 12, 16), P = g.attr
    Set per shot with setRig({...}) (shots.js), reset each frame with setRig(). */
 export const RIG = { uBase: { value: 1 }, uKeyCol: { value: new THREE.Color('#ffffff') }, uKeyAmt: { value: 0 }, uKeySide: { value: -1 }, uFillCol: { value: new THREE.Color('#ffffff') }, uFillAmt: { value: 0 },
   uTopCol: { value: new THREE.Color('#ffffff') }, uTopAmt: { value: 0 }, uRimCol: { value: new THREE.Color('#ffffff') }, uRimAmt: { value: 0 }, uRimDir: { value: new THREE.Vector2(1, .3) },
-  uRim2Col: { value: new THREE.Color('#ffffff') }, uRim2Amt: { value: 0 }, uRimW: { value: .012 }, uShadow: { value: 0 } };
-export function setRig(o = {}) { const d = { base: 1, key: ['#ffffff', 0], keySide: -1, fill: ['#ffffff', 0], top: ['#ffffff', 0], rim: ['#ffffff', 0], rimDir: [1, .3], rim2: ['#ffffff', 0], rimW: .012, shadow: 0, ...o };
+  uRim2Col: { value: new THREE.Color('#ffffff') }, uRim2Amt: { value: 0 }, uRimW: { value: .012 }, uShadow: { value: 0 },
+  uLight: { value: new THREE.Vector3(-.6, .6, .5) }, uCel: { value: 0 }, uTerm: { value: .05 }, uShadeCol: { value: new THREE.Color('#7a7090') } };
+export function setRig(o = {}) { const d = { base: 1, key: ['#ffffff', 0], keySide: -1, fill: ['#ffffff', 0], top: ['#ffffff', 0], rim: ['#ffffff', 0], rimDir: [1, .3], rim2: ['#ffffff', 0], rimW: .012, shadow: 0, dir: [-.6, .6, .5], cel: 0, term: .05, shadeCol: '#7a7090', ...o };
   RIG.uBase.value = d.base; RIG.uKeyCol.value.set(d.key[0]); RIG.uKeyAmt.value = d.key[1]; RIG.uKeySide.value = d.keySide; RIG.uFillCol.value.set(d.fill[0]); RIG.uFillAmt.value = d.fill[1];
-  RIG.uTopCol.value.set(d.top[0]); RIG.uTopAmt.value = d.top[1]; RIG.uRimCol.value.set(d.rim[0]); RIG.uRimAmt.value = d.rim[1]; RIG.uRimDir.value.set(...d.rimDir).normalize(); RIG.uRim2Col.value.set(d.rim2[0]); RIG.uRim2Amt.value = d.rim2[1]; RIG.uRimW.value = d.rimW; RIG.uShadow.value = d.shadow; }
-function rigShader(sh) { Object.assign(sh.uniforms, RIG);
+  RIG.uTopCol.value.set(d.top[0]); RIG.uTopAmt.value = d.top[1]; RIG.uRimCol.value.set(d.rim[0]); RIG.uRimAmt.value = d.rim[1]; RIG.uRimDir.value.set(...d.rimDir).normalize(); RIG.uRim2Col.value.set(d.rim2[0]); RIG.uRim2Amt.value = d.rim2[1]; RIG.uRimW.value = d.rimW; RIG.uShadow.value = d.shadow; RIG.uLight.value.set(...d.dir).normalize(); RIG.uCel.value = d.cel; RIG.uTerm.value = d.term; RIG.uShadeCol.value.set(d.shadeCol); }
+function rigShader(sh, mat) { Object.assign(sh.uniforms, RIG); sh.uniforms.uBall = mat.userData.uBall; sh.uniforms.uIsHead = mat.userData.uIsHead; sh.uniforms.uMask = mat.userData.uMask;
   sh.vertexShader = sh.vertexShader.replace('void main() {', 'varying vec2 vScr;\nvoid main() {').replace('#include <project_vertex>', `#include <project_vertex>
     { mat4 M = projectionMatrix * modelViewMatrix; vec4 c0 = M * vec4(0., 0., 0., 1.), c1 = M * vec4(position, 1.), cx = M * vec4(.5, 0., 0., 1.), cy = M * vec4(0., .5, 0., 1.);
       vScr = vec2((c1.x / c1.w - c0.x / c0.w) / max(1e-5, abs(cx.x / cx.w - c0.x / c0.w)), (c1.y / c1.w - c0.y / c0.w) / max(1e-5, abs(cy.y / cy.w - c0.y / c0.w))); }`);
-  sh.fragmentShader = sh.fragmentShader.replace('void main() {', `varying vec2 vScr; uniform float uBase, uKeyAmt, uKeySide, uFillAmt, uTopAmt, uRimAmt, uRim2Amt, uRimW, uShadow; uniform vec3 uKeyCol, uFillCol, uTopCol, uRimCol, uRim2Col; uniform vec2 uRimDir;
+  sh.fragmentShader = sh.fragmentShader.replace('void main() {', `varying vec2 vScr; uniform float uBase, uKeyAmt, uKeySide, uFillAmt, uTopAmt, uRimAmt, uRim2Amt, uRimW, uShadow; uniform vec3 uKeyCol, uFillCol, uTopCol, uRimCol, uRim2Col; uniform vec2 uRimDir; uniform vec3 uLight, uShadeCol; uniform float uCel, uTerm, uIsHead; uniform vec4 uBall; uniform sampler2D uMask;
     float rimA(vec2 dir) { vec2 sg = vec2(sign(dFdx(vMapUv.x) + 1e-9), sign(dFdy(vMapUv.y) + 1e-9)); vec2 o = vec2(dir.x * sg.x, dir.y * sg.y) * uRimW; float e = 0.;
       for (int i = 1; i <= 3; i++) e += 1. - step(.5, texture2D(map, vMapUv + o * float(i) / 3.).a); return clamp(e / 2., 0., 1.); }
     void main() {`).replace('#include <dithering_fragment>', `#include <dithering_fragment>
@@ -563,10 +564,21 @@ function rigShader(sh) { Object.assign(sh.uniforms, RIG);
       vec3 lit = vec3(uBase) + uKeyCol * uKeyAmt * s + uFillCol * uFillAmt * (1. - s) + uTopCol * uTopAmt * smoothstep(-.3, 1., vScr.y);
       lit *= 1. - uShadow * (1. - s) * .6 - uShadow * smoothstep(.2, -1., vScr.y) * .25;
       gl_FragColor.rgb *= lit;
+      /* v5.8 CEL SHADOW from a light direction (refs: 9 light directions on a head; anime hard-edged shadow shapes):
+         head = the ivory ball read as a sphere (normal from the pixel's place in the ball) + the hair/hat casting its
+         shadow onto the face (march toward the light through the ivory mask); body = a cylinder across the sprite. */
+      if (uCel > 0.) { vec2 sg = vec2(sign(dFdx(vMapUv.x) + 1e-9), sign(dFdy(vMapUv.y) + 1e-9)); vec3 L = normalize(uLight); vec2 Luv = vec2(L.x * sg.x, L.y * sg.y); float sh = 0.;
+        if (uIsHead > .5) { vec2 d = (vMapUv - uBall.xy) / uBall.zw; float r2 = dot(d, d);
+          float mk = texture2D(uMask, vMapUv).a; for (int k = 0; k < 4; k++) { vec2 o = vec2(k == 0 ? .008 : k == 1 ? -.008 : 0., k == 2 ? .008 : k == 3 ? -.008 : 0.); mk = max(mk, texture2D(uMask, vMapUv + o).a); }
+          if (r2 < 1.02 && mk > .5) { vec3 n = vec3(d.x * sg.x, d.y * sg.y, sqrt(max(0., 1. - r2))); float form = 1. - smoothstep(-.04, .04, dot(n, L) - uTerm);
+            float hcast = 0.; for (int i = 2; i <= 18; i++) { vec2 q = vMapUv + normalize(Luv + 1e-6) * uBall.zw * .022 * float(i); vec2 dq = (q - uBall.xy) / uBall.zw; if (dot(dq, dq) < .9 && texture2D(uMask, q).a < .5 && texture2D(map, q).a > .5) hcast = 1.; }
+            sh = max(form, hcast); } }
+        else { float x = clamp(vScr.x, -1., 1.); vec3 n = vec3(x, 0., sqrt(max(0., 1. - x * x))); sh = (1. - smoothstep(-.05, .05, dot(n, L) - uTerm)) * .8; }
+        gl_FragColor.rgb *= mix(vec3(1.), uShadeCol * 1.25, sh * uCel); }
       if (uRimAmt > 0.) gl_FragColor.rgb += uRimCol * uRimAmt * rimA(uRimDir);
       if (uRim2Amt > 0.) gl_FragColor.rgb += uRim2Col * uRim2Amt * rimA(vec2(-uRimDir.x, uRimDir.y)); }`); }
 function sprMesh(pear = false) {
-  const m = new THREE.MeshLambertMaterial({ alphaTest: .5, side: THREE.DoubleSide, emissive: 0xffffff, emissiveIntensity: .32 }); noOutline(m); m.onBeforeCompile = rigShader; m.customProgramCacheKey = () => 'rig1';
+  const m = new THREE.MeshLambertMaterial({ alphaTest: .5, side: THREE.DoubleSide, emissive: 0xffffff, emissiveIntensity: .32 }); noOutline(m); m.userData.uBall = { value: new THREE.Vector4(.5, .5, .4, .4) }; m.userData.uIsHead = { value: 0 }; m.userData.uMask = { value: null }; m.onBeforeCompile = (sh) => rigShader(sh, m); m.customProgramCacheKey = () => 'rig2';
   const me = new THREE.Mesh(pear ? pearGeo() : new THREE.PlaneGeometry(1, 1), m); me.castShadow = false; me.receiveShadow = false;
   me.userData.sprN = new THREE.ShaderMaterial({ uniforms: { map: { value: null } }, vertexShader: sprNVS, fragmentShader: sprNFS, side: THREE.DoubleSide });
   return me;
@@ -621,6 +633,7 @@ function visUp(o) { while (o) { if (!o.visible) return false; o = o.parent; } re
 function place(me, center, yaw, roll, w, h, mir) {
   me.position.copy(center); s_e.set(0, yaw, roll, 'YXZ'); me.quaternion.setFromEuler(s_e); me.scale.set(mir ? -w : w, h, 1);
 }
+const MASKT = {};
 export function updateSprites(cam) {
   cam.updateMatrixWorld(); cam.getWorldPosition(s_cp);
   for (const C of Object.values(CHARS)) { if (!C.is2D) continue;
@@ -659,6 +672,8 @@ export function updateSprites(cam) {
     const pp = C.pop || 0, hq = sq * .45; place(C.sh, ch, yaw, rollH, (hx1 - hx0) * K2 * s * hk * (1 + pp * .6) * (1 - hq * .5) * turnW, (hy1 - hy0) * K2 * s * hk * (1 + pp) * (1 + hq), mir);
     const ht = headTex(C, key, view); if (C.sh.material.map !== ht) { C.sh.material.map = ht; C.sh.material.emissiveMap = ht; C.sh.material.needsUpdate = true; }
     C.sh.userData.sprN.uniforms.map.value = ht;
+    { const mu = C.sh.material.userData, im = SPR.headImg[key], [bx2, by2, br2] = M.ballH; mu.uIsHead.value = 1; mu.uBall.value.set(bx2 / im.width, 1 - by2 / im.height, br2 / im.width, br2 / im.height);
+      if (!MASKT[key]) { MASKT[key] = new THREE.Texture(SPR.mask[key]); MASKT[key].needsUpdate = true; } mu.uMask.value = MASKT[key]; }
     C.view = view; C.mir = mir;
   }
 }
