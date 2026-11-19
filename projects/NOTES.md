@@ -49,3 +49,5 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
   big kinetic word BEHIND the character only for the hook/cliffhanger, typewriter for messages. Proposal sent; waiting
   for the user's go-ahead. Also offered: original 'style-alike' cues (bossa lounge, flute waltz, retro jingle, dark
   music-box, chill jazz, sad lofi) made with score.py - same mood/tempo/instruments, never the melody/hook.
+- User APPROVED the red marker ring (scribbleAt): use 1-2 times per episode on key people (first appearance of a key
+  character + name label, the reveal, a liar), never during heavy emotion beats.
