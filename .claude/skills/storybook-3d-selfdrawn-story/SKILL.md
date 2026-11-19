@@ -342,6 +342,19 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
   hard shadow).
 
+## Body mechanics kit (v6.7, src/motion.js; research: 12 principles, follow-through/overlap, Eiserloh camera trauma)
+- turn(lt, t0, dur, fromDeg, toDeg): successive breaking of joints - eyes dart first, head .06, chest .12, hips .2 of
+  dur later, each overshoots and settles; a small head dip mid-turn. Use for every look-around / turn to camera.
+- take(lt, t0, k): surprise: anticipation dip (squash, head down) -> stretch up past the pose -> damped settle.
+- hitReact(lt, t0, dir, k): head snaps first, chest 2 frames later, hips last + a stagger step (p_off), wobble out.
+- standUp(lt, t0, LEG): lean the weight over the feet first, push, rise with a small overshoot (no pop at the switch).
+- hold(lt, seed, k): moving hold - slow weight shift side to side, head settles a beat later. Nobody freezes.
+- beat(env, envPrev): small head nods ON stressed syllables; gestures land a hair BEFORE the word.
+- trauma(t, [[hitTime, amount]]): camera shake = trauma^2 x smooth noise, trauma decays linearly (small hits
+  almost invisible, big hits dramatic); replaces hand-tuned SH.a ramps.
+- Rules: the root (hips/torso) starts every move; lighter parts drag and settle later; heavier = slower start,
+  smaller overshoot, longer settle; anticipation the opposite way first; nothing stops all at once.
+
 ## Characters must always read at night (v6.6, user: 'characters are hard to see')
 - 'Black' clothes at night are painted charcoal blue-grey (#45425a-ish) with darker lapels and a bright trim, never
   near-black: the eye reads them as black against the darker set. Hair/hood art no darker than ~#3a3448.
