@@ -54,3 +54,5 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
 - EP2 (in progress): scratch project pm2 (= projects/_work/pm2). Voice ep2_raw.mp3 -> tighten 1.12 -> vo_fast.wav (71.33 s).
   Islands came from ASR word timestamps (tools/asr_words.py + difflib alignment, project.json 'islands'), NOT silencedetect.
   timing.json + vis done. Next: shots for ep2 (real seconds, SP = 1), rooftop friend character, stills, ASK helpers.
+- EP2 DELIVERED (2026-11-19): output/THE PUPPET MASTER ตอน 2 (4 files), 71.33 s, -13.9 LUFS. Sources: projects/the-puppet-master/ep2
+  (shots_ep2.js, audio_ep2.py, timing). Frame check: only intended speed-line/turn spikes. Next: ep3 when the user sends the voice.
