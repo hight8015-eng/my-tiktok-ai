@@ -371,6 +371,9 @@ If the user wants characters made in Flow from their own prompt, use the sister 
 - (ep2 v2) Hair, hats and hoods do NOT rotate with the head/body angle (sprite art stays front-facing) = unnatural.
   Study projects/refs/hair_hat_turn_ref.mp4 (user ref: hair/hat turning with the view angle) and build per-angle
   hair/hat views or a 3D cap that follows head yaw/pitch. TODO before the next episode.
+- (ep2 v2, ref projects/refs/ep2_motion_issue.mp4) Turning around POPS: the back sprite snaps to the front sprite in one
+  frame (hair/face jump). A turn must pass through the side (S) and 3/4 (Q) views, hold each >= 2-3 frames, crossfade
+  between views, and the hair/hat must rotate with it; lead with the head, body follows (turn()).
 - Before claiming a fix works, verify it in the actual render path (the ep1 lip demo was not using visemes).
 
 ## Staging rules from the user's ep2 review (v7.3, apply to every shot)
