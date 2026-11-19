@@ -342,6 +342,31 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
   hard shadow).
 
+## LESSONS LEARNED (mistakes made so far - check this list before writing the shots of every new episode)
+- Camera inside a wall / prop: MIND (min distance) pushes the camera BACK from the target -> it can end inside a wall
+  (alley walls x +-1.9). Check every camera against walls; lower MIND for tight places. (ep2 v1: black frames)
+- Camera behind a head: over-the-shoulder from behind the listener lets his head fill the frame; offset sideways.
+- A near prop (dumpster) or a head in the lower frame = blocked shot. Keep foregrounds small and at the edges.
+- Characters walking THROUGH props (ep2: Aren through the dumpster). Plan walk paths around every prop.
+- Fake walk: camera tracking at the walk speed = he slides on the spot; arms locked = stiff. Let him cross the frame, swing arms.
+- Frozen poses: fixed hR/hL/head values for whole shots look like mannequins. Always add hold()/perform()/gaze().
+- Squint faces (glare, rage, annoyedHard with lids) read as >< pain on the small dot eyes - use 'angry' for anger at
+  a distance; keep >< for pain only.
+- Narration describing an action that is not shown (ep2 v1 'they fight for power' with two men standing still).
+- Unclear geography: cutting between two places that are near each other (alley / roof) - link with a camera move.
+  Two people 10 m apart vertically never fit one readable frame: use a tilt/pan that follows the action (the bullet).
+- Something narrated 'on the roof' must really be on the roof (rule 4), not on a fire escape.
+- Gun held wrong: test prop rotation with a 6-rotation strip first (pistol in the hand = rot [90, 180, 0]).
+- Tiny effects (thin tracer, 1 thin thread, faint spark) do not read on a phone: make them thick, bright, and lit.
+- Faces of secondary characters too small/dark (ep2 friend): give every speaking/key character at least one clear
+  medium close-up with a light on the face.
+- Sentence islands from silencedetect can be badly wrong: use ASR word timestamps aligned to the script (project 'islands').
+- Whisper/shout markers (~ ^) must wrap EACH caption chunk.
+- Lip sync: initShots must pass timing.vis (TM.vis) or lipAt silently falls back to the old 3-level flap.
+- Head-anchored overlays (scribbleAt) must resolve the head at DRAW time (pass the character), not in the shot fn.
+- Music too loud: check the bed is 12-18 dB under the voice (LUFS) before mixing.
+- Before claiming a fix works, verify it in the actual render path (the ep1 lip demo was not using visemes).
+
 ## Staging rules from the user's ep2 review (v7.3, apply to every shot)
 1. GEOGRAPHY clear: an establishing wide/high shot shows where every party is; keep screen direction across cuts.
 2. Nearby events are linked by a CAMERA MOVE (pan/tilt/crane/track from one subject to the next), not a cut

@@ -87,3 +87,5 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
   5. (user) The camera does NOT follow/move all the time: MIX camera moves with the studied transitions (cut, blur, dis,
      whip, sweep, push, fgwipe) so the edit feels natural and flowing - a move links nearby beats, a transition marks a
      change of place/time/energy; vary them, never the same device twice in a row.
+- LESSONS LEARNED list now lives in SKILL.md ('LESSONS LEARNED'): read it before every new episode/story.
+- User: the roof friend's face must be clearly visible (medium close-up + face light) - fixed in ep2 v2 F06/F11/F14.
