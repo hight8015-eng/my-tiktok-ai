@@ -90,6 +90,7 @@ const GUNPOSE = (t, k = 1, up = 0) => { const s = shiver(t, k); return { hR: [.1
 const UPGUN = (t, k = .6) => { const s = shiver(t, k); return { hR: [.14 + s[0], 1.72 + s[1], .55], pR: [1, -.4, -.2], hL: [-.32, .4, .15] }; };
 const flicks = (lt, per = 1.35, on = .55, off = .95) => { const u = lt % per; return u > on && u < off; };
 function gunman(lt, t, P = {}) { put(GM(), ALLEY, live(lt, 3, { p: GP0, ry: 180, ...GUNPOSE(t, P.shake ?? .5), hold: gunR(G1), ...P })); }
+function friendLight() { const h = ALLEY.worldToLocal(headW(RF(), .45)); neonPt(3, ALLEY.localToWorld(V(h.x - 1.0, h.y + .3, h.z - 1.2)), '#ffc8a0', 5, 4); lightAt(headW(RF(), .45), '#ffb890', 1.0, .7); }
 function friend(lt, t, P = {}) { put(RF(), ALLEY, live(lt, 7, { p: FE, ry: FERY, ex: 'evil', lean: 18, hipY: -.07, head: [22, 0, 0], hR: [.12, .82, .62], pR: [1, -.4, -.2], hL: [-.12, .8, .55], hold: gunR(G2), ...P }, .5)); }
 function aren(lt, P = {}) { put(AR(), ALLEY, live(lt, 1, { p: AP, ry: 0, ex: 'stoic', look: gaze(lt, 'stare'), ...P }, .5)); }
 // ---------------- 0 "ปืนจ่ออยู่ที่หัวผม" : ESTABLISH - crane down the alley (fire escape, both men) onto the barrel at Aren's head ----------------
@@ -115,7 +116,7 @@ S('F05', 9.65, 'blur', ALLEY, (lt, t) => { alleyLight(); MIND = 2.4; const f = f
 S('F06', 12.85, 'cut', ALLEY, (lt, t) => { alleyLight(); MIND = 1; gunman(lt, t, { ex: 'anxious', look: [.8, -.9], head: [-6, 14, 0] }); friend(lt, t);
   neonPt(3, ALLEY.localToWorld(V(1.4, 11.5, -4.0)), '#ff4a6a', 3, 6); scribbleAt(RF(), (lt - 2.0) / .5, .16);
   scene.updateMatrixWorld(); const g2 = ALLEY.worldToLocal(G2.getWorldPosition(V())); const u1 = U(lt, 1.9, eIO), u2 = U(lt - 3.5, 1.4, eIO);
-  const tgt = lp(lp([0, 1.7, -6.45], [2.1, 10.7, -4.9], u1), [g2.x, g2.y, g2.z], u2), pos = lp(lp([-1.3, 1.5, -2.4], [-1.2, 2.4, -.6], u1), [.3, 7.6, -2.0], u2);
+  friendLight(); const tgt = lp(lp([0, 1.7, -6.45], [2.1, 10.7, -4.9], u1), [2.05, 11.3, -4.95], u2), pos = lp(lp([-1.3, 1.5, -2.4], [-1.2, 2.4, -.6], u1), [1.05, 10.6, -6.9], u2);
   camA(pos, tgt, pos, tgt, 0, 44); }, { rain: .5 });
 // ---------------- 10 "ผมไม่ได้พูดอะไรสักคำ" : Aren, silent, steady ----------------
 S('F07', 18.1, 'cut', ALLEY, (lt, t) => { alleyLight(); MIND = 2.6; aren(lt, { ex: 'stoic' }); gunman(lt, t, { ex: 'confident' });
@@ -143,7 +144,7 @@ S('F11', 27.6, 'whip', ALLEY, (lt, t) => { alleyLight(); MIND = 2.6; const sh = 
   const A = G2.getWorldPosition(V()), B = ALLEY.localToWorld(V(-.55, 1.4, -7.2)), u = clamp(age / .12); if (age > 0 && u < 1) beamAt(V().lerpVectors(A, B, Math.max(0, u - .35)), V().lerpVectors(A, B, u), t, 1, '#fff2c0');
   sparks({ at: B, normal: [1, .3, .2], t0: sh + .12, n: 26, speed: 3.6, cone: .9, life: .7, floor: 0, seed: 7 }).at(lt);
   SH.a = trauma(lt, [[sh, .5]]); SH.t = t;
-  { const u = U(lt - sh - .03, .38, eIO), pos = lp([1.0, 9.0, -6.9], [1.4, 1.65, -4.4], u), tg = lp([2.1, 10.5, -4.9], [.3, 1.6, -6.6], u); camA(pos, tg, pos, tg, 0, 46); } });
+  friendLight(); { const u = U(lt - sh - .03, .38, eIO), pos = lp([1.05, 10.6, -6.9], [1.4, 1.65, -4.4], u), tg = lp([2.05, 11.3, -4.95], [.3, 1.6, -6.6], u); camA(pos, tg, pos, tg, 0, 40); } });
 // ---------------- 18 "กระสุนเฉียดไหล่เขาไปอย่างเฉียดฉิว" : closer: a big flinch and stagger; sparks by Aren; Aren does not even blink ----------------
 S('F12', 30.45, 'cut', ALLEY, (lt, t) => { alleyLight(); MIND = 2.6; const hr = hitReact(lt, .05, 1, 1.6), kb = hr.p_off ? hr.p_off[0] : 0;
   put(GM(), ALLEY, { p: [GP1[0] + kb, 0, GP1[2]], ry: 40, ex: lt < .5 ? 'shocked' : 'terror', ...hr, ...UPGUN(t, 1.2), hold: gunR(G1) });
@@ -158,11 +159,11 @@ S('F13', 33.1, 'cut', ALLEY, (lt, t) => { alleyLight(); MIND = 2.6; const jab = 
 // ---------------- 20-21 "ฉันเปล่า! ฉันยิงคนนั้นต่างหาก!" : looking up at the fire escape - he points down at Aren, then aims at his partner ----------------
 S('F14', 34.85, 'cut', ALLEY, (lt, t) => { alleyLight(); MIND = 2.6; const sw = U(lt - .9, .4);
   friend(lt, t, { ...exShift(lt, .7, 'terror', 'annoyedHard'), talk: talkAt(t), lean: 14, head: [16, 0, 0], ry: FERY + 25 * (1 - sw) });
-  camA([1.0, 9.0, -6.9], [2.1, 10.6, -4.9], [1.05, 9.1, -6.75], [2.1, 10.6, -4.9], U(lt, 2.0), 44); });
+  friendLight(); camA([1.1, 10.65, -6.8], [2.05, 11.3, -4.95], [1.15, 10.7, -6.7], [2.05, 11.3, -4.95], U(lt, 2.0), 36); });
 // ---------------- 22-23 "แต่ไม่มีใครเชื่อใครอีกแล้ว / ทั้งสองคนหันปืนเข้าหากัน" : HIGH again - the standoff, slow crane ----------------
 S('F15', 36.9, 'blur', ALLEY, (lt, t) => { alleyLight(); MIND = 2.6;
   put(GM(), ALLEY, live(lt, 3, { p: GP1, ry: 40, ex: 'angry', head: [-24, 0, 0], ...UPGUN(t, .5), hold: gunR(G1) })); friend(lt, t, { ex: 'angry' }); aren(lt, { ex: 'calm' });
-  { const u = U(lt - 1.6, 1.4, eIO), pos = lp([1.2, .9, -4.0], [1.0, 9.0, -6.9], u), tg = lp([.45, 1.95, -6.3], [2.1, 10.5, -4.9], u); camA(pos, tg, pos, tg, 0, 44); } });
+  { const u = U(lt - 1.6, 1.4, eIO), pos = lp([1.2, .9, -4.0], [1.05, 10.6, -6.9], u), tg = lp([.45, 1.95, -6.3], [2.05, 11.3, -4.95], u); friendLight(); camA(pos, tg, pos, tg, 0, 40); } });
 // ---------------- 24 "ส่วนผม แค่เดินออกจากตรอกเงียบ ๆ" : he walks away (clear path x -0.25, past the dumpster); they stay locked above ----------------
 const walkZ = (t) => -8 + Math.max(0, t - 41.3) * 1.15;   // one continuous walk from 41.3 s (path x = -0.25: dumpster is x -0.7..-1.8)
 const arenWalk = (lt, t, P = {}) => put(AR(), ALLEY, { p: [-.25, 0, walkZ(t)], ry: 0, ex: 'calm', ...walk(t - 41.3, 1.55, .21), ...P });
