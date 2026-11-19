@@ -22,3 +22,11 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
   zc.js = ZERO CITY sets), tools (mk_pm.py characters, music_pm1.py, audio.py), chars/ (character drawings, rebuild
   sprites with tools/sprites.py + headmask.py), voice/ep1_raw.mp3 (cut the read-aloud speaker tags at 18.96-19.85 s
   and 46.96-48.0 s, then tools/tighten.sh ... 1.12).
+
+## Autosave (keeps everything after the cloud container is gone)
+- `autosave.sh` runs by itself after every Claude turn (Stop hook in `.claude/settings.json`) and saves:
+  every scratchpad story project -> `projects/_work/<name>/` (src, tools, chars, voice, timing, sheets, sfx.json),
+  loose scripts -> `projects/_work/_loose/`, finished episodes (ปก.jpg, โพสต์.txt) -> `projects/_delivered/`,
+  and the skill mirror; then commits and pushes to claude/skill-installation-kkpo2q. Log: `.autosave.log`.
+- Not saved (rebuildable): renders, frames, wavs, generated sprites. `bash autosave.sh --video` also saves the mp4s.
+- New session: `bash autosave.sh --restore` copies `projects/_work` back into the scratchpad.
