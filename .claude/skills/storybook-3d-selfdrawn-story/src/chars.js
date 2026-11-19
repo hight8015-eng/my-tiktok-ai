@@ -194,6 +194,7 @@ const V3 = (p) => p ? (p.clone ? p.clone() : new THREE.Vector3(...p)) : null;
 export const tintAt = (col, k) => { if (k > 0) OVL.push({ kind: 'tint', col, k: Math.min(1, k) }); };          // whole frame tinted (blood sky, night, flashback)
 export const irisAt = (p, k, col = '#d0102a') => { if (k > 0 && k <= 1) OVL.push({ kind: 'iris', p: V3(p), k, col }); };   // a disc grows from a point (red eye) to fill the screen
 export const burnAt = (k) => { if (k > 0) OVL.push({ kind: 'burn', k: Math.min(1, k) }); };                 // burnt sepia edges closing in (into the past)
+export const whisperAt = (p, p2, txt, k, t, o = {}) => { if (k > 0 && k < 1) OVL.push({ kind: 'whisper', p: p ? V3(p) : null, p2: V3(p2), txt, k, t, ...o }); };
 export const rainAt = (t, k = 1, flash = 0) => { if (k > 0) OVL.push({ kind: 'rain', t, k: Math.min(1, k), flash }); };
 export const shockAt = (p, k, size = 1, col = '#ffffff') => { if (k >= 0 && k <= 1) OVL.push({ kind: 'shock', p: V3(p), k, size, col }); };
 export const runesAt = (p, t, k = 1, o = {}) => { if (k > 0) OVL.push({ kind: 'runes', p: V3(p), t, k: Math.min(1, k), o }); };

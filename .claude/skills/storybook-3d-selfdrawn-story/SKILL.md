@@ -353,6 +353,18 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   ep 3 pays off in the finale).
 - No blood or wounds in the script or on screen; no "kill" in covers or captions.
 
+## THE PUPPET MASTER kit (v5.4, ep 1)
+- examples/pm_sets.js: ZERO CITY sets (TRUCK interior, GATE wall + searchlights + neon sign, STREET neon night with
+  signs/puddles/lamps/fire barrels/the liftable car, ALLEY brick + fire escape + flicker lamp + gun/laser). Import as
+  src/zc.js. examples/shots_pm1.js: the episode (38 shots), examples/mk_pm.py: 8 hair silhouettes (swoop, peaked cap,
+  flame spikes, buzz, mohawk, beanie, bandana, hood), examples/music_pm1.py + audio_pm1_episode.py: thriller bed + SFX.
+- New overlays (chars.js / main.js): whisperAt(from, to, txt, k, t) = a planted thought (red wavy thread head to head +
+  the line appearing letter by letter, Thai grapheme-safe); OVL {kind: 'redeyes', C, k, t} = glowing eyes on the real
+  eye positions (headBall); OVL {kind: 'dot', p, k, r} = laser dot. Use POST.sat ~.12 while the power is used: the
+  world drains to grey and only the red overlays keep colour. Silence the ambience + music in that beat.
+- Facing rule for 2D characters: ry = atan2(dx, dz) of (camera - character) in the set's space faces the camera; a
+  character more than ~70 deg off shows the side/back sprite (hair covers the face).
+
 ## Rules
 - Characters, story and sets are original. Never copy a reference video's characters, props or shots.
 - Never bundle third-party reference frames in this skill.

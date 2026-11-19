@@ -47,6 +47,11 @@ function trails(alpha) { // v4 smear trails behind fast hands/feet (positions fr
 function overlays(t, alpha) { // gloom lines + sparkles requested by poses/shots this frame
   trails(alpha);
   for (const o of OVL) { X.save(); X.globalAlpha = alpha * Math.min(1, o.k);
+    if (o.kind === 'redeyes') { const B = headBall(o.C); if (!B || B.view === 'B') { X.restore(); continue; } const q0 = scr(B.c), qr = scr(B.c.clone().addScaledVector(B.right, B.r)); if (!q0 || !qr) { X.restore(); continue; }
+      const r = Math.hypot(qr[0] - q0[0], qr[1] - q0[1]); X.globalCompositeOperation = 'lighter';   /* PM: the eyes light up red exactly where drawFace puts them */
+      for (const sd of [-1, 1]) { const a = sd * .247 + B.phi; if (Math.cos(a) < .25) continue; const q = scr(B.c.clone().addScaledVector(B.right, B.r * Math.sin(a) * B.sgn).addScaledVector(B.up, -B.faceY * B.r)); if (!q) continue;
+        const rr = r * (.22 + .03 * Math.sin(o.t * 9 + sd)), g = X.createRadialGradient(q[0], q[1], 0, q[0], q[1], rr); g.addColorStop(0, 'rgba(255,235,235,1)'); g.addColorStop(.25, 'rgba(255,40,55,.95)'); g.addColorStop(1, 'rgba(255,0,30,0)');
+        X.globalAlpha = alpha * o.k; X.fillStyle = g; X.beginPath(); X.arc(q[0], q[1], rr, 0, 7); X.fill(); } X.restore(); continue; }
     if (o.kind === 'tears') { const B = headBall(o.C); if (!B || B.view === 'B') { X.restore(); continue; } const q0 = scr(B.c), qr = scr(B.c.clone().addScaledVector(B.right, B.r)); if (!q0 || !qr) { X.restore(); continue; }
       const r = Math.hypot(qr[0] - q0[0], qr[1] - q0[1]), k = o.k; X.lineCap = 'round'; X.lineJoin = 'round';
       for (const sd of [-1, 1]) { const a = sd * .247 + B.phi; if (Math.cos(a) < .25) continue;   // v4.34 eyes exactly where drawFace puts them (u = .5 +- .13 of the face strip, wrapped on the ball)
@@ -116,6 +121,18 @@ function overlays(t, alpha) { // gloom lines + sparkles requested by poses/shots
       X.translate(q[0], q[1]); X.rotate(ro * .2); X.globalCompositeOperation = 'lighter'; const g = X.createRadialGradient(0, 0, 0, 0, 0, r * 1.3); g.addColorStop(0, 'rgba(255,250,220,.9)'); g.addColorStop(1, 'rgba(255,220,140,0)'); X.fillStyle = g; X.beginPath(); X.arc(0, 0, r * 1.3, 0, 7); X.fill();
       X.fillStyle = '#fffbe8'; for (const [rr, rot] of [[r, 0], [r * .55, Math.PI / 4]]) { X.save(); X.rotate(rot); X.beginPath(); for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4, d = k % 2 ? rr * .16 : rr; X.lineTo(Math.cos(a) * d, Math.sin(a) * d); } X.closePath(); X.fill(); X.restore(); } }
 
+    else if (o.kind === 'dot') { const q = scr(o.p); if (q) { X.globalCompositeOperation = 'lighter'; const r = o.r || 26, g = X.createRadialGradient(q[0], q[1], 0, q[0], q[1], r * 2.6); g.addColorStop(0, 'rgba(255,240,240,1)'); g.addColorStop(.18, 'rgba(255,40,60,.95)'); g.addColorStop(1, 'rgba(255,20,40,0)');
+      X.globalAlpha = alpha * o.k; X.fillStyle = g; X.beginPath(); X.arc(q[0], q[1], r * 2.6, 0, 7); X.fill(); } }
+    else if (o.kind === 'whisper') { /* PM: a planted thought. A thin red wavy thread from the speaker's head to the target's head, the line
+         of text floats beside the target and appears letter by letter (Thai grapheme clusters), soft red glow, slight drift. */
+      const a = o.p && scr(o.p), b = scr(o.p2) || [540, 700], k = o.k; X.globalAlpha = alpha * Math.min(1, k * 4) * (1 - E.sstep(.85, 1, k)); X.globalCompositeOperation = 'lighter';
+      if (a && o.thread !== false) { const n = 40, u = E.eOut(Math.min(1, k * 2.2)); X.strokeStyle = '#ff2a3a'; X.shadowColor = '#ff2a3a'; X.shadowBlur = 18; X.lineWidth = 3.2; X.beginPath();
+        for (let i = 0; i <= n * u; i++) { const s = i / n, x = a[0] + (b[0] - a[0]) * s, y = a[1] + (b[1] - a[1]) * s - Math.sin(Math.PI * s) * 60, w = Math.sin(s * 14 - o.t * 7) * 7 * Math.sin(Math.PI * s); i ? X.lineTo(x + w, y + w * .4) : X.moveTo(x, y); } X.stroke(); }
+      X.globalCompositeOperation = 'source-over'; const G = [...new Intl.Segmenter('th', { granularity: 'grapheme' }).segment(o.txt)].map(s => s.segment), shown = Math.floor(G.length * E.clamp((k - .12) / .45));
+      X.font = `600 ${o.fs || 56}px Prompt, sans-serif`; X.textBaseline = 'middle'; const full = G.join(''), W = X.measureText(full).width, x0 = Math.min(1040 - W, Math.max(40, b[0] - W / 2)), y0 = Math.max(170, b[1] - (o.dy ?? 210)) - k * 30;
+      let x = x0; for (let i = 0; i < shown; i++) { const g = G[i], w = X.measureText(g).width, fa = E.clamp((shown - i) / 3), yy = y0 + Math.sin(o.t * 3 + i * .5) * 4;
+        X.shadowColor = '#ff1a2a'; X.shadowBlur = 26; X.fillStyle = `rgba(255,70,80,${.85 * fa})`; X.fillText(g, x, yy); X.shadowBlur = 0; X.fillStyle = `rgba(255,236,238,${fa})`; X.fillText(g, x, yy); x += w; }
+      X.shadowBlur = 0; }
     else if (o.kind === 'tint') { X.globalAlpha = alpha * o.k; X.fillStyle = o.col; X.fillRect(0, 0, 1080, 1920); }
     else if (o.kind === 'iris') { const q = (o.p && scr(o.p)) || [540, 860]; const r = 2300 * E.eIn(o.k) + 6; X.globalAlpha = alpha; const g = X.createRadialGradient(q[0], q[1], r * .82, q[0], q[1], r);
       g.addColorStop(0, o.col); g.addColorStop(1, 'rgba(0,0,0,0)'); X.fillStyle = g; X.beginPath(); X.arc(q[0], q[1], r, 0, 7); X.fill(); }
