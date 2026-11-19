@@ -232,7 +232,7 @@ export function initShots(timing) { TM.env = timing.env; TM.vis = timing.vis; fo
 export function runShot(sh, t) { reset(t); sh.fn(t - sh.t0, t); }
 export const WHITEK = { k: 0 };
 export const COVER = { id: 'COVER', t0: 0, fn: (lt, t, o = {}) => { reset(10); ALLEY.visible = true; alleyLight(); ZC.alleyAt(10, 0);
-  put(AR(), ALLEY, { p: AP, ry: 0, ex: 'sinister' }); redEyes(AR(), .9, 10); put(GM(), ALLEY, { p: GP0, ry: 180, ex: 'anxious', ...GUNPOSE(10, 0), hold: gunR(G1) });
+  put(AR(), ALLEY, { p: AP, ry: 0, ex: 'sinister' }); redEyes(AR(), .9, 10); put(GM(), ALLEY, { p: GP0, ry: 180, ex: 'anxious', ...GUNPOSE(10, 0), hR: [.3, 1.05, .74], hold: gunR(G1) });
   const cm = o.cam || [-1.15, 1.72, -5.0], g = o.tgt || [.05, 1.68, -8]; MIND = 0; camA(cm, g, cm, g, 0, o.fov || 44); } };
 export const BENCH = { id: 'BENCH', t0: 0, fn: (lt, t, o = {}) => { reset(0); if (o.roof) { ZC.ROOF.visible = true; ZC.roofAt(3); alleyLight(); setRig(RIGS.alley); put(GM(), ZC.ROOF, { p: [0, 0, -6.2], ry: 180, ex: 'evil' }); const c = o.cam, g = o.tgt; look(V(...c).add(ZC.ROOF.position), V(...g).add(ZC.ROOF.position), o.fov || 50); ZC.zcLate(3, camera); return; } STREET.visible = true; streetLight(0); if (o.rig) setRig({ ...RIGS.street, ...o.rig }); const ids = ['aren', 'guard', 'fire', 'strong', 'thug1', 'thug2', 'thug3', 'gunman'];
   if (o.act) { const L = o.act, n = L.length, sp = o.sp ?? .85; ids.forEach((id) => put(CHARS[id], STREET, { p: [0, -50, -30], visible: false }));

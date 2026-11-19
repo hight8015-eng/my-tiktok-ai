@@ -24,12 +24,12 @@ def loop(name, t0, t1, g):
     while t < t1: d = min(len(x) / SR, t1 - t); sfx(name, t, g, dur=d); t += len(x) / SR - .5
 loop('amb_rain_m01', 0, 56.2, .09); loop('amb_rain_m01', 56.2, END, .06); loop('neon_hum_m01', 56.2, END, .04)
 for t, n, g, pan, kw in [
-  (.15, 'gun_cock_s01', .55, .2, {}), (12.55, 'whoosh_n01', .35, 0, {}), (14.8, 'draw_circle_n01', .3, .1, {}), (17.95, 'whoosh_n02', .3, 0, {}),
+  (.15, 'gun_cock_s01', .55, .2, {}), (14.85, 'draw_circle_n01', .3, .1, {}), (27.5, 'whoosh_n02', .35, 0, {}),
   (19.75, 'energy_m01', .25, 0, {'lpf_': 4000}), (20.25, 'whoosh_trail_n01', .3, .2, {}), (22.2, 'whisper_wind_m01', .3, -.2, {}),
   (25.1, 'swoosh_n01', .5, .3, {}), (25.2, 'cloth_n01', .35, .3, {}),
-  (29.18, 'gunshot_pistol_s01', .85, -.2, {'rev': .5}), (29.65, 'casing_s01', .25, -.3, {}), (30.62, 'bullet_whiz_s01', .55, .4, {}), (31.1, 'ricochet_s01', .45, -.2, {}),
+  (29.18, 'gunshot_pistol_s01', .85, -.2, {'rev': .5}), (29.65, 'casing_s01', .25, -.3, {}), (29.24, 'bullet_whiz_s01', .55, .4, {}), (29.32, 'ricochet_s01', .45, -.2, {}), (30.47, 'cloth_n02', .35, .2, {}),
   (41.15, 'whoosh_soft_n01', .4, 0, {}), (41.4, 'steps_m01', .25, -.1, {'dur': 7.5}), (56.0, 'whoosh_n01', .35, 0, {}),
-  (58.1, 'fire_burst_n01', .35, -.3, {}), (60.5, 'heavy_hit_n01', .4, .1, {}), (63.8, 'shimmer_63', .25, .2, {}), (66.3, 'reverse_whoosh_n01', .35, 0, {}),
+  (58.75, 'punch_52', .55, .2, {}), (59.5, 'fire_burst_n01', .45, -.3, {}), (59.62, 'punch_55', .55, -.2, {}), (60.75, 'heavy_hit_n01', .6, .1, {}), (61.05, 'body_fall_m01', .5, -.2, {}), (64.15, 'shine_25', .25, -.3, {}), (64.55, 'shine_25', .22, .3, {}), (64.95, 'shine_25', .2, 0, {}), (66.3, 'reverse_whoosh_n01', .35, 0, {}),
   (68.9, 'energy_shot_n01', .25, 0, {'lpf_': 5000})]:
     sfx(n, t, g, pan, **kw)
 # voice ducking of the SFX bus (light) and the dry mix
@@ -49,7 +49,7 @@ S.cue('horror', 25.3, 3.2, key='D', k=.6, fade=.25)            # cut dead .2 s b
 S.sting('hit_boom', 29.18, .9, 'D')
 S.cue('confrontation', 30.4, 10.9, bpm=108, key='D', k=.75)
 S.cue('villain', 41.1, 15.1, bpm=70, key='D', k=.55, fadein=.8); S.sting('piano_low', 52.75, .7, 'D')
-S.cue('city_night', 56.15, 10.4, bpm=100, key='D', k=.6)
+S.cue('city_night', 56.15, 1.95, bpm=100, key='D', k=.6, fade=.15); S.cue('action_drums', 58.05, 4.2, bpm=140, key='D', k=.7); S.cue('dark_ambient', 62.25, 4.3, key='D', k=.6, fadein=.3)
 S.sting('riser_hit', 66.55, .8, 'D'); S.cue('dark_ambient', 66.6, 4.7, key='D', k=.6); S.sting('braam', 69.95, .7, 'D')
 S.duck(T['env'], depth=.5); S.voice_eq()
 mb = S.mix(rev=.18, end=END) * .24
