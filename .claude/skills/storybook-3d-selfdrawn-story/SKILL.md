@@ -342,6 +342,16 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
   hard shadow).
 
+## Fire + no faceted shapes (v6.1, user: 'fire still looks blocky; make it realistic; fix anything else angular')
+- src/fire.js makeFire(parent, { w, h, seed, pal: fire|blue|green|purple|red, embers, ember }) -> .at(t, k, cam, lean);
+  faceFires(camera) once per frame AFTER the camera is placed. A shader flame on an upright camera-facing quad:
+  domain-warped fbm scrolling up, distortion growing with height, travelling sine sway, teardrop mask carved into
+  tongues, soft-edged colour bands, two noise speeds (hotter = faster), continuous noise (never a looping pulse),
+  lean = hand velocity (the flame trails a moving hand), embers rising on their own clocks, hot -> cool -> gone.
+  Never build fire from cones or spheres again. Coloured palettes double as magic flames.
+- Round things need segments: cylinders >= 14-18, spheres 16x12, tori 10x24 for anything bigger than a few pixels;
+  4-6 sided posts read as square sticks. Glow sprites / light pools use the soft falloff textures, never discs.
+
 ## Glow edit (v6.0, user refs: 'Tutorial glow' before/after, lantern light-painting tutorial, runway over-exposure)
 - GLOW.diffuse (main.js bloom): a soft blurred copy of the whole frame screened + soft-light on top = the 'glow edit'
   look: highlights bleed, a light haze, darks stay dark. .1-.18 for night stories; 0 for bright daytime fables.

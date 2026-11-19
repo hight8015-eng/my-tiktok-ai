@@ -36,9 +36,11 @@ const EYES = [0, 1].map(() => { const s = Wd.glowSprite('#ff2030', .5, { opacity
 function redEyes(C, k, t) { if (k > 0) { OVL.push({ kind: 'redeyes', C, k: Math.min(1, k), t }); lightAt(headW(C, .3), '#ff2030', .9, .6 * k); } }
 function redEyesOld(C, k, t) { scene.updateMatrixWorld(); const h = C.head.getWorldPosition(V()), d = V().subVectors(camera.position, h).normalize(), r = V().crossVectors(d, V(0, 1, 0)).normalize(), s = C.spec.s;
   EYES.forEach((e, i) => { e.position.copy(h).addScaledVector(d, .42 * s).addScaledVector(r, (i ? 1 : -1) * .13 * s).add(V(0, .16 * s, 0)); e.material.opacity = k * (.75 + .15 * Math.sin(t * 9 + i)); e.scale.setScalar(.42 * s * (.6 + .4 * k)); }); }
-const HF = group({ parent: scene }); HF.userData.fl = [0, 1, 2].map(i => { const f = mesh(new THREE.ConeGeometry(.09 - i * .02, .32 - i * .06, 8), basic(['#ff6a1a', '#ffb02a', '#fff2b0'][i]), { p: [0, .14, 0], parent: HF, cast: false }); f.userData.noInk = true; return f; });
-HF.userData.glow = Wd.glowSprite('#ff8a3a', 1.6, { opacity: .7 }); HF.userData.glow.position.set(0, .15, 0); HF.add(HF.userData.glow);
-function handFire(t, k) { HF.visible = k > .01; HF.scale.setScalar(.2 + .8 * k); HF.userData.fl.forEach((f, i) => { const s = 1 + .22 * Math.sin(t * (11 + i * 3) + i) + .12 * noise1(t * 7 + i * 5); f.scale.set(1, s, 1); f.position.y = .12 + .04 * s; f.rotation.z = .12 * noise1(t * 3 + i); }); HF.userData.glow.material.opacity = .32 * k * (.85 + .15 * Math.sin(t * 13)); }   /* the flame lights the holder through the rig (warm key), the glow sprite only halos the flame */
+import { makeFire, faceFires } from './fire.js';
+const HF = group({ parent: scene }); const HFF = makeFire(HF, { w: .46, h: .62, seed: 3, embers: 8, ember: .04 });   /* v6.1 shader flame (was 3 cones) */
+HF.userData.glow = Wd.glowSprite('#ff8a3a', 1.4, { opacity: .3 }); HF.userData.glow.position.set(0, .15, 0); HF.add(HF.userData.glow); let HFP = null;
+function handFire(t, k) { HF.visible = k > .01; if (!HF.visible) return; const lean = HFP ? Math.max(-1, Math.min(1, (HF.position.x - HFP.x) * 20)) : 0; HFP = HF.position.clone();   /* the flame trails behind a moving hand */
+  HFF.at(t, k, camera, lean); HF.userData.glow.material.opacity = .3 * k * (.85 + .15 * noise1(t * 9)); }
 const THREAD = makeRope('#ff2a3a', .008, 20); THREAD.material.emissive = new THREE.Color('#ff2a3a'); THREAD.material.emissiveIntensity = 1; scene.add(THREAD);
 const SEED = Wd.glowSprite('#ff3040', .5, { opacity: 0 }); scene.add(SEED);
 const hw = (C, side = 1) => { scene.updateMatrixWorld(); return C.torso.localToWorld(V(side * .3, .45, .2)); };
@@ -66,8 +68,8 @@ export const SHOTS = [];
 function reset(t) { SH.a = 0; SH.t = t; Object.values(CHARS).forEach(C => { C.g.visible = false; }); Wd.hideSets(); Wd.hideSea(); ZC.hideZC(); Wd.pts.forEach(l => { l.intensity = 0; });
   EYES.forEach(e => { e.material.opacity = 0; }); HF.visible = false; THREAD.visible = false; SEED.material.opacity = 0; ZC.laserAt([0, 0, 0], [0, 0, 1], 0);
   Z.car.position.set(3.2, 0, -14); Z.car.rotation.set(0, 0, 0); POST.sat = 1.05; POST.lift = 1; POST.vig = .45; MIND = 2.6; }
-const S = (id, t0, tr, set, fn, o = {}) => { const sh = { id, t0, tr, ...o }; sh.fn = (lt, t) => { set.visible = true; ZC.zcAt(t * SP); if (set === STREET) ZC.streetAt(t * SP); if (set === ALLEY) ZC.alleyAt(t * SP); if (set === GATE) ZC.gateAt(t * SP, 0);
-  fn(lt * SP, t * SP); if (o.rain !== false && set !== TRUCK) rainAt(t * SP, o.rain ?? .5); Wd.ambientAt(t, null); }; SHOTS.push(sh); };
+const S = (id, t0, tr, set, fn, o = {}) => { const sh = { id, t0, tr, ...o }; sh.fn = (lt, t) => { set.visible = true; ZC.zcAt(t * SP, camera); if (set === STREET) ZC.streetAt(t * SP); if (set === ALLEY) ZC.alleyAt(t * SP); if (set === GATE) ZC.gateAt(t * SP, 0);
+  fn(lt * SP, t * SP); scene.updateMatrixWorld(); faceFires(camera); if (o.rain !== false && set !== TRUCK) rainAt(t * SP, o.rain ?? .5); Wd.ambientAt(t, null); }; SHOTS.push(sh); };
 
 // ---------------- 0  "ทุกคนในเมืองนี้มีพลังพิเศษ" : neon street, a crane down past prisoners showing their powers ----------------
 S('S01', 0, 'cut', STREET, (lt, t) => { streetLight(lt); const u = U(lt, 2.4, eOut);
