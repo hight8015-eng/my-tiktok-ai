@@ -13,7 +13,8 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.ttf': 'font/ttf
   const nocap = !!process.env.NOCAP; if (process.env.NOFACE) await p.evaluate(() => { window.NOFACE = true; }); if (process.env.NOSMOOTH) await p.evaluate(() => { window.NOSMOOTH = true; }); if (process.env.SHUTTER) await p.evaluate(([n, a]) => { window.SHUTTER = n; if (a) window.SHUTTER_ANGLE = a; }, [+process.env.SHUTTER, +(process.env.SHUTTER_ANGLE || 0)]);
   if (mode === 'stills') { fs.mkdirSync(out, { recursive: true });
     for (const t of rest) { const t0 = Date.now(); const d = await p.evaluate(([t, n]) => frame(+t, { nocap: n }), [t, nocap]); fs.writeFileSync(`${out}/t${(+t).toFixed(2)}.jpg`, Buffer.from(d.split(',')[1], 'base64')); console.log('t', t, Date.now() - t0, 'ms'); }
-  } else if (mode === 'cover' || mode === 'bench') { const d = await p.evaluate(([m, o]) => window[m](o), [mode, JSON.parse(rest[0] || '{}')]); fs.writeFileSync(out, Buffer.from(d.split(',')[1], 'base64')); console.log('cover', out);
+  } else if (mode === 'cover' || mode === 'bench') { const J = JSON.parse(rest[0] || '{}'), L = Array.isArray(J) ? J : [J];
+    for (let i = 0; i < L.length; i++) { const d = await p.evaluate(([m, o]) => window[m](o), [mode, L[i]]); const f = L.length > 1 ? out.replace(/(\.\w+)$/, `_${i}$1`) : out; fs.writeFileSync(f, Buffer.from(d.split(',')[1], 'base64')); console.log('cover', f); }
   } else if (mode === 'refsheet') { fs.mkdirSync(out, { recursive: true });
     for (const id of ['C01', 'C02', 'C03', 'C04', 'C05', 'C06']) for (const [v, ry] of [['F', 0], ['Q', -45], ['S', -90], ['B', 180]]) {
       const d = await p.evaluate((o) => window.refsheet(o), { id, ry }); fs.writeFileSync(`${out}/${id}-${v}.png`, Buffer.from(d.split(',')[1], 'base64')); console.log(id, v); }

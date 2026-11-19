@@ -30,7 +30,61 @@ const EX = {
   ouch: { eyes: 'chev', bl: 24, br: -24, by: -6, mouth: 'clench' },
   dizzy: { eyes: 'spiral', bl: 10, br: -10, by: -6, mouth: 'wavy' },
   panic: { eyes: 'tiny', bl: 26, br: -26, by: -16, mouth: 'clench' },
+  // v6.8 ACTING faces (FACS action units in toon form; see SKILL.md 'Acting: faces + body language').
+  // extra fields (all optional): lid 0..1 upper lid drops over the eye (AU43 tired/bored/contempt), lidT tilt (+ = outer end
+  // down = sad, - = inner end down = angry glare), low 0..1 lower lid rises (AU6/7: real smile, squint, suspicion, glare),
+  // pup eye size (fear .6, awe 1.25), arch brow bend (+ = arched up, - = flat/knit), byL/byR one brow up or down (skeptical),
+  // mx mouth sideways, mw mouth width, mr mouth tilt (deg), mflip mirror a one-sided mouth, sh 0..1 shadow band over the eyes
+  // (dread / menace), blush 0..1 hatch lines (shy, ashamed), vein (anger mark), drop (sweat drop), spark (shiny eyes: hope, awe),
+  // wet 0..1 (watery eyes line), nod: hint for the body (not drawn).
+  smileReal: { eyes: 'open', low: .55, bl: -2, br: 2, by: -4, arch: 3, mouth: 'smileBig' },          // Duchenne: lower lids up
+  smilePolite: { eyes: 'open', bl: 0, br: 0, by: 0, mouth: 'smileSoft' },                            // mouth only = fake / polite
+  smileSad: { eyes: 'open', lid: .2, lidT: 8, bl: 14, br: -14, by: -2, arch: 4, mouth: 'smileSoft', wet: .5 },
+  laugh: { eyes: 'happy', bl: -4, br: 4, by: -10, mouth: 'laugh' },
+  relieved: { eyes: 'closed', bl: 12, br: -12, by: -2, arch: 4, mouth: 'smileSoft' },
+  touched: { eyes: 'open', low: .3, bl: 16, br: -16, by: -4, mouth: 'smileSoft', wet: .9, spark: 1 },
+  awe: { eyes: 'open', pup: 1.25, bl: 8, br: -8, by: -14, arch: 6, mouth: 'gasp', spark: 1 },
+  hopeful: { eyes: 'open', pup: 1.1, bl: 12, br: -12, by: -8, arch: 4, mouth: 'smileSoft', spark: 1 },
+  pleading: { eyes: 'open', pup: 1.15, bl: 24, br: -24, by: -6, arch: 6, mouth: 'pout', spark: 1, wet: .6 },
+  surprised: { eyes: 'wide', bl: 6, br: -6, by: -16, arch: 8, mouth: 'gasp' },                       // brows UP + level (not knit)
+  terror: { eyes: 'tiny', bl: 28, br: -28, by: -18, mouth: 'grimace', drop: 1 },                      // brows up AND knit, lips stretched
+  dread: { eyes: 'open', pup: .75, bl: 20, br: -20, by: -4, mouth: 'tight', sh: .8, drop: 1 },
+  anxious: { eyes: 'open', pup: .85, bl: 20, br: -20, by: -6, mouth: 'bite', drop: 1 },
+  hurt: { eyes: 'open', lid: .3, lidT: 10, bl: 22, br: -22, by: -2, mouth: 'tight', wet: .8 },
+  despair: { eyes: 'half', lidT: 12, bl: 26, br: -26, by: 0, arch: 2, mouth: 'cry', wet: 1 },
+  guilty: { eyes: 'open', lid: .35, bl: 18, br: -18, by: 2, mouth: 'tight', blush: .5 },
+  ashamed: { eyes: 'half', lidT: 6, bl: 16, br: -16, by: 4, mouth: 'frown', blush: .9 },
+  embarrassed: { eyes: 'open', low: .3, bl: 14, br: -14, by: -2, mouth: 'wavy', blush: 1, drop: 1 },
+  shy: { eyes: 'open', low: .25, lid: .15, bl: 10, br: -10, by: 0, mouth: 'smileSoft', blush: .8 },
+  annoyed: { eyes: 'open', lid: .45, bl: -8, br: 8, by: 4, mouth: 'tight', mr: -6 },
+  bored: { eyes: 'open', lid: .55, bl: 0, br: 0, by: 6, mouth: 'flat', mr: -5 },
+  skeptical: { eyes: 'open', low: .3, bl: -10, br: 10, byL: 10, byR: -16, mouth: 'smirk', mx: 4 },     // one brow up
+  suspicious: { eyes: 'open', lid: .35, low: .45, bl: -12, br: 12, by: 6, mouth: 'tight', mx: -4 },
+  contempt: { eyes: 'open', lid: .4, bl: -4, br: 6, byR: -6, mouth: 'smirk', mflip: true, mw: .8 },    // one-sided lip corner (AU14)
+  disgust: { eyes: 'open', low: .6, bl: -14, br: 14, by: 8, mouth: 'sneer' },                          // nose wrinkle -> lower lids up
+  annoyedHard: { eyes: 'open', lid: .3, low: .3, bl: -20, br: 20, by: 8, mouth: 'clench', vein: 1 },
+  rage: { eyes: 'open', lidT: -14, lid: .25, low: .35, pup: .8, bl: -30, br: 30, by: 12, mouth: 'grimace', vein: 1 },
+  coldFury: { eyes: 'open', lid: .3, lidT: -10, low: .4, bl: -14, br: 14, by: 8, mouth: 'flat', sh: .45 },   // calm mouth, killing eyes
+  menace: { eyes: 'open', lid: .25, lidT: -12, low: .35, pup: .8, bl: -18, br: 18, by: 8, mouth: 'smirk', sh: .7 },
+  glare: { eyes: 'open', lidT: -14, lid: .3, low: .45, bl: -22, br: 22, by: 10, mouth: 'tight' },
+  focused: { eyes: 'open', low: .3, bl: -10, br: 10, by: 4, arch: -2, mouth: 'tight' },
+  thinking: { eyes: 'open', lid: .15, bl: -6, br: 8, byL: -4, byR: 6, mouth: 'flat', mx: 8, mr: -8 },
+  realize: { eyes: 'wide', pup: .9, bl: 4, br: -4, by: -12, mouth: 'o' },                              // the 'wait...' moment
+  confused: { eyes: 'open', bl: 12, br: -16, byL: 6, byR: -10, mouth: 'wavy', mx: 6, drop: 1 },
+  exhausted: { eyes: 'half', lid: .2, lidT: 8, bl: 10, br: -10, by: 6, mouth: 'open', drop: 1 },
+  pain: { eyes: 'chev', bl: 22, br: -22, by: 2, mouth: 'grimace', drop: 1 },
+  mocking: { eyes: 'half', bl: 12, br: -6, byL: -6, mouth: 'grin', mflip: true, mx: 6 },
+  sinister: { eyes: 'half', lidT: -10, bl: -22, br: 22, by: 6, mouth: 'smileBig', sh: .55 },
+  stoic: { eyes: 'open', lid: .2, bl: -4, br: 4, by: 2, mouth: 'flat' },
+  determinedHard: { eyes: 'open', low: .35, lidT: -6, bl: -18, br: 18, by: 6, mouth: 'tight' },
 };
+const EXK = ['bl', 'br', 'by', 'byL', 'byR', 'arch', 'lid', 'lidT', 'low', 'pup', 'mx', 'mw', 'mr', 'sh', 'blush', 'vein', 'drop', 'spark', 'wet'];
+const EXD = { pup: 1, mw: 1 };
+// exOf('a') or a blend 'a>b@0.4' (eyes/mouth switch at the half way point: hide that frame under a blink, see exShift)
+export function exOf(n) { if (EX[n]) return EX[n]; const m = /^(\w+)>(\w+)@([\d.]+)$/.exec(n || ''); if (!m) return EX.neutral;
+  const A = EX[m[1]] || EX.neutral, B = EX[m[2]] || EX.neutral, k = +m[3], o = { eyes: k < .5 ? A.eyes : B.eyes, mouth: k < .5 ? A.mouth : B.mouth, mflip: k < .5 ? A.mflip : B.mflip };
+  for (const f of EXK) o[f] = (A[f] ?? EXD[f] ?? 0) * (1 - k) + (B[f] ?? EXD[f] ?? 0) * k; return (EX[n] = o); }
+export const EXPRESSIONS = EX;
 function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a white ball head (no nose)
   const S = 512; x.clearRect(0, 0, S, S);
   const BIG = !!spec.bigEyes, EK = BIG ? 2.45 : 1; // v4.8 hybrid: pirate-ref dot eyes by default (spec.bigEyes = sheet eyes everywhere) // v4.6 sheet face: eyes ~1/4 head wide, nearly touching; bigger mouth
@@ -38,6 +92,12 @@ function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a wh
   x.fillStyle = spec.cheek || 'rgba(255,128,140,.38)'; for (const s of [-1, 1]) { x.beginPath(); x.ellipse(S / 2 + s * S * (BIG ? .37 : .2), ey + (BIG ? 128 : 62), 30, 17, 0, 0, 7); x.fill(); }
   const eyes = blink ? 'closed' : e.eyes; const lx = (look?.[0] || 0) * 9, ly = (look?.[1] || 0) * 7;
   x.lineCap = 'round'; x.lineJoin = 'round';
+  if (e.sh > 0) { // v6.8 dread/menace: a shadow band falls over the brow and eyes (manga 'kao ni kage'), eyes stay crisp on top
+    const g = x.createLinearGradient(0, ey - (BIG ? 220 : 140), 0, ey + (BIG ? 50 : 34)); g.addColorStop(0, `rgba(28,18,52,${.62 * e.sh})`); g.addColorStop(.7, `rgba(28,18,52,${.4 * e.sh})`); g.addColorStop(1, 'rgba(28,18,52,0)');
+    x.fillStyle = g; x.fillRect(S * .1, ey - (BIG ? 220 : 140), S * .8, BIG ? 270 : 174);
+    x.strokeStyle = `rgba(20,12,40,${.5 * e.sh})`; x.lineWidth = 4; x.beginPath(); for (let i = 0; i < 14; i++) { const hx = S * .16 + i * S * .05; x.moveTo(hx, ey - (BIG ? 210 : 132)); x.lineTo(hx, ey - (BIG ? 100 : 62) - (i % 3) * 10); } x.stroke(); }
+  if (e.blush > 0) { x.fillStyle = `rgba(255,96,120,${.45 * e.blush})`; x.strokeStyle = `rgba(214,52,84,${.85 * e.blush})`; x.lineWidth = 5;
+    for (const s of [-1, 1]) { const bx = S / 2 + s * S * (BIG ? .37 : .2), byy = ey + (BIG ? 128 : 62); x.beginPath(); x.ellipse(bx, byy, 40, 22, 0, 0, 7); x.fill(); x.beginPath(); for (let i = -1; i <= 1; i++) { x.moveTo(bx + i * 16 - 6, byy + 9); x.lineTo(bx + i * 16 + 6, byy - 9); } x.stroke(); } }
   for (const s of [-1, 1]) {
     const cx = S / 2 + s * ex, cy = ey; let kind = eyes; if (kind === 'wink') kind = s < 0 ? 'open' : 'closedUp';
     x.save(); if (BIG) { x.translate(cx, cy); x.scale(EK, EK); x.translate(-cx, -cy); }
@@ -46,18 +106,32 @@ function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a wh
     if ((kind === 'open' || kind === 'side') && BIG) { const dx = kind === 'side' ? 13 * (spec.sideDir || 1) : lx * 1.4; // v4.6 sheet eyes: big white ovals, ink outline, pupil
       x.fillStyle = '#fbf8f2'; x.lineWidth = 6; x.beginPath(); x.ellipse(cx, cy - 2, 30, 38, 0, 0, 7); x.fill(); x.stroke();
       x.fillStyle = ink; x.beginPath(); x.ellipse(cx + dx + 3, cy + 6 + ly * 1.2, 13, 18, 0, 0, 7); x.fill(); x.fillStyle = '#ffffff'; x.beginPath(); x.arc(cx + dx - 1, cy - 2 + ly, 4.5, 0, 7); x.fill(); }
-    else if (kind === 'open' || kind === 'side') { const dx = kind === 'side' ? 11 * (spec.sideDir || 1) : lx; if (spec.eyeC) { x.fillStyle = spec.eyeC; x.shadowColor = spec.eyeC; x.shadowBlur = 18; } x.beginPath(); x.ellipse(cx + dx, cy + ly, spec.eyeC ? 15 : 12, spec.eyeC ? 21 : 18, 0, 0, 7); x.fill(); x.shadowBlur = 0; x.fillStyle = ink; }
+    else if (kind === 'open' || kind === 'side') { const dx = kind === 'side' ? 11 * (spec.sideDir || 1) : lx, pk = (e.pup ?? 1) * (e.lid || e.low || e.lidT ? 1.5 : 1); if (pk !== 1) { x.translate(cx + dx, cy + ly); x.scale(pk, pk); x.translate(-cx - dx, -cy - ly); } if (spec.eyeC) { x.fillStyle = spec.eyeC; x.shadowColor = spec.eyeC; x.shadowBlur = 18; } x.beginPath(); x.ellipse(cx + dx, cy + ly, spec.eyeC ? 15 : 12, spec.eyeC ? 21 : 18, 0, 0, 7); x.fill(); x.shadowBlur = 0; x.fillStyle = ink;
+      if (e.spark > 0) { x.fillStyle = '#ffffff'; x.beginPath(); x.arc(cx + dx - 4, cy + ly - 7, 5, 0, 7); x.fill(); x.beginPath(); x.arc(cx + dx + 4, cy + ly + 6, 2.5, 0, 7); x.fill(); x.fillStyle = ink; } }
     else if (kind === 'chev') { x.lineWidth = BIG ? 10 : 16; x.beginPath(); x.moveTo(cx - 20 * s, cy - 16); x.lineTo(cx + 14 * s, cy); x.lineTo(cx - 20 * s, cy + 16); x.stroke(); } // > <
     else if (kind === 'spiral') { x.lineWidth = BIG ? 6 : 9; x.beginPath(); for (let i = 0; i <= 60; i++) { const a = i / 60 * Math.PI * 5 * s, r = 3 + i / 60 * 30; x.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r * 1.1); } x.stroke(); }
-    else if (kind === 'tiny') { x.fillStyle = '#fbf8f2'; x.lineWidth = BIG ? 6 : 12; x.beginPath(); x.ellipse(cx, cy - 2, 30, 38, 0, 0, 7); x.fill(); x.stroke(); x.fillStyle = ink; x.beginPath(); x.arc(cx + lx * .5, cy + ly * .5, 6, 0, 7); x.fill(); }
+    else if (kind === 'tiny') { x.fillStyle = '#fbf8f2'; x.lineWidth = BIG ? 6 : 12; x.beginPath(); x.ellipse(cx, cy - 2, 30, 38, 0, 0, 7); x.fill(); x.stroke(); x.fillStyle = ink; x.beginPath(); x.arc(cx + lx * .5, cy + ly * .5, 6 * (e.pup ?? 1), 0, 7); x.fill(); }
     else if (kind === 'half') { x.save(); x.beginPath(); x.rect(cx - 40, cy - 2, 80, 60); x.clip(); if (spec.eyeC) { x.fillStyle = spec.eyeC; x.shadowColor = spec.eyeC; x.shadowBlur = 18; } x.beginPath(); x.ellipse(cx + lx, cy + 2, 16, 20, 0, 0, 7); x.fill(); x.restore(); x.fillStyle = ink; x.beginPath(); x.moveTo(cx - 25, cy - 2); x.lineTo(cx + 25, cy - 2); x.stroke(); }
     else if (kind === 'closed') { x.beginPath(); x.moveTo(cx - 22, cy + 2); x.quadraticCurveTo(cx, cy + 14, cx + 22, cy + 2); x.stroke(); }
     else if (kind === 'closedUp' || kind === 'happy') { x.beginPath(); x.moveTo(cx - 22, cy + 8); x.quadraticCurveTo(cx, cy - 16, cx + 22, cy + 8); x.stroke(); }
-    else if (kind === 'wide') { x.fillStyle = '#fbf8f2'; x.lineWidth = 13; x.beginPath(); x.ellipse(cx, cy, 30, 36, 0, 0, 7); x.fill(); x.stroke(); x.fillStyle = ink; x.beginPath(); x.arc(cx + lx * .6, cy + ly * .6, 9, 0, 7); x.fill(); }
+    else if (kind === 'wide') { x.fillStyle = '#fbf8f2'; x.lineWidth = 13; x.beginPath(); x.ellipse(cx, cy, 30, 36, 0, 0, 7); x.fill(); x.stroke(); x.fillStyle = ink; x.beginPath(); x.arc(cx + lx * .6, cy + ly * .6, 9 * (e.pup ?? 1), 0, 7); x.fill(); if (e.spark > 0) { x.fillStyle = '#fff'; x.beginPath(); x.arc(cx + lx * .6 - 3, cy + ly * .6 - 3, 3, 0, 7); x.fill(); } }
+    if (/^(open|side|wide|tiny)$/.test(kind) && (e.lid || e.low || e.lidT)) { // v6.8 eyelids: cut the eye shape, then ink the lid line
+      const big = BIG || kind === 'wide' || kind === 'tiny', LK_ = big ? 1 : 1.5 * (e.pup ?? 1), EH = big ? 40 : 21 * LK_, EW = big ? 34 : 16 * LK_, a = s * (e.lidT || 0) * D2R, lid = Math.max(e.lid || 0, e.lidT ? .12 : 0);
+      x.save(); x.translate(cx + (kind === 'side' ? 11 * (spec.sideDir || 1) : 0), cy); x.lineWidth = big ? 7 : 8;
+      if (lid > 0) { const y0 = -EH + 2 * EH * lid; x.save(); x.rotate(a); x.globalCompositeOperation = 'destination-out'; x.fillRect(-EW * 1.25, -EH * 3, EW * 2.5, y0 + EH * 3); x.restore();
+        x.save(); x.rotate(a); x.beginPath(); x.moveTo(-EW * 1.2, y0); x.lineTo(EW * 1.2, y0); x.stroke(); x.restore(); }
+      if (e.low > 0) { const yl = EH - 1.7 * EH * e.low; x.beginPath(); x.moveTo(-EW * 1.3, yl + EH * .3); x.quadraticCurveTo(0, yl - EH * .4, EW * 1.3, yl + EH * .3); x.lineTo(EW * 1.3, EH * 3); x.lineTo(-EW * 1.3, EH * 3); x.closePath();
+        x.save(); x.globalCompositeOperation = 'destination-out'; x.fill(); x.restore(); x.lineWidth = big ? 5 : 6; x.beginPath(); x.moveTo(-EW * .95, yl + EH * .18); x.quadraticCurveTo(0, yl - EH * .32, EW * .95, yl + EH * .18); x.stroke(); }
+      x.restore(); }
+    if (e.wet > 0 && kind !== 'chev' && kind !== 'spiral') { x.strokeStyle = `rgba(150,205,255,${Math.min(1, e.wet)})`; x.lineWidth = 6; x.beginPath(); x.moveTo(cx - 18, cy + 26); x.quadraticCurveTo(cx, cy + 34, cx + 18, cy + 26); x.stroke(); x.strokeStyle = ink; }
     x.restore();
-    const ang = (s < 0 ? e.bl : e.br) * D2R; const by = cy - (BIG ? 128 : /wide|tiny/.test(kind) ? 80 : 50) + (e.by || 0) * EK;
-    x.strokeStyle = spec.browC || ink; x.lineWidth = spec.browW || (BIG ? 16 : 11); x.save(); x.translate(cx, by); x.rotate(s < 0 ? -ang : ang); x.beginPath(); x.moveTo(BIG ? -36 : -24, 0); x.lineTo(BIG ? 36 : 24, 0); x.stroke(); x.restore();
+    const ang = (s < 0 ? e.bl : e.br) * D2R; const by = cy - (BIG ? 128 : /wide|tiny/.test(kind) ? 80 : 50) + ((e.by || 0) + ((s < 0 ? e.byL : e.byR) || 0)) * EK, arc_ = (e.arch || 0) * EK;
+    x.strokeStyle = spec.browC || ink; x.lineWidth = spec.browW || (BIG ? 16 : 11); x.save(); x.translate(cx, by); x.rotate(s < 0 ? -ang : ang); x.beginPath(); x.moveTo(BIG ? -36 : -24, 0); if (arc_) x.quadraticCurveTo(0, -arc_ * 2, BIG ? 36 : 24, 0); else x.lineTo(BIG ? 36 : 24, 0); x.stroke(); x.restore();
   }
+  if (e.vein > 0) { x.save(); x.translate(S * .8, ey - (BIG ? 120 : 64)); x.strokeStyle = `rgba(214,30,48,${Math.min(1, e.vein)})`; x.lineWidth = 9; // anger mark
+    for (let i = 0; i < 4; i++) { x.rotate(Math.PI / 2); x.beginPath(); x.moveTo(8, -26); x.quadraticCurveTo(8, -8, 26, -8); x.stroke(); } x.restore(); }
+  if (e.drop > 0) { x.save(); x.translate(S * .17, ey - (BIG ? 40 : 12)); x.fillStyle = `rgba(150,210,255,${Math.min(1, e.drop)})`; x.strokeStyle = ink; x.lineWidth = 6; // sweat drop
+    x.beginPath(); x.moveTo(0, -30); x.quadraticCurveTo(18, 2, 0, 14); x.quadraticCurveTo(-18, 2, 0, -30); x.fill(); x.stroke(); x.restore(); }
   if (spec.fringe) { x.fillStyle = spec.fringe; x.strokeStyle = ink; x.lineWidth = 12; const top = ey - 190, L = S * .16, Rr = S * .84, n = 6; x.beginPath(); x.moveTo(L, top); x.lineTo(L, ey - 60);
     for (let i = 1; i <= n; i++) { const bx = L + (Rr - L) * i / n, yb = ey - 60 - Math.sin(Math.PI * i / n) * 34 - (i === n ? 0 : 0); x.quadraticCurveTo(bx - (Rr - L) / n / 2, yb + 44, bx, i === n ? ey - 60 : yb); }
     x.lineTo(Rr, top); x.closePath(); x.fill(); x.stroke(); }
@@ -67,7 +141,7 @@ function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a wh
     const n = 7; for (let i = 0; i <= n; i++) { const u = i / n, bx = L + (Rr - L) * u, by = top + Math.sin(Math.PI * u) * 120 + 18; if (i) x.quadraticCurveTo(bx - (Rr - L) / n / 2, by + 26, bx, by); else x.lineTo(bx, by); }
     x.lineTo(Rr, top); x.quadraticCurveTo(S / 2, top + 44, L, top); x.closePath(); x.fill(); x.stroke(); }
   let m = e.mouth; if (talk > 0) m = talk > .66 ? 'open' : talk > .33 ? 'talk' : (m === 'o' || m === 'yawn' ? m : 'flat');
-  x.strokeStyle = ink; x.fillStyle = '#3a1a24'; x.lineWidth = 10; const cx = S / 2; x.save(); { x.translate(cx, my); x.scale(BIG ? 1.9 : 1.3, BIG ? 1.9 : 1.3); x.translate(-cx, -my); }
+  x.strokeStyle = ink; x.fillStyle = '#3a1a24'; x.lineWidth = 10; const cx = S / 2; x.save(); { x.translate(cx + (e.mx || 0) * (BIG ? 1.9 : 1.3), my); x.rotate((e.mr || 0) * D2R); x.scale((BIG ? 1.9 : 1.3) * (e.mw ?? 1) * (e.mflip && !talk ? -1 : 1), BIG ? 1.9 : 1.3); x.translate(-cx, -my); }
   if (m === 'smile') { const W = BIG ? 44 : 24, D = BIG ? 30 : 16; x.beginPath(); x.moveTo(cx - W, my - 10); x.quadraticCurveTo(cx, my + D, cx + W, my - 10); x.stroke(); } // v4.6 wide sheet smile
   else if (m === 'flat') { x.beginPath(); x.moveTo(cx - 18, my + 4); x.lineTo(cx + 18, my + 4); x.stroke(); }
   else if (m === 'smirk') { x.beginPath(); x.moveTo(cx - 22, my + 6); x.quadraticCurveTo(cx + 6, my + 12, cx + 28, my - 6); x.stroke(); }
@@ -80,12 +154,24 @@ function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a wh
     x.fillStyle = '#fbf8f2'; x.beginPath(); if (m === 'teeth') { x.moveTo(cx - w, y0); x.lineTo(cx + w, y0); x.quadraticCurveTo(cx + w, y0 + h, cx, y0 + h); x.quadraticCurveTo(cx - w, y0 + h, cx - w, y0); } else x.roundRect(cx - w, y0, w * 2, h, 8);
     x.closePath(); x.fill(); x.stroke(); x.lineWidth = 9; x.beginPath(); x.moveTo(cx - w + 4, y0 + h * .45); x.lineTo(cx + w - 4, y0 + h * .45); for (let i = -2; i <= 2; i++) { x.moveTo(cx + i * w / 3, y0 + 2); x.lineTo(cx + i * w / 3, y0 + h - 4); } x.stroke(); x.lineWidth = 15; }
   else if (m === 'bigO') { x.beginPath(); x.ellipse(cx, my + 22, 40, 58, 0, 0, 7); x.fill(); x.stroke(); }
+  else if (m === 'smileSoft') { x.beginPath(); x.moveTo(cx - 17, my); x.quadraticCurveTo(cx, my + 13, cx + 17, my); x.stroke(); }
+  else if (m === 'smileBig') { x.beginPath(); x.moveTo(cx - 30, my - 6); x.lineTo(cx + 30, my - 6); x.quadraticCurveTo(cx, my + 42, cx - 30, my - 6); x.closePath(); x.fill(); x.stroke(); x.fillStyle = '#fbf8f2'; x.fillRect(cx - 22, my - 2, 44, 7); }
+  else if (m === 'laugh') { x.beginPath(); x.moveTo(cx - 34, my - 10); x.quadraticCurveTo(cx, my - 2, cx + 34, my - 10); x.quadraticCurveTo(cx + 26, my + 58, cx, my + 58); x.quadraticCurveTo(cx - 26, my + 58, cx - 34, my - 10); x.closePath(); x.fill(); x.stroke();
+    x.fillStyle = '#e8707e'; x.beginPath(); x.ellipse(cx, my + 44, 18, 10, 0, 0, 7); x.fill(); x.fillStyle = '#fbf8f2'; x.fillRect(cx - 24, my - 5, 48, 7); }
+  else if (m === 'pout') { x.beginPath(); x.moveTo(cx - 13, my + 8); x.quadraticCurveTo(cx, my - 4, cx + 13, my + 8); x.stroke(); x.lineWidth = 7; x.beginPath(); x.moveTo(cx - 8, my + 15); x.quadraticCurveTo(cx, my + 21, cx + 8, my + 15); x.stroke(); }
+  else if (m === 'grimace') { const w = 50, h = 26, y0 = my - 4; x.fillStyle = '#fbf8f2'; x.beginPath(); x.moveTo(cx - w, y0 + 8); x.lineTo(cx + w, y0 + 8); x.lineTo(cx + w * .8, y0 + h); x.lineTo(cx - w * .8, y0 + h); x.closePath(); x.moveTo(cx - w * .8, y0); x.lineTo(cx + w * .8, y0); x.lineTo(cx + w, y0 + 8); x.lineTo(cx - w, y0 + 8); x.closePath(); x.fill(); x.stroke();
+    x.lineWidth = 7; x.beginPath(); x.moveTo(cx - w * .9, y0 + 12); x.lineTo(cx + w * .9, y0 + 12); for (let i = -2; i <= 2; i++) { x.moveTo(cx + i * w / 3, y0 + 2); x.lineTo(cx + i * w / 3, y0 + h - 2); } x.moveTo(cx - w, y0 + 8); x.lineTo(cx - w - 10, y0 + 22); x.moveTo(cx + w, y0 + 8); x.lineTo(cx + w + 10, y0 + 22); x.stroke(); }
+  else if (m === 'sneer') { x.beginPath(); x.moveTo(cx - 26, my + 8); x.lineTo(cx - 2, my + 6); x.quadraticCurveTo(cx + 14, my - 4, cx + 30, my - 12); x.stroke(); x.fillStyle = '#fbf8f2'; x.lineWidth = 6; x.beginPath(); x.moveTo(cx + 4, my + 4); x.lineTo(cx + 26, my - 8); x.lineTo(cx + 18, my + 6); x.closePath(); x.fill(); x.stroke(); }
+  else if (m === 'tight') { x.lineWidth = 13; x.beginPath(); x.moveTo(cx - 15, my + 5); x.lineTo(cx + 15, my + 5); x.stroke(); x.lineWidth = 6; x.beginPath(); x.moveTo(cx - 21, my + 1); x.lineTo(cx - 19, my + 9); x.moveTo(cx + 21, my + 1); x.lineTo(cx + 19, my + 9); x.stroke(); }
+  else if (m === 'gasp') { x.beginPath(); x.ellipse(cx, my + 10, 15, 22, 0, 0, 7); x.fill(); x.stroke(); }
+  else if (m === 'cry') { x.beginPath(); x.moveTo(cx - 28, my + 20); x.quadraticCurveTo(cx, my - 10, cx + 28, my + 20); x.quadraticCurveTo(cx, my + 36, cx - 28, my + 20); x.closePath(); x.fill(); x.stroke(); }
+  else if (m === 'bite') { x.beginPath(); x.moveTo(cx - 20, my + 4); x.quadraticCurveTo(cx, my + 9, cx + 20, my + 4); x.stroke(); x.fillStyle = '#fbf8f2'; x.lineWidth = 5; x.beginPath(); x.rect(cx - 10, my + 5, 9, 8); x.rect(cx + 1, my + 5, 9, 8); x.fill(); x.stroke(); }
   else if (m === 'wavy') { x.beginPath(); x.moveTo(cx - 26, my + 6); for (let i = 1; i <= 6; i++) x.lineTo(cx - 26 + i * 8.7, my + 6 + (i % 2 ? -6 : 6)); x.stroke(); }
   x.restore();
   if (spec.stache) { x.fillStyle = spec.stacheC || '#f2f0ea'; x.strokeStyle = ink; x.lineWidth = 12; for (const s of [-1, 1]) { x.beginPath(); x.moveTo(cx, my - 24); x.bezierCurveTo(cx + s * 26, my - 46, cx + s * 62, my - 28, cx + s * 78, my - 44); x.bezierCurveTo(cx + s * 72, my - 4, cx + s * 26, my - 6, cx, my - 12); x.closePath(); x.fill(); x.stroke(); } }
 }
 function faceTexFor(spec, exName, blink, talk, look) {
-  const e = EX[exName] || EX.neutral; const tq = talk > .66 ? 2 : talk > .33 ? 1 : 0;
+  const e = exOf(exName); const tq = talk > .66 ? 2 : talk > .33 ? 1 : 0;
   const key = spec.id + '|' + exName + '|' + (blink ? 1 : 0) + '|' + tq + '|' + (look ? look.join(',') : '');
   if (FACE.has(key)) return FACE.get(key);
   const t = canvasTex(512, 512, (x) => drawFace(x, spec, e, blink, tq ? (tq === 2 ? 1 : .5) : 0, look)); FACE.set(key, t); return t;
@@ -595,7 +681,7 @@ function headTex(C, key, view) {
   const t = canvasTex(w, h, (x) => {
     x.drawImage(im, 0, 0, w, h); if (view === 'B') return;
     const [bx, by, br] = SPR.meta[key].ballH; const cx = bx * HS, cy = by * HS, r = br * HS;
-    drawFace(FX, eyeC ? { ...C.spec, eyeC } : C.spec, EX[exName] || EX.neutral, blink, tq ? (tq === 2 ? 1 : .5) : 0, look); // P.eyeC: glowing coloured eyes (e.g. '#ff2030')
+    drawFace(FX, eyeC ? { ...C.spec, eyeC } : C.spec, exOf(exName), blink, tq ? (tq === 2 ? 1 : .5) : 0, look); // P.eyeC: glowing coloured eyes (e.g. '#ff2030')
     TMP.width = w; TMP.height = h; TX.clearRect(0, 0, w, h); const phi = PHI[view], FH = 1.53 * r * (C.spec.faceV || 1), fy = cy + r * (C.spec.faceY || 0);
     for (let i = 0; i < 64; i++) { const al = ((i + .5) / 64 - .5) * 1.9, c = Math.cos(al + phi); if (c < .07) continue;
       const X = cx + r * Math.sin(al + phi), ww = r * c * 1.9 / 64 + 1.2; TX.drawImage(FC, i * 8, 0, 8, 512, X - ww / 2, fy - FH / 2, ww, FH); }

@@ -342,6 +342,37 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
   hard shadow).
 
+## Acting: faces + body language (v6.8, src/acting.js + chars.js faces; user: 'faces and poses must fit the situation')
+Research basis: Ekman FACS (action units), Ed Hooks 'Acting for Animators', Disney 12 principles, Preston Blair sheets.
+- THOUGHT -> FEELING -> ACTION: eyes change first, then the face, head, torso, hands last (perform(..., {lead:'eyes'})).
+  A deliberate action leads with the body instead ({lead:'body'}). One clear emotion per beat; asymmetry, no twins.
+- FACE PARTS (EX fields, all optional): lid (upper lid drop), lidT (+ sad outer-down / - angry inner-down), low (lower lid
+  up = real smile / squint / glare), pup (eye size), arch (brow bend), byL/byR (one brow), mx/mw/mr/mflip (mouth shift,
+  width, tilt, mirror), sh (shadow over eyes = dread/menace), blush, vein, drop (sweat), spark (shiny eyes), wet (tears line).
+  Real vs fake smile = lower lids (smileReal vs smilePolite). Surprise = brows up level; fear = brows up AND knit.
+  Contempt = one lip corner (only asymmetric universal expression). Anger = lids pinch, mouth tight or bared.
+- 41 new faces: smileReal smilePolite smileSad laugh relieved touched awe hopeful pleading surprised terror dread anxious
+  hurt despair guilty ashamed embarrassed shy annoyed bored skeptical suspicious contempt disgust annoyedHard rage
+  coldFury menace glare focused thinking realize confused exhausted pain mocking sinister stoic determinedHard
+  (+ the older ones). New mouths: smileSoft smileBig laugh pout grimace sneer tight gasp cry bite.
+- exShift(lt, at, a, b): numbers tween in 5 steps, the eye/mouth SHAPE swap hides under a 2-frame blink. Blends are names
+  'a>b@0.4' (exOf resolves + caches). Never hard-cut a face.
+- gaze(lt, mode, seed): saccades (fast jump + hold): idle, think (up-side), avoid (guilt/lying, glances back), shifty,
+  down, stare (threat/shock), search, up. Eyes never drift slowly.
+- POSES (47, torso space): neutral relaxed confident handsOnHips armsCrossed handsBehind proud thinking chinRub headScratch
+  realize facepalm explain shrug point accuse stopHand offer beckon wave whisper leanIn leanBack laugh cheer fistPump
+  thumbsUp relief recoil gasp defend cower frozen handsUp anxious selfHug slump heartbreak ashamed exhausted fists menace
+  guard grabCollar coldStare sneak peek. perform(lt, [[t, 'pose', {ex, look, dur, lead, mirror}], ...]) blends them with
+  anticipation, overlap (parts arrive in order), overshoot-settle and a moving hold; mirror() swaps sides.
+- STATUS: high status = still, upright, chin level, few gestures (coldStare, handsBehind); low status = fidgets, head
+  down, self-touch (anxious, selfHug, ashamed). Open body = confident/honest; closed (crossed arms, hands at the face) =
+  defensive / scared / hiding something. Fear freezes first (frozen), then recoils.
+- FRONT CAMERA: spread gestures sideways and up; an arm aimed at the lens loses its silhouette. The 2D body cannot bend,
+  so lean/crouch read in 3/4 or side views; in front views sell the beat with arms, head tilt and face.
+- SITUATIONS cheat sheet in acting.js (bad news: frozen -> realize -> slump; caught lying: gasp -> ashamed + gaze avoid;
+  threat: leanIn -> menace; stays cool: handsBehind -> coldStare; figures it out: thinking -> realize -> point ...).
+- Contact sheets: output/ใบหน้าตามสถานการณ์.jpg, output/ท่าทางตามสถานการณ์.jpg (bench {act:[...], faceOnly, who, beats, lt}).
+
 ## Body mechanics kit (v6.7, src/motion.js; research: 12 principles, follow-through/overlap, Eiserloh camera trauma)
 - turn(lt, t0, dur, fromDeg, toDeg): successive breaking of joints - eyes dart first, head .06, chest .12, hips .2 of
   dur later, each overshoots and settles; a small head dip mid-turn. Use for every look-around / turn to camera.
