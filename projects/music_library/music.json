@@ -1,0 +1,140 @@
+{
+ "tension_pulse": {
+  "mood": "suspense build, someone is coming, a timer",
+  "bpm": 92,
+  "key": "D",
+  "file": "tension_pulse.mp3"
+ },
+ "dark_ambient": {
+  "mood": "mystery, dread, night, an empty place",
+  "bpm": 60,
+  "key": "C",
+  "file": "dark_ambient.mp3"
+ },
+ "mystery_pizz": {
+  "mood": "investigation, clues, curious",
+  "bpm": 104,
+  "key": "E",
+  "file": "mystery_pizz.mp3"
+ },
+ "sneaky": {
+  "mood": "sneaking, mischief, a plan in motion",
+  "bpm": 112,
+  "key": "A",
+  "file": "sneaky.mp3"
+ },
+ "action_drums": {
+  "mood": "fight, power clash, battle",
+  "bpm": 140,
+  "key": "D",
+  "file": "action_drums.mp3"
+ },
+ "chase": {
+  "mood": "chase, escape, running",
+  "bpm": 165,
+  "key": "E",
+  "file": "chase.mp3"
+ },
+ "epic_rise": {
+  "mood": "build to a big moment, transformation; ends on a hit",
+  "bpm": 90,
+  "key": "D",
+  "file": "epic_rise.mp3"
+ },
+ "villain": {
+  "mood": "villain entrance, menace, power",
+  "bpm": 70,
+  "key": "C",
+  "file": "villain.mp3"
+ },
+ "sad_piano": {
+  "mood": "loss, regret, memory",
+  "bpm": 66,
+  "key": "A",
+  "file": "sad_piano.mp3"
+ },
+ "hope": {
+  "mood": "hope, determination, new start",
+  "bpm": 84,
+  "key": "G",
+  "file": "hope.mp3"
+ },
+ "victory": {
+  "mood": "win, triumph, reward",
+  "bpm": 120,
+  "key": "C",
+  "file": "victory.mp3"
+ },
+ "heartbreak": {
+  "mood": "betrayal, heartbreak, alone",
+  "bpm": 58,
+  "key": "E",
+  "file": "heartbreak.mp3"
+ },
+ "horror": {
+  "mood": "horror, monster, danger close",
+  "bpm": 70,
+  "key": "C#",
+  "file": "horror.mp3"
+ },
+ "lofi_investigation": {
+  "mood": "thinking, planning, calm detective",
+  "bpm": 86,
+  "key": "F",
+  "file": "lofi_investigation.mp3"
+ },
+ "power_awakening": {
+  "mood": "power awakens, hacking, focus",
+  "bpm": 100,
+  "key": "D",
+  "file": "power_awakening.mp3"
+ },
+ "city_night": {
+  "mood": "neon city, travel, montage",
+  "bpm": 100,
+  "key": "A",
+  "file": "city_night.mp3"
+ },
+ "flashback": {
+  "mood": "flashback, childhood, innocence",
+  "bpm": 72,
+  "key": "G",
+  "file": "flashback.mp3"
+ },
+ "confrontation": {
+  "mood": "standoff, accusation, interrogation",
+  "bpm": 108,
+  "key": "D",
+  "file": "confrontation.mp3"
+ },
+ "calm": {
+  "mood": "peaceful, morning, safe",
+  "bpm": 88,
+  "key": "D",
+  "file": "calm.mp3"
+ },
+ "comedy": {
+  "mood": "funny, clumsy, light",
+  "bpm": 128,
+  "key": "F",
+  "file": "comedy.mp3"
+ },
+ "suspense_reveal": {
+  "mood": "riser -> silence -> hit on the reveal",
+  "bpm": 90,
+  "key": "D",
+  "file": "suspense_reveal.mp3"
+ },
+ "_stingers": [
+  "hit_boom",
+  "braam",
+  "riser_hit",
+  "reverse_hit",
+  "shimmer_up",
+  "dread",
+  "piano_low",
+  "comedy_bonk",
+  "heartbeat2",
+  "victory_hit"
+ ]
+}

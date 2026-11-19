@@ -144,7 +144,9 @@ function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a wh
   if (spec.beard) { x.fillStyle = spec.beard; x.strokeStyle = ink; x.lineWidth = 12; const top = ey + 34, L = S * .25, Rr = S * .75; x.beginPath(); x.moveTo(L, top);
     const n = 7; for (let i = 0; i <= n; i++) { const u = i / n, bx = L + (Rr - L) * u, by = top + Math.sin(Math.PI * u) * 120 + 18; if (i) x.quadraticCurveTo(bx - (Rr - L) / n / 2, by + 26, bx, by); else x.lineTo(bx, by); }
     x.lineTo(Rr, top); x.quadraticCurveTo(S / 2, top + 44, L, top); x.closePath(); x.fill(); x.stroke(); }
-  let m = e.mouth; if (talk > 0) m = talk > .66 ? 'open' : talk > .33 ? 'talk' : (m === 'o' || m === 'yawn' ? m : 'flat');
+  let m = e.mouth; const mood = /smile|grin|laugh|teeth/.test(e.mouth) ? 1 : /frown|cry|wavy|grimace|clench|pout/.test(e.mouth) ? -1 : 0;
+  if (typeof talk === 'string') { if (talk !== 'X') m = 'v' + talk; } // v6.9 viseme lip sync (tools/lipsync.py): X rest, M pressed, a/A open, E wide, O round, S teeth
+  else if (talk > 0) m = talk > .66 ? 'open' : talk > .33 ? 'talk' : (m === 'o' || m === 'yawn' ? m : 'flat');
   x.strokeStyle = ink; x.fillStyle = '#3a1a24'; x.lineWidth = 10; const cx = S / 2; x.save(); { x.translate(cx + (e.mx || 0) * (BIG ? 1.9 : 1.3), my); x.rotate((e.mr || 0) * D2R); x.scale((BIG ? 1.9 : 1.3) * (e.mw ?? 1) * (e.mflip && !talk ? -1 : 1), BIG ? 1.9 : 1.3); x.translate(-cx, -my); }
   if (m === 'smile') { const W = BIG ? 44 : 24, D = BIG ? 30 : 16; x.beginPath(); x.moveTo(cx - W, my - 10); x.quadraticCurveTo(cx, my + D, cx + W, my - 10); x.stroke(); } // v4.6 wide sheet smile
   else if (m === 'flat') { x.beginPath(); x.moveTo(cx - 18, my + 4); x.lineTo(cx + 18, my + 4); x.stroke(); }
@@ -158,6 +160,14 @@ function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a wh
     x.fillStyle = '#fbf8f2'; x.beginPath(); if (m === 'teeth') { x.moveTo(cx - w, y0); x.lineTo(cx + w, y0); x.quadraticCurveTo(cx + w, y0 + h, cx, y0 + h); x.quadraticCurveTo(cx - w, y0 + h, cx - w, y0); } else x.roundRect(cx - w, y0, w * 2, h, 8);
     x.closePath(); x.fill(); x.stroke(); x.lineWidth = 9; x.beginPath(); x.moveTo(cx - w + 4, y0 + h * .45); x.lineTo(cx + w - 4, y0 + h * .45); for (let i = -2; i <= 2; i++) { x.moveTo(cx + i * w / 3, y0 + 2); x.lineTo(cx + i * w / 3, y0 + h - 4); } x.stroke(); x.lineWidth = 15; }
   else if (m === 'bigO') { x.beginPath(); x.ellipse(cx, my + 22, 40, 58, 0, 0, 7); x.fill(); x.stroke(); }
+  else if (m === 'vM') { if (mood > 0) { x.lineWidth = 12; x.beginPath(); x.moveTo(cx - 18, my); x.quadraticCurveTo(cx, my + 12, cx + 18, my); x.stroke(); } else { x.lineWidth = 12; x.beginPath(); x.moveTo(cx - 15, my + 4); x.lineTo(cx + 15, my + 4); x.stroke(); } }
+  else if (m === 'va' || m === 'vA') { const h = m === 'va' ? 12 : 24;
+    if (mood > 0) { x.beginPath(); x.moveTo(cx - 26, my - 6); x.lineTo(cx + 26, my - 6); x.quadraticCurveTo(cx, my - 6 + h * 1.9, cx - 26, my - 6); x.closePath(); x.fill(); x.stroke(); x.fillStyle = '#fbf8f2'; x.fillRect(cx - 18, my - 3, 36, 5); }
+    else if (mood < 0) { x.beginPath(); x.moveTo(cx - 22, my + 8); x.quadraticCurveTo(cx, my - 6, cx + 22, my + 8); x.quadraticCurveTo(cx, my + 8 + h * 1.4, cx - 22, my + 8); x.closePath(); x.fill(); x.stroke(); }
+    else { x.beginPath(); x.moveTo(cx - 22, my - 2); x.quadraticCurveTo(cx, my + h * 2, cx + 22, my - 2); x.closePath(); x.fill(); x.stroke(); } }
+  else if (m === 'vE') { x.beginPath(); x.roundRect(cx - 28, my - 5 - (mood > 0 ? 3 : 0), 56, 19, 8); x.fill(); x.stroke(); x.fillStyle = '#fbf8f2'; x.fillRect(cx - 19, my - 2 - (mood > 0 ? 3 : 0), 38, 5); }
+  else if (m === 'vO') { x.beginPath(); x.ellipse(cx, my + 6, 12, 16, 0, 0, 7); x.fill(); x.stroke(); }
+  else if (m === 'vS') { x.lineWidth = 6; x.fillStyle = '#fbf8f2'; x.beginPath(); x.roundRect(cx - 24, my - 4, 48, 20, 7); x.fill(); x.stroke(); x.lineWidth = 4; x.beginPath(); x.moveTo(cx - 20, my + 6); x.lineTo(cx + 20, my + 6); for (const k of [-12, 0, 12]) { x.moveTo(cx + k, my - 2); x.lineTo(cx + k, my + 14); } x.stroke(); }
   else if (m === 'smileSoft') { x.beginPath(); x.moveTo(cx - 17, my); x.quadraticCurveTo(cx, my + 13, cx + 17, my); x.stroke(); }
   else if (m === 'smileBig') { x.beginPath(); x.moveTo(cx - 30, my - 6); x.lineTo(cx + 30, my - 6); x.quadraticCurveTo(cx, my + 42, cx - 30, my - 6); x.closePath(); x.fill(); x.stroke(); x.fillStyle = '#fbf8f2'; x.fillRect(cx - 22, my - 2, 44, 7); }
   else if (m === 'laugh') { x.beginPath(); x.moveTo(cx - 34, my - 10); x.quadraticCurveTo(cx, my - 2, cx + 34, my - 10); x.quadraticCurveTo(cx + 26, my + 58, cx, my + 58); x.quadraticCurveTo(cx - 26, my + 58, cx - 34, my - 10); x.closePath(); x.fill(); x.stroke();
@@ -175,10 +185,10 @@ function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a wh
   if (spec.stache) { x.fillStyle = spec.stacheC || '#f2f0ea'; x.strokeStyle = ink; x.lineWidth = 12; for (const s of [-1, 1]) { x.beginPath(); x.moveTo(cx, my - 24); x.bezierCurveTo(cx + s * 26, my - 46, cx + s * 62, my - 28, cx + s * 78, my - 44); x.bezierCurveTo(cx + s * 72, my - 4, cx + s * 26, my - 6, cx, my - 12); x.closePath(); x.fill(); x.stroke(); } }
 }
 function faceTexFor(spec, exName, blink, talk, look) {
-  const e = exOf(exName); const tq = talk > .66 ? 2 : talk > .33 ? 1 : 0;
+  const e = exOf(exName); const tq = typeof talk === 'string' ? talk : talk > .66 ? 2 : talk > .33 ? 1 : 0;
   const key = spec.id + '|' + exName + '|' + (blink ? 1 : 0) + '|' + tq + '|' + (look ? look.join(',') : '');
   if (FACE.has(key)) return FACE.get(key);
-  const t = canvasTex(512, 512, (x) => drawFace(x, spec, e, blink, tq ? (tq === 2 ? 1 : .5) : 0, look)); FACE.set(key, t); return t;
+  const t = canvasTex(512, 512, (x) => drawFace(x, spec, e, blink, typeof tq === 'string' ? tq : tq ? (tq === 2 ? 1 : .5) : 0, look)); FACE.set(key, t); return t;
 }
 const stripeTex = (a, b) => canvasTex(128, 1024, (x, w, h) => { for (let i = 0; i < 8; i++) { x.fillStyle = i % 2 ? b : a; x.fillRect(0, i * h / 8, w, h / 8); } });
 
@@ -509,6 +519,10 @@ export function actHammer(lt, { rate = 3, side = 1 } = {}) {
 // hit-stop: freeze the clock for `frames` right after `at` (use the returned lt for everything in the shot)
 export function hitStop(lt, at, frames = 4) { const d = frames / 30; return lt < at ? lt : lt < at + d ? at : lt - d; }
 // lip flap like anime: the mouth shape changes at most every 3 frames, from the envelope averaged over those frames
+// v6.9 lipAt(TM, t): viseme for voice time t from timing.json "vis" (tools/lipsync.py). Pass as talk: put(C, SET, { talk: lipAt(TM, t) }).
+//   Only the character who is speaking gets it; listeners keep talk 0 (their mouth = expression). o.k < .5 = mumble (A -> a, E -> a).
+export function lipAt(TM, t, o = {}) { const v = TM.vis; if (!v) return talkQ(TM.env || [], t); const c = v[Math.round(t * 30)] || 'X';
+  return (o.k ?? 1) < .5 ? ({ A: 'a', E: 'a', O: 'a' }[c] || c) : c; }
 export function talkQ(env, t) { const f0 = Math.floor(t * 30 / 3) * 3; let e = 0; for (let k = -1; k < 3; k++) e += (env[f0 + k] || 0) * (k < 0 ? .5 : 1); e /= 3.5; return e > .5 ? 1 : e > .2 ? .5 : 0; }
 // auto blink helper: returns true during a 0.12 s blink every ~3.3 s (seeded)
 export function blinkAt(t, seed = 0) { const p = 3.1 + (seed % 3) * .4; const u = ((t + seed * 1.37) % p); return u < .12; }
@@ -678,14 +692,14 @@ const HEADC = new Map(), HS = .72, FC = document.createElement('canvas'); FC.wid
 const TMP = document.createElement('canvas'), TX = TMP.getContext('2d');
 const PHI = { F: 0, Q: -.42, S: -1.42 };
 function headTex(C, key, view) {
-  const [exName, blink, talk, look, eyeC] = C.f2 || ['neutral', false, 0, null, '']; const tq = talk > .66 ? 2 : talk > .33 ? 1 : 0;
+  const [exName, blink, talk, look, eyeC] = C.f2 || ['neutral', false, 0, null, '']; const tq = typeof talk === 'string' ? talk : talk > .66 ? 2 : talk > .33 ? 1 : 0;
   const ck = key + '|' + exName + '|' + (blink ? 1 : 0) + '|' + tq + '|' + (look ? look.join(',') : '') + '|' + C.spec.id + '|' + (eyeC || '');
   if (HEADC.has(ck)) { const t = HEADC.get(ck); HEADC.delete(ck); HEADC.set(ck, t); return t; }
   const im = SPR.headImg[key], w = Math.round(im.width * HS), h = Math.round(im.height * HS);
   const t = canvasTex(w, h, (x) => {
     x.drawImage(im, 0, 0, w, h); if (view === 'B') return;
     const [bx, by, br] = SPR.meta[key].ballH; const cx = bx * HS, cy = by * HS, r = br * HS;
-    drawFace(FX, eyeC ? { ...C.spec, eyeC } : C.spec, exOf(exName), blink, tq ? (tq === 2 ? 1 : .5) : 0, look); // P.eyeC: glowing coloured eyes (e.g. '#ff2030')
+    drawFace(FX, eyeC ? { ...C.spec, eyeC } : C.spec, exOf(exName), blink, typeof tq === 'string' ? tq : tq ? (tq === 2 ? 1 : .5) : 0, look); // P.eyeC: glowing coloured eyes (e.g. '#ff2030')
     TMP.width = w; TMP.height = h; TX.clearRect(0, 0, w, h); const phi = PHI[view], FH = 1.53 * r * (C.spec.faceV || 1), fy = cy + r * (C.spec.faceY || 0);
     for (let i = 0; i < 64; i++) { const al = ((i + .5) / 64 - .5) * 1.9, c = Math.cos(al + phi); if (c < .07) continue;
       const X = cx + r * Math.sin(al + phi), ww = r * c * 1.9 / 64 + 1.2; TX.drawImage(FC, i * 8, 0, 8, 512, X - ww / 2, fy - FH / 2, ww, FH); }

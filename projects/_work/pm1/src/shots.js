@@ -3,12 +3,12 @@ import { THREE, setSmoothLight, scene, camera, clamp, lerp, sstep, eIO, eOut, eI
 import * as Wd from './world.js';
 import * as ZC from './zc.js';
 import { perform, POSES } from './acting.js';
-import { CHARS, OVL, setRig, lightAt, pose, popAt, sparkAt, dustAt, debrisAt, smokeAt, tintAt, rainAt, shockAt, whisperAt, makeRope, updateRope } from './chars.js';
+import { CHARS, OVL, lipAt, setRig, lightAt, pose, popAt, sparkAt, dustAt, debrisAt, smokeAt, tintAt, rainAt, shockAt, whisperAt, makeRope, updateRope } from './chars.js';
 const { TRUCK, GATE, STREET, ALLEY, Z } = ZC;
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 export const TM = { env: [] };
 const SP = 1.12;
-const talkAt = (t) => { const f0 = Math.floor(t / SP * 30 / 3) * 3; let e = 0; for (let k = -1; k < 3; k++) e += (TM.env[f0 + k] || 0) * (k < 0 ? .5 : 1); e /= 3.5; return e > .5 ? 1 : e > .2 ? .5 : 0; };
+const talkAt = (t) => { const c = lipAt(TM, t / SP); return c === 'X' ? 0 : c; }; // v6.9 viseme lip sync (tools/lipsync.py)
 let SH = { a: 0, t: 0 };
 function look(pos, tgt, fov = 40, roll = 0) { POST.focus = pos.distanceTo(tgt); camera.position.copy(pos); camera.fov = fov; camera.updateProjectionMatrix(); camera.up.set(0, 1, 0); camera.lookAt(tgt); if (roll) camera.rotateZ(roll * D2R);
   if (SH.a > 0) { const t = SH.t * 8;   /* a rumble, not a 22 Hz jitter (read as skipped frames on close shots) */ camera.rotateX(noise1(t) * .02 * SH.a); camera.rotateY(noise1(t + 50) * .02 * SH.a); camera.position.y += noise1(t + 9) * .05 * SH.a; } camera.updateMatrixWorld(); }
@@ -109,7 +109,7 @@ S('S08', 15.26, 'cut', GATE, (lt, t) => { gateLight(); Z.truckX.position.set(0, 
   camG([-3, 14.5, -24], [0, 16.2, -36.2], [-2, 15.4, -26], [0, 16.2, -36.2], U(lt, 1.4), 44); }, { rain: .5 });
 // ---------------- 8  "ลงไป" : the rear doors open, the guard points out ----------------
 S('S09', 16.71, 'whip', TRUCK, (lt, t) => { truckLight(); const op = U(lt, .3, eOut); Z.truckDoors.forEach((d, i) => { d.position.x = (i ? 1 : -1) * (.65 + 1.4 * op); }); Z.truckSlit.visible = op < .05; Z.outside.visible = true; neonPt(2, TRUCK.localToWorld(V(0, 1.6, 3.4)), '#ff7a5a', 6 * U(lt, .3), 8);
-  put(GU(), TRUCK, { p: [0, .05, 3.6], ry: 180, ex: 'angry', talk: talkAt(t) ? 1 : 0, hR: lp([.3, .35, .1], [.25, .75, .45], antic(lt, .2, .35, .15, .15, 2.2)), pR: [1, 0, -.4], lean: 4 * settle(lt - .2, 9, 4) });
+  put(GU(), TRUCK, { p: [0, .05, 3.6], ry: 180, ex: 'angry', talk: talkAt(t), hR: lp([.3, .35, .1], [.25, .75, .45], antic(lt, .2, .35, .15, .15, 2.2)), pR: [1, 0, -.4], lean: 4 * settle(lt - .2, 9, 4) });
   put(AR(), TRUCK, { p: [-.9, .64, .2], ry: 90, sit: true, seat: .62, ex: 'frown', head: [0, 50, 0] }); put(PX(2), TRUCK, { p: [.9, .64, -.6], ry: -90, sit: true, seat: .62, ex: 'frown', head: [0, -50, 0] });
   camT([-.3, 1.4, -1.8], [0, 1.4, 3.4], [-.25, 1.4, -1.5], [0, 1.45, 3.4], U(lt, .8), 46); });
 // ---------------- 9  "ยินดีต้อนรับสู่เมืองนรก" : the gate grinds open, red light floods out, prisoners walk in ----------------
@@ -254,7 +254,7 @@ export const COVER = { id: 'COVER', t0: 0, fn: (lt, t, o = {}) => { reset(10); A
   const cm = o.cam || [.9, 1.45, -4.6], g = o.tgt || [-1.1, 1.75, -7.4]; MIND = 0; camA(cm, g, cm, g, 0, o.fov || 44); } };
 export const BENCH = { id: 'BENCH', t0: 0, fn: (lt, t, o = {}) => { reset(0); if (o.roof) { ZC.ROOF.visible = true; ZC.roofAt(3); alleyLight(); setRig(RIGS.alley); put(GM(), ZC.ROOF, { p: [0, 0, -6.2], ry: 180, ex: 'evil' }); const c = o.cam, g = o.tgt; look(V(...c).add(ZC.ROOF.position), V(...g).add(ZC.ROOF.position), o.fov || 50); ZC.zcLate(3, camera); return; } STREET.visible = true; streetLight(0); if (o.rig) setRig({ ...RIGS.street, ...o.rig }); const ids = ['aren', 'guard', 'fire', 'strong', 'thug1', 'thug2', 'thug3', 'gunman'];
   if (o.act) { const L = o.act, n = L.length, sp = o.sp ?? .85; ids.forEach((id) => put(CHARS[id], STREET, { p: [0, -50, -30], visible: false }));
-    L.forEach((a, i) => { const id = o.who ? o.who[i % o.who.length] : ids[i % ids.length]; const pz = o.beats ? perform(o.lt, o.beats, { seed: i }) : typeof a === 'string' && POSES[a] && !o.faceOnly ? perform(5, [[0, a]], { seed: i, still: true }) : { ex: a };
+    L.forEach((a, i) => { const id = o.who ? o.who[i % o.who.length] : ids[i % ids.length]; const pz = o.beats ? perform(o.lt, o.beats, { seed: i }) : typeof a === 'string' && POSES[a] && !o.faceOnly ? perform(5, [[0, a]], { seed: i, still: true }) : a.includes('|') ? { ex: a.split('|')[0], talk: a.split('|')[1] } : { ex: a };
       put(CHARS[id], STREET, { p: [(i - (n - 1) / 2) * sp, .18, -9], ry: o.ry ?? 0, ...pz, blink: false, still: true }); });
     const bc = o.cam || [0, 1.4, -2.6], bt = o.tgt || [0, 1.1, -9]; camS(bc, bt, bc, bt, 0, o.fov || 44); return; }
   ids.forEach((id, i) => put(CHARS[id], STREET, { p: [(i - 3.5) * .85, .18, -9], ry: o.ry ?? 0, ex: ['sly', 'angry', 'grinTeeth', 'confident', 'evil', 'sneaky', 'frown', 'calm'][i] }));

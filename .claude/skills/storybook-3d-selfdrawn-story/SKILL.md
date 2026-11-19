@@ -342,6 +342,40 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
   hard shadow).
 
+## Lip sync (v6.9, tools/lipsync.py + chars.js visemes; user: 'mouth must match the speech rhythm, natural, never off-beat')
+- Run `python3 tools/lipsync.py .` after tools/timing.py: it reads aud/vo.wav at 100 Hz (loudness, low/mid band ratio =
+  vowel brightness, 4.5-11 kHz hiss) with PER-VOICE calibration (percentiles, so deep and high voices both work) and
+  writes timing.json "vis" = one viseme per video frame: X rest, M lips pressed (ม บ ป = energy dips inside a word),
+  a small open, A wide (อา), E wide/stretched (อี เอ แอ), O round (อู โอ ออ), S teeth (ส ช ซ ศ ฟ).
+- Rules built in (Preston Blair / Richard Williams / Rhubarb practice): the mouth LEADS the sound by 1 frame; every shape
+  holds >= 2 frames except a 1-frame M closure; lips close only in pauses > .12 s; no A-a-A flapping.
+- In shots: talk: lipAt(TM, voiceTime) (PM shots: talkAt(t) = lipAt(TM, t / SP); 'X' -> 0). Only the SPEAKER gets it.
+  Visemes follow the mood: smiling characters talk with corners up + teeth, sad/angry ones with an open frown.
+  o.k < .5 = mumble (smaller shapes) for whispers/asides.
+- Check: output/ทดลองขยับปากตามเสียง.mp4 (old 3-level flap vs visemes), output/รูปปากตามเสียง.jpg (7 shapes x 3 moods).
+
+## Music scoring (v6.9, tools/score.py; library: projects/music_library/*.mp3 + music.json; user: 'music entrances, sound on the beat, lots of music')
+Research basis: film spotting practice (hit points, sync points, 'Mickey-Mousing' only for comedy), Knudson tempo/click
+maths (pick the tempo so hits land on beats), trailer structure (build -> silence -> hit), broadcast ducking.
+- SPOTTING (do it from the script before writing a note): mark the emotional TURNS, the reveal, the cliffhanger. Music
+  ENTERS on a turn, a cut or under a sound (sneak in under an SFX/ambience, fadein .5-1.5 s); never starts mid-word.
+  It EXITS at a phrase end, on a hard 'button' hit, or is CUT DEAD for shock. One cue per story beat (~10-20 s); change
+  cue when the emotion changes, not when the camera does.
+- HIT POINTS: 3-5 per minute (the reveal, the power, the punch, the last line). beatfit(hits, lo, hi) finds bpm+offset
+  so every hit lands on a beat (error < 1 frame); bars(n, bpm) for riser lengths; a riser ENDS on the hit
+  ('riser_hit' / 'suspense_reveal'). Stingers go exactly on the hit frame.
+- SILENCE is a tool: drop the music .5-1 s before the biggest reveal, then hit. Don't score every second.
+- TEMPO/KEY by mood: sad/dread 58-72, investigation 86-104, tension 90-110, action 140-165; minor for threat, major for
+  hope/victory; step the key up (+2) for the final escalation; stingers in the cue's key.
+- SFX ON THE BEAT: snap(t, bpm, off) moves only MUSICAL sfx (whooshes into a hit, risers, impacts in a montage) onto the
+  grid if within 60 ms; physical/dialogue-synced sounds stay where the picture is. Whoosh = ends on the cut.
+- UNDER THE VOICE: S.duck(timing env, depth .45) + S.voice_eq() (carve 1-4 kHz); music sits ~12-18 dB under the voice.
+- CUES (21): tension_pulse dark_ambient mystery_pizz sneaky action_drums chase epic_rise villain sad_piano hope victory
+  heartbreak horror lofi_investigation power_awakening city_night flashback confrontation calm comedy suspense_reveal.
+  STINGERS (10): hit_boom braam riser_hit reverse_hit shimmer_up dread piano_low comedy_bonk heartbeat2 victory_hit.
+  S = Score(END); S.cue(name, t0, dur, bpm, key, k); S.sting(name, t); S.duck(env); S.write('aud/music_bed.wav').
+  Preview medley: output/ตัวอย่างเพลงประกอบ 21 แบบ.mp3.
+
 ## Acting: faces + body language (v6.8, src/acting.js + chars.js faces; user: 'faces and poses must fit the situation')
 Research basis: Ekman FACS (action units), Ed Hooks 'Acting for Animators', Disney 12 principles, Preston Blair sheets.
 - THOUGHT -> FEELING -> ACTION: eyes change first, then the face, head, torso, hands last (perform(..., {lead:'eyes'})).
