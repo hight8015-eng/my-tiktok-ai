@@ -376,6 +376,11 @@ If the user wants characters made in Flow from their own prompt, use the sister 
 - (ep2 v2, ref projects/refs/ep2_motion_issue.mp4) Turning around POPS: the back sprite snaps to the front sprite in one
   frame (hair/face jump). A turn must pass through the side (S) and 3/4 (Q) views, hold each >= 2-3 frames, crossfade
   between views, and the hair/hat must rotate with it; lead with the head, body follows (turn()).
+- (ep3) Z-FIGHTING: a light/decal plane placed at the same depth as a wall/door flickers in blocks -> offset it >= 5 cm and
+  use depthWrite false + renderOrder.
+- (ep3) CAMERA THROUGH A CHARACTER: a dolly that passes a character's position goes inside the sprite (dark frames) -
+  check every moving camera path against every character position, not only the end points.
+- (ep3) Indoor sets: pass { rain: false } to every S() of an interior set (the rain overlay is on by default).
 - Before claiming a fix works, verify it in the actual render path (the ep1 lip demo was not using visemes).
 
 ## Staging rules from the user's ep2 review (v7.3, apply to every shot)
