@@ -371,6 +371,9 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   the line appearing letter by letter, Thai grapheme-safe); OVL {kind: 'redeyes', C, k, t} = glowing eyes on the real
   eye positions (headBall); OVL {kind: 'dot', p, k, r} = laser dot. Use POST.sat ~.12 while the power is used: the
   world drains to grey and only the red overlays keep colour. Silence the ambience + music in that beat.
+- SITTING: put the character's root ON the seat top (p.y = seat top height, seat ~ that height) and inside/over
+  the seat, never at floor height behind a bench box: the box then hides the body to the chest (user: 'ตัวละครจม').
+  Check every seated shot from the camera side before rendering.
 - Facing rule for 2D characters: ry = atan2(dx, dz) of (camera - character) in the set's space faces the camera; a
   character more than ~70 deg off shows the side/back sprite (hair covers the face).
 

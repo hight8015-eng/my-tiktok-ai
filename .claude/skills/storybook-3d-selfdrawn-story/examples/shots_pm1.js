@@ -71,19 +71,19 @@ S('S02', 2.59, 'blur', STREET, (lt, t) => { streetLight(lt); MIND = 2.8;
   camS([.7, 1.7, -5.0], [.2, 1.5, -8], [.6, 1.68, -5.3], [.2, 1.5, -8], U(lt, 1.2), 42); });
 // ---------------- 2  "ผมตื่นขึ้นมาในรถขนนักโทษ" : truck interior, Aren opens his eyes ----------------
 S('S03', 3.8, 'dis', TRUCK, (lt, t) => { truckLight(); SH.a = .25; SH.t = t;
-  put(AR(), TRUCK, { p: [-.95, .3, .2], ry: 90, sit: true, seat: .45, ...pf(lt, [[0, 'sleepy'], [1.0, 'calm'], [1.5, 'worried']]), blink: lt < .9, head: [lt < 1 ? 18 : 0, 0, 0], hL: [-.2, .2, .3], hR: [.2, .2, .3] });
-  put(PX(2), TRUCK, { p: [.95, .3, -.6], ry: -90, sit: true, seat: .45, ex: 'frown' }); put(PX(3), TRUCK, { p: [.95, .3, 1.0], ry: -90, sit: true, seat: .45, ex: 'angry' }); put(PX(1), TRUCK, { p: [-.95, .3, 1.6], ry: 90, sit: true, seat: .45, ex: 'sleepy', blink: true });
+  put(AR(), TRUCK, { p: [-.9, .64, .2], ry: 90, sit: true, seat: .62, ...pf(lt, [[0, 'sleepy'], [1.0, 'calm'], [1.5, 'worried']]), blink: lt < .9, head: [lt < 1 ? 18 : 0, 0, 0], hL: [-.2, .2, .3], hR: [.2, .2, .3] });
+  put(PX(2), TRUCK, { p: [.9, .64, -.6], ry: -90, sit: true, seat: .62, ex: 'frown' }); put(PX(3), TRUCK, { p: [.9, .64, 1.0], ry: -90, sit: true, seat: .62, ex: 'angry' }); put(PX(1), TRUCK, { p: [-.9, .64, 1.6], ry: 90, sit: true, seat: .62, ex: 'sleepy', blink: true });
   Z.truckChain.rotation.z = Math.sin(t * 1.9) * .25; camT([.35, 1.25, -1.6], [-.9, 1.05, .2], [.2, 1.2, -1.4], [-.95, 1.05, .2], U(lt, 2), 46); });
 // ---------------- 3  "ที่ข้อมือมีป้ายเหล็กสลักเลข 047" : the wrist tag close-up ----------------
 S('S04', 5.93, 'cut', TRUCK, (lt, t) => { truckLight(); MIND = 0; SH.a = .18; SH.t = t;
-  const raise = antic(lt, .25, .7, .2, .1); put(AR(), TRUCK, { p: [-.95, .3, .2], ry: 90, sit: true, seat: .45, ex: 'worried', hR: lp([.2, .2, .3], [.12, .62, .42], raise), pR: [1, -.4, -.2], head: [14, 0, 0] });
+  const raise = antic(lt, .25, .7, .2, .1); put(AR(), TRUCK, { p: [-.9, .64, .2], ry: 90, sit: true, seat: .62, ex: 'worried', hR: lp([.2, .2, .3], [.12, .62, .42], raise), pR: [1, -.4, -.2], head: [14, 0, 0] });
   scene.updateMatrixWorld(); const w = AR().torso.localToWorld(V(.12, .55, .42)); Z.tag.visible = true; Z.tag.position.copy(w).add(V(0, -.07 + .01 * Math.sin(t * 5), 0)); Z.tag.rotation.set(0, Math.PI / 2 + Math.sin(t * 2.3) * .25, Math.sin(t * 3.1) * .12);
   const lc = TRUCK.worldToLocal(w.clone()); camT([lc.x + .55, lc.y + .02, lc.z + .06], [lc.x, lc.y - .07, lc.z + .03], [lc.x + .42, lc.y + .05, lc.z + .04], [lc.x, lc.y - .07, lc.z + .03], U(lt, 2.8), 32); });
 // ---------------- 4  "ไม่มีใครบอกว่าผมทำผิดอะไร" : wide inside the truck, the others stare at him ----------------
 S('S05', 9.16, 'cut', TRUCK, (lt, t) => { truckLight(); SH.a = .3; SH.t = t;
-  put(AR(), TRUCK, { p: [-.95, .3, .2], ry: 90, sit: true, seat: .45, ...pf(lt, [[0, 'worried'], [1.1, 'frown']]), head: [0, lt < 1 ? -30 : 20, 0], hL: [-.2, .2, .3], hR: [.2, .2, .3] });
-  put(PX(2), TRUCK, { p: [.95, .3, -.6], ry: -90, sit: true, seat: .45, ex: 'evil', head: [0, 0, 0] }); put(PX(3), TRUCK, { p: [.95, .3, 1.0], ry: -90, sit: true, seat: .45, ex: 'angry' }); put(PX(1), TRUCK, { p: [-.95, .3, 1.6], ry: 90, sit: true, seat: .45, ex: 'sly', head: [0, -40, 0] });
-  Z.truckChain.rotation.z = Math.sin(t * 1.9) * .25; camT([0, 1.9, 2.5], [0, 1.0, -.2], [0, 1.75, 2.2], [0, 1.0, 0], U(lt, 2), 52); });
+  put(AR(), TRUCK, { p: [-.9, .64, .2], ry: 90, sit: true, seat: .62, ...pf(lt, [[0, 'worried'], [1.1, 'frown']]), head: [0, lt < 1 ? -30 : 20, 0], hL: [-.2, .2, .3], hR: [.2, .2, .3] });
+  put(PX(2), TRUCK, { p: [.9, .64, -.6], ry: -90, sit: true, seat: .62, ex: 'evil', head: [0, 0, 0] }); put(PX(3), TRUCK, { p: [.9, .64, 1.0], ry: -90, sit: true, seat: .62, ex: 'angry' }); put(PX(1), TRUCK, { p: [-.9, .64, 1.6], ry: 90, sit: true, seat: .62, ex: 'sly', head: [0, -40, 0] });
+  Z.truckChain.rotation.z = Math.sin(t * 1.9) * .25; camT([0, 2.05, 2.75], [0, 1.15, -.4], [0, 1.95, 2.6], [0, 1.15, -.2], U(lt, 2), 74); });
 // ---------------- 5  "รถหยุดหน้ากำแพงสูงร้อยเมตร" : the truck brakes in front of the giant wall, low angle ----------------
 S('S06', 11.47, 'blur', GATE, (lt, t) => { gateLight(); const k = U(lt, 1.4, eOut), z = lerp(-4, -18, k); Z.truckX.position.set(0, 0, z); Z.truckX.rotation.x = -.04 * settle(lt - 1.25, 9, 3.5);   // nose dips on the brake
   if (lt > 1.2) dustAt(GATE.localToWorld(V(0, .2, z + 3)), (lt - 1.2) / 1.2, 1.6);
@@ -97,7 +97,7 @@ S('S08', 15.26, 'cut', GATE, (lt, t) => { gateLight(); Z.truckX.position.set(0, 
 // ---------------- 8  "ลงไป" : the rear doors open, the guard points out ----------------
 S('S09', 16.71, 'whip', TRUCK, (lt, t) => { truckLight(); const op = U(lt, .3, eOut); Z.truckDoors.forEach((d, i) => { d.position.x = (i ? 1 : -1) * (.65 + 1.4 * op); }); Z.truckSlit.visible = op < .05; Z.outside.visible = true; neonPt(2, TRUCK.localToWorld(V(0, 1.6, 3.4)), '#ff7a5a', 6 * U(lt, .3), 8);
   put(GU(), TRUCK, { p: [0, .05, 3.6], ry: 180, ex: 'angry', talk: talkAt(t) ? 1 : 0, hR: lp([.3, .35, .1], [.25, .75, .45], antic(lt, .2, .35, .15, .15, 2.2)), pR: [1, 0, -.4], lean: 4 * settle(lt - .2, 9, 4) });
-  put(AR(), TRUCK, { p: [-.95, .3, .2], ry: 90, sit: true, seat: .45, ex: 'frown', head: [0, 50, 0] }); put(PX(2), TRUCK, { p: [.95, .3, -.6], ry: -90, sit: true, seat: .45, ex: 'frown', head: [0, -50, 0] });
+  put(AR(), TRUCK, { p: [-.9, .64, .2], ry: 90, sit: true, seat: .62, ex: 'frown', head: [0, 50, 0] }); put(PX(2), TRUCK, { p: [.9, .64, -.6], ry: -90, sit: true, seat: .62, ex: 'frown', head: [0, -50, 0] });
   camT([-.3, 1.4, -1.8], [0, 1.4, 3.4], [-.25, 1.4, -1.5], [0, 1.45, 3.4], U(lt, .8), 46); });
 // ---------------- 9  "ยินดีต้อนรับสู่เมืองนรก" : the gate grinds open, red light floods out, prisoners walk in ----------------
 S('S10', 17.55, 'cut', GATE, (lt, t) => { gateLight(); Z.truckX.position.set(0, 0, -18); const op = U(lt, 1.6); ZC.gateAt(t, op);
