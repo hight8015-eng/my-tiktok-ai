@@ -3,6 +3,7 @@ import { THREE, setSmoothLight, scene, camera, clamp, lerp, sstep, eIO, eOut, eI
 import * as Wd from './world.js';
 import * as ZC from './zc.js';
 import { perform, POSES } from './acting.js';
+import { bigWord } from './text3d.js';
 import { CHARS, OVL, lipAt, setRig, lightAt, pose, popAt, sparkAt, dustAt, debrisAt, smokeAt, tintAt, rainAt, shockAt, whisperAt, makeRope, updateRope } from './chars.js';
 const { TRUCK, GATE, STREET, ALLEY, Z } = ZC;
 const V = (x, y, z) => new THREE.Vector3(x, y, z);

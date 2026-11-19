@@ -210,5 +210,16 @@
   "text": "ติดตามตอนต่อไป",
   "sub": "THE PUPPET MASTER",
   "dur": 1.6
- }
+ },
+ "captions": {
+  "style": "story",
+  "anim": "pop",
+  "hiStyle": "color",
+  "y": 1250
+ },
+ "hiWords": [
+  "ZERO CITY",
+  "อาเรน",
+  "พลัง"
+ ]
 }

@@ -342,6 +342,20 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
   hard shadow).
 
+## Text system (v7.1, main.js captions/labels + src/text3d.js; 5 user refs: safe zones, keyword pill, presets, documentary titles, text behind people)
+- Captions are NEEDED (many watch muted) but calm: one 1-2 word chunk at a time, soft POP (86% -> 100% in 4 frames, rises
+  16 px), no SFX per word. project.json captions: { style: 'story', anim: 'pop'|'slide'|'fade'|'none', hiStyle: 'color'|'pill', y }.
+- SAFE ZONE for TikTok/Reels/Shorts UI: x 60..900, y 230..1440 (top bar, bottom description, right buttons). The caption
+  line is chosen ONCE per shot from y, y-190, y+90, y-380: the first that clears every visible face (headBall projection);
+  a shot can force globalThis.CAP_Y.
+- Highlight only the KEY word inside the chunk (yellow): *word*, project.hiWords (names, powers, places), numbers.
+  ~text~ = whisper (smaller, slanted, softer); ^text^ = shout (bigger + short shake).
+- project.json labels: place (documentary location/time card top-left, bar wipes in: scene openings), name (character name
+  + role, left, first appearance only), type (phone/system message typed at 18 cps with a cursor).
+- bigWord(SET, 'WORD', [x,y,z], { h, k, col, op }) (text3d.js): a big glowing word standing IN the set behind the
+  characters (depth-tested: people in front cover it). Hook (first 2 s) and cliffhanger ONLY. Keep it inside the frame.
+- Check: output/ระบบตัวหนังสือใหม่.jpg. 'classic' style = the old plain centred captions.
+
 ## Lip sync (v6.9, tools/lipsync.py + chars.js visemes; user: 'mouth must match the speech rhythm, natural, never off-beat')
 - Run `python3 tools/lipsync.py .` after tools/timing.py: it reads aud/vo.wav at 100 Hz (loudness, low/mid band ratio =
   vowel brightness, 4.5-11 kHz hiss) with PER-VOICE calibration (percentiles, so deep and high voices both work) and

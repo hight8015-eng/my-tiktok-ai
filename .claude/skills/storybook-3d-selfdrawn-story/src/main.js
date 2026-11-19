@@ -3,6 +3,7 @@ import * as E from './engine.js';
 import * as Wd from './world.js';
 import { makeCast, makeChar, pose, CHARS, loadSprites, updateSprites, SPRG, ANIM, OVL, applySmooth, attachHeld, headBall } from './chars.js';
 import { SHOTS, initShots, runShot, COVER, BENCH } from './shots.js';
+import { bigWordsReset } from './text3d.js';
 const timing = await (await fetch('timing.json')).json(), project = await (await fetch('project.json')).json();
 await E.fontsReady; await loadSprites(project.cast); E.scene.add(SPRG); makeCast(project.cast); initShots(timing); Wd.redrawSign();
 const out = document.getElementById('out'), X = out.getContext('2d');
@@ -27,7 +28,7 @@ let FX = null;
 let SPL = null;
 function camDrift(t) { const f = Math.min(1.6, Math.max(.4, (E.POST.focus || 3) / 4)); E.camera.translateX(E.noise1(t * .45 + 3) * .13 * f); E.camera.translateY(E.noise1(t * .38 + 21) * .05 * f); // v4.29 the camera always floats a little (refs: 90% of frames move)
   E.camera.rotateX(E.noise1(t * .33 + 11) * .0045); E.camera.rotateY(E.noise1(t * .27 + 47) * .006); E.camera.updateMatrixWorld(); }
-function draw(sh, t, alpha = 1, mb = 0, dir = 1) { OVL.length = 0; E.POST.gseed = Math.floor(t * 30 + .5) % 97; /* v4.26 grain refreshes every frame (12 fps grain read as stutter) */ E.POST.dof = 0; E.POST.mblur = [mb * 90 * dir, mb * 14]; E.POST.leakPh = t * .6;
+function draw(sh, t, alpha = 1, mb = 0, dir = 1) { OVL.length = 0; bigWordsReset(); E.POST.gseed = Math.floor(t * 30 + .5) % 97; /* v4.26 grain refreshes every frame (12 fps grain read as stutter) */ E.POST.dof = 0; E.POST.mblur = [mb * 90 * dir, mb * 14]; E.POST.leakPh = t * .6;
   // v4 motion smoothing: evaluate the shot 5..1 frames back (no render) and blend character poses -> no 1-frame snaps
   const SW = [.05, .08, .12, .17, .23], lt0 = t - sh.t0; Object.values(CHARS).forEach(C => { C._acc = null; C._trail = []; C._roots = []; });
   let prevCam = null;
@@ -190,7 +191,7 @@ function sweep(k) { // soft warm light sweep across the frame (k 0..1)
   X.save(); X.globalCompositeOperation = 'screen'; const x = -700 + k * 2500; const g = X.createLinearGradient(x - 500, 0, x + 500, 400);
   g.addColorStop(0, 'rgba(255,240,215,0)'); g.addColorStop(.5, `rgba(255,240,215,${.75 * Math.sin(Math.PI * k)})`); g.addColorStop(1, 'rgba(255,240,215,0)'); X.fillStyle = g; X.fillRect(0, 0, 1080, 1920); X.restore(); }
 // v4.13 viral captions: each word pops in (overshoot), *word* or numbers are highlighted yellow (project.json captions: { pop, hi, y, size })
-const CAP = { pop: false, highlight: false, hi: '#ffd23f', y: 1350, size: 70, maxW: 860, words: 2, ...(project.captions || {}) }; // v4.16 RicksClips study: plain white 1-2 word captions, no pop/colour by default
+const CAP = { style: 'story', pop: false, highlight: false, hi: '#ffd23f', hiStyle: 'color', y: 1250, size: 70, maxW: 860, words: 2, ...(project.captions || {}) }; // v4.16 RicksClips study: plain white 1-2 word captions, no pop/colour by default
 // v4.14 one knob for all automatic effects (0 = clean .. 1 = loud); default .7 keeps it lively but uncluttered
 const FXL = Math.max(0, Math.min(1, project.fxLevel ?? .7)); E.POST.grain = .025 * FXL;
 // seamless loop: the last LOOP_D seconds dissolve into the opening frame so replays feel continuous (project.loop = false to end on black)
@@ -198,8 +199,57 @@ const LOOP = project.loop === true, LOOP_D = .45; let ZP = 1; // story channels:
 // a caption chunk with more than CAP.words space-separated words is split into 1-2 word pieces, timed by text length
 function capSlice(c, t) { const w = c[2].split(/\s+/).filter(Boolean); if (w.length <= CAP.words) return c; const parts = []; for (let i = 0; i < w.length; i += CAP.words) parts.push(w.slice(i, i + CAP.words).join(' '));
   const L = parts.reduce((a, p) => a + p.length, 0); let t0 = c[0]; for (const p of parts) { const t1 = t0 + (c[1] - c[0]) * p.length / L; if (t < t1) return [t0, t1, p]; t0 = t1; } return [t0, c[1], parts[parts.length - 1]]; }
-function caption(t) {
+// v7.1 TEXT SYSTEM (user refs: safe zones, keyword highlight, subtle per-chunk animation, documentary labels, typewriter).
+// project.json captions: { style: 'story' (default) | 'classic', y, size, hi, hiStyle: 'color' | 'pill', anim: 'pop' | 'slide' | 'fade' | 'none' }
+// markers inside a caption: *word* = highlight, ~text~ = whisper (smaller, softer), ^text^ = shout (bigger, a short shake);
+// project.hiWords = words always highlighted (names, powers, numbers are automatic).
+// SAFE ZONE (TikTok / Reels / Shorts UI): keep text inside x 60..900, y 230..1440; captions never go below 1440.
+const SAFE = { x0: 60, x1: 900, y0: 230, y1: 1440 }; const CAPX = (SAFE.x0 + SAFE.x1) / 2; const CAPPOS = new Map();
+function capSegs(txt) { const hw = project.hiWords || []; const out = []; let rest = txt;
+  rest.split(/(\*[^*]+\*)/).forEach(p => { if (!p) return; if (p[0] === '*') { out.push([p.slice(1, -1), 1]); return; }
+    let parts = [[p, 0]]; for (const w of hw) parts = parts.flatMap(([q, h]) => h ? [[q, h]] : q.split(w).flatMap((x, i, A) => i < A.length - 1 ? [[x, 0], [w, 1]] : [[x, 0]]));
+    parts.forEach(([q, h]) => { if (!q) return; if (!h) q.split(/([0-9๐-๙][0-9๐-๙,.%]*)/).forEach((x, i) => x && out.push([x, i % 2])); else out.push([q, 1]); }); });
+  return out; }
+function capY(sh, size) { // pick the caption line for this shot once: the first candidate whose box clears every visible face
+  if (globalThis.CAP_Y) return globalThis.CAP_Y; const key = sh ? sh.id : '-'; if (CAPPOS.has(key)) return CAPPOS.get(key);
+  const cands = [CAP.y, CAP.y - 190, CAP.y + 90, CAP.y - 380].filter(y => y > SAFE.y0 + 200 && y < SAFE.y1); let pick = cands[0];
+  const heads = []; Object.values(CHARS).forEach(C => { if (!C.g.visible) return; const B = headBall(C); if (!B) return; const q = B.c.clone().project(E.camera), q2 = B.c.clone().addScaledVector(B.up, B.r * 1.15).project(E.camera);
+    if (q.z > 1) return; const x = (q.x + 1) * 540, y = (1 - q.y) * 960, r = Math.abs((1 - q2.y) * 960 - y); if (r > 30) heads.push([x, y, r]); });
+  for (const y of cands) { const hit = heads.some(([hx, hy, r]) => Math.abs(hx - CAPX) < 330 + r && hy + r * .9 > y - size * 1.1 && hy - r * .6 < y + size * .4); if (!hit) { pick = y; break; } }
+  CAPPOS.set(key, pick); return pick; }
+function caption(t, sh) {
   const c0 = timing.caps.find(c => t >= c[0] && t < c[1]); if (!c0) return; const c = capSlice(c0, t);
+  if (CAP.style === 'classic') return captionClassic(t, c);
+  let txt = c[2], mode = 0; if (/^~.*~$/.test(txt)) { mode = 1; txt = txt.slice(1, -1); } else if (/^\^.*\^$/.test(txt)) { mode = 2; txt = txt.slice(1, -1); }
+  const segs = capSegs(txt.replace(/[~^]/g, '')), size = CAP.size * (mode === 1 ? .78 : mode === 2 ? 1.22 : 1), a = t - c[0], an = CAP.anim || 'pop';
+  const k = an === 'pop' ? .86 + .14 * E.eOut(Math.min(1, a / .13)) + .025 * Math.sin(Math.PI * Math.min(1, a / .2)) : 1, al = an === 'none' ? 1 : Math.min(1, a / .1);
+  const dy = an === 'pop' || an === 'slide' ? 16 * (1 - E.eOut(Math.min(1, a / .16))) : 0, dx = an === 'slide' ? -30 * (1 - E.eOut(Math.min(1, a / .18))) : 0;
+  const y = capY(sh, size); X.save(); X.globalAlpha = al * (mode === 1 ? .82 : 1); X.translate(CAPX + dx + (mode === 2 ? 5 * Math.sin(a * 70) * Math.exp(-a * 9) : 0), y + dy); X.scale(k, k);
+  if (mode === 1) X.transform(1, 0, -.12, 1, 0, 0);
+  X.font = `700 ${size}px Prompt`; X.textBaseline = 'alphabetic'; X.lineJoin = 'round'; X.textAlign = 'left';
+  const W = segs.reduce((s_, [q]) => s_ + X.measureText(q).width, 0), sc = Math.min(1, (SAFE.x1 - SAFE.x0 - 40) / Math.max(1, W)); X.scale(sc, sc); let x = -W / 2;
+  for (const [q, h] of segs) { const w = X.measureText(q).width;
+    if (h && CAP.hiStyle === 'pill') { X.fillStyle = CAP.hi; X.beginPath(); X.roundRect(x - 12, -size * .86, w + 24, size * 1.12, size * .3); X.fill(); }
+    X.shadowColor = 'rgba(0,0,0,.45)'; X.shadowBlur = 10; X.shadowOffsetY = 5; X.lineWidth = size * .19; X.strokeStyle = '#141018';
+    if (!(h && CAP.hiStyle === 'pill')) X.strokeText(q, x, 0); X.shadowColor = 'transparent';
+    X.fillStyle = h ? (CAP.hiStyle === 'pill' ? '#141018' : CAP.hi) : '#ffffff'; X.fillText(q, x, 0); x += w; }
+  X.restore(); globalThis.CAP_Y = null; }
+// labels (project.json labels: [{ t, dur, text, sub, kind: 'place' | 'name' | 'type' }]):
+//  place = documentary location/time card top-left (thin bar wipes in, text slides); name = a character's name + role,
+//  left side mid-height (first appearance only); type = phone/system message typed out at ~18 chars/s with a cursor.
+function labels(t) { for (const L of project.labels || []) { const a = t - L.t, d = L.dur ?? 2.4; if (a < 0 || a > d) continue;
+  const inn = E.eOut(Math.min(1, a / .3)), out = 1 - E.sstep(d - .3, d, a); X.save(); X.globalAlpha = out; X.textBaseline = 'middle'; X.lineJoin = 'round';
+  if (L.kind === 'type') { const n = Math.floor(Math.max(0, a - .15) * (L.cps ?? 18)), s_ = [...L.text].slice(0, n).join(''), cur = Math.floor(a * 3) % 2 ? '' : '▍';
+    X.font = '600 52px Prompt'; const w = Math.min(820, Math.max(320, X.measureText(L.text).width + 70)), y = L.y ?? 520; X.fillStyle = 'rgba(16,14,30,.82)'; X.strokeStyle = '#7fd1ff'; X.lineWidth = 3;
+    X.beginPath(); X.roundRect(CAPX - w / 2, y - 50, w, 100, 22); X.fill(); X.stroke(); X.fillStyle = '#eaf6ff'; X.textAlign = 'left'; X.fillText(s_ + cur, CAPX - w / 2 + 34, y + 2, w - 60); }
+  else if (L.kind === 'name') { const y = L.y ?? 1060, x0 = SAFE.x0 + 10 - 60 * (1 - inn); X.globalAlpha = out * inn; X.fillStyle = L.col || '#ffd23f'; X.fillRect(x0, y - 44, 10, 88 * inn);
+    X.textAlign = 'left'; X.font = '700 60px Prompt'; X.lineWidth = 10; X.strokeStyle = '#141018'; X.strokeText(L.text, x0 + 28, y - 12); X.fillStyle = '#ffffff'; X.fillText(L.text, x0 + 28, y - 12);
+    if (L.sub) { X.font = '600 36px Prompt'; X.lineWidth = 7; X.strokeText(L.sub, x0 + 30, y + 34); X.fillStyle = L.col || '#ffd23f'; X.fillText(L.sub, x0 + 30, y + 34); } }
+  else { const y = L.y ?? 300, x0 = SAFE.x0 + 10; X.fillStyle = 'rgba(255,255,255,.9)'; X.fillRect(x0, y + 38, 260 * inn, 4);
+    X.globalAlpha = out * inn; X.textAlign = 'left'; X.font = '700 46px Prompt'; X.lineWidth = 8; X.strokeStyle = 'rgba(10,8,20,.9)'; X.strokeText(L.text, x0 + 30 * (1 - inn), y); X.fillStyle = '#ffffff'; X.fillText(L.text, x0 + 30 * (1 - inn), y);
+    if (L.sub) { X.font = '500 34px Prompt'; X.lineWidth = 6; X.strokeText(L.sub, x0, y + 78); X.fillStyle = '#d8d0f0'; X.fillText(L.sub, x0, y + 78); } }
+  X.restore(); } }
+function captionClassic(t, c) {
   let txt = c[2]; const star = /\*(.+?)\*/.test(txt), hi = CAP.highlight && (star || /[0-9๐-๙]/.test(txt) || (project.hiWords || []).some(w => txt.includes(w))); txt = txt.replace(/\*/g, '');
   const a = t - c[0], k = CAP.pop ? (a < .16 ? .55 + .45 * E.eOut(a / .16) + .12 * Math.sin(Math.PI * Math.min(1, a / .16)) : 1) : 1;
   X.save(); X.translate(520, CAP.y); X.scale(k, k); /* safe zone: a touch left of the app's right-hand buttons */ X.rotate(hi && CAP.pop ? Math.sin(a * 18) * .025 * Math.exp(-a * 6) : 0);
@@ -250,7 +300,7 @@ const frame1 = (t, opts = {}) => { ZP = keyZoom(t); globalThis.FRAME_T = t; // v
   bloom();
   if (sh.tr === 'sweep' && lt < .45) sweep(lt / .45); const nx = SHOTS[i + 1]; if (nx && nx.tr === 'sweep' && nx.t0 - t < .2) sweep((t - (nx.t0 - .2)) / .45);
   if (LOOP && t > timing.end - LOOP_D) { const k = E.eSine((t - (timing.end - LOOP_D)) / LOOP_D); ZP = 1; draw(SHOTS[0], 0, k); }
-  if (!opts.nocap) { caption(t); hook(t); endCard(t); } progress(t);
+  if (!opts.nocap) { caption(t, sh); labels(t); hook(t); endCard(t); } progress(t);
   if (!LOOP && t > timing.end - .25) { X.fillStyle = `rgba(0,0,0,${E.clamp((t - (timing.end - .25)) / .25)})`; X.fillRect(0, 0, 1080, 1920); } /* fade to black last */
 };
 /* v5.3 real shutter motion blur: average n sub-frames spread over SHUTTER_ANGLE of the frame (180 deg = half a frame),
