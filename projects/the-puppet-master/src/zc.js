@@ -145,7 +145,7 @@ export function laserAt(from, to, k) { Z.gun.visible = Z.laser.visible = k > 0; 
   Z.gun.position.copy(a); Z.gun.lookAt(ALLEY.localToWorld(b.clone())); Z.gun.rotateY(Math.PI); Z.laser.position.copy(a.clone().add(b).multiplyScalar(.5)); Z.laser.scale.set(1, d.length() * k, 1);
   Z.laser.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize()); Z.dot.position.copy(b); }
 
-export function hideZC() { TRUCK.visible = GATE.visible = STREET.visible = ALLEY.visible = false; Z.tag.visible = false; Z.truckDoors.forEach(d => { d.visible = true; }); Z.outside.visible = false; Z.truckSlit.visible = true; Z.truckSlit.scale.x = 1; Z.dark.visible = true; }
+export function hideZC() { TRUCK.visible = GATE.visible = STREET.visible = ALLEY.visible = false; if (typeof ROOF !== 'undefined') ROOF.visible = false; Z.tag.visible = false; Z.truckDoors.forEach(d => { d.visible = true; }); Z.outside.visible = false; Z.truckSlit.visible = true; Z.truckSlit.scale.x = 1; Z.dark.visible = true; }
 export function zcAt(t, cam) { firesAt(t, cam); propsAt(t); glowAt(t); }
 export function zcLate(t, cam) { steamAt(t, cam); }   /* after the camera is placed */
 
@@ -253,3 +253,44 @@ steam(STREET, [-5.85, 1.35, -6.5], { n: 9, size: .32, rise: 1.1, op: .32, seed: 
 steam(STREET, [1.8, .05, -8], { n: 12, size: .7, rise: 2.4, op: .22, life: 3, seed: 5 });  // street vent
 steam(ALLEY, [1.6, 4.2, -9], { n: 5, size: .4, rise: .9, op: .16, life: 2.6, seed: 7 });   // AC exhaust in the cold rain
 for (const [x, z] of [[-6.6, -11], [6.8, -27], [-7, -41]]) steam(STREET, [x, 1.9, z], { n: 7, size: .5, rise: 1.6, op: .22, life: 2.4, col: '#5a5260', seed: x * z });   // barrel fire smoke (dark)
+
+// ======================= v5 ROOF (ep 2: the second gunman on the roof above the alley) =======================
+export const ROOF = group({ p: [600, 0, 600], parent: scene });
+{ const RF = ROOF, conc = toon('#4a4654'), dk = toon('#2a2632'), R = rng(77);
+  mesh(rbox(14, .3, 14), toon('#3a3644'), { p: [0, -.15, 0], parent: RF });                                     // roof slab (wet)
+  for (const [x, z, w, d] of [[0, -7, 14, .4], [0, 7, 14, .4], [-7, 0, .4, 14], [7, 0, .4, 14]]) mesh(rbox(w, 1.0, d), conc, { p: [x, .5, z], parent: RF });   // parapet
+  for (let x = -6.5; x <= 6.5; x += 1) mesh(rbox(.9, .08, .5), toon('#5a5664'), { p: [x, 1.04, -7], parent: RF });     // ledge caps
+  // water tank on stilts
+  { const g = group({ p: [-4.2, 0, 3.8], parent: RF }); for (const [x, z] of [[-.8, -.8], [.8, -.8], [-.8, .8], [.8, .8]]) cylBetween([x, 0, z], [x, 2.2, z], .07, dk, g, 14);
+    mesh(new THREE.CylinderGeometry(1.3, 1.3, 2.2, 28), toon('#6a5a4a'), { p: [0, 3.3, 0], parent: g }); mesh(new THREE.ConeGeometry(1.4, .6, 28), toon('#4a3e34'), { p: [0, 4.7, 0], parent: g });
+    for (const y of [2.6, 3.4, 4.2]) mesh(new THREE.TorusGeometry(1.31, .03, 10, 32), dk, { p: [0, y, 0], r: [90, 0, 0], parent: g }); }
+  // stair hut with a door + caged lamp (the gunman came up through it)
+  { const g = group({ p: [4.5, 0, 4.5], parent: RF }); mesh(rbox(2.6, 2.8, 2.4), toon('#55505e'), { p: [0, 1.4, 0], parent: g }); mesh(rbox(1, 2, .06), toon('#3a4048'), { p: [-.4, 1, -1.22], parent: g });
+    mesh(rbox(2.8, .15, 2.6), dk, { p: [0, 2.88, 0], parent: g }); const b = mesh(new THREE.SphereGeometry(.1, 16, 12), lit('#ffd8a0', 1.3), { p: [.6, 2.3, -1.3], parent: g, cast: false }); glow(g, [.6, 2.3, -1.45], '#ffd8a0', 2.2, .45); Z.roofBulb = b; }
+  // AC condensers with fans, vent pipes (steam), satellite dish, antenna with a red aircraft light
+  for (const [x, z] of [[1.5, -5.6], [3, -5.6], [-1.5, 5.8]]) { const g = group({ p: [x, 0, z], parent: RF }); mesh(rbox(1.1, .9, .8), toon('#a8acb4'), { p: [0, .45, 0], parent: g }); mesh(new THREE.CircleGeometry(.32, 24), dk, { p: [0, .45, -.41], r: [0, 180, 0], parent: g, cast: false }); }
+  for (const [x, z] of [[-2.5, -1], [-2.1, -1.3]]) { cylBetween([x, 0, z], [x, 1.3, z], .12, toon('#7a7e88'), RF, 18); mesh(new THREE.CylinderGeometry(.18, .14, .2, 18), toon('#5a5e68'), { p: [x, 1.35, z], parent: RF }); }
+  steam(RF, [-2.3, 1.45, -1.15], { n: 7, size: .45, rise: 1.6, op: .22, life: 2.6, seed: 31 });
+  { const g = group({ p: [5.6, 1.0, -2], r: [0, -140, 0], parent: RF }); cylBetween([0, 0, 0], [0, .8, 0], .04, dk, g, 14); const dish = mesh(new THREE.SphereGeometry(.6, 24, 12, 0, Math.PI * 2, 0, Math.PI / 3.2), toon('#d8dce4', { side: THREE.DoubleSide }), { p: [0, 1.1, 0], r: [-70, 0, 0], parent: g }); }
+  { cylBetween([-6, 1, -6], [-6, 6.5, -6], .05, dk, RF, 14); for (let y = 2; y < 6.5; y += 1.2) cylBetween([-6.4, y, -6], [-5.6, y, -6], .02, dk, RF, 8); Z.roofRed = mesh(new THREE.SphereGeometry(.09, 16, 12), basic('#ff2030'), { p: [-6, 6.6, -6], parent: RF, cast: false }); Z.roofRedG = glow(RF, [-6, 6.6, -6], '#ff2030', 1.6, .6); }
+  // the back of a big neon sign standing on the roof (letters face the street, its glow spills on the roof)
+  { const g = group({ p: [0, 0, 6.2], parent: RF }); for (const x of [-3, 3]) cylBetween([x, 0, 0], [x, 4, 0], .06, dk, g, 14); mesh(rbox(7, 2.2, .3), toon('#2a2632'), { p: [0, 3.6, 0], parent: g });
+    for (let i = 0; i < 8; i++) mesh(rbox(.06, 1.8, .06), dk, { p: [-3 + i * .86, 3.6, -.17], parent: g }); spill(RF, [0, .05, 5], 4, '#ff2f6a', .3); glow(g, [0, 4.9, .2], '#ff2f6a', 8, .35); }
+  // clothesline, crates, puddles, cables to the next building
+  cylBetween([-6.5, 1.8, 1], [-1, 1.8, 1], .012, dk, RF, 6); ['#d8d0c0', '#6a8ac8', '#c86a5a', '#e8e0d0'].forEach((c, k) => mesh(rbox(.42, .55, .01), toon(c, { side: THREE.DoubleSide }), { p: [-5.8 + k * 1.2, 1.5, 1], parent: RF, cast: false }));
+  crate(RF, [-5.6, 0, -5], .7, 20); crate(RF, [-5.0, 0, -5.3], .55, -15); crate(RF, [-5.4, .7, -5.1], .5, 40);
+  [[1, -2, 1.4, '#ff2f6a'], [-1, 3, 1.1, '#8a9aff'], [3, 1, .9, '#ffd8a0']].forEach(([x, z, r, c]) => puddle(RF, [x, .02, z], r, c));
+  for (let i = 0; i < 4; i++) cylBetween([7, 1.2 + i * .3, -4 + i * 2], [16, -1 + i * .3, -6 + i * 2], .015, dk, RF, 6);
+  // the skyline beyond the parapet: lit towers, red aircraft lights
+  for (let i = 0; i < 22; i++) { const w = 4 + R() * 6, h = 16 + R() * 34, a = (i / 22) * Math.PI * 2, d = 26 + R() * 22; const bg = building(RF, [Math.sin(a) * d, -14, -Math.cos(a) * d], w, h, w, ['#2a2436', '#2e3446', '#3a2c3c'][i % 3], 100 + i, 1); bg.rotation.y = -a;   /* lit windows face the roof */ if (i % 3 === 0) { mesh(new THREE.SphereGeometry(.25, 16, 12), basic('#ff2030'), { p: [0, h + .5, 0], parent: bg, cast: false }); glow(bg, [0, h + .5, 0], '#ff2030', 3, .5); } }
+}
+export function roofAt(t) { const b = Math.sin(t * 2.2) > .55 ? 1 : .15; Z.roofRed.material.color.setScalar(b); Z.roofRedG.material.opacity = .6 * b; }   // aircraft beacon: slow, small = allowed to blink
+// ======================= v5 GUN FX (ep 2) =======================
+/* muzzle flash: 2 frames, a 6-point star + a hot core + a lightAt pulse; smoke puff after; tracer = a thin bright streak
+   that crosses in ~3 frames (bullets are not visible: a streak sells the path); wall hit = sparks + brick chips + dust */
+export function makeGun(par) { const g = group({ parent: par }); const m = toon('#24242c');
+  mesh(rbox(.035, .06, .2), m, { p: [0, 0, .06], parent: g }); mesh(new THREE.CylinderGeometry(.012, .012, .1, 14), toon('#3a3a44'), { p: [0, .012, -.07], r: [90, 0, 0], parent: g }); mesh(rbox(.03, .09, .045), m, { p: [0, -.06, .12], r: [-15, 0, 0], parent: g });
+  const fl = mesh(new THREE.PlaneGeometry(.45, .45), basic('#fff2b0', { transparent: true, opacity: 0, add: true, depthWrite: false, map: (() => canvasTex(128, 128, (x) => { x.translate(64, 64); const gr = x.createRadialGradient(0, 0, 0, 0, 0, 60); gr.addColorStop(0, 'rgba(255,255,240,1)'); gr.addColorStop(.25, 'rgba(255,220,120,.9)'); gr.addColorStop(1, 'rgba(255,140,40,0)'); x.fillStyle = gr;
+    x.beginPath(); for (let k = 0; k < 12; k++) { const a = k * Math.PI / 6, r = k % 2 ? 18 : 62; x.lineTo(Math.cos(a) * r, Math.sin(a) * r); } x.closePath(); x.fill(); }))() }), { p: [0, .012, -.16], parent: g, cast: false });
+  fl.userData.noInk = true; g.userData.flash = fl; g.userData.muzzle = new THREE.Vector3(0, .012, -.14); return g; }
+export function gunFlashAt(g, age, cam) { const fl = g.userData.flash; const on = age >= 0 && age < 2 / 30; fl.material.opacity = on ? 1 : 0; if (on && cam) { fl.quaternion.copy(cam.quaternion); fl.rotateZ(age * 40); } return on; }

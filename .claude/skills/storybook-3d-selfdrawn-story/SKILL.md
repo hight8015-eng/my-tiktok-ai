@@ -342,6 +342,19 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
   hard shadow).
 
+## SFX library v3 + rooftop/gun kit (v6.5)
+- Library now ~300 sounds (projects/sfx_library, sfx.json): + 64 CC0 sounds from the SFXMint sample set on Hugging Face
+  (AI-generated, CC0: rain, fire crackle, neon hum, heartbeat, wind whisper, drones, sirens, CCTV motor, glitch,
+  scan, radio, typewriter-like UI, steps, body fall, bone crack, knife, glass crack, door/gate/lock, crowd, tinnitus,
+  tape hiss...) + synthesized gun set: gunshot (alley echo / open), bullet_whiz, ricochet, casing (bouncing brass),
+  gun_cock. Full SFXMint downloads need credits (free key = 3 a day): huggingface.co samples are free.
+- Gun beat recipe: gun_cock (anticipation) -> silence .3 s -> gunshot + flash 2 frames + lightAt pulse -> whiz past
+  the ear (pan) -> ricochet/spark on the wall -> casing bounces 3-5x -> tinnitus under the next line (everything else
+  ducked -12 dB for ~1 s).
+- zc.js ROOF set (ep 2 rooftop): parapet, water tank, stair hut + caged lamp, AC units, steaming vents, dish, antenna
+  with a slow red beacon, back of a neon sign (pink spill), clothesline, crates, puddles, cables, lit skyline (window
+  faces turned to the roof: rotation.y = -angle). makeGun(par) + gunFlashAt(gun, age, cam) (star flash 2 frames).
+
 ## SFX library v2 + pairing (v6.4, 8 user SFX compilation clips -> 81 clean sounds, catalogue sfx.json)
 - Cutting: use the on-screen label timings (a label crop + frame-difference finds every change), or for narrated
   packs the word timestamps (cut BETWEEN the narrator's words). tools/sfx_clean.py: 35 Hz high-pass + spectral noise

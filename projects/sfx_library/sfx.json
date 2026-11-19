@@ -1944,5 +1944,725 @@
   "floor_db": -51.4,
   "note": "from a full fight mix: other hits overlap, use only as a reference / quiet layer",
   "n": 154
+ },
+ {
+  "n": 155,
+  "cat": "amb_rain",
+  "th": "ฝนตก (บรรยากาศ)",
+  "file": "amb_rain_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) ambience-rain-03",
+  "dur": 10.0,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 156,
+  "cat": "crowd_angry",
+  "th": "ฝูงชนโกรธ",
+  "file": "crowd_angry_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) angry-crowd-01",
+  "dur": 5.8,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 157,
+  "cat": "body_fall",
+  "th": "คนล้มกระแทกพื้น",
+  "file": "body_fall_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) body-fall-01",
+  "dur": 0.76,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 158,
+  "cat": "step_metal",
+  "th": "ก้าวบนแผ่นเหล็ก",
+  "file": "step_metal_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) boot-step-on-metal-plate-01",
+  "dur": 0.94,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 159,
+  "cat": "crowd",
+  "th": "เสียงคนพลุกพล่าน",
+  "file": "crowd_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) busy-market-crowd-murmur-walla-01",
+  "dur": 12.0,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 160,
+  "cat": "cctv",
+  "th": "กล้องวงจรปิดหมุน/โฟกัส",
+  "file": "cctv_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) camera-focus-motor-01",
+  "dur": 1.59,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 161,
+  "cat": "gun_click",
+  "th": "คลิกโลหะ (ง้างปืน)",
+  "file": "gun_click_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) carabiner-gate-click-01",
+  "dur": 1.34,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 162,
+  "cat": "boom",
+  "th": "บูมหนัง",
+  "file": "boom_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) cinematic-boom-01",
+  "dur": 2.76,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 163,
+  "cat": "computer",
+  "th": "คอมประมวลผล",
+  "file": "computer_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) data-processing-01",
+  "dur": 2.78,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 164,
+  "cat": "amb_fire",
+  "th": "ไฟปะทุ (ถังไฟ)",
+  "file": "amb_fire_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) distant-bonfire-fire-crackling-01",
+  "dur": 3.55,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 165,
+  "cat": "door",
+  "th": "ประตูปิด",
+  "file": "door_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) door-close-01",
+  "dur": 0.52,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 166,
+  "cat": "door_creak",
+  "th": "ประตูเอี๊ยด",
+  "file": "door_creak_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) door-creak-01",
+  "dur": 0.49,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 167,
+  "cat": "door_lock",
+  "th": "ล็อกประตู",
+  "file": "door_lock_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) door-lock-01",
+  "dur": 0.33,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 168,
+  "cat": "siren",
+  "th": "ไซเรน",
+  "file": "siren_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) dub-siren-01",
+  "dur": 3.1,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 169,
+  "cat": "meme_dundun",
+  "th": "ดัน ดัน ดั๊น (มีม)",
+  "file": "meme_dundun_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) dun-dun-dun-01",
+  "dur": 2.99,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 170,
+  "cat": "energy",
+  "th": "พลังระเบิด",
+  "file": "energy_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) energy-burst-01",
+  "dur": 1.33,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 171,
+  "cat": "neon_hum",
+  "th": "ไฟนีออนหึ่ง",
+  "file": "neon_hum_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) fire-electric-hum-39",
+  "dur": 6.0,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 172,
+  "cat": "fire_burst",
+  "th": "ไฟพุ่ง",
+  "file": "fire_burst_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) fire-electric-whoosh-flame-36",
+  "dur": 4.68,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 173,
+  "cat": "zap",
+  "th": "ไฟฟ้าช็อต",
+  "file": "zap_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) fire-electric-zap-36",
+  "dur": 5.57,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 174,
+  "cat": "steps",
+  "th": "ฝีเท้าพื้นปูน",
+  "file": "steps_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) footsteps-concrete-03",
+  "dur": 2.78,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 175,
+  "cat": "glass_crack",
+  "th": "กระจกร้าว",
+  "file": "glass_crack_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) glass-crack-41",
+  "dur": 1.0,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 176,
+  "cat": "glass",
+  "th": "กระจกแตก",
+  "file": "glass_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) glass-shatter-01",
+  "dur": 0.62,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 177,
+  "cat": "drone_dark",
+  "th": "โดรนมืด (บรรยากาศสยอง)",
+  "file": "drone_dark_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) hollow-metallic-dark-horror-drone-01",
+  "dur": 6.0,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 178,
+  "cat": "creak_horror",
+  "th": "เอี๊ยดสยอง",
+  "file": "creak_horror_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) horror-creak-17",
+  "dur": 8.37,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 179,
+  "cat": "heartbeat",
+  "th": "หัวใจเต้น",
+  "file": "heartbeat_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) horror-heartbeat-34",
+  "dur": 10.17,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 180,
+  "cat": "whisper_wind",
+  "th": "ลมกระซิบ",
+  "file": "whisper_wind_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) horror-wind-whisper-04",
+  "dur": 4.64,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 181,
+  "cat": "crate_break",
+  "th": "ลังไม้แตก",
+  "file": "crate_break_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) impact-crate-break-08",
+  "dur": 0.94,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 182,
+  "cat": "heavy_hit",
+  "th": "กระแทกหนัก",
+  "file": "heavy_hit_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) impact-slam-35",
+  "dur": 0.18,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 183,
+  "cat": "gate_iron",
+  "th": "ประตูเหล็กใหญ่",
+  "file": "gate_iron_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) iron-gate-01",
+  "dur": 1.17,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 184,
+  "cat": "keys",
+  "th": "พวงกุญแจ",
+  "file": "keys_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) keys-jingling-01",
+  "dur": 2.05,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 185,
+  "cat": "knife",
+  "th": "แทงมีด",
+  "file": "knife_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) knife-stab-01",
+  "dur": 0.3,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 186,
+  "cat": "amb_lab",
+  "th": "บรรยากาศห้องแล็บ",
+  "file": "amb_lab_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) laboratory-ambience-01",
+  "dur": 3.81,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 187,
+  "cat": "lighter",
+  "th": "จุดไฟแช็ก",
+  "file": "lighter_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) lighter-flick-01",
+  "dur": 0.43,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 188,
+  "cat": "reveal",
+  "th": "เปิดเผย/โลโก้",
+  "file": "reveal_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) logo-reveal-01",
+  "dur": 2.58,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 189,
+  "cat": "march",
+  "th": "เดินแถว",
+  "file": "march_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) marching-footsteps-01",
+  "dur": 5.54,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 190,
+  "cat": "match",
+  "th": "ขีดไม้ขีด",
+  "file": "match_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) match-strike-01",
+  "dur": 2.22,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 191,
+  "cat": "lever",
+  "th": "คันโยก",
+  "file": "lever_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) mechanical-lever-36",
+  "dur": 3.38,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 192,
+  "cat": "siren",
+  "th": "ไซเรน",
+  "file": "siren_m02.wav",
+  "src": "sfxmint CC0 (AI-generated) mechanical-siren-02",
+  "dur": 5.13,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 193,
+  "cat": "amb_night",
+  "th": "บรรยากาศกลางคืน",
+  "file": "amb_night_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) night-ambience-01",
+  "dur": 17.8,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 194,
+  "cat": "shutter",
+  "th": "ชัตเตอร์",
+  "file": "shutter_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) office-camera-08",
+  "dur": 0.16,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 195,
+  "cat": "door_lock_e",
+  "th": "ล็อกประตูไฟฟ้า",
+  "file": "door_lock_e_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) owner-continuous-20260922-electronic-door-lock",
+  "dur": 0.85,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 196,
+  "cat": "energy",
+  "th": "พลังเต้นเป็นจังหวะ",
+  "file": "energy_m02.wav",
+  "src": "sfxmint CC0 (AI-generated) owner-continuous-20260922-energy-pulse",
+  "dur": 0.73,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 197,
+  "cat": "pa_feedback",
+  "th": "ลำโพงหอน",
+  "file": "pa_feedback_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) pa-feedback-01",
+  "dur": 1.63,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 198,
+  "cat": "radio",
+  "th": "วิทยุจับคลื่น",
+  "file": "radio_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) radio-carrier-lock-01",
+  "dur": 3.76,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 199,
+  "cat": "suspense_hit",
+  "th": "ตึ้ง เปิดเผย",
+  "file": "suspense_hit_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) reveal-impact-01",
+  "dur": 1.12,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 200,
+  "cat": "rock_crumble",
+  "th": "หินถล่ม",
+  "file": "rock_crumble_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) rock-crumbling-01",
+  "dur": 2.33,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 201,
+  "cat": "scan",
+  "th": "สแกน",
+  "file": "scan_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) sci-fi-scan-01",
+  "dur": 1.48,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 202,
+  "cat": "ui_popup",
+  "th": "หน้าต่างเด้ง",
+  "file": "ui_popup_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) short-ui-modal-03",
+  "dur": 1.09,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 203,
+  "cat": "hit_video",
+  "th": "ตึ้ง (คลิปสั้น)",
+  "file": "hit_video_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) short-video-impact-01",
+  "dur": 0.6,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 204,
+  "cat": "whoosh",
+  "th": "วูบ",
+  "file": "whoosh_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) short-video-whoosh-01",
+  "dur": 0.46,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 205,
+  "cat": "gunshot",
+  "th": "ยิงปืน (ลูกซอง)",
+  "file": "gunshot_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) shotgun-01",
+  "dur": 1.21,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 206,
+  "cat": "scrape_metal",
+  "th": "โลหะขูด",
+  "file": "scrape_metal_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) steel-spike-scrape-01",
+  "dur": 0.99,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 207,
+  "cat": "stone_grind",
+  "th": "ประตูหินเลื่อน",
+  "file": "stone_grind_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) stone-door-grind-02",
+  "dur": 3.22,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 208,
+  "cat": "bonebreak",
+  "th": "กระดูกหัก",
+  "file": "bonebreak_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) stylized-bone-crack-01",
+  "dur": 0.71,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 209,
+  "cat": "train",
+  "th": "รถไฟ",
+  "file": "train_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) subway-train-01",
+  "dur": 7.36,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 210,
+  "cat": "tape_hiss",
+  "th": "เทปซ่า (ย้อนอดีต)",
+  "file": "tape_hiss_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) tape-hiss-01",
+  "dur": 5.81,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 211,
+  "cat": "drone_tension",
+  "th": "โดรนตึงเครียด",
+  "file": "drone_tension_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) tension-drone-01",
+  "dur": 14.59,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 212,
+  "cat": "tinnitus",
+  "th": "หูอื้อหลังเสียงปืน",
+  "file": "tinnitus_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) tinnitus-tone-01",
+  "dur": 2.22,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 213,
+  "cat": "glitch",
+  "th": "กลิตช์",
+  "file": "glitch_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) transition-glitch-08",
+  "dur": 3.52,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 214,
+  "cat": "riser",
+  "th": "ไต่ระดับ",
+  "file": "riser_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) transition-riser-01",
+  "dur": 0.94,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 215,
+  "cat": "truck_horn",
+  "th": "แตรรถบรรทุก",
+  "file": "truck_horn_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) truck-horn-01",
+  "dur": 1.85,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 216,
+  "cat": "war_drum",
+  "th": "กลองศึก",
+  "file": "war_drum_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) war-drum-01",
+  "dur": 5.74,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 217,
+  "cat": "drip",
+  "th": "น้ำหยด",
+  "file": "drip_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) water-drip-03",
+  "dur": 0.59,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 218,
+  "cat": "plop",
+  "th": "น้ำหยดลงแอ่ง",
+  "file": "plop_m01.wav",
+  "src": "sfxmint CC0 (AI-generated) water-plop-01",
+  "dur": 0.45,
+  "license": "CC0-1.0"
+ },
+ {
+  "n": 219,
+  "cat": "gunshot",
+  "th": "ยิงปืนพก (alley)",
+  "file": "gunshot_pistol_s01.wav",
+  "src": "synth (physical model)",
+  "dur": 1.1
+ },
+ {
+  "n": 220,
+  "cat": "gunshot",
+  "th": "ยิงปืนพก (alley)",
+  "file": "gunshot_pistol_s02.wav",
+  "src": "synth (physical model)",
+  "dur": 1.1
+ },
+ {
+  "n": 221,
+  "cat": "gunshot",
+  "th": "ยิงปืนพก (alley)",
+  "file": "gunshot_pistol_s03.wav",
+  "src": "synth (physical model)",
+  "dur": 1.1
+ },
+ {
+  "n": 222,
+  "cat": "gunshot",
+  "th": "ยิงปืนพก (open)",
+  "file": "gunshot_pistol_s01.wav",
+  "src": "synth (physical model)",
+  "dur": 1.1
+ },
+ {
+  "n": 223,
+  "cat": "gunshot",
+  "th": "ยิงปืนพก (open)",
+  "file": "gunshot_pistol_s02.wav",
+  "src": "synth (physical model)",
+  "dur": 1.1
+ },
+ {
+  "n": 224,
+  "cat": "gunshot",
+  "th": "ยิงปืนพก (open)",
+  "file": "gunshot_pistol_s03.wav",
+  "src": "synth (physical model)",
+  "dur": 1.1
+ },
+ {
+  "n": 225,
+  "cat": "bullet_whiz",
+  "th": "กระสุนเฉียด",
+  "file": "bullet_whiz_s01.wav",
+  "src": "synth (physical model)",
+  "dur": 0.35
+ },
+ {
+  "n": 226,
+  "cat": "bullet_whiz",
+  "th": "กระสุนเฉียด",
+  "file": "bullet_whiz_s02.wav",
+  "src": "synth (physical model)",
+  "dur": 0.35
+ },
+ {
+  "n": 227,
+  "cat": "bullet_whiz",
+  "th": "กระสุนเฉียด",
+  "file": "bullet_whiz_s03.wav",
+  "src": "synth (physical model)",
+  "dur": 0.35
+ },
+ {
+  "n": 228,
+  "cat": "ricochet",
+  "th": "กระสุนแฉลบ",
+  "file": "ricochet_s01.wav",
+  "src": "synth (physical model)",
+  "dur": 0.75
+ },
+ {
+  "n": 229,
+  "cat": "ricochet",
+  "th": "กระสุนแฉลบ",
+  "file": "ricochet_s02.wav",
+  "src": "synth (physical model)",
+  "dur": 0.75
+ },
+ {
+  "n": 230,
+  "cat": "ricochet",
+  "th": "กระสุนแฉลบ",
+  "file": "ricochet_s03.wav",
+  "src": "synth (physical model)",
+  "dur": 0.75
+ },
+ {
+  "n": 231,
+  "cat": "casing",
+  "th": "ปลอกกระสุนตกพื้น",
+  "file": "casing_s01.wav",
+  "src": "synth (physical model)",
+  "dur": 1.0
+ },
+ {
+  "n": 232,
+  "cat": "casing",
+  "th": "ปลอกกระสุนตกพื้น",
+  "file": "casing_s02.wav",
+  "src": "synth (physical model)",
+  "dur": 1.0
+ },
+ {
+  "n": 233,
+  "cat": "casing",
+  "th": "ปลอกกระสุนตกพื้น",
+  "file": "casing_s03.wav",
+  "src": "synth (physical model)",
+  "dur": 1.0
+ },
+ {
+  "n": 234,
+  "cat": "gun_cock",
+  "th": "ง้างปืน",
+  "file": "gun_cock_s01.wav",
+  "src": "synth (physical model)",
+  "dur": 0.5
+ },
+ {
+  "n": 235,
+  "cat": "gun_cock",
+  "th": "ง้างปืน",
+  "file": "gun_cock_s02.wav",
+  "src": "synth (physical model)",
+  "dur": 0.5
+ },
+ {
+  "n": 236,
+  "cat": "gun_cock",
+  "th": "ง้างปืน",
+  "file": "gun_cock_s03.wav",
+  "src": "synth (physical model)",
+  "dur": 0.5
  }
 ]
