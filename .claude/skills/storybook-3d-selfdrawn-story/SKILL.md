@@ -295,6 +295,45 @@ If the user wants characters made in Flow from their own prompt, use the sister 
     `SRC=out/full2.mp4 bash tools/finish.sh ...`. A change to the character drawing or rig needs a full re-render,
     so get the bench line-up right first.
 
+## Motion principles (v5.2, from the user's animation-principle study clips; apply to every new clip)
+- Timing: fewer frames = faster, more = slower. Hold key poses on twos (2 frames) for snappy hits; keep camera,
+  FX and physics on ones so nothing strobes. More frames is not better: a punch is 2-4 frames, a head turn 6-10.
+- Spacing: the biggest gap is the frame just before an impact (no ease-in into a hit). The thing being hit moves
+  most on or right after the contact frame. Random or uneven spacing is a bug; check spacing in the frame diff.
+- Easing: ease in/out on starts and stops of characters and camera; never slow down mid-air (gravity is constant);
+  carry momentum through a pose instead of stopping dead. Punch/kick: no ease-out into the hit pose, overshoot the
+  hit pose by 1 frame then settle; put the hips and whole body into it; even 1 frame of chamber (wind-up) matters.
+- Anticipation before every action (crouch before a jump, wind-up before a swing, a breath before a line that
+  matters). Bigger anticipation = more force.
+- Squash and stretch keeps volume (stretch long = thinner). Ease toward the original shape. Hard objects stretch a
+  little, soft ones a lot. A little still reads.
+- Follow-through and overlap: hair, coat tails, capes, ribbons, threads lag behind the body as a travelling wave
+  (x = sin(y - t)); different materials lag differently (hair > cloth > strap). Hair is furthest behind on the
+  walk's contact pose. Keep inertia: the tip keeps moving after the root stops.
+- Arcs: limbs, heads, swords and thrown things move on arcs; a jump is a parabola, not a semicircle. Horizontal
+  speed in the air is constant.
+- Walk cycle: body lowest at/after contact, highest after passing, small hip sway, minimal head drift.
+- Secondary action supports the main action and never hides it (a hand adjusting a coat while talking).
+- Exaggeration is for clarity (poses, expressions), not distortion of proportions.
+- Weight: heavy things accelerate and stop slowly, bounce less, drag more, and show impact on the environment
+  (dust, cracks, the floor shakes).
+- Smears on fast moves: elongated in-between, multiples (2-3 ghosts), or motion lines. One kind per move. Don't
+  overdo it.
+- Fire and smoke rise, spread, slow and fade as they rise; hotter parts rise faster; parts don't move in sync; a
+  looping fire must not visibly "pulse"; never redraw the shape at random between frames.
+- Bounces: each bounce lower and shorter than the last; the first frame leaving the ground moves the most; as
+  little ground time as possible (except an intentionally squishy landing).
+
+## Script rules (v5.2, from the PUPPET MASTER rewrite; see output/THE PUPPET MASTER บทซีซัน 1.txt)
+- 60-75 s per episode (finale up to 85 s) = about 34-45 lines at SP 1.12. The viewer average was 31 s, so:
+  line 1 is the hook (the most shocking fact of the episode), a re-hook at about 30 s, the end is a cliffhanger.
+- Don't narrate what the picture shows ("he laughed", "I nodded", "I answered:"). Animate it instead and cut the
+  line. Speaker tags [name] carry who is talking.
+- Dialogue: short (8-10 words max), with subtext. Each character keeps one pronoun pair for the whole series.
+- Write the rules of the power once (episode 1) and never break them; plant every reveal earlier (a figure seen in
+  ep 3 pays off in the finale).
+- No blood or wounds in the script or on screen; no "kill" in covers or captions.
+
 ## Rules
 - Characters, story and sets are original. Never copy a reference video's characters, props or shots.
 - Never bundle third-party reference frames in this skill.
