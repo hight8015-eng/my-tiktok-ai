@@ -72,7 +72,10 @@ const EX = {
   realize: { eyes: 'wide', pup: .9, bl: 4, br: -4, by: -12, mouth: 'o' },                              // the 'wait...' moment
   confused: { eyes: 'open', bl: 12, br: -16, byL: 6, byR: -10, mouth: 'wavy', mx: 6, drop: 1 },
   exhausted: { eyes: 'half', lid: .2, lidT: 8, bl: 10, br: -10, by: 6, mouth: 'open', drop: 1 },
-  pain: { eyes: 'chev', bl: 22, br: -22, by: 2, mouth: 'grimace', drop: 1 },
+  pain: { eyes: 'x', bl: 22, br: -22, by: 2, mouth: 'grimace', drop: 1 },
+  hurtX: { eyes: 'x', bl: 18, br: -18, by: -2, mouth: 'cry', drop: 1 },                                  // hit hard
+  ko: { eyes: 'x', bl: 8, br: -8, by: -4, mouth: 'wavy' },                                               // knocked out
+  dead: { eyes: 'x', bl: 0, br: 0, by: 2, mouth: 'gasp', mw: .9 },                                       // cartoon death: X eyes, open mouth
   mocking: { eyes: 'half', bl: 12, br: -6, byL: -6, mouth: 'grin', mflip: true, mx: 6 },
   sinister: { eyes: 'half', lidT: -10, bl: -22, br: 22, by: 6, mouth: 'smileBig', sh: .55 },
   stoic: { eyes: 'open', lid: .2, bl: -4, br: 4, by: 2, mouth: 'flat' },
@@ -109,6 +112,7 @@ function drawFace(x, spec, e, blink, talk, look) { // v2: flat ink faces on a wh
     else if (kind === 'open' || kind === 'side') { const dx = kind === 'side' ? 11 * (spec.sideDir || 1) : lx, pk = (e.pup ?? 1) * (e.lid || e.low || e.lidT ? 1.5 : 1); if (pk !== 1) { x.translate(cx + dx, cy + ly); x.scale(pk, pk); x.translate(-cx - dx, -cy - ly); } if (spec.eyeC) { x.fillStyle = spec.eyeC; x.shadowColor = spec.eyeC; x.shadowBlur = 18; } x.beginPath(); x.ellipse(cx + dx, cy + ly, spec.eyeC ? 15 : 12, spec.eyeC ? 21 : 18, 0, 0, 7); x.fill(); x.shadowBlur = 0; x.fillStyle = ink;
       if (e.spark > 0) { x.fillStyle = '#ffffff'; x.beginPath(); x.arc(cx + dx - 4, cy + ly - 7, 5, 0, 7); x.fill(); x.beginPath(); x.arc(cx + dx + 4, cy + ly + 6, 2.5, 0, 7); x.fill(); x.fillStyle = ink; } }
     else if (kind === 'chev') { x.lineWidth = BIG ? 10 : 16; x.beginPath(); x.moveTo(cx - 20 * s, cy - 16); x.lineTo(cx + 14 * s, cy); x.lineTo(cx - 20 * s, cy + 16); x.stroke(); } // > <
+    else if (kind === 'x') { x.lineWidth = BIG ? 10 : 13; const r = BIG ? 18 : 17; x.beginPath(); x.moveTo(cx - r, cy - r); x.lineTo(cx + r, cy + r); x.moveTo(cx + r, cy - r); x.lineTo(cx - r, cy + r); x.stroke(); } // X eyes: pain / knocked out / dead (cartoon, no blood)
     else if (kind === 'spiral') { x.lineWidth = BIG ? 6 : 9; x.beginPath(); for (let i = 0; i <= 60; i++) { const a = i / 60 * Math.PI * 5 * s, r = 3 + i / 60 * 30; x.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r * 1.1); } x.stroke(); }
     else if (kind === 'tiny') { x.fillStyle = '#fbf8f2'; x.lineWidth = BIG ? 6 : 12; x.beginPath(); x.ellipse(cx, cy - 2, 30, 38, 0, 0, 7); x.fill(); x.stroke(); x.fillStyle = ink; x.beginPath(); x.arc(cx + lx * .5, cy + ly * .5, 6 * (e.pup ?? 1), 0, 7); x.fill(); }
     else if (kind === 'half') { x.save(); x.beginPath(); x.rect(cx - 40, cy - 2, 80, 60); x.clip(); if (spec.eyeC) { x.fillStyle = spec.eyeC; x.shadowColor = spec.eyeC; x.shadowBlur = 18; } x.beginPath(); x.ellipse(cx + lx, cy + 2, 16, 20, 0, 0, 7); x.fill(); x.restore(); x.fillStyle = ink; x.beginPath(); x.moveTo(cx - 25, cy - 2); x.lineTo(cx + 25, cy - 2); x.stroke(); }

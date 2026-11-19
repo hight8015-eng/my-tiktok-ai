@@ -354,7 +354,8 @@ Research basis: Ekman FACS (action units), Ed Hooks 'Acting for Animators', Disn
 - 41 new faces: smileReal smilePolite smileSad laugh relieved touched awe hopeful pleading surprised terror dread anxious
   hurt despair guilty ashamed embarrassed shy annoyed bored skeptical suspicious contempt disgust annoyedHard rage
   coldFury menace glare focused thinking realize confused exhausted pain mocking sinister stoic determinedHard
-  (+ the older ones). New mouths: smileSoft smileBig laugh pout grimace sneer tight gasp cry bite.
+  (+ the older ones). X EYES (user: pain / death = X eyes): eyes 'x'; faces pain, hurtX, ko, dead (cartoon, no blood).
+  New mouths: smileSoft smileBig laugh pout grimace sneer tight gasp cry bite.
 - exShift(lt, at, a, b): numbers tween in 5 steps, the eye/mouth SHAPE swap hides under a 2-frame blink. Blends are names
   'a>b@0.4' (exOf resolves + caches). Never hard-cut a face.
 - gaze(lt, mode, seed): saccades (fast jump + hold): idle, think (up-side), avoid (guilt/lying, glances back), shifty,
