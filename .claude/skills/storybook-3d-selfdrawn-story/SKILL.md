@@ -342,6 +342,17 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
   hard shadow).
 
+## Staging rules from the user's ep2 review (v7.3, apply to every shot)
+1. GEOGRAPHY clear: an establishing wide/high shot shows where every party is; keep screen direction across cuts.
+2. Nearby events are linked by a CAMERA MOVE (pan/tilt/crane/track from one subject to the next), not a cut
+   (ref: courtroom clip - judge, pan across the room to the crowd, then over the shoulder to the accused).
+3. Motion, emotion, gesture and face must agree and look natural: every acting shot uses perform()/hold()/gaze(); no frozen poses.
+4. Narration that describes an ACTION is shown literally on screen (e.g. 'they fight for power' = a real fight).
+5. Walk paths are checked against every prop (dumpster, crates, bags): nobody passes through objects; a walk must visibly
+   travel through the frame (the camera never tracks at exactly the walk speed), arms swing.
+6. Never let a near object (dumpster, a head) fill the lower frame; never place a camera inside a wall (MIND pushes the
+   camera back from the target - check against walls).
+
 ## Camera + transitions, documentary edit (v7.2, user ref: AI-image documentary with titles; main.js)
 - Never a dead frame: every shot keeps a slow push-in or drift (camDrift + camS/camA ease); 3-4 s per shot, cut on the
   voice's phrase boundary; keep the push/pan DIRECTION consistent through a sequence (a story moving forward = left).

@@ -63,3 +63,11 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
   roof together, tracer too faint + small flinch, thread shot shows 1 thread and the follower off-frame, cover hides the gun.
   Re-render only the changed segments (rq.sh is resumable: delete those segments' .ok) then finish again.
   RULE: check every walk path against props (dumpster, crates, bags) - characters must never pass through objects.
+- USER RULES (2026-11-19, after the ep2 review; apply to every episode):
+  1. Scene GEOGRAPHY must be clear: establish where everyone is (a wide/high shot showing all parties), keep screen direction.
+  2. Events in places CLOSE to each other = connect them with a CAMERA MOVE (pan / tilt / crane / tracking from one subject
+     to the other), not a cut. Ref: courtroom clip (judge -> pan across the room -> the crowd -> over-shoulder to the
+     defendant). Ep2 fix idea: put the 'roof' friend on the alley's own fire escape/roofline (x 1.55, y 5.8, z -6) so one
+     tilt-up links them, plus one high shot with both guns.
+  3. Motion, emotion, gestures and faces must match each other and look natural (acting.js perform/hold/gaze, no frozen poses).
+  4. When the narration describes an ACTION, SHOW that action literally (e.g. 'they fight for power' = a real fight on screen).
