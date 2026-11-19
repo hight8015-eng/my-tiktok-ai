@@ -342,6 +342,17 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
   hard shadow).
 
+## Glow + visible light (v5.7, user refs: Blade Runner haze, stage beams, window god rays, a match in a blue room, glowing doorway)
+- src/glow.js: beam(par, from, to, r, col, op) = volumetric cone (soft edges, brightest at the source, falls off with
+  distance; beamMat() to retexture an existing cone); spill(par, p, r, col, op, rot) = the source's colour pooling on
+  the ground / a wall; streak(par, p, w, len, col, op) = wet-road reflection running toward the viewer (shimmers);
+  glowAt(t) each frame. globalThis.GLOW = { a, wide } = two-scale bloom (tight core + wide soft halo).
+- Rules from the refs: light shows in the air only where there is haze/rain/dust -> beams for lamps, searchlights,
+  windows, open doors; every glowing thing spills its colour onto what is near it (wall, floor, the character via
+  setRig) and fades with distance; on wet ground each sign makes a long streak; one dominant hue per scene + one
+  accent; a figure in front of a bright source is a silhouette with a rim (RIGS.silhouette: base .28, strong rims);
+  a small source (match, phone, flame, red eyes) lights only the face/hands near it = the strongest mood shot.
+
 ## FX study 3 (v5.5, 6 user clips: live-action power edit, green-screen meteors + explosion, flame tornado, power-% montage, stick fight)
 - Power-up chain (one beat each, ~0.5-1 s): hands glow -> aura bursts around the body -> top-down shot -> an object flies
   AT the lens -> eye glow close-up -> wide -> the hit. Escalate scale shot by shot, never show the biggest first.

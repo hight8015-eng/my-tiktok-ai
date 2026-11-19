@@ -5,6 +5,7 @@
 //   ALLEY  narrow brick alley           [0, 0, -600]
 import { THREE, scene, toon, basic, canvasTex, mesh, rbox, group, cylBetween, rng, noise1 } from './engine.js';
 import * as Wd from './world.js';
+import { beam, beamMat, spill, streak, glowAt } from './glow.js';
 export const TRUCK = group({ p: [0, 0, 600], parent: scene }), GATE = group({ p: [600, 0, 0], parent: scene }), STREET = group({ p: [-600, 0, 0], parent: scene }), ALLEY = group({ p: [0, 0, -600], parent: scene });
 export const Z = {};
 const glow = (par, p, col, size, op = .6) => { const s = Wd.glowSprite(col, size, { opacity: op }); s.position.set(...p); par.add(s); return s; };
@@ -84,7 +85,7 @@ const wanted = (par, p, ry, txt = 'WANTED') => sign(par, txt, p, ry, { w: .7, h:
     sign(tr, 'PRISON 07', [1.31, 2.2, .8], 90, { w: 2.4, h: .5, col: '#ffb02a', bg: '#3e4656', txtC: '#ffd27a', glow: false }); }
   Z.gWanted = [wanted(G, [-6.8, 1.6, -14], 90), wanted(G, [-6.8, 1.6, -20], 90, 'ไม่มีกฎ')];
 }
-export function gateAt(t, open = 0) { Z.gateDoors.forEach((g, i) => { g.position.x = (i ? 1 : -1) * (5.6 + open * 5); }); Z.gateLight.material.opacity = .55 * open;
+export function gateAt(t, open = 0) { Z.gateDoors.forEach((g, i) => { g.position.x = (i ? 1 : -1) * (5.6 + open * 5); }); Z.gateLight.material.opacity = .55 * open; if (Z.gateBeam) { Z.gateBeam.visible = open > .02; Z.gateBeam.material.uniforms.uOp.value = .14 * open; }
   Z.beams.forEach((b, i) => { const a = Math.sin(t * .35 + i * 2) * .5, bs = b.userData.base; const dir = new THREE.Vector3(Math.sin(a) * .8, -.55, .9).normalize(); b.position.set(bs[0] + dir.x * 17, bs[1] + dir.y * 17, bs[2] + dir.z * 17);
     b.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), dir); }); Z.zsign.userData.m.material.color.setScalar(.85 + .15 * (Math.sin(t * 13) > -.85 ? 1 : 0)); }
 
@@ -136,13 +137,13 @@ export function streetAt(t) { Z.signs.forEach((g, i) => { const fl = i === 3 && 
   Z.gun = group({ parent: A }); Z.gun.scale.setScalar(1.7); mesh(rbox(.06, .1, .38), toon('#3a3a46'), { p: [0, 0, .1], parent: Z.gun }); mesh(new THREE.CylinderGeometry(.022, .022, .26, 10), toon('#2a2a32'), { p: [0, .02, -.18], r: [90, 0, 0], parent: Z.gun }); mesh(rbox(.05, .16, .07), toon('#1c1c22'), { p: [0, -.1, .2], r: [-15, 0, 0], parent: Z.gun });
   Z.laser = mesh(new THREE.CylinderGeometry(.006, .006, 1, 6), basic('#ff2030', { transparent: true, opacity: .85, add: true, depthWrite: false }), { parent: A, cast: false }); Z.laser.userData.noInk = true; Z.dot = glow(A, [0, 0, 0], '#ff2030', .35, 0); Z.gun.visible = Z.laser.visible = false;
 }
-export function alleyAt(t, flick = 1) { const f = flick && (Math.sin(t * 23) > .82 || (t % 4.1) < .08) ? .25 : 1; Z.aBulb.material.emissiveIntensity = 1.4 * f; Z.aGlow.material.opacity = .55 * f; }
+export function alleyAt(t, flick = 1) { const f = flick && (Math.sin(t * 23) > .82 || (t % 4.1) < .08) ? .25 : 1; Z.aBulb.material.emissiveIntensity = 1.4 * f; Z.aGlow.material.opacity = .55 * f; if (Z.aBeam) Z.aBeam.material.uniforms.uOp.value = .2 * f; }
 export function laserAt(from, to, k) { Z.gun.visible = Z.laser.visible = k > 0; Z.dot.material.opacity = .9 * k; if (!k) return; const a = new THREE.Vector3(...from), b = new THREE.Vector3(...to), d = b.clone().sub(a);
   Z.gun.position.copy(a); Z.gun.lookAt(ALLEY.localToWorld(b.clone())); Z.gun.rotateY(Math.PI); Z.laser.position.copy(a.clone().add(b).multiplyScalar(.5)); Z.laser.scale.set(1, d.length() * k, 1);
   Z.laser.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize()); Z.dot.position.copy(b); }
 
 export function hideZC() { TRUCK.visible = GATE.visible = STREET.visible = ALLEY.visible = false; Z.tag.visible = false; Z.truckDoors.forEach(d => { d.visible = true; }); Z.outside.visible = false; Z.truckSlit.visible = true; Z.truckSlit.scale.x = 1; Z.dark.visible = true; }
-export function zcAt(t) { firesAt(t); propsAt(t); }
+export function zcAt(t) { firesAt(t); propsAt(t); glowAt(t); }
 
 // ======================= v2 SET DRESSING (story props, user: "more props that fit each scene") =======================
 const stencil = (par, txt, p, ry, w = 1.2, h = .4, col = '#d8d0b8', bg = '#4a5060') => sign(par, txt, p, ry, { w, h, col: bg, bg, txtC: col, fs: .6, glow: false });
@@ -217,3 +218,28 @@ function wire(par, a, b, sag = .8, col = '#141018') { const mid = [(a[0] + b[0])
   sign(A, 'BAR', [-1.88, 3.6, 2.2], 90, { w: 1.2, h: .45, col: '#ff2f6a', fs: .65 }); }
 export function propsAt(t) { CAMS.forEach((c, i) => { c.g.rotation.y = .35 * Math.sin(t * .4 + i * 1.7); c.led.visible = Math.sin(t * 6 + i) > -.2; });
   TVS.forEach((s, i) => { const k = .55 + .45 * Math.abs(Math.sin(t * (13 + i * 3) + i)); s.material.color.setRGB(.55 * k, .65 * k, .85 * k + .1); }); }
+
+// ======================= v3 GLOW PASS (light you can see; user refs: haze beams, spill, wet reflections, silhouettes) =======================
+{ // GATE: the searchlights become real volumetric beams; the red ZERO CITY sign spills red down the wall and onto the wet road
+  Z.beams.forEach(b => { b.material = beamMat('#fff2d8', .4, 34, 1.2); });
+  spill(GATE, [0, 12, -36.1], 9, '#ff2340', .35, [0, 0, 0]); spill(GATE, [0, .05, -30], 8, '#ff2340', .22); streak(GATE, [0, .04, -34], 5, 26, '#ff3048', .3);
+  beam(GATE, [0, 7, -36], [0, -.5, -24], 5.5, '#ff7a5a', .1);   // the light pouring out of the gate when it opens (opacity driven in gateAt)
+  Z.gateBeam = GATE.children[GATE.children.length - 1]; Z.gateBeam.visible = false;
+  for (const s of [-1, 1]) beam(GATE, [s * 3.2, 1.0, -31.5], [s * 2.5, 4.5, -22], 1.6, '#fff0d0', .12);   // ground floods up through the haze
+  spill(GATE, [5.2 - 1.3, .05, -29], 2, '#ffd27a', .3);   // booth window light pool
+}
+{ // STREET: every sign gets a wet-road reflection streak and a colour pool; lamps get light cones; the stall glows warm
+  const SIGC = ['#ff2f6a', '#2fe0ff', '#3aff8a', '#ff9a2a', '#ff2340', '#c070ff', '#ff4a3a', '#ffd23a'];
+  SIGC.forEach((c, i) => { const s = i % 2 ? 1 : -1, z = -2 - i * 7.5; streak(STREET, [s * 4.4, .03, z], 1.4, 9, c, .6); spill(STREET, [s * 6.4, .05, z], 2.2, c, .28); spill(STREET, [s * 7.82, 3.2 + (i % 3) * 1.4, z], 1.8, c, .25, [0, s > 0 ? -90 : 90, 0]); });
+  Z.lamps.forEach((l, i) => { const sx = l.position.x + (i % 2 === 0 ? -.8 : .8); beam(STREET, [sx, 4.15, l.position.z], [sx, 0, l.position.z], 1.5, i % 2 ? '#ffcf8a' : '#9ad8ff', .3); spill(STREET, [sx, .05, l.position.z], 1.8, i % 2 ? '#ffcf8a' : '#9ad8ff', .3); });
+  spill(STREET, [-5.8, .2, -6.5], 2.4, '#ff8a4a', .3);   // the noodle stall's lanterns
+  [[-6.6, -11], [6.8, -27], [-7, -41]].forEach(([x, z]) => spill(STREET, [x, .05, z], 2.2, '#ff8a3a', .35));   // fire barrels
+}
+{ // ALLEY: the bulb throws a visible cone down the wall, a warm pool on the wet bricks, the BAR sign bleeds pink at the mouth
+  beam(ALLEY, [-1.45, 3.45, -7], [-.6, 0, -7], 1.7, '#ffc87a', .2); Z.aBeam = ALLEY.children[ALLEY.children.length - 1];
+  spill(ALLEY, [-.9, .05, -7], 1.8, '#ffc87a', .35); spill(ALLEY, [-1.86, 3.6, 2.2], 1.4, '#ff2f6a', .35, [0, 90, 0]); streak(ALLEY, [-1.2, .03, 2.0], .8, 6, '#ff2f6a', .35);
+  spill(ALLEY, [.2, .05, -15], 2.2, '#5a6aff', .18);
+}
+{ // TRUCK: a cold shaft from the barred window slices through the dusty air
+  beam(TRUCK, [0, 1.75, -2.9], [.2, .1, -.6], .7, '#b8ccff', .22);
+}

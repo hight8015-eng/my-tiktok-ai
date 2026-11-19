@@ -53,6 +53,7 @@ const RIGS = {
   alley: { base: .74, key: ['#ffb060', .4], keySide: -1, fill: ['#5a6aff', .2], top: ['#ffd8a0', .1], rim: ['#ff3a5a', 0.35], rimDir: [1, .2], rim2: ['#ffb060', 0.16], shadow: .45, rimW: .007 },
   truck: { base: .78, key: ['#a8c4ff', .25], keySide: 1, fill: ['#ffcf8a', .18], top: ['#c8d8ff', .3], rim: ['#c8d8ff', 0.3], rimDir: [0, 1], shadow: .3, rimW: .007 },
   gate: { base: .8, key: ['#ff3040', .38], keySide: -1, fill: ['#8aa0ff', .16], top: ['#ff6070', .25], rim: ['#fff0d8', 0.4], rimDir: [1, .5], shadow: .35, rimW: .007 },
+  silhouette: { base: .28, key: ['#000000', 0], fill: ['#000000', 0], top: ['#ffd8a0', .08], rim: ['#ffc87a', .9], rimDir: [1, .4], rim2: ['#ffc87a', .7], shadow: .8, rimW: .008 },   /* a figure in front of a bright source: dark body, bright edges */
   power: { base: .62, key: ['#ff2030', .3], keySide: -1, fill: ['#000000', 0], top: ['#ffffff', .05], rim: ['#ff2a3a', 0.55], rimDir: [1, .2], rim2: ['#ff2a3a', 0.28], shadow: .6, rimW: .009 } };
 function streetLight(lt) { setRig(RIGS.street); nightCity(); Wd.setShadowFocus(-600, 1, -10, 14); neonPt(0, STREET.localToWorld(V(-6, 3.5, -4)), '#ff2f6a', 7); neonPt(1, STREET.localToWorld(V(6, 3.5, -12)), '#2fe0ff', 7); neonPt(2, STREET.localToWorld(V(-5, 3, -20)), '#ffd23a', 6); neonPt(3, STREET.localToWorld(V(5.5, 3, -30)), '#c070ff', 6, 14); }
 function alleyLight(o = {}) { setRig(RIGS.alley); nightCity({ hemiI: 1.9, sunI: .9, fog: '#1c1628', fogN: 10, fogF: 48, ...o }); Wd.setShadowFocus(0, 1, -606, 8); neonPt(0, ALLEY.localToWorld(V(-1.4, 3.3, -7)), '#ffc87a', 6, 9); neonPt(1, ALLEY.localToWorld(V(0, 2.5, 3)), '#ff2f6a', 5, 12); neonPt(3, ALLEY.localToWorld(V(.5, 3, -13)), '#7a8aff', 3.5, 9); }
@@ -60,6 +61,7 @@ function truckLight() { setRig(RIGS.truck); nightCity({ hemiI: 1.9, sunI: .8, fo
 function gateLight() { setRig(RIGS.gate); nightCity({ fogN: 20, fogF: 140, glowAmt: .45 }); Wd.setShadowFocus(600, 1, -18, 16); neonPt(0, GATE.localToWorld(V(0, 15, -34)), '#ff2340', 9, 30); neonPt(1, GATE.localToWorld(V(0, 2, -14)), '#fff0c8', 3, 10); }
 const mono = (k) => { POST.sat = lerp(POST.sat, .12, k); if (k > .5) setRig(RIGS.power); };   /* the power: hard red rim, the rest falls into shadow */   // the world drains to grey when Aren uses his power (red stays: it is drawn on top)
 // ===================================================================== SHOTS
+globalThis.GLOW = { a: .26, wide: .2 };   /* two-scale glow: neon/sign halos reach further */
 export const SHOTS = [];
 function reset(t) { SH.a = 0; SH.t = t; Object.values(CHARS).forEach(C => { C.g.visible = false; }); Wd.hideSets(); Wd.hideSea(); ZC.hideZC(); Wd.pts.forEach(l => { l.intensity = 0; });
   EYES.forEach(e => { e.material.opacity = 0; }); HF.visible = false; THREAD.visible = false; SEED.material.opacity = 0; ZC.laserAt([0, 0, 0], [0, 0, 1], 0);
@@ -228,7 +230,7 @@ S('S35', 65.57, 'cut', ALLEY, (lt, t) => { alleyLight();
   put(AR(), ALLEY, { p: [-1.2, 0, -7.4], ry: 40, ex: 'sly' });
   camA([0, 2.2, -3.5], [-1.1, 1, -7.4], [0, 8.5, -2], [-1, .6, -8], U(lt, 1.5, eSine), 44); }, { shutter: 3 });
 // ---------------- 38 "แต่จากความมืดท้ายตรอก" : behind the hooded shape in the dark end of the alley ----------------
-S('S36', 67.08, 'cut', ALLEY, (lt, t) => { alleyLight({ hemiI: .9 }); Z.dark.visible = false;
+S('S36', 67.08, 'cut', ALLEY, (lt, t) => { alleyLight({ hemiI: .9 }); setRig(RIGS.silhouette); Z.dark.visible = false;
   put(GM(), ALLEY, { p: [.6, 0, -16.5], ry: 0, ex: 'calm' }); put(AR(), ALLEY, { p: [-1.2, 0, -7.4], ry: 40, ex: 'sly' });
   camA([1.25, 1.75, -18.4], [-1.0, 1.35, -7.4], [1.1, 1.7, -18.0], [-1.0, 1.35, -7.4], U(lt, 1.4), 40); });
 // ---------------- 39 "มีปืนกระบอกหนึ่ง" : the barrel slides out of the dark, the laser clicks on ----------------

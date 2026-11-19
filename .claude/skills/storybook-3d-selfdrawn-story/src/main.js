@@ -7,7 +7,12 @@ const timing = await (await fetch('timing.json')).json(), project = await (await
 await E.fontsReady; await loadSprites(project.cast); E.scene.add(SPRG); makeCast(project.cast); initShots(timing); Wd.redrawSign();
 const out = document.getElementById('out'), X = out.getContext('2d');
 const BL = document.createElement('canvas'); BL.width = 270; BL.height = 480; const BX = BL.getContext('2d');
-function bloom(a = .24) { BX.filter = 'brightness(.9) contrast(3.4) saturate(1.3) blur(7px)'; BX.drawImage(out, 0, 0, 270, 480); BX.filter = 'none'; X.save(); X.globalCompositeOperation = 'screen'; X.globalAlpha = a; X.drawImage(BL, 0, 0, 1080, 1920); X.restore(); }
+/* v5.7 two-scale glow (real lenses: a tight core glow + a wide soft halo whose light falls off with distance). Only the
+   brightest parts feed it (threshold via brightness/contrast). globalThis.GLOW = { a, wide, warm } tunes it per project. */
+const BW = document.createElement('canvas'); BW.width = 135; BW.height = 240; const BWX = BW.getContext('2d');
+function bloom(a = .24) { const G = globalThis.GLOW || {}; a = G.a ?? a; BX.filter = 'brightness(.9) contrast(3.4) saturate(1.3) blur(7px)'; BX.drawImage(out, 0, 0, 270, 480); BX.filter = 'none';
+  const wide = G.wide ?? 0; if (wide > 0) { BWX.filter = 'brightness(.8) contrast(4) saturate(1.5) blur(9px)'; BWX.drawImage(out, 0, 0, 135, 240); BWX.filter = 'none'; }
+  X.save(); X.globalCompositeOperation = 'screen'; X.globalAlpha = a; X.drawImage(BL, 0, 0, 1080, 1920); if (wide > 0) { X.globalAlpha = wide; X.drawImage(BW, 0, 0, 1080, 1920); } X.restore(); }
 // v4 auto-cinematics (no effect on story/staging): shallow focus on the nearest character, shock speed lines + zoom punch
 const _hv = new E.THREE.Vector3(), _cv = new E.THREE.Vector3();
 function nearestHead() { let best = null; E.camera.getWorldPosition(_cv); const fw = new E.THREE.Vector3(0, 0, -1).transformDirection(E.camera.matrixWorld);
