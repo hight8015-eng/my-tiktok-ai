@@ -89,3 +89,4 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
      change of place/time/energy; vary them, never the same device twice in a row.
 - LESSONS LEARNED list now lives in SKILL.md ('LESSONS LEARNED'): read it before every new episode/story.
 - User: the roof friend's face must be clearly visible (medium close-up + face light) - fixed in ep2 v2 F06/F11/F14.
+- EP2 v2 user notes (fix from ep3 on, no re-render): captions centred + in sync; level camera so guns read; hair/hats/hoods must turn with the head (ref projects/refs/hair_hat_turn_ref.mp4, study before ep3).
