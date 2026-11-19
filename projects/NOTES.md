@@ -51,3 +51,6 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
   music-box, chill jazz, sad lofi) made with score.py - same mood/tempo/instruments, never the melody/hook.
 - User APPROVED the red marker ring (scribbleAt): use 1-2 times per episode on key people (first appearance of a key
   character + name label, the reveal, a liar), never during heavy emotion beats.
+- EP2 (in progress): scratch project pm2 (= projects/_work/pm2). Voice ep2_raw.mp3 -> tighten 1.12 -> vo_fast.wav (71.33 s).
+  Islands came from ASR word timestamps (tools/asr_words.py + difflib alignment, project.json 'islands'), NOT silencedetect.
+  timing.json + vis done. Next: shots for ep2 (real seconds, SP = 1), rooftop friend character, stills, ASK helpers.

@@ -40,6 +40,7 @@ for s, e in zip(st, en):
     if s - t > 0.05: isl.append([t, s])
     t = e
 if dur - t > 0.1: isl.append([t, dur])
+if P.get('islands'): isl = [list(x) for x in P['islands']]  # v7.3: islands from ASR word timestamps (tools/align_islands.py) beat silencedetect
 if len(isl) != len(LINES):
     print(f'MISMATCH: {len(isl)} speech islands but {len(LINES)} lines in project.json. Islands (s):')
     for i, (s, e) in enumerate(isl): print(f'  {i:2d}  {s:6.2f} - {e:6.2f}  ({e - s:4.2f} s)  line: {P["lines"][i] if i < len(P["lines"]) else "-"}')
