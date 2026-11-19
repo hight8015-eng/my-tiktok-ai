@@ -44,3 +44,8 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
 - New session start: restore runs by itself (SessionStart hook -> `autosave.sh --restore`). No need to ask for it.
 - Token saving: SKILL.md keeps the core workflow; detail rules v5.2-v6.9 are in the skill's `references/*.md`
   (index table in SKILL.md). Read only the files the current step needs.
+- Text study (5 user refs, 2026-11-19): safe zone (avoid top ~12%, bottom ~25%, right ~15% UI), keyword highlight
+  (colour/pill), subtle per-chunk pop/slide/fade (no heavy fx every word), documentary title/lower-third labels,
+  big kinetic word BEHIND the character only for the hook/cliffhanger, typewriter for messages. Proposal sent; waiting
+  for the user's go-ahead. Also offered: original 'style-alike' cues (bossa lounge, flute waltz, retro jingle, dark
+  music-box, chill jazz, sad lofi) made with score.py - same mood/tempo/instruments, never the melody/hook.
