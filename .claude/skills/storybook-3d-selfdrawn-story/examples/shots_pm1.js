@@ -10,7 +10,7 @@ const SP = 1.12;
 const talkAt = (t) => { const f0 = Math.floor(t / SP * 30 / 3) * 3; let e = 0; for (let k = -1; k < 3; k++) e += (TM.env[f0 + k] || 0) * (k < 0 ? .5 : 1); e /= 3.5; return e > .5 ? 1 : e > .2 ? .5 : 0; };
 let SH = { a: 0, t: 0 };
 function look(pos, tgt, fov = 40, roll = 0) { POST.focus = pos.distanceTo(tgt); camera.position.copy(pos); camera.fov = fov; camera.updateProjectionMatrix(); camera.up.set(0, 1, 0); camera.lookAt(tgt); if (roll) camera.rotateZ(roll * D2R);
-  if (SH.a > 0) { const t = SH.t * 22; camera.rotateX(noise1(t) * .02 * SH.a); camera.rotateY(noise1(t + 50) * .02 * SH.a); camera.position.y += noise1(t + 9) * .05 * SH.a; } camera.updateMatrixWorld(); }
+  if (SH.a > 0) { const t = SH.t * 8;   /* a rumble, not a 22 Hz jitter (read as skipped frames on close shots) */ camera.rotateX(noise1(t) * .02 * SH.a); camera.rotateY(noise1(t + 50) * .02 * SH.a); camera.position.y += noise1(t + 9) * .05 * SH.a; } camera.updateMatrixWorld(); }
 const lp = (a, b, u) => a.map((v, i) => lerp(v, b[i], u));
 const CAMX = 1.3; /* moves are stretched at the far end only (never closer into faces) */
 const ampl = (p0, p1, t0, t1) => { const d0 = Math.hypot(p0[0] - t0[0], p0[1] - t0[1], p0[2] - t0[2]), d1 = Math.hypot(p1[0] - t1[0], p1[1] - t1[1], p1[2] - t1[2]);
@@ -87,10 +87,10 @@ S('S03', 3.8, 'dis', TRUCK, (lt, t) => { truckLight(); SH.a = .25; SH.t = t;
   put(PX(2), TRUCK, { p: [.9, .64, -.6], ry: -90, sit: true, seat: .62, ex: 'frown' }); put(PX(3), TRUCK, { p: [.9, .64, 1.0], ry: -90, sit: true, seat: .62, ex: 'angry' }); put(PX(1), TRUCK, { p: [-.9, .64, 1.6], ry: 90, sit: true, seat: .62, ex: 'sleepy', blink: true });
   Z.truckChain.rotation.z = Math.sin(t * 1.9) * .25; camT([.35, 1.25, -1.6], [-.9, 1.05, .2], [.2, 1.2, -1.4], [-.95, 1.05, .2], U(lt, 2), 46); });
 // ---------------- 3  "ที่ข้อมือมีป้ายเหล็กสลักเลข 047" : the wrist tag close-up ----------------
-S('S04', 5.93, 'cut', TRUCK, (lt, t) => { truckLight(); MIND = 0; SH.a = .18; SH.t = t;
+S('S04', 5.93, 'cut', TRUCK, (lt, t) => { truckLight(); MIND = 0; SH.a = 0;
   const raise = antic(lt, .25, .7, .2, .1); put(AR(), TRUCK, { p: [-.9, .64, .2], ry: 90, sit: true, seat: .62, ex: 'worried', hR: lp([.2, .2, .3], [.12, .62, .42], raise), pR: [1, -.4, -.2], head: [14, 0, 0] });
-  scene.updateMatrixWorld(); const w = AR().torso.localToWorld(V(.12, .55, .42)); Z.tag.visible = true; Z.tag.position.copy(w).add(V(0, -.07 + .01 * Math.sin(t * 5), 0)); Z.tag.rotation.set(0, Math.PI / 2 + Math.sin(t * 2.3) * .25, Math.sin(t * 3.1) * .12);
-  const lc = TRUCK.worldToLocal(w.clone()); camT([lc.x + .55, lc.y + .02, lc.z + .06], [lc.x, lc.y - .07, lc.z + .03], [lc.x + .42, lc.y + .05, lc.z + .04], [lc.x, lc.y - .07, lc.z + .03], U(lt, 2.8), 32); });
+  scene.updateMatrixWorld(); const w = AR().torso.localToWorld(V(.12, .55, .42)); Z.tag.visible = true; Z.tag.position.copy(w).add(V(0, -.07 + .006 * Math.sin(t * 1.6), 0)); Z.tag.rotation.set(0, Math.PI / 2 + Math.sin(t * .9) * .18, Math.sin(t * 1.3) * .06);   /* slow sway on the chain, no jitter */
+  const lc = TRUCK.worldToLocal(AR().torso.localToWorld(V(.12, .55, .42)).clone()); camT([lc.x + .55, lc.y + .02, lc.z + .06], [lc.x, lc.y - .07, lc.z + .03], [lc.x + .42, lc.y + .05, lc.z + .04], [lc.x, lc.y - .07, lc.z + .03], U(lt, 2.8), 32); });
 // ---------------- 4  "ไม่มีใครบอกว่าผมทำผิดอะไร" : wide inside the truck, the others stare at him ----------------
 S('S05', 9.16, 'cut', TRUCK, (lt, t) => { truckLight(); SH.a = .3; SH.t = t;
   put(AR(), TRUCK, { p: [-.9, .64, .2], ry: 90, sit: true, seat: .62, ...pf(lt, [[0, 'worried'], [1.1, 'frown']]), head: [0, lt < 1 ? -30 : 20, 0], hL: [-.2, .2, .3], hR: [.2, .2, .3] });
@@ -242,7 +242,7 @@ S('S37', 68.77, 'cut', ALLEY, (lt, t) => { alleyLight({ hemiI: .8 }); MIND = 0; 
 // ---------------- 40 "เล็งมาที่หัวผมแล้ว" : the red dot lands on his forehead; his eyes slide to it ----------------
 S('S38', 70.14, 'cut', ALLEY, (lt, t) => { alleyLight({ hemiI: .85 }); MIND = 2.8;
   put(AR(), ALLEY, { p: [-1.2, 0, -7.4], ry: 40, ...pf(lt, [[0, 'sly'], [.7, 'sneaky']]), head: [0, -9 * eIO(clamp((lt - 1.0) / .8)), 0] }); const hd = ALLEY.worldToLocal(headW(AR(), .42));
-  ZC.laserAt([.45, 1.45, -16.35], [hd.x, hd.y, hd.z + .02], 1); SH.a = 0; OVL.push({ kind: 'dot', p: headW(AR(), .42), k: .85 + .15 * Math.sin(t * 20), r: 16 }); lightAt(headW(AR(), .42), '#ff2030', .5, .7);
+  ZC.laserAt([.45, 1.45, -16.35], [hd.x, hd.y, hd.z + .02], 1); SH.a = 0; OVL.push({ kind: 'dot', p: headW(AR(), .42), k: .9 + .1 * Math.sin(t * 5), r: 16 }); lightAt(headW(AR(), .42), '#ff2030', .5, .7);
   camA([.3, 1.6, -5.6], [-1.2, 1.52, -7.4], [.15, 1.58, -5.8], [-1.2, 1.52, -7.4], U(lt, 2.5, eOut), 38); }, { rain: .6 });
 
 export function initShots(timing) { TM.env = timing.env; for (let i = 0; i < SHOTS.length; i++) SHOTS[i].t1 = i + 1 < SHOTS.length ? SHOTS[i + 1].t0 : timing.end; }

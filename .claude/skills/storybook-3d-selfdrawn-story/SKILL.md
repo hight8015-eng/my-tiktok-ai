@@ -342,6 +342,14 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
   hard shadow).
 
+## Flicker + shake rules (v6.3, found in the PM ep1 frame check)
+- Never flicker a light on/off at a fast regular rate when it drives big lit areas (bulb + glow + beam + pool +
+  lightAt): the whole frame pulses every few frames and reads as stutter. Use a rare, soft dip from noise
+  (1 - .35 * sstep(.55, .85, noise1(t * .9))). Small signs may blink; big light may not.
+- Camera shake noise ~8 Hz (a rumble), never ~22 Hz, and none at all on macro / insert close-ups (a 2 mm jitter
+  becomes a big jump when the camera is 40 cm away). Props in a close-up sway slowly (< 1.6 rad/s).
+- The frame check must print ALL spikes, grouped by time, not the first 30 (periodic spikes hide past the cut-off).
+
 ## Rain + steam (v6.2)
 - rainAt overlay is now 3 depth layers (far: many fine slow faint; near: few long thick fast), each drop on its own
   speed, slight wind slant, + splash crowns and widening rings on the ground part of the frame.

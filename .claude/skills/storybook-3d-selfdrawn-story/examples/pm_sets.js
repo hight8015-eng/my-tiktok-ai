@@ -3,7 +3,7 @@
 //   GATE   the 100 m wall + gate        [600, 0, 0]
 //   STREET neon street at night         [-600, 0, 0]
 //   ALLEY  narrow brick alley           [0, 0, -600]
-import { THREE, scene, toon, basic, canvasTex, mesh, rbox, group, cylBetween, rng, noise1 } from './engine.js';
+import { THREE, scene, toon, basic, canvasTex, mesh, rbox, group, cylBetween, rng, noise1, sstep } from './engine.js';
 import * as Wd from './world.js';
 import { makeFire } from './fire.js';
 import { beam, beamMat, spill, streak, glowAt, RAD, steam, steamAt } from './glow.js';
@@ -140,7 +140,7 @@ export function streetAt(t) { Z.signs.forEach((g, i) => { const fl = i === 3 && 
   Z.gun = group({ parent: A }); Z.gun.scale.setScalar(1.7); mesh(rbox(.06, .1, .38), toon('#3a3a46'), { p: [0, 0, .1], parent: Z.gun }); mesh(new THREE.CylinderGeometry(.022, .022, .26, 18), toon('#2a2a32'), { p: [0, .02, -.18], r: [90, 0, 0], parent: Z.gun }); mesh(rbox(.05, .16, .07), toon('#1c1c22'), { p: [0, -.1, .2], r: [-15, 0, 0], parent: Z.gun });
   Z.laser = mesh(new THREE.CylinderGeometry(.006, .006, 1, 6), basic('#ff2030', { transparent: true, opacity: .85, add: true, depthWrite: false }), { parent: A, cast: false }); Z.laser.userData.noInk = true; Z.dot = glow(A, [0, 0, 0], '#ff2030', .35, 0); Z.gun.visible = Z.laser.visible = false;
 }
-export function alleyAt(t, flick = 1) { const f = flick && (Math.sin(t * 23) > .82 || (t % 4.1) < .08) ? .25 : 1; Z.aBulb.material.emissiveIntensity = 1.4 * f; Z.aGlow.material.opacity = .55 * f; if (Z.aBeam) Z.aBeam.material.uniforms.uOp.value = .2 * f; }
+export function alleyAt(t, flick = 1) { const f = flick ? 1 - .35 * sstep(.55, .85, noise1(t * .9 + 3)) : 1;   /* v6.3 a rare, soft brown-out dip (a hard on/off every .27 s pulsed the whole frame = stutter) */ Z.aBulb.material.emissiveIntensity = 1.4 * f; Z.aGlow.material.opacity = .55 * f; if (Z.aBeam) Z.aBeam.material.uniforms.uOp.value = .2 * f; }
 export function laserAt(from, to, k) { Z.gun.visible = Z.laser.visible = k > 0; Z.dot.material.opacity = .9 * k; if (!k) return; const a = new THREE.Vector3(...from), b = new THREE.Vector3(...to), d = b.clone().sub(a);
   Z.gun.position.copy(a); Z.gun.lookAt(ALLEY.localToWorld(b.clone())); Z.gun.rotateY(Math.PI); Z.laser.position.copy(a.clone().add(b).multiplyScalar(.5)); Z.laser.scale.set(1, d.length() * k, 1);
   Z.laser.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize()); Z.dot.position.copy(b); }
