@@ -136,5 +136,47 @@
   "comedy_bonk",
   "heartbeat2",
   "victory_hit"
- ]
+ ],
+ "bossa_lounge": {
+  "mood": "bossa nova lounge, sneaky-cool, playful scheming (style of library bossa tracks)",
+  "bpm": 126,
+  "key": "F",
+  "file": "bossa_lounge.mp3",
+  "style_alike": true
+ },
+ "flute_waltz": {
+  "mood": "whimsical 3/4 flute waltz, innocent, nostalgic or comic chaos",
+  "bpm": 150,
+  "key": "G",
+  "file": "flute_waltz.mp3",
+  "style_alike": true
+ },
+ "retro_jingle": {
+  "mood": "cheesy retro commercial, ironic calm, ad parody",
+  "bpm": 120,
+  "key": "C",
+  "file": "retro_jingle.mp3",
+  "style_alike": true
+ },
+ "dark_musicbox": {
+  "mood": "dark music box, ominous innocence, creepy calm",
+  "bpm": 84,
+  "key": "D",
+  "file": "dark_musicbox.mp3",
+  "style_alike": true
+ },
+ "chill_jazz": {
+  "mood": "chill lounge jazz, cafe, late shift, everyday calm",
+  "bpm": 92,
+  "key": "Bb",
+  "file": "chill_jazz.mp3",
+  "style_alike": true
+ },
+ "sad_lofi": {
+  "mood": "sad lofi, heartbreak, regret, rain at night",
+  "bpm": 78,
+  "key": "A",
+  "file": "sad_lofi.mp3",
+  "style_alike": true
+ }
 }

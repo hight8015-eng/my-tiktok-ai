@@ -286,3 +286,94 @@ STINGS = {
     'heartbeat2': lambda S, t, g, key: (S.put(t, heartbeat(), .8 * g), S.put(t + .8, heartbeat(), .8 * g)),
     'victory_hit': lambda S, t, g, key: (S.put(t, brass(chord(key, 0, minor=False, oct=1), 1.8), .6 * g), S.put(t, kick(), .6 * g)),
 }
+
+# ---------------- v7.0 STYLE-ALIKE cues: same GENRE / mood / tempo / instruments as tracks the user likes, but ORIGINAL
+# melodies (seeded random walks on the scale) - never the source tune, hook or riff, so they are ours to use anywhere.
+def flute(m, d, vib=.012, breath=.08):
+    t = tt(d); f = nf(m) * (1 + vib * np.sin(2 * np.pi * 5.5 * t) * np.minimum(1, t / .25))
+    ph = 2 * np.pi * np.cumsum(f) / SR; s = np.sin(ph) + .18 * np.sin(2 * ph) + .06 * np.sin(3 * ph)
+    return (s + breath * bpf(noise(d), 1500, 6000)) * adsr(d, .05, .2, .8, .08)
+def nylon(m, d=1.2): return lpf(pluck(m, d, .997, .3), 3500) * 1.2
+def brush(d=.25): t = tt(d); return bpf(noise(d), 2000, 9000) * np.minimum(1, t / .03) * np.exp(-t / .1) * .7
+def rim(d=.08): t = tt(d); return np.sin(2 * np.pi * 1700 * t) * np.exp(-t / .012) + .4 * bpf(noise(d), 2500, 6000) * np.exp(-t / .006)
+def vibes(m, d=1.5): t = tt(d); f = nf(m); return (np.sin(2 * np.pi * f * t) + .25 * np.sin(2 * np.pi * f * 4 * t) * np.exp(-t / .15)) * np.exp(-t / .8) * (1 + .25 * np.sin(2 * np.pi * 5 * t)) * np.minimum(1, t / .003)
+def organ(ms, d): t = tt(d); return sum(sum(np.sin(2 * np.pi * nf(m) * h * t) / h for h in (1, 2, 3)) for m in ms) / len(ms) * .5 * env(d, .01, .05)
+def crackle(d): n = noise(d); return hpf((np.abs(n) > 3.6) * n, 1000) * .25 + lpf(noise(d), 4000) * .015
+def melody(rs, scale_notes, n, start=4, jump=2):
+    i = start; out = []
+    for _ in range(n): i = int(np.clip(i + rs.randint(-jump, jump + 1), 0, len(scale_notes) - 1)); out.append(scale_notes[i])
+    return out
+def notes_of(key, minor, lo, hi, pent=False):
+    r, sc = scale(key, minor); sc = [sc[j] for j in ((0, 2, 3, 4, 6) if minor else (0, 1, 2, 4, 5))] if pent else sc
+    return [r + o * 12 + s for o in range(-2, 4) for s in sc if lo <= r + o * 12 + s <= hi]
+def c_bossa(S, d, bpm, key, k, o):
+    b = 60 / bpm; rs = np.random.RandomState(o.get('seed', 3)); prog = [(1, 7), (4, 7), (0, 7), (5, 7)]  # ii7 V7 I7 vi7
+    for bar, t in _loop(d, b * 4):
+        deg = prog[bar % 4][0]; ch = chord(key, deg, minor=False, oct=0, n=4); root = ch[0] - 12
+        for off in (0, 1.5, 2.5, 3.5 if bar % 2 else 3.0): S.put(t + off * b, sum(nylon(m, b * 1.2) for m in ch[1:]) / 2, .3, -.3)   # syncopated comping
+        S.put(t, pizz(root, b * 1.4), .7); S.put(t + 2 * b, pizz(root + 7, b * 1.4), .6)                                       # bass 1 & 5
+        for j in range(8): S.put(t + j * b / 2, shaker(), .18, .4)
+        for j in (0, 1.5, 3, 4.5, 6): S.put(t + j * b / 2, rim(), .2, .2)
+    mel = notes_of(key, False, 72, 88); rs2 = np.random.RandomState(o.get('seed', 3) + 1); seq = melody(rs2, mel, 64, len(mel) // 2)
+    tm = b * 8; j = 0
+    while tm < d - b * 2: L = [b, b / 2, b * 1.5, b / 2, b * 2][j % 5]; S.put(tm, flute(seq[j], L * .95), .16, .25); tm += L; j += 1
+def c_flute_waltz(S, d, bpm, key, k, o):
+    b = 60 / bpm; prog = [0, 3, 4, 0, 5, 1, 4, 4]; mel = notes_of(key, False, 74, 91); rs = np.random.RandomState(o.get('seed', 5))
+    for bar, t in _loop(d, b * 3):
+        ch = chord(key, prog[bar % 8], minor=False); S.put(t, pizz(ch[0] - 12, b * 1.2), .7)
+        for q in (1, 2): S.put(t + q * b, sum(stacc(m + 12, .14) for m in ch) / 2, .22, .3)
+        if bar >= 2:
+            for q, L in ((0, 2), (2, 1)) if bar % 2 else ((0, 1), (1, 1), (2, 1)):
+                S.put(t + q * b, flute(mel[int(np.clip(rs.randint(0, len(mel)), 0, len(mel) - 1))] if False else melody(rs, mel, 1, len(mel) // 2, 3)[0], L * b * .92), .2, -.2)
+        if bar % 4 == 3: S.put(t + 2 * b, bell(mel[-1] + 12, 1.2), .07)
+def c_retro_jingle(S, d, bpm, key, k, o):
+    b = 60 / bpm; prog = [0, 5, 1, 4]; mel = notes_of(key, False, 67, 84, pent=True); rs = np.random.RandomState(o.get('seed', 9))
+    for bar, t in _loop(d, b * 4):
+        ch = chord(key, prog[bar % 4], minor=False, oct=1, n=4)
+        for q in range(4):
+            S.put(t + q * b, pizz(ch[0] - 24 + [0, 4, 7, 9][q], b * .9), .6)          # walking bass
+            S.put(t + q * b + b / 2, organ(ch[:3], b * .35), .2, .3)                   # off-beat organ stabs
+            S.put(t + q * b, brush(), .25 if q % 2 else .12, -.2)
+        seq = melody(rs, mel, 6, len(mel) // 2)
+        for q, (m, L) in enumerate(zip(seq, (1, .5, .5, 1, .5, .5))): S.put(t + sum((1, .5, .5, 1, .5, .5)[:q]) * b, vibes(m, L * b * 1.6), .25, .15)
+def c_dark_musicbox(S, d, bpm, key, k, o):
+    b = 60 / bpm; mel = notes_of(key, True, 74, 91); rs = np.random.RandomState(o.get('seed', 13)); r = 36 + NOTE[key]
+    S.put(0, lpf(drone(r, d + 1, .2), 300), .12); seq = melody(rs, mel, 200, len(mel) // 2, 2)
+    for i, t in _loop(d, b / 2):
+        drift = 1 - .012 * (t / max(d, 1))                                       # the box slowly runs down, slightly flat
+        if i % 8 != 7: S.put(t * (1 + .01 * (i % 3)), lpf(musicbox(seq[i] + 12 * (i % 16 == 0), 1.4) * drift, 6000), .5, .3 * np.sin(i * .7))
+    for t in np.arange(b * 8, d - 1, b * 8): S.put(t - 1.5, reverse_cym(1.5), .08)
+def c_chill_jazz(S, d, bpm, key, k, o):
+    b = 60 / bpm; prog = [1, 4, 0, 0]; rs = np.random.RandomState(o.get('seed', 21)); sw = b * 2 / 3
+    for bar, t in _loop(d, b * 4):
+        ch = chord(key, prog[bar % 4], minor=False, oct=0, n=4); S.put(t, sum(keys(m + 12, b * 3.6) for m in ch) / 3, .3, -.2)
+        if bar % 2: S.put(t + 2.5 * b, sum(keys(m + 12, b * 1.2) for m in ch) / 3, .18, -.2)
+        walk = [ch[0] - 24, ch[1] - 24, ch[2] - 24, ch[0] - 23 + rs.choice([0, 2])]
+        for q in range(4):
+            S.put(t + q * b, pizz(walk[q], b), .65)                                    # upright walking bass
+            S.put(t + q * b, brush(.3), .14, .3); S.put(t + q * b + sw, brush(.15), .08, .3)   # swung ride/brushes
+            if q % 2: S.put(t + q * b, rim(), .1)
+    mel = notes_of(key, False, 72, 86, pent=True); seq = melody(rs, mel, 80, len(mel) // 2)
+    tm = b * 8; j = 0
+    while tm < d - b * 2: L = [b, sw, b - sw, b * 2, b][j % 5]; S.put(tm, vibes(seq[j], L * 1.8), .17, .2); tm += L; j += 1
+def c_sad_lofi(S, d, bpm, key, k, o):
+    b = 60 / bpm; prog = [5, 3, 0, 4]; rs = np.random.RandomState(o.get('seed', 33)); sw = b * .56
+    S.put(0, crackle(d + .5), .5)
+    for bar, t in _loop(d, b * 4):
+        ch = chord(key, prog[bar % 4], minor=True, oct=0, n=4); S.put(t, lpf(sum(keys(m + 12, b * 3.8) for m in ch) / 3, 1800), .4, -.15)
+        S.put(t, bass(ch[0] - 12, b * 1.8, 400), .5); S.put(t + 2.5 * b, bass(ch[0] - 12, b * 1.2, 400), .4)
+        for q in range(4):
+            S.put(t + q * b, lpf(kick(), 900) if q in (0, 2) else lpf(snare(), 3000) * .8, .4 if q in (0, 2) else .3)
+            if rs.rand() < .3 and q == 3: S.put(t + q * b + sw, lpf(kick(), 900), .25)
+            S.put(t + q * b, lpf(hat(), 7000), .07, .3); S.put(t + q * b + sw, lpf(hat(), 7000), .05, .3)
+    mel = notes_of(key, True, 67, 81, pent=True); seq = melody(rs, mel, 60, len(mel) // 2)
+    for i, t in _loop(d - b * 4, b * 2):
+        if i % 4 != 3: S.put(t + b * 4 + (b / 2 if i % 3 == 1 else 0), lpf(piano(seq[i], b * 2.5, .5), 2500), .22, .2)
+CUES.update({
+    'bossa_lounge': dict(fn=c_bossa, bpm=126, mood='bossa nova lounge, sneaky-cool, playful scheming (style of library bossa tracks)'),
+    'flute_waltz': dict(fn=c_flute_waltz, bpm=150, mood='whimsical 3/4 flute waltz, innocent, nostalgic or comic chaos'),
+    'retro_jingle': dict(fn=c_retro_jingle, bpm=120, mood='cheesy retro commercial, ironic calm, ad parody'),
+    'dark_musicbox': dict(fn=c_dark_musicbox, bpm=84, mood='dark music box, ominous innocence, creepy calm', fadein=1),
+    'chill_jazz': dict(fn=c_chill_jazz, bpm=92, mood='chill lounge jazz, cafe, late shift, everyday calm'),
+    'sad_lofi': dict(fn=c_sad_lofi, bpm=78, mood='sad lofi, heartbreak, regret, rain at night', fadein=.8),
+})

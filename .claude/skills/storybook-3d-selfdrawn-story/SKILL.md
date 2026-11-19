@@ -375,6 +375,9 @@ maths (pick the tempo so hits land on beats), trailer structure (build -> silenc
   STINGERS (10): hit_boom braam riser_hit reverse_hit shimmer_up dread piano_low comedy_bonk heartbeat2 victory_hit.
   S = Score(END); S.cue(name, t0, dur, bpm, key, k); S.sting(name, t); S.duck(env); S.write('aud/music_bed.wav').
   Preview medley: output/ตัวอย่างเพลงประกอบ 21 แบบ.mp3.
+- STYLE-ALIKE CUES (v7.0, ours to use anywhere): bossa_lounge flute_waltz retro_jingle dark_musicbox chill_jazz sad_lofi =
+  the genres of the user's favourite tracks with ORIGINAL seeded melodies (never the source tune, hook or riff).
+  Preview: output/เพลงแนวเดียวกัน 6 แบบ (ไม่ติดลิขสิทธิ์).mp3.
 - USER TRACKS (projects/music_library/user/*.mp3 + user_music.json: title, mood, licence, approx bpm, LUFS): 13 tracks the
   user found (Kevin MacLeod 'Darkest Child' = CC BY 4.0, credit in the post; the rest are production-library / OST /
   Spotify songs = copyrighted: on TikTok add them as the in-app sound, on YouTube/FB expect Content ID claims -> prefer
