@@ -14,7 +14,8 @@
 # Then: git add, commit if anything changed, push to the working branch (retries).
 set -u
 REPO="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")" && pwd)}"
-BRANCH="claude/skill-installation-kkpo2q"
+MAIN="claude/skill-installation-kkpo2q"   # repo default branch: every new session starts from it
+CUR="$(git -C "$REPO" branch --show-current 2>/dev/null)"
 MAXKB=5120                       # skip single files over 5 MB (except --video)
 MODE="${1:-}"
 LOG="$REPO/.autosave.log"
@@ -22,7 +23,13 @@ say() { [ "$MODE" = "--hook" ] || echo "$@"; echo "$(date '+%F %T') $*" >> "$LOG
 
 # scratchpad: the session's, or every one we can find under /tmp/claude-*/
 SCRATCHES=()
-for d in /tmp/claude-*/*/*/scratchpad; do [ -d "$d" ] && SCRATCHES+=("$d"); done
+# this session's scratchpad first (created if missing, so --restore works at session start)
+if [ -n "${CLAUDE_CODE_SESSION_ID:-}" ]; then
+  OWN="/tmp/claude-$(id -u)/$(echo "$REPO" | sed 's|[/.]|-|g')/$CLAUDE_CODE_SESSION_ID/scratchpad"
+  [ "$MODE" = "--restore" ] && mkdir -p "$OWN"
+  [ -d "$OWN" ] && SCRATCHES+=("$OWN")
+fi
+for d in /tmp/claude-*/*/*/scratchpad; do [ -d "$d" ] && [ "$d" != "${OWN:-}" ] && SCRATCHES+=("$d"); done
 
 exec 9>"$REPO/.autosave.lock"
 flock -n 9 || { say "another autosave is running; skip"; exit 0; }
@@ -91,14 +98,22 @@ N=$(git diff --cached --name-only | wc -l)
 git commit -q -m "autosave: $N files ($(date '+%F %H:%M'))
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01GMCyhhBf96PfZGofzkVNHY" || { say "commit failed"; exit 0; }
+Claude-Session: https://claude.ai/code/session_${CLAUDE_CODE_REMOTE_SESSION_ID#cse_}" || { say "commit failed"; exit 0; }
 
-ok=0
-for w in 2 4 8 16; do
-  if git push -q -u origin "$BRANCH" 2>>"$LOG"; then ok=1; break; fi
-  # remote has commits we lack: merge, never force
-  git fetch -q origin "$BRANCH" 2>>"$LOG" && { git merge -q --no-edit -X ours FETCH_HEAD 2>>"$LOG" || git merge --abort 2>/dev/null; }
-  sleep "$w"
+# push this session's work to its own branch AND to the default branch (so the next session starts with it)
+push_to() { # target branch
+  local t="$1" w
+  for w in 2 4 8 16; do
+    git push -q origin "HEAD:refs/heads/$t" 2>>"$LOG" && return 0
+    # remote has commits we lack: merge, never force
+    git fetch -q origin "$t" 2>>"$LOG" && { git merge -q --no-edit -X ours FETCH_HEAD 2>>"$LOG" || git merge --abort 2>/dev/null; }
+    sleep "$w"
+  done
+  return 1
+}
+res=""
+for t in $(printf '%s\n' "$CUR" "$MAIN" | awk 'NF && !seen[$0]++'); do
+  push_to "$t" && res="$res $t:ok" || res="$res $t:FAILED"
 done
-[ $ok = 1 ] && say "saved $N files and pushed" || say "saved $N files locally; push failed (will retry next time)"
+say "saved $N files; push$res"
 exit 0

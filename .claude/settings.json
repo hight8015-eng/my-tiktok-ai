@@ -11,6 +11,18 @@
           }
         ]
       }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/autosave.sh\" --restore >/dev/null 2>&1 || true",
+            "timeout": 120
+          }
+        ]
+      }
     ]
   }
 }
