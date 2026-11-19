@@ -71,3 +71,16 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
      tilt-up links them, plus one high shot with both guns.
   3. Motion, emotion, gestures and faces must match each other and look natural (acting.js perform/hold/gaze, no frozen poses).
   4. When the narration describes an ACTION, SHOW that action literally (e.g. 'they fight for power' = a real fight on screen).
+- EP2 FULL REDO PLAN (user: 'fix only that?' -> fix everything with the 4 rules; = rebuild nearly all shots + full re-render):
+  0-12 s: wide establishing (alley, both men, fire escape above); camera MOVES gun -> Aren -> gunman instead of 4 cuts;
+  gunman alive (weight shift, real shaking hand, eyes flick up, confident -> worried); Aren breathing, stare, tiny smirk.
+  12-18: friend on the alley FIRE ESCAPE (x 1.55, y 5.8, z -6); one tilt-up from the gunman to him; red ring; down to his gun.
+  18-25: visible red spark Aren -> gunman's ear; gunman eyes widen, sweat, shaking grows.
+  25-37: full-body whip turn, gun swings up; HIGH shot with both men + the shot fired down; clear tracer past the
+  shoulder, big flinch/stagger, sparks on the wall by Aren, Aren does not blink; shouting with pointing guns + angry bodies.
+  37-50: high shot: two aiming at each other, Aren walks out below (path clear of props, arms swing, really crosses frame);
+  follow from behind with them small in the back; pan as he turns to the graffiti.
+  50-62: slow move across the graffiti; follow him out to the street (no push - same place); REAL FIGHT for 'สู้เพื่ออำนาจ':
+  fire man vs strong man guard, clash, punches, fire burst, one falls, winner stands over him, bystanders step back.
+  62-71: threads to several passers-by who stop walking when touched; everyone breathes/blinks/gazes; cover = gun at head +
+  red-eyed smile; redo music/SFX sync to the new picture.
