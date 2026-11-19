@@ -30,3 +30,14 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
   and the skill mirror; then commits and pushes to claude/skill-installation-kkpo2q. Log: `.autosave.log`.
 - Not saved (rebuildable): renders, frames, wavs, generated sprites. `bash autosave.sh --video` also saves the mp4s.
 - New session: `bash autosave.sh --restore` copies `projects/_work` back into the scratchpad.
+
+## Handoff (latest session, 2026-11-19)
+- Done this session: autosave (Stop hook), acting kit v6.8 (41 faces + X eyes pain/hurtX/ko/dead, 47 poses, perform/
+  exShift/gaze), music scoring kit v6.9 (tools/score.py, 21 cues + 10 stingers in projects/music_library, beatfit/snap/
+  duck), viseme lip sync v6.9 (tools/lipsync.py -> timing.json "vis", lipAt). All rules in SKILL.md.
+- PM working project = projects/_work/pm1 (shots.js already uses talkAt = lipAt visemes; bench supports act/beats/lt).
+- NEXT: THE PUPPET MASTER ep2. Wait for the user's voice-over, then: timing.py -> lipsync.py -> shots (ROOF set, gun kit,
+  motion.js, acting.js perform + faces by situation, brighter rigs) -> stills check -> ASK how many helper sessions ->
+  render -> frame check -> music with score.py (spot cues, beatfit hit points, stingers, duck) + SFX (hit rules, snap
+  musical sfx) -> finish -> deliver 4 files. Do NOT re-render ep1.
+- New session start: `bash autosave.sh --restore` copies projects/_work back into the scratchpad.
