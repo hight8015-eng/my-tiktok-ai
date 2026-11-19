@@ -24,3 +24,14 @@ export function spill(par, p, r, col, op = .35, rot = [-90, 0, 0]) { const m = m
 export function streak(par, p, w, len, col, op = .45) { const g = group({ p, parent: par }); const m = mesh(new THREE.PlaneGeometry(w, len), add(col, op, STRK), { p: [0, 0, len / 2], r: [-90, 0, 0], parent: g, cast: false, recv: false }); m.renderOrder = 3; g.userData.m = m; STREAKS.push(g); return g; }
 const STREAKS = [];
 export function glowAt(t) { STREAKS.forEach((g, i) => { g.userData.m.scale.x = 1 + .12 * Math.sin(t * 3.1 + i * 1.7) + .06 * Math.sin(t * 7.3 + i); }); }   // rain ripples make the reflections shimmer
+
+/* v6.2 steam / vapour: soft blobs rising from a source (noodle pot, street vent, breath in the cold). Small and quick at the
+   source, larger, slower, more transparent as they rise (smoke rules); each puff on its own clock + a travelling sine sway. */
+const STEAMS = [];
+export function steam(par, p, o = {}) { const n = o.n ?? 8, g = group({ p, parent: par }), list = [];
+  for (let i = 0; i < n; i++) { const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), add(o.col || '#e8eef8', 1, RAD)); m.material.blending = THREE.NormalBlending; m.renderOrder = 5; m.userData.noInk = true; g.add(m); list.push(m); }
+  const S = { g, list, n, life: o.life ?? 2.2, rise: o.rise ?? .9, size: o.size ?? .35, op: o.op ?? .35, seed: o.seed ?? 1 }; STEAMS.push(S); return S; }
+export function steamAt(t, cam) { for (const S of STEAMS) { let v = S.g, on = true; while (v) { on = on && v.visible; v = v.parent; } if (!on) continue;
+  S.list.forEach((m, i) => { const ph = ((i * .6180339 + S.seed * .13) % 1), u = ((t / S.life + ph) % 1), h = S.rise * (1 - Math.exp(-u * 2.2)) / (1 - Math.exp(-2.2));
+    m.position.set(Math.sin(h * 4 - t * 1.3 + i) * .12 * u + ((i % 3) - 1) * .04, h, ((i % 2) - .5) * .05); const s = S.size * (.35 + 1.4 * u); m.scale.set(s, s, 1);
+    m.material.opacity = S.op * Math.sin(Math.PI * Math.min(1, u * 1.15)) * (1 - u * .6); if (cam) m.quaternion.copy(cam.quaternion); }); } }

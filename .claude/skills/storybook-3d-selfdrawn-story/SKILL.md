@@ -342,6 +342,13 @@ If the user wants characters made in Flow from their own prompt, use the sister 
   blue fill + red rim), truck (cold window top light), gate (red sign key + white searchlight rim), power (red rim,
   hard shadow).
 
+## Rain + steam (v6.2)
+- rainAt overlay is now 3 depth layers (far: many fine slow faint; near: few long thick fast), each drop on its own
+  speed, slight wind slant, + splash crowns and widening rings on the ground part of the frame.
+- glow.js steam(par, p, {n, size, rise, op, life, col}) + steamAt(t, cam) after the camera: soft puffs, small and
+  quick at the source, bigger/slower/fainter as they rise, own clocks, sine sway. Use for pots, vents, AC units,
+  breath in the cold, dark smoke above fire barrels (col dark).
+
 ## Fire + no faceted shapes (v6.1, user: 'fire still looks blocky; make it realistic; fix anything else angular')
 - src/fire.js makeFire(parent, { w, h, seed, pal: fire|blue|green|purple|red, embers, ember }) -> .at(t, k, cam, lean);
   faceFires(camera) once per frame AFTER the camera is placed. A shader flame on an upright camera-facing quad:

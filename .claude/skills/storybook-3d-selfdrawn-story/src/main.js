@@ -153,8 +153,18 @@ function overlays(t, alpha) { // gloom lines + sparkles requested by poses/shots
       g.addColorStop(0, o.col); g.addColorStop(1, 'rgba(0,0,0,0)'); X.fillStyle = g; X.beginPath(); X.arc(q[0], q[1], r, 0, 7); X.fill(); }
     else if (o.kind === 'burn') { const k = o.k, g = X.createRadialGradient(540, 900, 300 + 700 * (1 - k), 540, 900, 1250); g.addColorStop(0, 'rgba(60,30,10,0)'); g.addColorStop(.6, `rgba(90,45,15,${.55 * k})`); g.addColorStop(.85, `rgba(30,12,4,${.9 * k})`); g.addColorStop(1, `rgba(10,4,0,${k})`);
       X.globalAlpha = alpha; X.fillStyle = g; X.fillRect(0, 0, 1080, 1920); X.globalCompositeOperation = 'multiply'; X.fillStyle = `rgba(255,214,160,${.6 * k})`; X.fillRect(0, 0, 1080, 1920); }
-    else if (o.kind === 'rain') { const r_ = E.rng(9), k = o.k; X.globalAlpha = alpha * .55 * k; X.strokeStyle = '#cfe0ff'; X.lineWidth = 2.2; X.beginPath();
-      for (let i = 0; i < 160; i++) { const x0 = r_() * 1180 - 50, sp = 1500 + r_() * 900, y = ((r_() * 2100 + o.t * sp) % 2100) - 100, x = x0 - (y + 100) * .12; X.moveTo(x, y); X.lineTo(x - 9, y + 70); } X.stroke();
+    else if (o.kind === 'rain') { /* v6.2 layered rain (refs: real rain reads in DEPTH): far = many fine slow faint streaks, mid, near = few long
+         thick soft streaks moving fast (closer = faster on screen); a slight wind slant; each drop on its own speed (never a moving
+         wallpaper); splash ticks + tiny rings on the lower part of the frame (the ground); the streaks pick up the scene colour. */
+      const k = o.k; X.lineCap = 'round';
+      for (const [n, len, wd, sp, al, slant, seed] of [[150, 34, 1.2, 1300, .32, .1, 9], [70, 70, 2.2, 1900, .42, .12, 19], [14, 150, 4.5, 2900, .28, .15, 29]]) {
+        const r_ = E.rng(seed); X.strokeStyle = '#d8e4ff'; X.lineWidth = wd; X.globalAlpha = alpha * al * k; X.beginPath();
+        for (let i = 0; i < n; i++) { const x0 = r_() * 1300 - 110, s = sp * (.8 + .4 * r_()), y = ((r_() * 2200 + o.t * s) % 2200) - 140, x = x0 - (y + 140) * slant; X.moveTo(x, y); X.lineTo(x - len * slant, y + len); }
+        X.stroke(); }
+      const r2 = E.rng(41); X.strokeStyle = '#e8eeff'; X.lineWidth = 1.6;
+      for (let i = 0; i < 26; i++) { const x = r2() * 1080, y = 1250 + r2() * 640, ph = r2(), per = .35 + .3 * r2(), u = ((o.t / per + ph) % 1);   // splashes: a short crown then a ring that widens and fades
+        X.globalAlpha = alpha * k * .5 * (1 - u); X.beginPath(); X.ellipse(x, y, 6 + 22 * u, (6 + 22 * u) * .3, 0, 0, 7); X.stroke();
+        if (u < .25) { X.globalAlpha = alpha * k * .6 * (1 - u * 4); X.beginPath(); for (const d of [-1, -.4, .4, 1]) { X.moveTo(x, y); X.lineTo(x + d * 9 * (u * 4 + .3), y - 12 * Math.sin(Math.PI * (u * 4 + .2))); } X.stroke(); } }
       if (o.flash > 0) { X.globalAlpha = alpha * o.flash; X.fillStyle = '#eef3ff'; X.fillRect(0, 0, 1080, 1920); } }
     else if (o.kind === 'shock') { const q = scr(o.p); if (!q) { X.restore(); continue; } const k = o.k, r = 60 + 900 * o.size * E.eOut(k); X.globalAlpha = alpha * (1 - k);
       X.globalCompositeOperation = 'lighter'; X.strokeStyle = o.col; X.lineWidth = 46 * (1 - k) + 4; X.beginPath(); X.ellipse(q[0], q[1], r, r * .42, 0, 0, 7); X.stroke(); X.lineWidth = 10 * (1 - k) + 2; X.beginPath(); X.ellipse(q[0], q[1], r * .7, r * .3, 0, 0, 7); X.stroke(); }

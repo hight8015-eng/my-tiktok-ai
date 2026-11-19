@@ -6,7 +6,7 @@
 import { THREE, scene, toon, basic, canvasTex, mesh, rbox, group, cylBetween, rng, noise1 } from './engine.js';
 import * as Wd from './world.js';
 import { makeFire } from './fire.js';
-import { beam, beamMat, spill, streak, glowAt, RAD } from './glow.js';
+import { beam, beamMat, spill, streak, glowAt, RAD, steam, steamAt } from './glow.js';
 export const TRUCK = group({ p: [0, 0, 600], parent: scene }), GATE = group({ p: [600, 0, 0], parent: scene }), STREET = group({ p: [-600, 0, 0], parent: scene }), ALLEY = group({ p: [0, 0, -600], parent: scene });
 export const Z = {};
 const glow = (par, p, col, size, op = .6) => { const s = Wd.glowSprite(col, size, { opacity: op }); s.position.set(...p); par.add(s); return s; };
@@ -147,6 +147,7 @@ export function laserAt(from, to, k) { Z.gun.visible = Z.laser.visible = k > 0; 
 
 export function hideZC() { TRUCK.visible = GATE.visible = STREET.visible = ALLEY.visible = false; Z.tag.visible = false; Z.truckDoors.forEach(d => { d.visible = true; }); Z.outside.visible = false; Z.truckSlit.visible = true; Z.truckSlit.scale.x = 1; Z.dark.visible = true; }
 export function zcAt(t, cam) { firesAt(t, cam); propsAt(t); glowAt(t); }
+export function zcLate(t, cam) { steamAt(t, cam); }   /* after the camera is placed */
 
 // ======================= v2 SET DRESSING (story props, user: "more props that fit each scene") =======================
 const stencil = (par, txt, p, ry, w = 1.2, h = .4, col = '#d8d0b8', bg = '#4a5060') => sign(par, txt, p, ry, { w, h, col: bg, bg, txtC: col, fs: .6, glow: false });
@@ -246,3 +247,9 @@ export function propsAt(t) { CAMS.forEach((c, i) => { c.g.rotation.y = .35 * Mat
 { // TRUCK: a cold shaft from the barred window slices through the dusty air
   beam(TRUCK, [0, 1.75, -2.9], [.2, .1, -.6], .7, '#b8ccff', .22);
 }
+
+// ======================= v4 STEAM (the city breathes) =======================
+steam(STREET, [-5.85, 1.35, -6.5], { n: 9, size: .32, rise: 1.1, op: .32, seed: 2 });      // noodle pot
+steam(STREET, [1.8, .05, -8], { n: 12, size: .7, rise: 2.4, op: .22, life: 3, seed: 5 });  // street vent
+steam(ALLEY, [1.6, 4.2, -9], { n: 5, size: .4, rise: .9, op: .16, life: 2.6, seed: 7 });   // AC exhaust in the cold rain
+for (const [x, z] of [[-6.6, -11], [6.8, -27], [-7, -41]]) steam(STREET, [x, 1.9, z], { n: 7, size: .5, rise: 1.6, op: .22, life: 2.4, col: '#5a5260', seed: x * z });   // barrel fire smoke (dark)

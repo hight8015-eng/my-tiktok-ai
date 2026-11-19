@@ -69,7 +69,7 @@ function reset(t) { SH.a = 0; SH.t = t; Object.values(CHARS).forEach(C => { C.g.
   EYES.forEach(e => { e.material.opacity = 0; }); HF.visible = false; THREAD.visible = false; SEED.material.opacity = 0; ZC.laserAt([0, 0, 0], [0, 0, 1], 0);
   Z.car.position.set(3.2, 0, -14); Z.car.rotation.set(0, 0, 0); POST.sat = 1.05; POST.lift = 1; POST.vig = .45; MIND = 2.6; }
 const S = (id, t0, tr, set, fn, o = {}) => { const sh = { id, t0, tr, ...o }; sh.fn = (lt, t) => { set.visible = true; ZC.zcAt(t * SP, camera); if (set === STREET) ZC.streetAt(t * SP); if (set === ALLEY) ZC.alleyAt(t * SP); if (set === GATE) ZC.gateAt(t * SP, 0);
-  fn(lt * SP, t * SP); scene.updateMatrixWorld(); faceFires(camera); if (o.rain !== false && set !== TRUCK) rainAt(t * SP, o.rain ?? .5); Wd.ambientAt(t, null); }; SHOTS.push(sh); };
+  fn(lt * SP, t * SP); scene.updateMatrixWorld(); faceFires(camera); ZC.zcLate(t * SP, camera); if (o.rain !== false && set !== TRUCK) rainAt(t * SP, o.rain ?? .5); Wd.ambientAt(t, null); }; SHOTS.push(sh); };
 
 // ---------------- 0  "ทุกคนในเมืองนี้มีพลังพิเศษ" : neon street, a crane down past prisoners showing their powers ----------------
 S('S01', 0, 'cut', STREET, (lt, t) => { streetLight(lt); const u = U(lt, 2.4, eOut);
