@@ -100,7 +100,8 @@ function overlays(t, alpha) { // gloom lines + sparkles requested by poses/shots
       const d0 = E.camera.position.distanceTo(o.p), col = O.col || '#e9dcc0', sh = O.shade || 'rgba(70,50,90,.26)';
       const P = []; for (let i = 0; i < n; i++) { const th = r_() * Math.PI * 2, v = .35 + .65 * r_(), up = .25 + .6 * r_(), r0 = (.18 + .22 * r_()) * (O.size || 1), dl = r_() * .25, lf = life * (.6 + .4 * r_());
         const a = Math.max(0, age - dl), k = 1 - Math.exp(-a * 2.4); // eased outward travel
-        const w = new E.THREE.Vector3(o.p.x + Math.cos(th) * v * spread * k * (O.size || 1), o.p.y + (up * spread * .55 * k + (O.rise ?? .35) * a) * (O.size || 1), o.p.z + Math.sin(th) * v * spread * .6 * k * (O.size || 1));
+        const hgt = (up * spread * .55 * k + (O.rise ?? .35) * (1 - Math.exp(-a * .8)) / .8) * (O.size || 1), sway = (O.sway ?? .22) * (O.size || 1) * Math.min(1, hgt / ((O.size || 1) * .6)) * Math.sin(hgt * 3.2 - age * 1.6 + i * .7); /* v5.3 smoke rises on a travelling sine (x = sin(y - t)), sway grows with height, rise slows as heat dissipates */
+        const w = new E.THREE.Vector3(o.p.x + Math.cos(th) * v * spread * k * (O.size || 1) + sway, o.p.y + hgt, o.p.z + Math.sin(th) * v * spread * .6 * k * (O.size || 1));
         const q = scr(w); if (!q || a <= 0) continue; const R = r0 * (.4 + 1.6 * (1 - Math.exp(-a * 1.8))) * 1100 / Math.max(.5, E.camera.position.distanceTo(w));
         const fade = 1 - E.sstep(lf * .35, lf, a); if (fade <= .01) continue; P.push([q[0], q[1], R, fade, w.y]); }
       P.sort((A, B) => A[4] - B[4]);
@@ -192,7 +193,7 @@ window.audit = (t) => { window.frame(t, { nocap: true }); const cam = E.camera, 
     out.chars.push({ id: C.spec.id, x: c[0], y: c[1], r, d, view: C.view, inFrame: c[0] - r > -.02 && c[0] + r < 1.02 && c[1] - r * .5625 > -.02 && c[1] < 1 && c[2] < 1 }); }
   for (const h of out.chars) { h.headPct = +(h.r * 2 * 100).toFixed(1); h.blockedBy = boxes.filter(b => b.id !== h.id && b.d < h.d - .05 && h.x > b.x0 && h.x < b.x1 && h.y > b.y0 && h.y < b.y1).map(b => b.id); }
   return out; };
-window.frame = (t, opts = {}) => { ZP = keyZoom(t); globalThis.FRAME_T = t; // v4.24 shots can tell the frame being drawn from the smoothing look-backs
+const frame1 = (t, opts = {}) => { ZP = keyZoom(t); globalThis.FRAME_T = t; // v4.24 shots can tell the frame being drawn from the smoothing look-backs
   let i = SHOTS.length - 1; for (let k = 0; k < SHOTS.length; k++) if (t < SHOTS[k].t1) { i = k; break; }
   const sh = SHOTS[i], lt = t - sh.t0;
   const nx0 = SHOTS[i + 1], dir = i % 2 ? 1 : -1;
@@ -205,8 +206,20 @@ window.frame = (t, opts = {}) => { ZP = keyZoom(t); globalThis.FRAME_T = t; // v
   if (sh.tr === 'sweep' && lt < .45) sweep(lt / .45); const nx = SHOTS[i + 1]; if (nx && nx.tr === 'sweep' && nx.t0 - t < .2) sweep((t - (nx.t0 - .2)) / .45);
   if (LOOP && t > timing.end - LOOP_D) { const k = E.eSine((t - (timing.end - LOOP_D)) / LOOP_D); ZP = 1; draw(SHOTS[0], 0, k); }
   if (!opts.nocap) { caption(t); hook(t); endCard(t); } progress(t);
-  if (!LOOP && t > timing.end - .25) { X.fillStyle = `rgba(0,0,0,${E.clamp((t - (timing.end - .25)) / .25)})`; X.fillRect(0, 0, 1080, 1920); } // fade to black last
-  return out.toDataURL('image/jpeg', .92);
+  if (!LOOP && t > timing.end - .25) { X.fillStyle = `rgba(0,0,0,${E.clamp((t - (timing.end - .25)) / .25)})`; X.fillRect(0, 0, 1080, 1920); } /* fade to black last */
+};
+/* v5.3 real shutter motion blur: average n sub-frames spread over SHUTTER_ANGLE of the frame (180 deg = half a frame),
+   like a film camera. Everything blurs by its own true motion (particles, limbs, camera). Per shot: shutter: 3, or
+   window.SHUTTER = n for the whole clip. Sub-frame times stay monotonic, so look-back smoothing is unaffected. */
+let ACC = null, ACX = null;
+window.frame = (t, opts = {}) => {
+  let i = SHOTS.length - 1; for (let k = 0; k < SHOTS.length; k++) if (t < SHOTS[k].t1) { i = k; break; }
+  const n = opts.shutter ?? SHOTS[i].shutter ?? globalThis.SHUTTER ?? 1;
+  if (!(n > 1)) { frame1(t, opts); return out.toDataURL('image/jpeg', .92); }
+  if (!ACC) { ACC = document.createElement('canvas'); ACC.width = 1080; ACC.height = 1920; ACX = ACC.getContext('2d'); }
+  const ang = (globalThis.SHUTTER_ANGLE ?? 180) / 360;
+  for (let k = 0; k < n; k++) { frame1(t + (k / (n - 1) - .5) * ang / 30, opts); ACX.globalAlpha = 1 / (k + 1); ACX.drawImage(out, 0, 0); }
+  ACX.globalAlpha = 1; X.drawImage(ACC, 0, 0); return out.toDataURL('image/jpeg', .92);
 };
 window.cover = (o = {}) => { reset0(); COVER.fn(0, 57.5, o); updateSprites(E.camera); Wd.updateSky(57.5); E.render(); X.drawImage(E.glc, 0, 0); bloom(); return out.toDataURL('image/jpeg', .95); };
 window.bench = (o = {}) => { reset0(); BENCH.fn(0, 20, o); updateSprites(E.camera); Wd.updateSky(20); E.render(); X.drawImage(E.glc, 0, 0); bloom(); return out.toDataURL('image/jpeg', .95); };

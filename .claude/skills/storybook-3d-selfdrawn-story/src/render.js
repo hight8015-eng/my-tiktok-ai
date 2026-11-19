@@ -10,7 +10,7 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.ttf': 'font/ttf
   const p = await b.newPage({ viewport: { width: 540, height: 960 } });
   p.on('pageerror', e => console.error('PAGEERR', e.message)); p.on('console', m => { const s = m.text(); if (/GPU stall|GL Driver|WebGL/.test(s)) return; console.log('[pg]', s.slice(0, 400)); });
   await p.goto(`http://127.0.0.1:${port}/index.html`); await Promise.race([p.waitForFunction(() => window.ready, null, { timeout: 180000 }), new Promise((_, rej) => p.on('pageerror', e => rej(e)))]);
-  const nocap = !!process.env.NOCAP; if (process.env.NOFACE) await p.evaluate(() => { window.NOFACE = true; }); if (process.env.NOSMOOTH) await p.evaluate(() => { window.NOSMOOTH = true; });
+  const nocap = !!process.env.NOCAP; if (process.env.NOFACE) await p.evaluate(() => { window.NOFACE = true; }); if (process.env.NOSMOOTH) await p.evaluate(() => { window.NOSMOOTH = true; }); if (process.env.SHUTTER) await p.evaluate(([n, a]) => { window.SHUTTER = n; if (a) window.SHUTTER_ANGLE = a; }, [+process.env.SHUTTER, +(process.env.SHUTTER_ANGLE || 0)]);
   if (mode === 'stills') { fs.mkdirSync(out, { recursive: true });
     for (const t of rest) { const t0 = Date.now(); const d = await p.evaluate(([t, n]) => frame(+t, { nocap: n }), [t, nocap]); fs.writeFileSync(`${out}/t${(+t).toFixed(2)}.jpg`, Buffer.from(d.split(',')[1], 'base64')); console.log('t', t, Date.now() - t0, 'ms'); }
   } else if (mode === 'cover' || mode === 'bench') { const d = await p.evaluate(([m, o]) => window[m](o), [mode, JSON.parse(rest[0] || '{}')]); fs.writeFileSync(out, Buffer.from(d.split(',')[1], 'base64')); console.log('cover', out);

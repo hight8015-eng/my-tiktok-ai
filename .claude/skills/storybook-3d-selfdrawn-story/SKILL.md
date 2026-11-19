@@ -327,6 +327,22 @@ If the user wants characters made in Flow from their own prompt, use the sister 
 - Bounces: each bounce lower and shorter than the last; the first frame leaving the ground moves the most; as
   little ground time as possible (except an intentionally squishy landing).
 
+## Smoothness + particles (v5.3, research + the study clips)
+- Real shutter motion blur: `shutter: 3` on a shot (or `SHUTTER=3 node render.js video ...` for a whole range)
+  averages 3 sub-frames over half a frame (180 deg, `SHUTTER_ANGLE`), like a film camera. Use it on fast action
+  (punch, slash, explosion, falling debris, fast pans); it costs n x render time, so not on talking shots. Keep the
+  per-object velocity stretch too: blur shows the path, stretch keeps fast pieces readable.
+- Camera: judder comes from pans that are too fast for 30 fps. Slow, eased pans; if a pan must be fast, add shutter.
+- Particles: less is more, never hide the main action; they react to the action and lead the eye to the hit.
+  Mix 3 sizes (few big + slow, some medium, many small + fast) for depth and weight. Bursts come in clumps, not a
+  perfect sphere (shatter: clump 0..1). Pieces thrown up fly higher and longer than ones thrown sideways. Spawn
+  from an area, not one point. Vary life, size, speed and spin a little per particle so nothing moves in sync.
+  Size over life: sparks start big and shrink; smoke and dust start small and grow while fading. Fade by
+  shrinking/thinning, not a sudden pop. Fire/explosion colour ramps smoothly white -> yellow -> orange -> grey per
+  piece on its own clock (no synchronized colour steps). Smoke sways on a travelling sine that grows with height
+  (sway: amount) and slows as it rises.
+- Particles stay on ones (every frame), never on twos: the user reads held particles as stutter.
+
 ## Script rules (v5.2, from the PUPPET MASTER rewrite; see output/THE PUPPET MASTER บทซีซัน 1.txt)
 - 60-75 s per episode (finale up to 85 s) = about 34-45 lines at SP 1.12. The viewer average was 31 s, so:
   line 1 is the hook (the most shocking fact of the episode), a re-hook at about 30 s, the end is a cliffhanger.

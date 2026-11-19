@@ -78,10 +78,11 @@ export function shatter(par, o) { const R = rng(o.seed || 3), at = V(o.at), size
   const whole = o.whole || propMesh(kind === 'pot' ? 'pot' : kind, size); if (!o.whole) { if (kind === 'pot') { whole.clear(); whole.add(new THREE.Mesh(new THREE.LatheGeometry([[0, 0], [size * .35, 0], [size * .5, size * .35], [size * .4, size * .75], [size * .25, size * .9], [size * .28, size]].map(([x, y]) => new THREE.Vector2(x, y)), 16), MAT.pot())); whole.position.copy(at).add(new THREE.Vector3(0, -size * .5, 0)); }
     else whole.position.copy(at); (par || SCENE).add(whole); }
   const mat = (MAT[kind] || MAT.rock)(), shards = [], dir = V(o.dir || [0, 0, 0]);
-  for (let i = 0; i < n; i++) { const s = size * (.12 + R() * .2), geo = kind === 'glass' || kind === 'ice' ? new THREE.TetrahedronGeometry(s, 0) : kind === 'wood' ? new THREE.BoxGeometry(s * .4, s * 2.2, s * .4) : new THREE.DodecahedronGeometry(s * .8, 0);
+  const lobes = [0, 1, 2].map(() => new THREE.Vector3(R() - .5, R() * .6 + .1, R() - .5).normalize()); /* v5.3 shards burst in 3 clumps, not a perfect sphere */
+  for (let i = 0; i < n; i++) { const tier = R(), s = size * (tier < .15 ? .3 + R() * .12 : tier < .5 ? .17 + R() * .09 : .07 + R() * .07), spk = tier < .15 ? .62 : tier < .5 ? 1 : 1.35, geo = kind === 'glass' || kind === 'ice' ? new THREE.TetrahedronGeometry(s, 0) : kind === 'wood' ? new THREE.BoxGeometry(s * .4, s * 2.2, s * .4) : new THREE.DodecahedronGeometry(s * .8, 0);
     geo.scale(1, .55 + R() * .9, .7 + R() * .6); const m = new THREE.Mesh(geo, mat); m.castShadow = true; m.visible = false; (par || SCENE).add(m);
-    const off = new THREE.Vector3(R() - .5, R() - .5, R() - .5).multiplyScalar(size * .8), out = off.clone().normalize();
-    const sp = (o.power ?? 3.2) * (.5 + R() * .8), v0 = out.multiplyScalar(sp).addScaledVector(dir, o.power ?? 3.2).add(new THREE.Vector3(0, (o.lift ?? 1.6) * R(), 0));
+    const off = new THREE.Vector3(R() - .5, R() - .5, R() - .5).multiplyScalar(size * .8), out = off.clone().normalize().lerp(lobes[i % 3], o.clump ?? .45).normalize();
+    const sp = (o.power ?? 3.2) * (.5 + R() * .8) * spk,   /* big pieces fly slower, small ones faster (weight) */ v0 = out.multiplyScalar(sp).addScaledVector(dir, o.power ?? 3.2).add(new THREE.Vector3(0, (o.lift ?? 1.6) * R(), 0));
     shards.push({ m, s, tr: simBody({ p0: at.clone().add(off), v0, t0: o.tBreak, r: s * .45, rest: kind === 'glass' ? .25 : .35, friction: .6, dur: o.dur || 3.5, seed: i + 11, ground: o.ground ?? 0 }) }); }
   const events = [{ t: o.tBreak, p: at.clone(), speed: 9, kind: 'break' }, ...shards.flatMap(s => s.tr.ev.slice(0, 1))];
   const P = new THREE.Vector3(), Vv = new THREE.Vector3();
@@ -204,14 +205,15 @@ export function lightning(par, o) { const A = V(o.from), B = V(o.to), g = new TH
 
 // ---------------- 9. explosion (fireball that rolls up into smoke, flash, debris via shatter/rainOf) ----------------
 export function explosion(par, o) { const at = V(o.at), size = o.size || 2, R = rng(o.seed || 17), balls = [], g = new THREE.Group(); (par || SCENE).add(g);
-  for (let i = 0; i < 14; i++) { const m = noInk(new THREE.Mesh(new THREE.IcosahedronGeometry(1, 2), basic('#ffffff', { transparent: true }))); g.add(m); balls.push({ m, d: new THREE.Vector3(R() - .5, R() * .8 + .2, R() - .5).normalize(), sp: .6 + R() * .8, s: .5 + R() * .6 }); }
+  for (let i = 0; i < 14; i++) { const m = noInk(new THREE.Mesh(new THREE.IcosahedronGeometry(1, 2), basic('#ffffff', { transparent: true }))); g.add(m); balls.push({ m, d: new THREE.Vector3(R() - .5, R() * .8 + .2, R() - .5).normalize(), sp: .6 + R() * .8, s: .5 + R() * .6, ph: R() * .25 }); }
   const flash = noInk(new THREE.Mesh(new THREE.SphereGeometry(1, 16, 10), basic('#fff2c0', { transparent: true, add: true, depthWrite: false }))); g.add(flash);
   return { events: [{ t: o.t0, p: at, kind: 'boom' }], at(t) { const a = t - o.t0; g.visible = a >= 0 && a < 2.2; if (!g.visible) return;
     flash.position.copy(at); flash.scale.setScalar(size * (.3 + a * 4)); flash.material.opacity = Math.max(0, .9 - a * 5);
-    for (const b of balls) { const e = eOut(Math.min(1, a / .5)), rise = a * a * .6; b.m.position.copy(at).addScaledVector(b.d, size * .55 * b.sp * e).add(new THREE.Vector3(0, rise * size * .4, 0));
-      b.m.scale.setScalar(size * .26 * b.s * (.3 + e) * (1 + a * .5)); const h = 1 - sstep(.0, .9, a);   // white-hot -> yellow -> orange -> charcoal smoke
-      const c = h > .75 ? [1, 1, .85] : h > .45 ? [1, .82, .3] : h > .2 ? [.95, .45, .15] : [.3, .27, .3]; b.m.material.color.setRGB(...c); b.m.material.opacity = Math.max(0, Math.min(1, (1.3 - b.s * .3 - a) * 2.5)); b.m.visible = b.m.material.opacity > .02; }   // fireballs fade out; the soft smoke puffs take over
-    if (a > .35) for (let i = 0; i < 5; i++) smokeAt(par ? par.localToWorld(at.clone().add(new THREE.Vector3((i - 2) * .3 * size, size * .4, 0))) : at, a - .35 - i * .05, { col: '#4a4450', size: size * .5, life: 2 });
+    for (const b of balls) { const e = eOut(Math.min(1, a / .5)), rise = a * a * (.4 + .5 * (1.1 - b.s));   /* v5.3 small hot cores rise faster */ b.m.position.copy(at).addScaledVector(b.d, size * .55 * b.sp * e).add(new THREE.Vector3(0, rise * size * .4, 0));
+      b.m.scale.setScalar(size * .26 * b.s * (.3 + e) * (1 + a * .5)); const h = 1 - sstep(.0, .9, a - b.ph + (b.s - .8) * .15);   // white-hot -> yellow -> orange -> charcoal smoke, each ball on its own clock
+      const RAMP = [[.3, .27, .3], [.95, .45, .15], [1, .82, .3], [1, 1, .85]], x = Math.max(0, Math.min(2.999, h * 3)), j = Math.floor(x), f = x - j, c = [0, 1, 2].map(q => RAMP[j][q] + (RAMP[j + 1][q] - RAMP[j][q]) * f);   /* smooth ramp: no colour pops */ b.m.material.color.setRGB(...c); b.m.material.opacity = Math.max(0, Math.min(1, (1.3 - b.s * .3 - a) * 2.5)); b.m.visible = b.m.material.opacity > .02; }   // fireballs fade out; the soft smoke puffs take over
+    if (a > .35) for (let i = 0; i < 5; i++) { const off = new THREE.Vector3([-.5, .35, 0, -.25, .55][i] * size, [.3, .45, .7, .9, .2][i] * size, [.1, -.2, 0, .2, -.1][i] * size);   /* v5.3 puffs at different heights + own seeds: no identical sausage row */
+      smokeAt(par ? par.localToWorld(at.clone().add(off)) : at.clone().add(off), a - .35 - [0, .12, .05, .2, .09][i], { col: ['#4a4450', '#57505c', '#3f3a46', '#504856', '#46404c'][i], size: size * [.5, .42, .6, .38, .45][i], life: 2 + i * .15, seed: 3 + i * 7, rise: .5 + i * .06 }); }
     if (a < .5) OVL.push({ kind: 'tint', col: '#ffe0a0', k: .35 * (1 - a / .5) }); } }; }
 
 // ---------------- 10. pile: many bodies that collide WITH EACH OTHER (spheres, positional correction), e.g. a collapsing
