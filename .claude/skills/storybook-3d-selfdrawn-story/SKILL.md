@@ -837,3 +837,14 @@ Film grammar that makes these hold 100K+ likes, mapped to our 2D engine:
     - Slow involuntary motion: a nod, eyes dropping, a small head shake, a shock inhale.
     - A 1-2 s close-up is never a still frame.
   - Use: `put(C, SET, live(lt, 1, { p, ry, ...sob(lt, .8) }))`
+
+### v7.6 Production system
+- `bash tools/make_ep.sh <project> "<name>" [vo.mp3] [--from STAGE|--only STAGE|--until STAGE]` runs the whole episode with ONE command.
+  - Stages: voice → asr → timing (islands, caps, lipsync) → [shots written here] → lint → render (resumable, WORKERS=4) → steps (footsteps) → audio (tools/audio_ep.py) → finish → cover → qa.
+  - Every stage leaves out/.stage/<stage>.ok, so a rerun continues where it stopped. `--from render` redoes render and everything after it.
+  - It stops at lint if src/shots.js is missing (the storyboard step).
+- `python3 tools/qa.py <out_dir> "<name>" <project>` checks the delivered files.
+  - ERRORS: missing files, >= 30 MB, not 1080x1920 at 30 fps, duration vs timing, loudness -14 +-1.2 LUFS, true peak > -1 dBTP, a black stretch > 0.5 s.
+  - WARNINGS: picture frozen >= 2.5 s, audio silent >= 2 s, the cover grid-crop reminder.
+  - It also writes out/qa_sheet.jpg: one frame every 2 s with the safe-zone lines.
+  - ep3 passed in 44 s.

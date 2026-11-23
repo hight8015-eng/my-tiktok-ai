@@ -122,3 +122,4 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
 - safe zones OK; cover rules (grid crop cuts series line!); camera helpers dollyZoom/arcCam/snorriCam/throughCam from Higgsfield study.
 - Drama-short study (4 clips 11-23): OTS shot/reverse (otsPair), cut per speaker, CU escalation, key-phrase yellow.
 - sob()/listen() CU acting beats added + tested stills.
+- v7.6 system: make_ep.sh (one-command episode) + qa.py (auto QA + contact sheet). ep3 QA pass.
