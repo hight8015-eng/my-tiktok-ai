@@ -6,6 +6,8 @@ import sys
 from pm_draw import *
 from outfits import *
 from hair_library import *
+import hair3d
+from styles3d import STYLES as STYLES3D
 out=sys.argv[1]
 CH={'C01':(hair_aren,villager,(hexc('#1b1820'),)),'C02':(cap_guard,villager,(hexc('#2c3a5c'),)),
     'C03':(hair_fire,villager,(hexc('#c8bfa8'),)),'C04':(hair_buzz,villager,(hexc('#6a5a4a'),)),
@@ -19,6 +21,9 @@ for cid,spec in CH.items():
         im=Image.new('RGB',(W,H),GREEN); d=ImageDraw.Draw(im)
         cos(im,d,v,*args); d=ImageDraw.Draw(im)
         if back and v!='B': back(d,v)
-        SEED[0]=int(cid[1:])*7+3; ball(d,flip=(v=='B')); hat(d,v)
+        SEED[0]=int(cid[1:])*7+3; ball(d,flip=(v=='B'))
+        if cid in STYLES3D:
+            for h in STYLES3D[cid](): hair3d.render(d,h,v)   # v8 (2026-11-24): one 3D hair model, projected per view
+        else: hat(d,v)
         im.resize((1080,1920),Image.LANCZOS).save(f'{out}/{cid}-{v}.png')
 print('ok')
