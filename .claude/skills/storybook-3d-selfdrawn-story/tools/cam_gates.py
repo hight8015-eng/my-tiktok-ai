@@ -50,7 +50,10 @@ gate('speed median px/f', round(float(p50), 2), 2.0 <= p50 <= 6.1, 1.55 <= p50 <
 gate('speed p90 px/f', round(float(p90), 1), 15 <= p90 <= 27.4, 9.8 <= p90 <= 33.8, 'about 23 (range 9.8-33.8)')
 gate('dead still (<0.3 px/f), % of frames', round(100 * dead.sum() / use.sum(), 1), dead.sum() / use.sum() <= .21, dead.sum() / use.sum() <= .29, '<= 21, aim 9')
 gate('speed peak px/f', round(float(pk), 1), pk <= 60, pk <= 90, '<= 60 outside planned whips')
-nc = int(cut.sum()); gate('cuts per 10 s', round(nc / dur * 10, 2), nc / dur * 10 <= .9, nc / dur * 10 <= 1.66, '<= 0.9, aim 0.4')
+# v8 (2026-11-23, user: "use RicksClips' numbers"): shot rate measured by rea-video on 7 RicksClips films
+# (library/style/ricksclips-dna/rea-video/*/breakdown.json): median 3.05 shots / 10 s, range 1.5-4.1, median shot 2.8 s.
+# The old 0.9 / 10 s target (film_plan.py) counted only hard cuts without a camera move and is replaced for this series.
+nc = int(cut.sum()); cr = nc / dur * 10; gate('cuts per 10 s', round(cr, 2), 1.5 <= cr <= 4.1, cr <= 5.0, '1.5-4.1, aim 3 (RicksClips median 3.05)')
 # dead-still stretches (read as a freeze)
 longest = 0; k = 0; stretches = []
 while k < n:

@@ -4,10 +4,11 @@
 #        wrong size / fps, loudness off -14 LUFS by > 1.2, true peak > -1.0 dBTP.
 #  WARN: a freeze (change < .25 grey levels for >= 12 frames: needs a creeping push-in), a low-detail run (frame detail < 35 % of its
 #        shot's median for >= 5 frames: camera inside a wall/pillar or a prop in front of the lens).
-# Shot cuts come from S('id', t0, ...) in shots.js, so changes at cuts are not counted as pops.
+# Shot cuts come from S('id', t0, ...) in shots.js (+ camera jumps inside a shot from --camdump), so changes at cuts are not counted as pops.
 import argparse, json, re, subprocess, sys, numpy as np
 
 ap = argparse.ArgumentParser(); ap.add_argument('video'); ap.add_argument('--shots', default='src/shots.js'); ap.add_argument('--sheet')
+ap.add_argument('--camdump', help='out/camdump.json: also treat camera jumps inside a shot (> 200 px/f) as cuts (v8 M2)')
 a = ap.parse_args(); W, H, FPS = 90, 160, 30
 info = json.loads(subprocess.run(['ffprobe', '-v', 'error', '-show_streams', '-of', 'json', a.video], capture_output=True, text=True).stdout)
 v = next(s for s in info['streams'] if s['codec_type'] == 'video'); rows = []
@@ -24,6 +25,9 @@ try:
     for t in re.findall(r"^S\('[^']+',\s*([\d.]+)", open(a.shots, encoding='utf-8').read(), re.M):
         f = int(round(float(t) * FPS)); cuts.update(range(f - 2, f + 3))
 except OSError: pass
+if a.camdump:
+    for cd in json.load(open(a.camdump, encoding='utf-8')):
+        if (cd.get('speed') or 0) > 200: cuts.update(range(cd['f'] - 2, cd['f'] + 3))
 def runs(mask, min_len):
     out, k = [], 0
     while k < n:

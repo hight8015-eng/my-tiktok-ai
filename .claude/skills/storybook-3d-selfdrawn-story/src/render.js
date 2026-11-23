@@ -1,4 +1,4 @@
-// node render.js stills <out_dir> <t1> <t2> ... | node render.js video <out.mp4> <startFrame> <endFrame> | node render.js steps <out.json> [t0 t1]  (walkAlong heel strikes, no rendering)
+// node render.js stills <out_dir> <t1> <t2> ... | node render.js video <out.mp4> <startFrame> <endFrame> | node render.js steps <out.json> [t0 t1]  (walkAlong heel strikes, no rendering) | node render.js camdump <out.json> [t0 t1]  (camera + cast per frame, no rendering)
 { const fs0 = require('fs'), p0 = require('path'); let d = __dirname;   // v7.10: use the Chromium kept in a parent render/ms-playwright (E:) when no PLAYWRIGHT_BROWSERS_PATH is set
   while (!process.env.PLAYWRIGHT_BROWSERS_PATH && d !== p0.dirname(d)) { if (fs0.existsSync(p0.join(d, 'ms-playwright'))) process.env.PLAYWRIGHT_BROWSERS_PATH = p0.join(d, 'ms-playwright'); d = p0.dirname(d); } }
 const { chromium } = require('playwright'); const { spawn } = require('child_process'); const path = require('path'); const fs = require('fs'); const http = require('http');
@@ -21,6 +21,7 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.ttf': 'font/ttf
     for (const id of ['C01', 'C02', 'C03', 'C04', 'C05', 'C06']) for (const [v, ry] of [['F', 0], ['Q', -45], ['S', -90], ['B', 180]]) {
       const d = await p.evaluate((o) => window.refsheet(o), { id, ry }); fs.writeFileSync(`${out}/${id}-${v}.png`, Buffer.from(d.split(',')[1], 'base64')); console.log(id, v); }
   } else if (mode === 'steps') { fs.writeFileSync(out, JSON.stringify(await p.evaluate(([a, b]) => window.steps(a == null ? 0 : +a, b == null ? undefined : +b), rest), null, 0)); console.log('steps ->', out);
+  } else if (mode === 'camdump') { fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true }); fs.writeFileSync(out, JSON.stringify(await p.evaluate(([a, b]) => window.camdump(a == null ? 0 : +a, b == null ? undefined : +b), rest))); console.log('camdump ->', out);   // v8.0: camera + cast per frame, no rendering
   } else if (mode === 'list') { console.log(JSON.stringify(await p.evaluate(() => window.SHOTLIST))); }
   else {
     const [a, z] = rest.map(Number);

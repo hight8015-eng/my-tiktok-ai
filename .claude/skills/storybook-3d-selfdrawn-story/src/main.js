@@ -366,4 +366,24 @@ window.steps = (t0 = 0, t1 = timing.end) => { globalThis.STEPLOG = []; const out
     const sh = SHOTS[i]; globalThis.FRAME_T = t; const n = globalThis.STEPLOG.length; try { sh.fn(t - sh.t0, t); } catch (e) { }
     for (const e of globalThis.STEPLOG.splice(n)) out.push({ ...e, t: +t.toFixed(3), shot: sh.id }); }
   globalThis.STEPLOG = null; return out; };
+// v8.0 camdump (M2): the camera and the cast of every frame WITHOUT rendering (seconds for a whole episode), for tools/film_check.py.
+// Per frame: shot id + transition, camera position / forward / fov, screen speed of the picture in px per frame at 720x1280 (a 3x3 grid of
+// points at the focus distance, seen by the last frame's camera, projected through this frame's camera), and every visible character's
+// head on screen (x, y in 0..1, radius as a share of the width). Runs the same shot code + camera drift as draw(), no smoothing look-backs.
+window.camdump = (t0 = 0, t1 = timing.end) => { const out = [], V3 = E.THREE.Vector3; let prev = null, prevShot = null;
+  for (let f = Math.round(t0 * 30); f < Math.round(t1 * 30); f++) { const t = f / 30; let i = SHOTS.length - 1; for (let k = 0; k < SHOTS.length; k++) if (t < SHOTS[k].t1) { i = k; break; }
+    const sh = SHOTS[i]; globalThis.FRAME_T = t; ANIM.t = t; ZP = keyZoom(t); try { runShot(sh, t); } catch (e) { out.push({ f, err: String(e).slice(0, 120) }); continue; }
+    if (!window.NOAUTO) camDrift(t); const cam = E.camera; cam.updateMatrixWorld(); cam.updateProjectionMatrix(); E.scene.updateMatrixWorld(); updateSprites(cam);
+    const fwd = new V3(0, 0, -1).transformDirection(cam.matrixWorld), up = new V3(0, 1, 0).transformDirection(cam.matrixWorld), rt = new V3(1, 0, 0).transformDirection(cam.matrixWorld);
+    const focus = Math.max(.6, E.POST.focus || 4); let speed = null;
+    if (prev && prevShot === sh.id) { let s = 0; for (const a of [-1, 0, 1]) for (const b of [-1, 0, 1]) {
+        const w = prev.pos.clone().addScaledVector(prev.fwd, focus).addScaledVector(prev.rt, a * focus * .3).addScaledVector(prev.up, b * focus * .5);
+        const q0 = w.clone().applyMatrix4(prev.view).applyMatrix4(prev.proj), q1 = w.clone().project(cam); s += Math.hypot((q1.x - q0.x) * 360, (q1.y - q0.y) * 640); }
+      speed = +(s / 9).toFixed(2); }
+    const chars = []; for (const C of Object.values(CHARS)) { if (!C.g.visible || !C.sb || !C.sb.visible) continue; const B = headBall(C); if (!B) continue;
+      const c = B.c.clone().project(cam), e = B.c.clone().addScaledVector(B.right, B.r).project(cam); if (c.z > 1) continue;
+      chars.push({ id: C.spec.id, x: +((c.x + 1) / 2).toFixed(3), y: +((1 - c.y) / 2).toFixed(3), r: +(Math.hypot(e.x - c.x, (e.y - c.y) * 16 / 9) / 2).toFixed(3), d: +cam.position.distanceTo(B.c).toFixed(2) }); }
+    out.push({ f, shot: sh.id, tr: sh.tr, cam: cam.position.toArray().map(v => +v.toFixed(3)), fwd: fwd.toArray().map(v => +v.toFixed(3)), fov: +cam.fov.toFixed(2), speed, focus: +focus.toFixed(2), dof: +(E.POST.dof || 0).toFixed(2), chars });
+    prev = { pos: cam.position.clone(), fwd, up, rt, view: cam.matrixWorldInverse.clone(), proj: cam.projectionMatrix.clone() }; prevShot = sh.id; }
+  return out; };
 window.__CHARS = CHARS; window.ready = true;
