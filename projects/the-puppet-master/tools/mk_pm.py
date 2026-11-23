@@ -140,13 +140,12 @@ def hair_aren(d,view='F'):
     strands(d,[[(CX-120,330),(CX-80,430),(CX-90,540)],[(CX+20,250),(CX+40,380),(CX+60,560)],[(CX+150,300),(CX+170,420),(CX+170,560)],[(CX-210,420),(CX-205,520),(CX-205,590)]],hexc('#2a2a3c'),4)
 # ---- Guard (C02): navy peaked cap, black visor, gold badge ----
 def cap_guard(d,view='F'):
-    navy=hexc('#1f2c4a'); gold=hexc('#e2b23c'); blk=hexc('#121018')
-    poly(d,cr([(CX-232,470),(CX-262,370),(CX-150,300),(CX,285),(CX+150,300),(CX+262,370),(CX+232,470)],6)+[(CX+232,470),(CX-232,470)],navy)
-    poly(d,[(CX-236,475),(CX-236,440),(CX+236,440),(CX+236,475)],hexc('#111827'),lw=9*K)
-    if view!='B':
-        poly(d,cr([(CX-215,470),(CX,445),(CX+215,470),(CX+150,540),(CX,555),(CX-150,540)],6),blk)
-        poly(d,[(CX-40,330),(CX,300),(CX+40,330),(CX+30,395),(CX,410),(CX-30,395)],gold,lw=7*K)
-        hl(d,[(CX-160,330),(CX-70,305),(CX-60,320),(CX-150,345)],navy)
+    navy=hexc('#1f2c4a'); gold=hexc('#e2b23c'); blk=hexc('#121018'); band=hexc('#111827')
+    # one connected cap: visor (drawn first, its top edge hides under the band) -> crown -> curved hat band -> badge (no wedge of face between the pieces, crown no wider than the skull + a little)
+    if view!='B': poly(d,cr([(CX-204,520),(CX-100,508),(CX,503),(CX+100,508),(CX+204,520),(CX+178,553),(CX+90,570),(CX,576),(CX-90,570),(CX-178,553)],5),blk)
+    poly(d,cr([(CX-246,505),(CX-258,412),(CX-196,326),(CX-90,288),(CX,280),(CX+90,288),(CX+196,326),(CX+258,412),(CX+246,505),(CX+150,492),(CX,478),(CX-150,492)],5),navy)
+    poly(d,cr([(CX-246,505),(CX-150,492),(CX,478),(CX+150,492),(CX+246,505),(CX+242,540),(CX+150,528),(CX,514),(CX-150,528),(CX-242,540)],4),band)
+    if view!='B': poly(d,[(CX-40,352),(CX,322),(CX+40,352),(CX+32,418),(CX,436),(CX-32,418)],gold,lw=7*K)
 # ---- Fire man (C03): tall orange flame spikes with yellow tips ----
 FIRE=[(CX-236,600),(CX-250,470),(CX-300,330),(CX-200,380),(CX-210,200),(CX-110,320),(CX-60,120),(CX+10,300),(CX+90,110),(CX+120,310),(CX+230,190),(CX+200,370),(CX+300,320),(CX+250,470),(CX+236,600),(CX+190,500),(CX+110,450),(CX,470),(CX-110,450),(CX-190,500)]
 def hair_fire(d,view='F'):
