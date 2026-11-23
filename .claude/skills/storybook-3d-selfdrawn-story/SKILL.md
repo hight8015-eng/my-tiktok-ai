@@ -764,3 +764,6 @@ clip for them.⁠​​‌‌‌​​​‌​‌​‌‌​‌‌‌‌​‌
   - The held breath eases out over 0.3 s once he speaks.
   - After a long line (more than 2 s), a small exhale settles the body.
   - Use: `live(lt, A, { ..., talk: lipAt(TM, t), inhale: breathAt(TM, t) })`. It needs `live` (the idle layer).
+
+### v7.5 Props + background study (Blender prep)
+Full study and set rules: projects/refs/BLENDER_SET_STUDY.md. Apply section 5 (set rules) from ep4 even without Blender.
