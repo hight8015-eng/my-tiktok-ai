@@ -347,6 +347,18 @@ export const WAREHOUSE = group({ p: [-600, 0, 600], parent: scene });
     if (side === 0) p = [-6.4 + R() * .9, 0, -10 + u * 18]; else if (side === 1) p = [6.4 - R() * .9, 0, -10 + u * 18]; else p = [-5.5 + u * 11, 0, -11.2 + R() * .5];
     const h = 1.6 + R() * .3, m = mesh(new THREE.PlaneGeometry(h * .5, h), basic('#ffffff', { transparent: true, map: silT[i % 6] }), { p: [p[0], h / 2, p[2]], parent: W, cast: false }); m.userData.ph = R() * 7; m.userData.noInk = true; Z.whCrowd.push(m); }
 }
+// ---- Blender-baked static room (sets/wh_pm3.glb, built by blender/build_set.py + make_wh_pm3.py): replaces the old procedural floor / walls / beams / crates / throne.
+// Kept from the old set: the crowd, hole + crack, fire drums, table (+ paper), hanging lamps (+ glow, spill). If the glb is missing the old procedural room stays (no crash).
+import { loadSet } from './blendset.js';
+{ let S = null; try { S = await loadSet(scene, 'sets/wh_pm3.glb', { visible: true, ink: true }); } catch (e) { console.warn('wh_pm3.glb not loaded, using the procedural warehouse', e && e.message); }
+  if (S) {
+    const keep = new Set([...Z.whCrowd, Z.whHole, Z.whCrack]);
+    WAREHOUSE.children.slice().forEach(c => { if (c.isMesh && !keep.has(c) && !c.material.transparent && !c.material.isMeshBasicMaterial) c.visible = false;
+      if (c.isGroup && Math.abs(c.position.x) < .01 && Math.abs(c.position.z + 9.6) < .01) c.visible = false; });                       // old throne group
+    WAREHOUSE.add(S.root); Z.whColliders = S.colliders; Z.whBlender = S;
+    S.root.traverse(n => { if (n.isMesh && n.material && n.material.color && !/^(signs|win|keys)/.test(n.name)) n.material.color.setRGB(.52, .44, .6); });   // night grade: darker + crimson/violet (matches ep1-2, mean luma ~.15-.2)
+    Z.whShaft = beam(WAREHOUSE, [0, 9.2, -6], [0, .05, -8.9], 2.3, '#9aa8ff', .2);                                                       // moonlight shaft through the broken skylight
+  } }
 export function warehouseAt(t, cam, look = 0) {   // look 0..1: the crowd turns to face the door (Aren)
   Z.whCrowd.forEach(m => { if (cam) { m.quaternion.copy(cam.quaternion); } m.position.x += Math.sin(t * 1.3 + m.userData.ph) * .0008; m.scale.y = 1 + .012 * Math.sin(t * 2.1 + m.userData.ph); });
   Z.whFires.forEach(g => g.userData.f.at(t, 1, cam, 0)); }

@@ -87,3 +87,11 @@ They are 2D-looking stick characters inside fully modelled 3D sets. These look l
   - Hook (0-10 s): at least 5 framings, with every framing change about 1.5-2.5 s apart. A camera move inside a shot counts as a change only if the shot size changes.
   - Push in to a close-up on the key emotional word of each line.
   - At least one in-world "info prop" (paper, board, screen, sign) per episode for the key fact.
+
+## 5. Extra study (2026-11-23): signalman / desert railway clips (2 user refs)
+- **Layered background, four planes:** sky gradient + clustered fluffy clouds; telephone poles with sagging wires; stepped terraced mesas; acacia trees and cacti; then the ground. Depth comes from stacking, not detail in one plane.
+- **Real materials on props:** painted wood with grain, chrome wheel rims, glossy paint on levers, gravel ballast between rails, cracked-earth decals, loose pebbles everywhere. Nothing is a flat colour.
+- **Hero props carry the plot and are chunky:** coloured lever poles with white bands, a key board with gold keys, a semaphore with a red arm, a wheeled green cart, a hut with a white roof edge, a lantern on a post. Big bevels (toy look) catch the light.
+- **Foreground framing:** levers / a cart edge / a hut wall at the frame edge, low camera, characters in the mid-ground.
+- **Soft cast shadows**, saturated colour, bloom on lights, motion blur on moving props (cart).
+- **Applied to the warehouse (keep the ep1-2 night palette):** brick / concrete / wood / metal procedural textures baked in (build_set.py `tex`), bevel .045, neon city windows (the earlier eps' rooftop look), key board + red-string case board as story props, pebbles / paper / cables / oil puddles / cracks on the floor.

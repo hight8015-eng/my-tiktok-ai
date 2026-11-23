@@ -1,0 +1,1 @@
+wh_pm3.glb is built by .claude/skills/storybook-3d-selfdrawn-story/blender (make_wh_pm3.py + build_set.py, ~6 min); not committed (16 MB). Copy it here as sets/wh_pm3.glb into the render root's src/sets/.

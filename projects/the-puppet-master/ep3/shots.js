@@ -81,7 +81,7 @@ const S = (id, t0, tr, set, fn, o = {}) => { const sh = { id, t0, tr, ...o }; sh
 const VI = () => CHARS.strong, CL = () => CHARS.cloak;    // Victor = the strong man of ep 2, now in his king's coat
 const live = (lt, sd, P, k = .8) => { const h = hold(lt, sd, k); return { ...P, side: (P.side || 0) + h.side, twist: (P.twist || 0) + h.twist, head: (P.head || [0, 0, 0]).map((v, i) => v + h.head[i]) }; };
 function hideGuns() { [PILLAR, HOLE, CRACK, HOLE2, CRACK2, DOORL, POUCH].forEach(m => { m.visible = false; }); }
-const PILLAR = mesh(rbox(1.2, 9, 1.2), toon('#8a8690'), { p: [0, 4.5, -1.9], parent: WAREHOUSE });
+const PILLAR = mesh(rbox(1.2, 9, 1.2), toon('#4a3446'), { p: [0, 4.5, -1.9], parent: WAREHOUSE });
 const HOLE = Z.whHole.clone(), CRACK = Z.whCrack.clone(); [HOLE, CRACK].forEach((m, i) => { m.position.set(.45, 1.78, -2.52 - i * .005); m.rotation.set(0, Math.PI, 0); WAREHOUSE.add(m); }); HOLE.scale.setScalar(.6); CRACK.scale.setScalar(.7);
 const HOLE2 = Z.whHole.clone(), CRACK2 = Z.whCrack.clone(); [HOLE2, CRACK2].forEach((m, i) => { m.position.set(7.77 - i * .005, 1.6, 4); m.rotation.set(0, -Math.PI / 2, 0); WAREHOUSE.add(m); });
 const DOORL = mesh(new THREE.PlaneGeometry(2.8, 3.8), basic('#ffd8b0', { transparent: true, opacity: .9 }), { p: [0, 1.95, 11.45], r: [0, 180, 0], parent: WAREHOUSE, cast: false }); DOORL.material.depthWrite = false; DOORL.renderOrder = 2;
