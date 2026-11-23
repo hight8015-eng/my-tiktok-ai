@@ -39,7 +39,7 @@ AREN=[(CX-238,620),(CX-252,500),(CX-310,440),(CX-222,415),(CX-262,330),(CX-160,3
 def hair_aren(d,view='F'):
     c=hexc('#16131d')
     if view=='B': back_cap(d,c,720); poly(d,cr([(CX-170,350),(CX-170,245),(CX-60,318),(CX-10,205),(CX+60,300),(CX+175,240),(CX+168,335)]),c); return
-    poly(d,cr(AREN,6),c)
+    poly(d,cr(AREN,6),c); hl(d,[(CX-150,365),(CX-40,330),(CX+70,342),(CX-20,370)],hexc('#3b4a78'))   # cold blue sheen (the ep1-3 look, restored 2026-11-24)
     strands(d,[[(CX-120,330),(CX-80,430),(CX-90,540)],[(CX+20,250),(CX+40,380),(CX+60,560)],[(CX+150,300),(CX+170,420),(CX+170,560)],[(CX-210,420),(CX-205,520),(CX-205,590)]],hexc('#2a2a3c'),4)
 # ---- Guard (C02): navy peaked cap, black visor, gold badge ----
 def cap_guard(d,view='F'):
