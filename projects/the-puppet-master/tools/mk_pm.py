@@ -155,19 +155,27 @@ def hair_fire(d,view='F'):
     poly(d,cr(FIRE,5),c)
     for tip in [(CX-210,215),(CX-62,140),(CX+88,130),(CX+226,205)]: poly(d,cr([(tip[0]-28,tip[1]+90),(tip[0],tip[1]),(tip[0]+28,tip[1]+90),(tip[0],tip[1]+60)],4),hexc('#ffd04a'),lw=0)
     if view!='B': strands(d,[[(CX-140,330),(CX-120,420)],[(CX+20,330),(CX+10,430)],[(CX+150,340),(CX+140,430)]],c,4)
+def skull_cap(d,col,hair_y=474,lw=None):
+    """hair that hugs the head: outer edge follows the skull (centre CX,600), hairline across the forehead - one connected piece (fixes the flat floating band / temple gaps)"""
+    outer=arc(CX,600,236,232,193,347,36); inner=[(CX+198,548),(CX+140,505),(CX+62,hair_y+6),(CX,hair_y),(CX-62,hair_y+6),(CX-140,505),(CX-198,548)]
+    poly(d,outer+inner,col)
 # ---- Strong man (C04): very short dark buzz cut ----
 def hair_buzz(d,view='F'):
-    c=hexc('#3a3236'); lo=600 if view=='B' else 470
-    poly(d,cr([(CX-224,lo+70),(CX-226,440),(CX-155,385),(CX,368),(CX+155,385),(CX+226,440),(CX+224,lo+70),(CX+196,lo+18),(CX,lo),(CX-196,lo+18)]),c)
+    c=hexc('#3a3236')
+    if view=='B': back_cap(d,c,700); return
+    skull_cap(d,c,470)
     import random; r=random.Random(4)
-    for _ in range(26): x=CX+r.uniform(-180,180); y=r.uniform(395,lo-10); ell(d,x,y,4,4,shade(c,1.5),lw=0)
+    for _ in range(26):
+        x=CX+r.uniform(-170,170); y=r.uniform(400,500)
+        if (x-CX)**2/225**2+(y-600)**2/200**2<1 and y<530-abs(x-CX)*.12: ell(d,x,y,4,4,shade(c,1.5),lw=0)
 # ---- Thug leader (C05): magenta mohawk fin, shaved sides ----
 def hair_mohawk(d,view='F'):
     c=hexc('#c2348a'); g=hexc('#4a3a40')
-    poly(d,cr([(CX-224,540),(CX-226,440),(CX-155,385),(CX,368),(CX+155,385),(CX+226,440),(CX+224,540),(CX+196,490),(CX,476),(CX-196,490)]),shade(g,1.0))
-    fin=[(CX-60,470),(CX-80,330),(CX-120,250),(CX-40,270),(CX-30,160),(CX+20,250),(CX+60,150),(CX+70,260),(CX+140,230),(CX+80,340),(CX+60,470)]
+    if view=='B': back_cap(d,g,700)
+    skull_cap(d,g,476)
+    fin=[(CX-66,520),(CX-84,380),(CX-124,258),(CX-44,282),(CX-32,168),(CX+20,262),(CX+62,156),(CX+72,268),(CX+142,236),(CX+86,370),(CX+68,520),(CX+10,500),(CX-30,510)]
     if view=='S': fin=[(x-40,y) for x,y in fin]
-    poly(d,cr(fin,5),c); hl(d,[(CX-30,280),(CX+10,240),(CX+20,260),(CX-20,300)],c)
+    poly(d,cr(fin,5),c); hl(d,[(CX-30,300),(CX+10,262),(CX+20,282),(CX-20,322)],c)
 # ---- Thug 2 (C06): knit beanie with a folded band ----
 def hat_beanie(d,view='F'):
     c=hexc('#5c6b4e')
@@ -189,10 +197,22 @@ def hood(d,view='F'):
     if view=='B': poly(d,cr([(CX-290,800),(CX-285,520),(CX-220,370),(CX,300),(CX+220,370),(CX+285,520),(CX+290,800)],6),c); return
     poly(d,cr([(CX-280,760),(CX-275,520),(CX-210,380),(CX,320),(CX+210,380),(CX+275,520),(CX+280,760),(CX+215,700),(CX+215,520),(CX+150,470),(CX,455),(CX-150,470),(CX-215,520),(CX-215,700)],6),c)
     hl(d,[(CX-200,420),(CX-120,370),(CX-100,385),(CX-185,440)],c)
+# ---- Noah (C09, ep4 the invisible hunter): ash-silver slicked-back hair, ONE continuous outline (like Aren's): swept spikes on top, a long fringe lock on the left, sideburns ----
+NOAH=[(CX-236,600),(CX-254,490),(CX-228,395),(CX-150,345),(CX-70,320),(CX-26,236),(CX+28,318),(CX+92,252),(CX+122,336),(CX+206,292),(CX+192,384),(CX+276,382),(CX+242,474),(CX+248,610),
+      (CX+198,545),(CX+152,490),(CX+60,466),(CX-34,478),(CX-104,532),(CX-148,610),(CX-182,540),(CX-204,590)]
+def hair_noah(d,view='F'):
+    c=hexc('#cdd0da')
+    if view=='B':
+        back_cap(d,c,720); poly(d,cr([(CX-170,350),(CX-166,250),(CX-60,320),(CX-12,232),(CX+60,312),(CX+176,262),(CX+170,350)],4),c)
+        poly(d,cr([(CX-40,690),(CX-26,740),(CX+8,785),(CX+40,740),(CX+56,690)],5),c); return
+    poly(d,cr(NOAH,6),c)
+    hl(d,[(CX+10,340),(CX+110,352),(CX+160,390),(CX+70,376)],hexc('#f4f6fb'))
+    strands(d,[[(CX-80,350),(CX-86,440),(CX-96,540)],[(CX+30,330),(CX+40,420),(CX+50,490)],[(CX+150,350),(CX+170,430),(CX+176,500)],[(CX-200,440),(CX-210,520),(CX-206,570)]],hexc('#8f93a6'),4)
 CH={'C01':(hair_aren,villager,(hexc('#1b1820'),)),'C02':(cap_guard,villager,(hexc('#2c3a5c'),)),
     'C03':(hair_fire,villager,(hexc('#c8bfa8'),)),'C04':(hair_buzz,villager,(hexc('#6a5a4a'),)),
     'C05':(hair_mohawk,villager,(hexc('#2a2a30'),)),'C06':(hat_beanie,villager,(hexc('#4a4038'),)),
-    'C07':(hat_bandana,villager,(hexc('#38404a'),)),'C08':(hood,villager,(hexc('#3a3448'),),back_hood)}
+    'C07':(hat_bandana,villager,(hexc('#38404a'),)),'C08':(hood,villager,(hexc('#3a3448'),),back_hood),
+    'C09':(hair_noah,villager,(hexc('#222a38'),))}
 for cid,spec in CH.items():
     hat,cos,args=spec[:3]; back=spec[3] if len(spec)>3 else None
     for v in 'FQSB':
