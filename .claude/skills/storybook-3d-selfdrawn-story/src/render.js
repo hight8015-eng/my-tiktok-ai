@@ -5,7 +5,7 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.ttf': 'font/ttf
   const srv = http.createServer((q, r) => { const f = path.join(__dirname, decodeURIComponent(q.url.split('?')[0])); fs.readFile(f, (e, d) => { if (e) { r.writeHead(404); r.end(); return; } r.writeHead(200, { 'Content-Type': MIME[path.extname(f)] || 'application/octet-stream' }); r.end(d); }); });
   await new Promise(r => srv.listen(0, '127.0.0.1', r)); const port = srv.address().port;
   const [mode, out, ...rest] = process.argv.slice(2);
-  const args = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'];
+  const args = process.env.GPU ? ['--use-gl=angle', '--use-angle=' + (process.platform === 'win32' ? 'd3d11' : process.platform === 'darwin' ? 'metal' : 'vulkan'), '--ignore-gpu-blocklist', '--enable-gpu-rasterization'] : ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']; // v7.6 GPU=1 on a PC with a graphics card (much faster); default = CPU SwiftShader (cloud)
   const b = await chromium.launch({ args, headless: true });
   const p = await b.newPage({ viewport: { width: 540, height: 960 } });
   p.on('pageerror', e => console.error('PAGEERR', e.message)); p.on('console', m => { const s = m.text(); if (/GPU stall|GL Driver/.test(s)) return; console.log('[pg]', s.slice(0, 400)); });
