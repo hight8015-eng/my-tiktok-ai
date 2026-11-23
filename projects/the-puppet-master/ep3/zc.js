@@ -322,12 +322,30 @@ export const WAREHOUSE = group({ p: [-600, 0, 600], parent: scene });
   Z.whHole = mesh(new THREE.CircleGeometry(.75, 18), basic('#0c0a10'), { p: [-7.78, 1.75, -3], r: [0, 90, 0], parent: W, cast: false }); Z.whHole.visible = false;
   Z.whCrack = mesh(new THREE.PlaneGeometry(2.6, 2.6), basic('#ffffff', { transparent: true, depthWrite: false, map: canvasTex(256, 256, (x) => { x.strokeStyle = '#1a161e'; x.lineWidth = 5; x.translate(128, 128);
     for (let k = 0; k < 11; k++) { let a = k / 11 * Math.PI * 2 + R() * .3, r = 30; x.beginPath(); x.moveTo(Math.cos(a) * 26, Math.sin(a) * 26); for (let j = 0; j < 5; j++) { r += 14 + R() * 18; a += (R() - .5) * .5; x.lineTo(Math.cos(a) * r, Math.sin(a) * r); } x.stroke(); } }) }), { p: [-7.77, 1.75, -3], r: [0, 90, 0], parent: W, cast: false }); Z.whCrack.visible = false;
-  // the crowd: ~46 silhouettes standing around the walls (cut-outs with a rim light and two eye glints), each sways a little
-  const sil = canvasTex(128, 256, (x, w, h) => { x.fillStyle = '#16121c'; x.beginPath(); x.arc(64, 52, 30, 0, 7); x.fill(); x.beginPath(); x.moveTo(14, 256); x.quadraticCurveTo(12, 110, 64, 92); x.quadraticCurveTo(116, 110, 114, 256); x.fill();
-    x.strokeStyle = 'rgba(255,190,120,.55)'; x.lineWidth = 4; x.beginPath(); x.arc(64, 52, 30, -2.6, -.4); x.stroke(); x.fillStyle = 'rgba(255,240,220,.85)'; x.fillRect(50, 48, 6, 4); x.fillRect(72, 48, 6, 4); });
+  // the crowd: ~46 shadowed bystanders, drawn in the same chibi language as the cast (big head, bean body, hair-thin limbs, ball hands/feet), backlit dark with warm/cool rim light.
+  // 6 variants (bald, cap, spiky, hood, bun, beanie); each sways a little and turns to the camera.
+  const silV = i => canvasTex(160, 320, (x, w, h) => {
+    const ink = '#0c0a12', skin = '#241d33', cloth = ['#1a1626', '#1d1830', '#16202e'][i % 3], lw = 3;
+    x.lineCap = 'round'; x.lineJoin = 'round'; x.strokeStyle = ink; x.lineWidth = lw;
+    x.strokeStyle = '#14101c'; x.lineWidth = 5; [[66, 236, 62, 298], [94, 236, 98, 298]].forEach(([a, b, c, d]) => { x.beginPath(); x.moveTo(a, b); x.lineTo(c, d); x.stroke(); });       // legs
+    x.fillStyle = '#14101c'; [[60, 306], [100, 306]].forEach(([a, b]) => { x.beginPath(); x.ellipse(a, b, 13, 6, 0, 0, 7); x.fill(); });                                           // feet
+    x.lineWidth = 4; [[52, 152, 40, 228], [108, 152, 120, 228]].forEach(([a, b, c, d]) => { x.beginPath(); x.moveTo(a, b); x.lineTo(c, d); x.stroke(); x.beginPath(); x.arc(c, d + 4, 5, 0, 7); x.fillStyle = '#14101c'; x.fill(); });  // arms + hands
+    x.fillStyle = cloth; x.strokeStyle = ink; x.lineWidth = lw; x.beginPath(); x.moveTo(52, 140); x.quadraticCurveTo(80, 128, 108, 140); x.quadraticCurveTo(116, 190, 104, 240); x.quadraticCurveTo(80, 248, 56, 240); x.quadraticCurveTo(44, 190, 52, 140); x.fill(); x.stroke();   // bean body
+    if (i % 6 === 3) { x.fillStyle = cloth; x.beginPath(); x.ellipse(80, 90, 62, 66, 0, 0, 7); x.fill(); x.stroke(); }                                                                    // hood
+    x.fillStyle = skin; x.beginPath(); x.ellipse(80, 94, 50, 46, 0, 0, 7); x.fill(); x.stroke();                                                                                          // head (wider than tall)
+    x.fillStyle = '#100d18'; const v = i % 6;
+    if (v === 1) { x.beginPath(); x.moveTo(26, 82); x.quadraticCurveTo(80, 30, 134, 82); x.lineTo(150, 84); x.lineTo(138, 70); x.quadraticCurveTo(80, 22, 22, 70); x.lineTo(10, 84); x.closePath(); x.fill(); x.stroke(); }   // flat cap + brim
+    if (v === 2) { x.beginPath(); x.moveTo(32, 76); for (let k = 0; k < 6; k++) { x.lineTo(32 + k * 19 + 9, 36 - (k % 2) * 4); x.lineTo(32 + k * 19 + 19, 72); } x.lineTo(130, 80); x.closePath(); x.fill(); x.stroke(); }                  // spiky hair
+    if (v === 4) { x.beginPath(); x.moveTo(34, 78); x.quadraticCurveTo(80, 36, 126, 78); x.quadraticCurveTo(80, 60, 34, 78); x.fill(); x.stroke(); x.beginPath(); x.arc(80, 38, 15, 0, 7); x.fill(); x.stroke(); }                        // hair + bun
+    if (v === 5) { x.beginPath(); x.moveTo(30, 80); x.quadraticCurveTo(80, 22, 130, 80); x.closePath(); x.fill(); x.stroke(); x.fillStyle = '#2a2236'; x.fillRect(30, 76, 100, 9); x.strokeRect(30, 76, 100, 9); }                    // beanie + band
+    x.strokeStyle = 'rgba(255,170,100,.7)'; x.lineWidth = 4; x.beginPath(); x.ellipse(80, 94, 50, 46, 0, 3.5, 4.9); x.stroke();                                                                             // warm rim (key side)
+    x.strokeStyle = 'rgba(90,200,255,.45)'; x.lineWidth = 3; x.beginPath(); x.ellipse(80, 94, 50, 46, 0, -.7, .5); x.stroke(); x.beginPath(); x.moveTo(110, 150); x.quadraticCurveTo(116, 190, 104, 236); x.stroke();     // cool rim
+    x.fillStyle = 'rgba(255,240,220,.9)'; x.fillRect(64, 94, 7, 5); x.fillRect(90, 94, 7, 5);                                                                                                               // eye glints
+  });
+  const silT = [0, 1, 2, 3, 4, 5].map(silV);
   Z.whCrowd = []; for (let i = 0; i < 46; i++) { const side = i % 3, u = R(); let p;
     if (side === 0) p = [-6.4 + R() * .9, 0, -10 + u * 18]; else if (side === 1) p = [6.4 - R() * .9, 0, -10 + u * 18]; else p = [-5.5 + u * 11, 0, -11.2 + R() * .5];
-    const h = 1.75 + R() * .35, m = mesh(new THREE.PlaneGeometry(h * .5, h), basic('#ffffff', { transparent: true, map: sil }), { p: [p[0], h / 2, p[2]], parent: W, cast: false }); m.userData.ph = R() * 7; m.userData.noInk = true; Z.whCrowd.push(m); }
+    const h = 1.6 + R() * .3, m = mesh(new THREE.PlaneGeometry(h * .5, h), basic('#ffffff', { transparent: true, map: silT[i % 6] }), { p: [p[0], h / 2, p[2]], parent: W, cast: false }); m.userData.ph = R() * 7; m.userData.noInk = true; Z.whCrowd.push(m); }
 }
 export function warehouseAt(t, cam, look = 0) {   // look 0..1: the crowd turns to face the door (Aren)
   Z.whCrowd.forEach(m => { if (cam) { m.quaternion.copy(cam.quaternion); } m.position.x += Math.sin(t * 1.3 + m.userData.ph) * .0008; m.scale.y = 1 + .012 * Math.sin(t * 2.1 + m.userData.ph); });
