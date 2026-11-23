@@ -1,4 +1,6 @@
 // node render.js stills <out_dir> <t1> <t2> ... | node render.js video <out.mp4> <startFrame> <endFrame> | node render.js steps <out.json> [t0 t1]  (walkAlong heel strikes, no rendering)
+{ const fs0 = require('fs'), p0 = require('path'); let d = __dirname;   // v7.10: use the Chromium kept in a parent render/ms-playwright (E:) when no PLAYWRIGHT_BROWSERS_PATH is set
+  while (!process.env.PLAYWRIGHT_BROWSERS_PATH && d !== p0.dirname(d)) { if (fs0.existsSync(p0.join(d, 'ms-playwright'))) process.env.PLAYWRIGHT_BROWSERS_PATH = p0.join(d, 'ms-playwright'); d = p0.dirname(d); } }
 const { chromium } = require('playwright'); const { spawn } = require('child_process'); const path = require('path'); const fs = require('fs'); const http = require('http');
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.ttf': 'font/ttf', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg' };
 (async () => {
