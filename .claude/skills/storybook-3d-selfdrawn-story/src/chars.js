@@ -769,23 +769,32 @@ export function updateSprites(cam) {
     place(C.sb, cb, yaw, rollB, (x1 - x0) * K2 * s * BK.w * (1 - (C.br || 0) * .5) * (1 - sq * .5) * turnW, bhL * (1 + (C.br || 0)) * (1 + sq), mir);
     C.sb.material.map !== SPR.body[key] && (C.sb.material.map = SPR.body[key], C.sb.material.emissiveMap = SPR.body[key], C.sb.material.needsUpdate = true);
     C.sb.userData.sprN.uniforms.map.value = SPR.body[key];
-    // head
-    const UH = new THREE.Vector3(0, 1, 0).transformDirection(C.hc.matrixWorld); const rollH = Math.atan2(-UH.dot(s_r), UH.y) + (C.hw || 0) * (mir ? -1 : 1);
+    // head. v7.5 the head (and its hair/hat, drawn on the head sprite) picks its OWN view from the head bone's yaw,
+    // so a gaze/turn of the head swaps the hair/hat view before the body follows (ref: hats turn with the head, not the torso).
+    // Neck limit: at most one view away from the body. Same >= 2-frame stepping as the body.
+    const hf = new THREE.Vector3(0, 0, 1).transformDirection(C.hc.matrixWorld); hf.y = 0; hf.normalize();
+    const thH = Math.atan2(hf.z * s_v.x - hf.x * s_v.z, hf.dot(s_v)) * 180 / Math.PI, aH = Math.abs(thH);
+    let viewH = aH < 24 ? 'F' : aH < 60 ? 'Q' : aH < 128 ? 'S' : 'B'; { const O = 'FQSB', ib = O.indexOf(view); let i1 = O.indexOf(viewH); i1 = Math.max(ib - 1, Math.min(ib + 1, i1)); viewH = O[i1];
+      const i0 = C._hvw ? O.indexOf(C._hvw) : i1, ft = Math.round((ANIM.t || 0) * 30);
+      if (C._hvf !== ft) { const rec = ft - (C._hvft ?? -99); if (i1 !== i0 && rec >= 0 && rec < 2) viewH = C._hvw; else if (Math.abs(i1 - i0) > 1) viewH = O[i0 + Math.sign(i1 - i0)]; if (Math.abs(O.indexOf(viewH) - ib) > 1) viewH = view; if (viewH !== C._hvw) C._hvft = ft; C._hvw = viewH; C._hvf = ft; } else viewH = C._hvw || viewH; }
+    const mirH = viewH === view ? mir : (viewH === 'Q' || viewH === 'S') && thH < 0, keyH = C.spr + '-' + viewH, MH = SPR.meta[keyH] || M;
+    const dbH = Math.min(Math.abs(aH - 24), Math.abs(aH - 60), Math.abs(aH - 128)), turnWH = viewH === view ? turnW : dbH < 9 ? .82 + .18 * (dbH / 9) * (dbH / 9) : 1;
+    const UH = new THREE.Vector3(0, 1, 0).transformDirection(C.hc.matrixWorld); const rollH = Math.atan2(-UH.dot(s_r), UH.y) + (C.hw || 0) * (mirH ? -1 : 1);
     // v3.1: the head is anchored like a 2D puppet to the costume's collar in the billboard plane (not to the 3D head bone),
     // so leaning/pitching never lifts it off the costume (neck hole showed when Tim yawned/leaned back)
-    const [hx0, hy0, hx1, hy1] = M.head, [bx, by] = M.ballH; const dx = ((hx1 - hx0) / 2 - bx) * K2 * (mir ? -1 : 1), dy = (by - (hy1 - hy0) / 2) * K2;
+    const [hx0, hy0, hx1, hy1] = MH.head, [bx, by] = MH.ballH; const dx = ((hx1 - hx0) / 2 - bx) * K2 * (mirH ? -1 : 1), dy = (by - (hy1 - hy0) / 2) * K2;
     const upB = new THREE.Vector3(0, Math.cos(rollB), 0).addScaledVector(s_r, -Math.sin(rollB)), rtB = s_r.clone().multiplyScalar(Math.cos(rollB)).add(new THREE.Vector3(0, Math.sin(rollB), 0));
     const upH = new THREE.Vector3(0, Math.cos(rollH), 0).addScaledVector(s_r, -Math.sin(rollH)), rtH = s_r.clone().multiplyScalar(Math.cos(rollH)).add(new THREE.Vector3(0, Math.sin(rollH), 0));
     const nod = (C.head.rotation.x || 0); // looking down sinks the head a touch, looking up lifts it a touch
     const neck = cb.clone().addScaledVector(upB, bhL / 2 * (1 + sq)).addScaledVector(rtB, (M.ball[0] - (x0 + x1) / 2) * K2 * s * (mir ? -1 : 1) * .5);
     const hk = BK.head || 1, ballC = neck.addScaledVector(upH, (M.ball[2] * hk - (C.sink ?? 105) - 40 * Math.sin(nod)) * K2 * s).addScaledVector(rtH, (M.ball[0] - (x0 + x1) / 2) * K2 * s * (mir ? -1 : 1) * .5);
     const ch = ballC.addScaledVector(rtH, dx * s * hk).addScaledVector(upH, dy * s * hk).addScaledVector(s_v, .04 * s);
-    const pp = C.pop || 0, hq = sq * .45; place(C.sh, ch, yaw, rollH, (hx1 - hx0) * K2 * s * hk * (1 + pp * .6) * (1 - hq * .5) * turnW, (hy1 - hy0) * K2 * s * hk * (1 + pp) * (1 + hq), mir);
-    const ht = headTex(C, key, view); if (C.sh.material.map !== ht) { C.sh.material.map = ht; C.sh.material.emissiveMap = ht; C.sh.material.needsUpdate = true; }
+    const pp = C.pop || 0, hq = sq * .45; place(C.sh, ch, yaw, rollH, (hx1 - hx0) * K2 * s * hk * (1 + pp * .6) * (1 - hq * .5) * turnWH, (hy1 - hy0) * K2 * s * hk * (1 + pp) * (1 + hq), mirH);
+    const ht = headTex(C, keyH, viewH); if (C.sh.material.map !== ht) { C.sh.material.map = ht; C.sh.material.emissiveMap = ht; C.sh.material.needsUpdate = true; }
     C.sh.userData.sprN.uniforms.map.value = ht;
-    { const mu = C.sh.material.userData, im = SPR.headImg[key], [bx2, by2, br2] = M.ballH; mu.uIsHead.value = 1; mu.uBall.value.set(bx2 / im.width, 1 - by2 / im.height, br2 / im.width, br2 / im.height);
-      if (!MASKT[key]) { MASKT[key] = new THREE.Texture(SPR.mask[key]); MASKT[key].needsUpdate = true; } mu.uMask.value = MASKT[key]; }
-    C.view = view; C.mir = mir;
+    { const mu = C.sh.material.userData, im = SPR.headImg[keyH], [bx2, by2, br2] = MH.ballH; mu.uIsHead.value = 1; mu.uBall.value.set(bx2 / im.width, 1 - by2 / im.height, br2 / im.width, br2 / im.height);
+      if (!MASKT[keyH]) { MASKT[keyH] = new THREE.Texture(SPR.mask[keyH]); MASKT[keyH].needsUpdate = true; } mu.uMask.value = MASKT[keyH]; }
+    C.view = view; C.mir = mir; C.viewH = viewH;
   }
 }
 

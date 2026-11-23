@@ -707,3 +707,10 @@ The user attaches the voice-over in the chat. Send the clips and cover back thro
 ## Running on the user's own computer
 Install with `SETUP.md`, work in a copy of this folder under `~/Desktop/edit-video/<topic>/`, and open the finished
 clip for them.⁠​​‌‌‌​​​‌​‌​‌‌​‌‌‌‌​‌​​‌​‌​‌‌​​​​‌‌​‌​‌‌‌​‌​​‌​​‌‌⁠
+
+### v7.5 Head view follows the HEAD, not the torso (hair/hat turn study)
+- Ref study (projects/refs/hair_hat_turn_ref.mp4): hat brim + hair always match the head's yaw/pitch; the head turns first, the body follows 2-6 frames later; brim foreshortens at 3/4 and side.
+- Before v7.5 the 2D head sprite (hair/hat drawn on it) used the BODY's view, so a gaze/head turn never changed the hair/hat.
+- Now chars.js picks `viewH` from the head bone (C.hc) yaw, at most 1 view from the body (neck limit), stepped >= 2 frames like the body. It also has its own mirror and turn squash. C.viewH is exposed.
+- So: to sell a turn, rotate the head first (gaze/turn on the head), then the body. Tested on pm3 W02 stills: no pop, head leads one view.
+- Still open: per-view hat art for hats drawn as separate layers (current hats are painted on the head sprite, so they turn with it).
