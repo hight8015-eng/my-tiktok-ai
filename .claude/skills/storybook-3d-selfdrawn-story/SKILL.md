@@ -863,3 +863,13 @@ Film grammar that makes these hold 100K+ likes, mapped to our 2D engine:
   2. `make_ep.sh pm4 "<name>" vo.mp3`, which stops after the storyboard
   3. write src/shots.js
   4. `make_ep.sh pm4 "<name>"`, which runs lint → render → audio → finish → cover → qa
+- Blender bridge (READY, UNTESTED: this container may not install Blender; it runs on the user's computer):
+  - `blender -b -P blender/build_set.py -- blender/warehouse_test.json out/warehouse.glb [--samples 128 --res 1024 --gpu]` builds the set from a JSON recipe.
+    - Recipes hold boxes, CC0 assets, lights, camera marks and colliders.
+    - It Cycles-bakes light + colour into one texture per object and exports a Draco .glb.
+  - `src/blendset.js` `loadSet(scene, url, { pos })` loads that .glb.
+    - Baked meshes use MeshBasicMaterial (fast, no double light). `*_emit` stays bright for bloom.
+    - `light_*` empties become real lights for our 2D characters.
+    - `cam_*` marks become camX targets. `col_*` boxes become colliders; use `blocked(S, x, z)` for walk paths.
+  - GLTFLoader r169 is vendored in src/lib/three/examples/jsm/loaders.
+  - First job on the computer: run warehouse_test.json, load it in a pm3 test shot, and compare it with the hand-built warehouse.

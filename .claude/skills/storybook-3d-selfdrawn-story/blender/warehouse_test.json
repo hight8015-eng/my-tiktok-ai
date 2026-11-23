@@ -1,0 +1,21 @@
+{ "name": "warehouse_test", "style": {"bevel": 0.02},
+  "objects": [
+    {"kind": "box", "name": "floor", "size": [14, 0.1, 14], "pos": [0, -0.05, 0], "color": "#3d3833"},
+    {"kind": "box", "name": "wall_back", "size": [14, 6, 0.3], "pos": [0, 3, -7], "color": "#4a4440"},
+    {"kind": "box", "name": "wall_left", "size": [0.3, 6, 14], "pos": [-7, 3, 0], "color": "#46403c"},
+    {"kind": "box", "name": "pillar", "size": [0.8, 6, 0.8], "pos": [0, 3, -1.9], "color": "#5a534c"},
+    {"kind": "box", "name": "crate1", "size": [1, 1, 1], "pos": [-3, 0.5, -4], "color": "#8a6a44"},
+    {"kind": "box", "name": "crate2", "size": [1, 1, 1], "pos": [-3.2, 1.5, -4.1], "color": "#7d6040"},
+    {"kind": "box", "name": "drum", "size": [0.6, 0.9, 0.6], "pos": [2.5, 0.45, -3], "color": "#7a2e22"},
+    {"kind": "box", "name": "drum_fire_emit", "size": [0.5, 0.05, 0.5], "pos": [2.5, 0.92, -3], "color": "#ff9a40", "emit": 8},
+    {"kind": "box", "name": "lamp_emit", "size": [0.5, 0.08, 0.5], "pos": [0, 5, 0], "color": "#ffd59a", "emit": 10}
+  ],
+  "lights": [
+    {"name": "light_lamp", "type": "point", "pos": [0, 4.8, 0], "color": "#ffd59a", "power": 400, "engine_power": 1.6},
+    {"name": "light_fire", "type": "point", "pos": [2.5, 1.4, -3], "color": "#ff8a3a", "power": 120, "engine_power": 1.2},
+    {"name": "sky", "type": "sun", "rot": [60, 0, 20], "color": "#9fb6ff", "power": 0.6}
+  ],
+  "world": {"color": "#10131c", "strength": 0.25},
+  "cams": [{"name": "cam_door", "pos": [0, 1.5, 6], "look": [0, 1.2, 0]}],
+  "colliders": [{"name": "col_pillar", "size": [0.8, 4, 0.8], "pos": [0, 2, -1.9]}, {"name": "col_crates", "size": [1.4, 2, 1.4], "pos": [-3.1, 1, -4]}]
+}

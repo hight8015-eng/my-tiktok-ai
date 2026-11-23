@@ -124,3 +124,4 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
 - sob()/listen() CU acting beats added + tested stills.
 - v7.6 system: make_ep.sh (one-command episode) + qa.py (auto QA + contact sheet). ep3 QA pass.
 - v7.6: storyboard.py (auto shot table) + new_ep.sh (series library start). Flow in SKILL v7.6.
+- Blender bridge written (build_set.py + blendset.js + test recipe), untested: waiting for the user's computer folder.
