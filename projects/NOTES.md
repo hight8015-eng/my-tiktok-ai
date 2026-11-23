@@ -94,3 +94,5 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
 - Framing rule (user): characters and held props must never be cut by the frame edge; level camera on prop beats.
 - Captions: every chunk FADES OUT at its end (0.12 s) - user request, main.js v7.4. EP3: segments 0-3 started before this change -> re-render them (delete out/seg s_00000..s_00400 .ok) before finishing.
 - User LIKES and wants to KEEP: (1) the documentary place label (title + white underline + sub line, top-left) and (2) the whisper-thought text floating from Aren to the target (whisperAt, pink-red glow). Use them every episode where they fit.
+- (ep3) Never put a // comment in the middle of a one-line statement that continues after it (it swallowed '}, { rain: false });'); check shots.js with node --check on a .mjs copy (module syntax), not .js.
+- Skills added (text-only SKILL.md, no hooks/scripts run): caveman (+ultracave, megacave, caveman-compress) from JuliusBrussee/caveman; ponytail (+audit, debt, gain, help, review) from dietrichgebert/ponytail. User wants token saving.
