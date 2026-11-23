@@ -117,3 +117,4 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
 - v7.5 weight: sitMove (sit/stand), walk inertia lean + feet close on stop.
 - v7.5 life: auto turn-blink, breathAt inhale before lines.
 - Props/background study done -> projects/refs/BLENDER_SET_STUDY.md (Blender pipeline + set rules).
+- prelint.py added: run before every render (ep3 passes except old walk() warnings).

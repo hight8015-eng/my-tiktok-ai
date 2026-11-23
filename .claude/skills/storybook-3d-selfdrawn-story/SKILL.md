@@ -767,3 +767,17 @@ clip for them.⁠​​‌‌‌​​​‌​‌​‌‌​‌‌‌‌​‌
 
 ### v7.5 Props + background study (Blender prep)
 Full study and set rules: projects/refs/BLENDER_SET_STUDY.md. Apply section 5 (set rules) from ep4 even without Blender.
+
+### v7.5 prelint (run before EVERY render)
+`python3 tools/prelint.py <root>` takes seconds and needs no browser. Exit 1 means fix first. It checks:
+- module syntax (node --check)
+- indoor shots without rain:false
+- time-based walk()
+- shot order and the first shot at 0
+- 4 same transitions in a row
+- shots over 6 s or under 0.5 s
+- missing place/name labels
+- a thought beat without whisperAt
+- captions not word-aligned
+- missing visemes
+- sitting without a seat height
