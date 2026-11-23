@@ -5,6 +5,7 @@ import { makeCast, makeChar, pose, CHARS, loadSprites, updateSprites, SPRG, ANIM
 import { SHOTS, initShots, runShot, COVER, BENCH } from './shots.js';
 import { bigWordsReset } from './text3d.js';
 import { POSES } from './acting.js';
+import { MOVES, moveAt, contactAt, moveLen, actionFromText } from './moves.js';
 const timing = await (await fetch('timing.json')).json(), project = await (await fetch('project.json')).json();
 await E.fontsReady; await loadSprites(project.cast); E.scene.add(SPRG); makeCast(project.cast); initShots(timing); Wd.redrawSign();
 const out = document.getElementById('out'), X = out.getContext('2d');
@@ -383,6 +384,7 @@ window.charpose = (o = {}) => {
   if (C.g.parent !== E.scene) E.scene.add(C.g);
   for (const k of ['_vw', '_vf', '_vft', '_hvw', '_hvf', '_hvft', '_acc', '_trail', '_roots', '_hy', '_hyT', '_hold']) delete C[k];   // view hysteresis + smoothing caches: every sheet image stands alone
   C.g.visible = true; const P = { ...(o.pose ? POSES[o.pose] : {}), p: [0, 0, 0], ry: o.ry || 0, ex: o.ex || 'neutral', head: o.head || [0, 0, 0], noBlink: true };
+  if (o.move) { const mv = moveAt(o.move, o.mt || 0, 0, { dir: o.dir || 1 }); delete mv.phase; Object.assign(P, mv); }   // v8.2 move previews
   pose(C, P); E.scene.updateMatrixWorld(true);
   // frame from the real head: first a provisional camera so the sprites are placed, then aim at the head ball / whole figure
   E.camera.position.set(0, 1, 9); E.camera.fov = 20; E.camera.updateProjectionMatrix(); E.camera.up.set(0, 1, 0); E.camera.lookAt(0, 1, 0); E.camera.updateMatrixWorld(); updateSprites(E.camera);
@@ -411,5 +413,16 @@ window.camdump = (t0 = 0, t1 = timing.end) => { const out = [], V3 = E.THREE.Vec
       chars.push({ id: C.spec.id, x: +((c.x + 1) / 2).toFixed(3), y: +((1 - c.y) / 2).toFixed(3), r: +(Math.hypot(e.x - c.x, (e.y - c.y) * 16 / 9) / 2).toFixed(3), d: +cam.position.distanceTo(B.c).toFixed(2) }); }
     out.push({ f, shot: sh.id, tr: sh.tr, cam: cam.position.toArray().map(v => +v.toFixed(3)), fwd: fwd.toArray().map(v => +v.toFixed(3)), fov: +cam.fov.toFixed(2), speed, focus: +focus.toFixed(2), dof: +(E.POST.dof || 0).toFixed(2), chars });
     prev = { pos: cam.position.clone(), fwd, up, rt, view: cam.matrixWorldInverse.clone(), proj: cam.projectionMatrix.clone() }; prevShot = sh.id; }
+  return out; };
+// v8.2 move tests (tools/moves_test.py via render.js movetest): timing, continuity, anticipation, settle, text picker
+window.movetest = () => { const out = {};
+  const F = ['lean', 'side', 'twist', 'hipY'], dist = (a, b) => Math.max(...F.map(f => Math.abs((a[f] || 0) - (b[f] || 0))), ...['hL', 'hR', 'head'].map(f => Math.max(...a[f].map((v, i) => Math.abs(v - b[f][i]) / (f === 'head' ? 60 : 1)))));
+  for (const name of Object.keys(MOVES)) { const L = moveLen(name), c = contactAt(name, 0), fr = [];
+    for (let f = 0; f <= Math.round(L * 30) + 10; f++) fr.push(moveAt(name, f / 30, 0));
+    let maxStep = 0, at = 0; for (let i = 1; i < fr.length; i++) { const d = dist(fr[i - 1], fr[i]); if (d > maxStep) { maxStep = d; at = i; } }
+    const ci = Math.round(c * 30), pre = fr[Math.max(0, ci - 3)], s0 = fr[0], s1 = fr[ci];
+    const tail = fr.slice(-6); const still = tail.every((x, i) => i === 0 || dist(tail[i - 1], x) < 1e-6);
+    out[name] = { len: +L.toFixed(2), contact: +c.toFixed(3), contactPhase: fr[ci].phase, maxStep: +maxStep.toFixed(3), maxStepAt: at, endsStill: still, ex: [s0.ex, s1.ex, tail[5].ex] }; }
+  out.picker = ['ผมเอียงคอแค่นิดเดียว', 'เขาชกเข้าที่โต๊ะ', 'ยื่นกระเป๋าให้', 'เขาหันขวับ', 'ทุกคนสะดุ้ง', 'เข่าอ่อนแล้วทรุดลง'].map(l => [l, actionFromText(l).map(a => a.move)]);
   return out; };
 window.__CHARS = CHARS; window.ready = true;

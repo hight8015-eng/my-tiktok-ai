@@ -25,6 +25,7 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.ttf': 'font/ttf
     for (const o of L) { const d = await p.evaluate((o) => window.charpose(o), o); fs.writeFileSync(path.join(out, o.file), Buffer.from(d.split(',')[1], 'base64')); }
     console.log('charpose', L.length, '->', out);
   } else if (mode === 'camdump') { fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true }); fs.writeFileSync(out, JSON.stringify(await p.evaluate(([a, b]) => window.camdump(a == null ? 0 : +a, b == null ? undefined : +b), rest))); console.log('camdump ->', out);   // v8.0: camera + cast per frame, no rendering
+  } else if (mode === 'movetest') { const r = await p.evaluate(() => window.movetest()); fs.writeFileSync(out, JSON.stringify(r, null, 1)); console.log(JSON.stringify(r));   // v8.2
   } else if (mode === 'list') { console.log(JSON.stringify(await p.evaluate(() => window.SHOTLIST))); }
   else {
     const [a, z] = rest.map(Number);

@@ -55,6 +55,20 @@ fmt = lambda m: ', '.join(f"{k}:{'/'.join(sorted(v))}" for k, v in list(m.items(
 gate('framing', 'heads cut by the frame edge (shots)', len(edge), not edge, len(edge) <= 3, '0 (unless a planned extreme close-up)', fmt(edge))
 gate('framing', 'faces under the caption band (shots)', len(capb), not capb, len(capb) <= 3, '0', fmt(capb))
 gate('framing', 'faces too small to read (shots)', len(tiny), True if len(tiny) <= 3 else False, True, 'heads >= 2.5 % of width', fmt(tiny))
+# ---- motion (v8.2 M4): from `node src/motion_audit.js out/motion_audit.json` samples, a character on screen whose root, head and both
+#      hands all move less than 2 cm/s for more than 60 % of a shot reads as frozen (the user's ep3 note: stiff payment scene)
+ma = R / 'out/motion_audit.json'
+if ma.exists():
+    S_ = json.loads(ma.read_text(encoding='utf-8')); byk = {}
+    for smp in S_: byk.setdefault((smp['shot'], smp['id']), []).append(smp)
+    frozen = {}
+    for (shid, cid), L in byk.items():
+        L.sort(key=lambda q: q['t']); still = 0
+        for a_, b_ in zip(L, L[1:]):
+            dt = max(1e-6, b_['t'] - a_['t']); v = max(np.linalg.norm(np.subtract(b_[k], a_[k])) / dt for k in ('root', 'head', 'hl', 'hr'))
+            still += v < .02
+        if len(L) > 3 and still / (len(L) - 1) > .6: frozen.setdefault(shid, []).append(cid)
+    gate('motion', 'shots with a frozen character', len(frozen), not frozen, len(frozen) <= 2, '0 (> 60 % of the shot without any movement)', fmt({k: set(v) for k, v in frozen.items()}))
 # ---- per-shot summary: longest dead stretch per shot (where a push-in is missing)
 per = {}
 for k, L in dr:

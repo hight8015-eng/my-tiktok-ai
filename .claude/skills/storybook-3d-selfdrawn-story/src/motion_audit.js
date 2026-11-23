@@ -1,4 +1,6 @@
 // node src/motion_audit.js out.json [step=3] : for every visible character, per shot: how much the head / hands / root actually move (m/s), % of time frozen (nothing moves), max hand speed
+{ const fs0 = require('fs'), p0 = require('path'); let d = __dirname;   // v8.2: the Chromium kept in a parent render/ms-playwright (E:)
+  while (!process.env.PLAYWRIGHT_BROWSERS_PATH && d !== p0.dirname(d)) { if (fs0.existsSync(p0.join(d, 'ms-playwright'))) process.env.PLAYWRIGHT_BROWSERS_PATH = p0.join(d, 'ms-playwright'); d = p0.dirname(d); } }
 const { chromium } = require('playwright'); const path = require('path'); const fs = require('fs'); const http = require('http');
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.ttf': 'font/ttf', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.glb': 'model/gltf-binary' };
 (async () => {
