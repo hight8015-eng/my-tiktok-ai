@@ -178,10 +178,12 @@ def hair_mohawk(d,view='F'):
 # ---- Thug 2 (C06): knit beanie with a folded band ----
 def hat_beanie(d,view='F'):
     c=hexc('#5c6b4e')
-    poly(d,cr([(CX-240,520),(CX-236,400),(CX-150,320),(CX,295),(CX+150,320),(CX+236,400),(CX+240,520)],6)+[(CX+240,520),(CX-240,520)],c)
-    poly(d,[(CX-246,525),(CX-246,455),(CX+246,455),(CX+246,525)],shade(c,.82),lw=10*K)
-    for x in range(-210,231,42): line(d,[(CX+x,462),(CX+x,518)],lw=4*K,col=shade(c,.6))
-    ell(d,CX,292,34,30,shade(c,1.15),lw=8*K)
+    # one connected beanie: dome that follows the skull -> curved folded cuff (same curve as the dome's rim, no overhang) -> pom-pom overlapping the crown
+    poly(d,cr([(CX-244,505),(CX-252,410),(CX-190,330),(CX-90,296),(CX,288),(CX+90,296),(CX+190,330),(CX+252,410),(CX+244,505),(CX+150,492),(CX,478),(CX-150,492)],5),c)
+    poly(d,cr([(CX-244,505),(CX-150,492),(CX,478),(CX+150,492),(CX+244,505),(CX+240,548),(CX+150,536),(CX,522),(CX-150,536),(CX-240,548)],4),shade(c,.82))
+    for x in range(-210,231,42):
+        yt=478+(x/244.0)**2*27; line(d,[(CX+x,yt+6),(CX+x,yt+40)],lw=4*K,col=shade(c,.6))
+    ell(d,CX,284,36,32,shade(c,1.15),lw=8*K)
 # ---- Thug 3 (C07): bald with a red bandana, knot tails at the side ----
 def hat_bandana(d,view='F'):
     r=hexc('#c83a3a')
