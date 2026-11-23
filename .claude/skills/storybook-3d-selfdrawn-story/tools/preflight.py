@@ -8,7 +8,7 @@ def g(ok, what, det=''): rows.append(('PASS' if ok is True else ('WARN' if ok is
 free = lambda p: shutil.disk_usage(p).free / 1e9
 T = json.loads((R / 'src/timing.json').read_text(encoding='utf-8')) if (R / 'src/timing.json').exists() else None
 g(T is not None, 'src/timing.json present')
-frames = int(round(T['end'] * 30)) if T else 0; need = frames * .012 + 3          # parts ~10 MB / 100 f at 1080x1920 + full.mp4 + audio
+frames = int(round(T['end'] * 30)) if T else 0; need = frames * .0003 + 3          # parts ~10 MB / 100 f at 1080x1920 + full.mp4 + audio
 fr = free(R); g(fr >= max(a.min_free_gb, need), f'free space on {R.drive or R.anchor}', f'{fr:.1f} GB free, need >= {max(a.min_free_gb, need):.1f} GB')
 tmp = os.environ.get('TEMP') or tempfile.gettempdir(); td = Path(tmp).resolve()
 g(td.drive.lower() != 'c:', 'TEMP is not on C:', str(td) + ('' if td.drive.lower() != 'c:' else '  -> set TEMP=TMP=E:/Claude Animate/render/tmp'))

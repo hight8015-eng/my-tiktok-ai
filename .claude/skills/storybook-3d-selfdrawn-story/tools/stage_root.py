@@ -63,7 +63,8 @@ if (root / P['vo']).exists():                                          # aud/vo.
     r = subprocess.run([sys.executable, 'tools/timing.py'], cwd=root, capture_output=True, text=True, env=env)
     if r.returncode: print('WARN: timing.py failed, no aud/vo.wav:', r.stdout[-300:], r.stderr[-300:])
     elif keep is not None:
-        same = json.loads(keep) == json.loads((src / 'timing.json').read_text(encoding='utf-8'))
+        strip = lambda d: {k: v for k, v in d.items() if k not in ('vis', 'vis_lead')}   # lipsync.py adds the visemes later
+        same = strip(json.loads(keep)) == strip(json.loads((src / 'timing.json').read_text(encoding='utf-8')))
         (src / 'timing.json').write_bytes(keep)
         if not same: print('WARN: timing.py gives a different timing.json than the committed one: kept the committed one')
 
