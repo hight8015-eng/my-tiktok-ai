@@ -8,7 +8,7 @@ from outfits import *
 from hair_library import *
 import os, hair3d
 from styles3d import STYLES as STYLES3D
-USE3D = os.environ.get('HAIR3D') == '1'   # off by default until the user approves the 3D turned views
+USE3D = os.environ.get('HAIR3D', '1') == '1'   # on: user chose the 3D turned views 2026-11-24 (HAIR3D=0 gives the old flat ones)
 out=sys.argv[1]
 CH={'C01':(hair_aren,villager,(hexc('#1b1820'),)),'C02':(cap_guard,villager,(hexc('#2c3a5c'),)),
     'C03':(hair_fire,villager,(hexc('#c8bfa8'),)),'C04':(hair_buzz,villager,(hexc('#6a5a4a'),)),

@@ -1,35 +1,35 @@
 {
  "C01": {
-  "version": 1,
-  "approved": "2026-11-23 23:17",
-  "note": "user: Approve all (EP4 cast sheets, chat 2026-11-23)",
+  "version": 2,
+  "approved": "2026-11-24 00:31",
+  "note": "user chose the right side (3D turned views, original front) 2026-11-24",
   "files": {
-   "C01-B.png": "983a8e6658ea9e6437dcf3249442b17741cbe964f90b65eb5a31c7fdb694227d",
-   "C01-F.png": "6233656266fbc4f2d593574364a1cf5ccb0f8628f00c78f7c2aa0af8d43a532f",
-   "C01-Q.png": "b58c80145c299ad84f6761e93ab82f228a799ba7dbfcc61eb8989d549da39213",
-   "C01-S.png": "e2985e2b29bc4a8ce40b7e09ce4175ccb46d704cc017a1f8d1b498697eb5d3b5"
+   "C01-B.png": "0b16c415bb58b4cd2f08fb472a9de0bb4ae2db3f5b1bd6024bf074eab41f10ed",
+   "C01-F.png": "064b1ecd1ba590c3c6380c392727df7764b731cdec282736a094c9172b3d4724",
+   "C01-Q.png": "7d0f50f19fc07c6c291d0543f230f4b732614a5d8fa6d9eb7e4a9532e3847fc9",
+   "C01-S.png": "6959e154af7f6d6ad02eba8c4c22720ea0773b7b22bab99263f37412d66a6f8e"
   }
  },
  "C04": {
-  "version": 1,
-  "approved": "2026-11-23 23:17",
-  "note": "user: Approve all (EP4 cast sheets, chat 2026-11-23)",
+  "version": 2,
+  "approved": "2026-11-24 00:31",
+  "note": "user chose the right side (3D turned views, original front) 2026-11-24",
   "files": {
-   "C04-B.png": "2f92eed35ecc7d71b7d56e03fbba6fbf42453cb2c9fcf41fb0e9f56c09b3b61f",
+   "C04-B.png": "e4925019af7809437076f0ee73813b49a241edc3ff0c4bf16658499194d43d93",
    "C04-F.png": "bd941bfbbf980a16acf0f69cea8e7c3bbf4e64dd344854953039ad442641646a",
-   "C04-Q.png": "cd5d504e4920d6bcd842440c1c9672a47804c5b3f311109c41bb0b94350f2cb2",
-   "C04-S.png": "8ea730910ed9a5df256bcbe1da561ab850cfd1de3952c28e3c27a40cf47db975"
+   "C04-Q.png": "8e7f4b69a0f6982d636b5427dcddfbc71d942d80acc20581192345656019b924",
+   "C04-S.png": "7e147604f92078f77f240ed5a3255f370fdc14aef3413276f071ffe68009bea3"
   }
  },
  "C05": {
-  "version": 1,
-  "approved": "2026-11-23 23:17",
-  "note": "user: Approve all (EP4 cast sheets, chat 2026-11-23)",
+  "version": 2,
+  "approved": "2026-11-24 00:31",
+  "note": "user chose the right side (3D turned views, original front) 2026-11-24",
   "files": {
-   "C05-B.png": "dfca47163a550e5c0868accce0104b29e64fa08aa6f88ce2463fc45c9cf0adbf",
+   "C05-B.png": "f626c4e91714735f7fd588ff09f249522f2b3f268835cdeb5cf21a48059f1ea5",
    "C05-F.png": "8915228dfa8349e3297283d9e034628a041632a7fb31f079f737255d0ec6e757",
-   "C05-Q.png": "d2b3d6b1187097808ea3dfad381d5056b4b9523343ff2880e59140edbaeeb05e",
-   "C05-S.png": "d1a5c110d6884080e512118ff09275a8cec43b02121e7ed747843c7f1c565b2f"
+   "C05-Q.png": "7caf38faab1f264854f02d6e1f95a4ae90286eb01beb6913166dc857c1f27ed0",
+   "C05-S.png": "7bb01bea8ff32ab76b4918d477111cbeec483acc48cd680453176a5ae77407cb"
   }
  },
  "C06": {
@@ -55,14 +55,25 @@
   }
  },
  "C09": {
-  "version": 1,
-  "approved": "2026-11-23 23:17",
-  "note": "user: Approve all (EP4 cast sheets, chat 2026-11-23)",
+  "version": 2,
+  "approved": "2026-11-24 00:31",
+  "note": "user chose the right side (3D turned views, original front) 2026-11-24",
   "files": {
-   "C09-B.png": "5f6324401944d6f2464aad0c72401513888e3a5af0f93cf69aa78821e05806ab",
+   "C09-B.png": "87f48f3669dc4fc8d130568008bed6ea7028af4b75fa12a6e2f5b46325e83313",
    "C09-F.png": "9212d5cc8e4f48abc6cbc307bca2ea1fac06d33dbfd6c343ed491a2429b0cee3",
-   "C09-Q.png": "0d306204b43db231f03bcedebf6b78ac1ba3fd10ec65a88d21ab69b98fc35d7d",
-   "C09-S.png": "c41047d39923625d86705a597cdde8397362e9ffa9a11f5e2434c2f9ba0355a8"
+   "C09-Q.png": "8ea662fdf0751ce8fc52b645386d899474ae4e471461f8764f9251f7d0c52f28",
+   "C09-S.png": "d79d86f84c8f4ea4debe267f64c9387c8f509e784cc3a0a2462e03576aebe569"
+  }
+ },
+ "C10": {
+  "version": 1,
+  "approved": "2026-11-24 00:31",
+  "note": "user chose the right side (3D turned views, original front) 2026-11-24",
+  "files": {
+   "C10-B.png": "f045a31f98e23b0802215f980822cf5177ce7ccf4b038fa78be2ee9c360555cf",
+   "C10-F.png": "64f03d38e4bd1f385edb521d356fc0cd2b45e652129c2a581819a146119ace7a",
+   "C10-Q.png": "29397efd4e51eae0547ba85f09267e2c9c5441c74fa06b0157ea3f7e97a21fd1",
+   "C10-S.png": "de74c7fadca6be3bd4e010445bbb8439409112e88ddf59b2ce191ca0289e1565"
   }
  }
 }
