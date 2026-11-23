@@ -29,85 +29,6 @@ def hl(d,pts,col):  # soft hair highlight streak
 def strands(d,curves,col,w=5):  # flowing strand lines (refs): darker curved lines along the hair
     for c in curves: line(d,cr(c,6,closed=False),lw=w*K,col=shade(col,.62))
 def back_cap(d,col,lo=760): poly(d,cr([(CX-238,560),(CX-232,420),(CX-150,345),(CX,320),(CX+150,345),(CX+232,420),(CX+238,560),(CX+220,lo),(CX,lo+30),(CX-220,lo)]),col)
-# ---- v8 (user rule 2026-11-23): hair turns WITH the head. The F drawing is mapped onto the skull as a sphere (centre CX,600, radius 250)
-# and rotated by the view's yaw (Q 38 deg, S 78 deg; the face looks to screen-left in Q/S, so the back of the head is +x). What turns off
-# the far edge stays on the rim; the strip of skull that turns into view at the back is covered by back_mass() in the same colour, so the
-# hair still reads as one piece that grows from the whole head.
-HEAD_R = 218;   # the drawn head ball (blob R 205, 3 % wider, + ink)
-YAW = {'F': 0, 'Q': 38, 'S': 78, 'B': 0}
-def _hr(y): return math.sqrt(max(HEAD_R ** 2 - (y - 600) ** 2, 70 ** 2))
-def vt(pts, view):
-    phi = math.radians(YAW.get(view, 0))
-    if not phi: return list(pts)
-    out = []
-    for x, y in pts:
-        r = _hr(y); u = (x - CX) / r; over = 0.0
-        if abs(u) > 1: over = (abs(u) - 1) * r * math.copysign(1, u); u = math.copysign(1, u)
-        th = max(-math.pi / 2, math.asin(u) - phi)
-        out.append((CX + r * math.sin(th) + over * (math.cos(phi) if over > 0 else 1), y))
-    return out
-def _ink_mask(d, a, x0, y0, col, lw=LW):
-    """paint boolean mask `a` (pixel box at x0,y0) as one piece: weighted ink (offset shadow + edge line, like poly()) + fill"""
-    import numpy as np
-    from scipy import ndimage
-    from PIL import Image as _I
-    im = d._image; ox, oy = int(lw * .55), int(lw * .5)
-    sh = np.zeros_like(a); sh[oy:, ox:] = a[:-oy, :-ox]
-    half = lw * .6 / 2; din = ndimage.distance_transform_edt(a); dout = ndimage.distance_transform_edt(~a)
-    ink = (sh & ~a) | ((din > 0) & (din <= half)) | ((dout > 0) & (dout <= half)); fill = a & ~ink
-    box = im.crop((x0, y0, x0 + a.shape[1], y0 + a.shape[0]))
-    box.paste(_I.new('RGB', box.size, INK), (0, 0), _I.fromarray((ink * 255).astype('uint8')))
-    box.paste(_I.new('RGB', box.size, col), (0, 0), _I.fromarray((fill * 255).astype('uint8')))
-    im.paste(box, (x0, y0))
-def union_fill(d, shapes, col, lw=LW):
-    """several polygons (head-design coords) filled as ONE piece with ONE ink outline (no seams where they overlap)"""
-    import numpy as np
-    from PIL import Image as _I, ImageDraw as _D
-    pts = [P(s_) for s_ in shapes]; xs = [x for p_ in pts for x, _ in p_]; ys = [y for p_ in pts for _, y in p_]
-    pad = int(lw * 2); x0, y0 = max(0, int(min(xs)) - pad), max(0, int(min(ys)) - pad); x1, y1 = min(W, int(max(xs)) + pad), min(H, int(max(ys)) + pad)
-    m = _I.new('L', (x1 - x0, y1 - y0), 0); md = _D.Draw(m)
-    for p_ in pts: md.polygon([(x - x0, y - y0) for x, y in p_], fill=255)
-    _ink_mask(d, np.asarray(m) > 127, x0, y0, col, lw)
-# Hairline on the skull (user reference 2026-11-23: front / side / back hairline chart): design-y of the hair edge at an angle around the
-# head measured from the face (0 = forehead, 90 = ear, 180 = nape). Forehead -> temple corner -> sideburn in front of the ear ->
-# up behind the ear -> nape. front / side / back come from each hairstyle.
-def hairline(front=474, side=620, back=690):
-    return [(0, front), (50, front + 12), (68, side - 50), (84, side), (100, side - 34), (118, back - 22), (150, back - 4), (180, back)]
-def hair_shape(d, F, col, view, hl=None, puff=18):
-    """one hairstyle for any view, as ONE connected piece that turns with the head:
-       F view = the drawn front outline F (unchanged); Q / S / B = the scalp region above the hairline on a 3D head (sphere r 250 at
-       CX,600) seen from that view, with `puff` of hair thickness at the silhouette, + the style's own shapes from F turned on the skull
-       (spikes, curls, the fringe in front)."""
-    if view == 'F': poly(d, F, col); return
-    import numpy as np
-    from PIL import Image as _I, ImageDraw as _D
-    HL = hairline(*(hl or (474, 620, 690))); angs = [a_ for a_, _ in HL]; ysl = [y_ for _, y_ in HL]
-    yaw = math.radians({'Q': 38, 'S': 78, 'B': 180}[view])
-    R, t = HEAD_R, puff
-    x0, y0 = int((CX - R - t - 120) * K), int((600 - R - t - 260) * K); x1, y1 = int((CX + R + t + 120) * K), int((600 + R + t) * K)
-    gx, gy = np.meshgrid(np.arange(x0, x1) / K - CX, np.arange(y0, y1) / K - 600)
-    rr = np.hypot(gx, gy); onb = rr <= R; shell = (rr > R) & (rr <= R + t)
-    z = np.sqrt(np.clip(R * R - gx * gx - gy * gy, 0, None)); sx = np.where(onb, gx, gx * R / np.maximum(rr, 1e-6)); sz = np.where(onb, z, 0)
-    # face direction on screen after the turn: (-sin yaw, cos yaw) in (x, z); azimuth of each surface point from the face
-    fx, fz = -math.sin(yaw), math.cos(yaw)
-    az = np.degrees(np.abs(np.arctan2(sx * fz - sz * fx, sx * fx + sz * fz)))
-    edge = np.interp(az, angs, ysl) - 600
-    sy = np.where(onb, gy, gy * R / np.maximum(rr, 1e-6))
-    cap = (onb | shell) & (sy < edge)
-    # the style's own outline from F, turned (mirrored for B: the back shows the spikes, not the fringe)
-    Fv = [(2 * CX - x, y) for x, y in F] if view == 'B' else vt(F, view)
-    m = _I.new('L', (x1 - x0, y1 - y0), 0); _D.Draw(m).polygon([(x * K - x0, y * K - y0) for x, y in Fv], fill=255)
-    style = np.asarray(m) > 127
-    if view == 'B': style &= ~onb                                              # from behind only what sticks out of the skull
-    _ink_mask(d, cap | style, x0, y0, col)
-def back_mass(d, col, view, lo=640, top=330, puff=18):
-    """the back of the hair that turns into view in Q / S: from the rotated right edge of the front drawing out to the skull rim (+puff)"""
-    phi = math.radians(YAW.get(view, 0))
-    if not phi: return
-    ys = [top + (lo - top) * i / 24 for i in range(25)]
-    inner = [(CX + _hr(y) * math.sin(math.pi / 2 - phi) * .96, y) for y in ys]
-    outer = [(CX + (_hr(y) + puff) * (1 - .1 * ((y - top) / (lo - top)) ** 2), y) for y in reversed(ys)]
-    poly(d, cr(inner + outer, 4), col)
 # ---- Kael: dark swept villain hair, sharp layered bangs over one eye ----
 KAEL=[(CX-236,610),(CX-246,500),(CX-300,430),(CX-210,410),(CX-250,330),(CX-150,345),(CX-150,250),(CX-50,315),(CX+10,215),(CX+70,310),(CX+170,250),(CX+165,340),(CX+270,330),(CX+215,410),(CX+262,470),(CX+232,520),
       (CX+238,600),(CX+190,520),(CX+150,560),(CX+120,480),(CX+40,545),(CX+10,470),(CX-60,600),(CX-90,500),(CX-170,640),(CX-180,520)]
@@ -117,9 +38,9 @@ AREN=[(CX-238,620),(CX-252,500),(CX-310,440),(CX-222,415),(CX-262,330),(CX-160,3
       (CX+246,640),(CX+196,560),(CX+170,620),(CX+120,500),(CX+70,600),(CX+30,480),(CX-40,560),(CX-80,470),(CX-150,580),(CX-175,500),(CX-200,600)]
 def hair_aren(d,view='F'):
     c=hexc('#16131d')
-    hair_shape(d,cr(AREN,6),c,view,hl=(470,640,700))
-    if view=='B': return
-    strands(d,[vt(s_,view) for s_ in [[(CX-120,330),(CX-80,430),(CX-90,540)],[(CX+20,250),(CX+40,380),(CX+60,560)],[(CX+150,300),(CX+170,420),(CX+170,560)],[(CX-210,420),(CX-205,520),(CX-205,590)]]],hexc('#2a2a3c'),4)
+    if view=='B': back_cap(d,c,720); poly(d,cr([(CX-170,350),(CX-170,245),(CX-60,318),(CX-10,205),(CX+60,300),(CX+175,240),(CX+168,335)]),c); return
+    poly(d,cr(AREN,6),c)
+    strands(d,[[(CX-120,330),(CX-80,430),(CX-90,540)],[(CX+20,250),(CX+40,380),(CX+60,560)],[(CX+150,300),(CX+170,420),(CX+170,560)],[(CX-210,420),(CX-205,520),(CX-205,590)]],hexc('#2a2a3c'),4)
 # ---- Guard (C02): navy peaked cap, black visor, gold badge ----
 def cap_guard(d,view='F'):
     navy=hexc('#1f2c4a'); gold=hexc('#e2b23c'); blk=hexc('#121018'); band=hexc('#111827')
@@ -132,29 +53,31 @@ def cap_guard(d,view='F'):
 FIRE=[(CX-236,600),(CX-250,470),(CX-300,330),(CX-200,380),(CX-210,200),(CX-110,320),(CX-60,120),(CX+10,300),(CX+90,110),(CX+120,310),(CX+230,190),(CX+200,370),(CX+300,320),(CX+250,470),(CX+236,600),(CX+190,500),(CX+110,450),(CX,470),(CX-110,450),(CX-190,500)]
 def hair_fire(d,view='F'):
     c=hexc('#ee7a22')
-    hair_shape(d,cr(FIRE,5),c,view,hl=(480,600,650))
-    for tip in [(CX-210,215),(CX-62,140),(CX+88,130),(CX+226,205)]: poly(d,cr(vt([(tip[0]-28,tip[1]+90),(tip[0],tip[1]),(tip[0]+28,tip[1]+90),(tip[0],tip[1]+60)],view),4),hexc('#ffd04a'),lw=0)
-    if view!='B': strands(d,[vt(s_,view) for s_ in [[(CX-140,330),(CX-120,420)],[(CX+20,330),(CX+10,430)],[(CX+150,340),(CX+140,430)]]],c,4)
-def skull_cap(d,col,hair_y=474,lw=None,view='F'):
+    if view=='B': back_cap(d,c,700)
+    poly(d,cr(FIRE,5),c)
+    for tip in [(CX-210,215),(CX-62,140),(CX+88,130),(CX+226,205)]: poly(d,cr([(tip[0]-28,tip[1]+90),(tip[0],tip[1]),(tip[0]+28,tip[1]+90),(tip[0],tip[1]+60)],4),hexc('#ffd04a'),lw=0)
+    if view!='B': strands(d,[[(CX-140,330),(CX-120,420)],[(CX+20,330),(CX+10,430)],[(CX+150,340),(CX+140,430)]],c,4)
+def skull_cap(d,col,hair_y=474,lw=None):
     """hair that hugs the head: outer edge follows the skull (centre CX,600), hairline across the forehead - one connected piece (fixes the flat floating band / temple gaps)"""
     outer=arc(CX,600,236,232,193,347,36); inner=[(CX+198,548),(CX+140,505),(CX+62,hair_y+6),(CX,hair_y),(CX-62,hair_y+6),(CX-140,505),(CX-198,548)]
-    hair_shape(d,outer+inner,col,view,hl=(hair_y,560,640),puff=4)
+    poly(d,outer+inner,col)
 # ---- Strong man (C04): very short dark buzz cut ----
 def hair_buzz(d,view='F'):
     c=hexc('#3a3236')
-    skull_cap(d,c,470,view=view)
-    if view=='B': return
+    if view=='B': back_cap(d,c,700); return
+    skull_cap(d,c,470)
     import random; r=random.Random(4)
     for _ in range(26):
         x=CX+r.uniform(-170,170); y=r.uniform(400,500)
-        if (x-CX)**2/225**2+(y-600)**2/200**2<1 and y<530-abs(x-CX)*.12: [(x,y)]=vt([(x,y)],view); ell(d,x,y,4,4,shade(c,1.5),lw=0)
+        if (x-CX)**2/225**2+(y-600)**2/200**2<1 and y<530-abs(x-CX)*.12: ell(d,x,y,4,4,shade(c,1.5),lw=0)
 # ---- Thug leader (C05): magenta mohawk fin, shaved sides ----
 def hair_mohawk(d,view='F'):
     c=hexc('#c2348a'); g=hexc('#4a3a40')
-    skull_cap(d,g,476,view=view)
+    if view=='B': back_cap(d,g,700)
+    skull_cap(d,g,476)
     fin=[(CX-66,520),(CX-84,380),(CX-124,258),(CX-44,282),(CX-32,168),(CX+20,262),(CX+62,156),(CX+72,268),(CX+142,236),(CX+86,370),(CX+68,520),(CX+10,500),(CX-30,510)]
-    fin=vt(fin,view)
-    poly(d,cr(fin,5),c); hl(d,vt([(CX-30,300),(CX+10,262),(CX+20,282),(CX-20,322)],view),c)
+    if view=='S': fin=[(x-40,y) for x,y in fin]
+    poly(d,cr(fin,5),c); hl(d,[(CX-30,300),(CX+10,262),(CX+20,282),(CX-20,322)],c)
 # ---- Thug 2 (C06): knit beanie with a folded band ----
 def hat_beanie(d,view='F'):
     c=hexc('#5c6b4e')
@@ -183,10 +106,12 @@ NOAH=[(CX-236,600),(CX-254,490),(CX-228,395),(CX-150,345),(CX-70,320),(CX-26,236
       (CX+198,545),(CX+152,490),(CX+60,466),(CX-34,478),(CX-104,532),(CX-148,610),(CX-182,540),(CX-204,590)]
 def hair_noah(d,view='F'):
     c=hexc('#cdd0da')
-    hair_shape(d,cr(NOAH,6),c,view,hl=(470,620,700))
-    if view=='B': return
-    hl(d,vt([(CX+10,340),(CX+110,352),(CX+160,390),(CX+70,376)],view),hexc('#f4f6fb'))
-    strands(d,[vt(s_,view) for s_ in [[(CX-80,350),(CX-86,440),(CX-96,540)],[(CX+30,330),(CX+40,420),(CX+50,490)],[(CX+150,350),(CX+170,430),(CX+176,500)],[(CX-200,440),(CX-210,520),(CX-206,570)]]],hexc('#8f93a6'),4)
+    if view=='B':
+        back_cap(d,c,720); poly(d,cr([(CX-170,350),(CX-166,250),(CX-60,320),(CX-12,232),(CX+60,312),(CX+176,262),(CX+170,350)],4),c)
+        poly(d,cr([(CX-40,690),(CX-26,740),(CX+8,785),(CX+40,740),(CX+56,690)],5),c); return
+    poly(d,cr(NOAH,6),c)
+    hl(d,[(CX+10,340),(CX+110,352),(CX+160,390),(CX+70,376)],hexc('#f4f6fb'))
+    strands(d,[[(CX-80,350),(CX-86,440),(CX-96,540)],[(CX+30,330),(CX+40,420),(CX+50,490)],[(CX+150,350),(CX+170,430),(CX+176,500)],[(CX-200,440),(CX-210,520),(CX-206,570)]],hexc('#8f93a6'),4)
 
 # ---- Prisoner p1 (C10, ep4): brown curly mop, ONE connected bumpy outline that sits on the skull (the gossip scene needs a silhouette
 #      that differs from the beanie thug: round curly cloud vs a flat cuffed dome) ----
@@ -198,16 +123,17 @@ def _curls(cx, cy, rx, ry, a0, a1, n, amp):
     return pts
 def hair_curly(d, view='F'):
     c = hexc('#6b4630')
+    if view == 'B':
+        poly(d, cr(_curls(CX, 520, 262, 250, 0, 360, 22, .07)[:-1], 5), c); return
     # user rule 2026-11-23: hair flows down the sides and JOINS the head (curly sideburns to the ear line), never a cap sitting on top
     left = [(CX - 232, 628), (CX - 262, 566), (CX - 248, 512), (CX - 276, 452)]
     top = _curls(CX, 470, 268, 215, 196, 344, 14, .08)                     # bumpy crown from the left temple over to the right temple
     right = [(CX + 276, 452), (CX + 248, 512), (CX + 264, 566), (CX + 234, 628)]
     fringe = [(CX + 206, 592), (CX + 196, 520), (CX + 150, 470), (CX + 96, 500), (CX + 40, 456), (CX - 20, 496), (CX - 80, 458), (CX - 140, 502), (CX - 194, 522), (CX - 206, 592)]
-    hair_shape(d, cr(left + top + right + fringe, 5), c, view, hl=(470, 640, 705), puff=28)
-    if view == 'B': return
-    hl(d, vt([(CX - 120, 345), (CX - 40, 318), (CX + 30, 330), (CX - 50, 352)], view), c)
+    poly(d, cr(left + top + right + fringe, 5), c)
+    hl(d, [(CX - 120, 345), (CX - 40, 318), (CX + 30, 330), (CX - 50, 352)], c)
     for x, y in [(CX - 150, 390), (CX - 60, 360), (CX + 40, 372), (CX + 130, 396), (CX - 100, 430), (CX + 90, 436)]:
-        line(d, vt(arc(x, y, 26, 20, 200, 340, 8), view), lw=4 * K, col=shade(c, .62))
+        line(d, arc(x, y, 26, 20, 200, 340, 8), lw=4 * K, col=shade(c, .62))
 
 # ---------- registry (v8 M3): what charsheet.py shows as the Hair Library. silhouette = the outline family (characters in one scene
 # must differ by SILHOUETTE, not only colour - SKILL.md "HAIR LIBRARY" rule); back = how the B view is drawn.
