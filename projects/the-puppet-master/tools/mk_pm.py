@@ -6,6 +6,9 @@ import sys
 from pm_draw import *
 from outfits import *
 from hair_library import *
+import os, hair3d
+from styles3d import STYLES as STYLES3D
+USE3D = os.environ.get('HAIR3D') == '1'   # off by default until the user approves the 3D turned views
 out=sys.argv[1]
 CH={'C01':(hair_aren,villager,(hexc('#1b1820'),)),'C02':(cap_guard,villager,(hexc('#2c3a5c'),)),
     'C03':(hair_fire,villager,(hexc('#c8bfa8'),)),'C04':(hair_buzz,villager,(hexc('#6a5a4a'),)),
@@ -19,6 +22,9 @@ for cid,spec in CH.items():
         im=Image.new('RGB',(W,H),GREEN); d=ImageDraw.Draw(im)
         cos(im,d,v,*args); d=ImageDraw.Draw(im)
         if back and v!='B': back(d,v)
-        SEED[0]=int(cid[1:])*7+3; ball(d,flip=(v=='B')); hat(d,v)
+        SEED[0]=int(cid[1:])*7+3; ball(d,flip=(v=='B'))
+        if USE3D and cid in STYLES3D and v!='F':   # front = the original drawing; turned views = the 3D model built from it
+            for h in STYLES3D[cid](): hair3d.render(d,h,v)
+        else: hat(d,v)
         im.resize((1080,1920),Image.LANCZOS).save(f'{out}/{cid}-{v}.png')
 print('ok')

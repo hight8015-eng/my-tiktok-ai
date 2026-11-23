@@ -124,3 +124,30 @@ def render(d, hair, view, mirror=False):
         if pts[0][2] < 20: continue
         q = [((CX + sgn * x) * K, (600 - y) * K) for x, y, _ in pts[:-1]] + [((CX + sgn * pts[-1][0]) * K * .3 + (CX + sgn * pts[-2][0]) * K * .7, (600 - pts[-1][1]) * K * .3 + (600 - pts[-2][1]) * K * .7)]
         dd.line(q, fill=shade(hair.col, .55), width=int(4 * K), joint='curve')
+
+def from_outline(hair, F, kind='spike', ring=(60, -60, 120, -120, 180), fringe_from=470, lock_r=30, fringe_max=585):
+    """build the 3D pieces of an ORIGINAL front-view hair outline (its control points), so the turned views are the same hairstyle:
+       - every spike TIP of the outline (a point further from the head centre than both neighbours, outside the skull) = a spike
+         seen at the front view's silhouette (z = 0), as wide as the outline between its two valleys; tips on the upper part are
+         repeated around the head at the `ring` angles, so the spikes and the volume exist all round the head
+       - every bang TIP (lowest point between two higher ones, hanging over the forehead) = a lock lying on the forehead"""
+    pts = list(F); n = len(pts); rad = [math.hypot(x - CX, 600 - y) for x, y in pts]
+    for i, (x, y) in enumerate(pts):
+        X, Y = x - CX, 600 - y; r = rad[i]
+        if r > R + hair.t * .3 and r >= rad[i - 1] and r >= rad[(i + 1) % n]:
+            # half-width = distance to the nearer neighbouring control point (the valley on each side)
+            dn = min(math.hypot(x - pts[i - 1][0], y - pts[i - 1][1]), math.hypot(x - pts[(i + 1) % n][0], y - pts[(i + 1) % n][1]))
+            w = max(30.0, min(90.0, .62 * dn)); ux, uy = X / r, Y / r
+            base = (ux * (R * .82), uy * (R * .82), 0.0); tip = (X, Y, 0.0)
+            for a in [0.0] + (list(ring) if Y > 40 else []):
+                c, s_ = math.cos(math.radians(a)), math.sin(math.radians(a))
+                rb = (base[0] * c, base[1], -base[0] * s_); rt = (tip[0] * c, tip[1], -tip[0] * s_)
+                if kind == 'puff': hair.parts.append(('ball', tuple((rb[k] * .3 + rt[k] * .7) for k in range(3)), w * 1.05)); continue
+                mid = tuple(rb[k] + (rt[k] - rb[k]) * .55 for k in range(3))
+                hair.parts.append(('tube', [rb, mid, rt], [w * 1.15, w * .62, 2.0], abs(a) < 90))
+        elif fringe_from < y <= fringe_max and abs(X) < R * .8 and y >= pts[i - 1][1] and y >= pts[(i + 1) % n][1]:
+            zt = math.sqrt(max(R * R - X * X - Y * Y, 0)) + 10
+            if kind == 'puff': hair.parts.append(('ball', (X, Y + lock_r * .5, zt - 6), lock_r)); continue
+            top_y = 600 - fringe_from + 30; zb = math.sqrt(max(R * R - X * X - top_y * top_y, 0)) + hair.t * .6
+            hair.parts.append(('tube', [(X, top_y, zb), (X, (top_y + Y) / 2, (zb + zt) / 2 + 6), (X, Y, zt)], [lock_r * 1.3, lock_r * .8, 3], True))
+    return hair
