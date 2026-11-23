@@ -1,4 +1,4 @@
-// node render.js stills <out_dir> <t1> <t2> ... | node render.js video <out.mp4> <startFrame> <endFrame>
+// node render.js stills <out_dir> <t1> <t2> ... | node render.js video <out.mp4> <startFrame> <endFrame> | node render.js steps <out.json> [t0 t1]  (walkAlong heel strikes, no rendering)
 const { chromium } = require('playwright'); const { spawn } = require('child_process'); const path = require('path'); const fs = require('fs'); const http = require('http');
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.ttf': 'font/ttf', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg' };
 (async () => {
@@ -18,6 +18,7 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.ttf': 'font/ttf
   } else if (mode === 'refsheet') { fs.mkdirSync(out, { recursive: true });
     for (const id of ['C01', 'C02', 'C03', 'C04', 'C05', 'C06']) for (const [v, ry] of [['F', 0], ['Q', -45], ['S', -90], ['B', 180]]) {
       const d = await p.evaluate((o) => window.refsheet(o), { id, ry }); fs.writeFileSync(`${out}/${id}-${v}.png`, Buffer.from(d.split(',')[1], 'base64')); console.log(id, v); }
+  } else if (mode === 'steps') { fs.writeFileSync(out, JSON.stringify(await p.evaluate(([a, b]) => window.steps(a == null ? 0 : +a, b == null ? undefined : +b), rest), null, 0)); console.log('steps ->', out);
   } else if (mode === 'list') { console.log(JSON.stringify(await p.evaluate(() => window.SHOTLIST))); }
   else {
     const [a, z] = rest.map(Number);

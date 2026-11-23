@@ -150,5 +150,8 @@ export function walkAlong(t, path, o = {}) {
   let ph = 0, k = 1, [px, pz] = path(t0); const dt = (t - t0) / N;
   for (let i = 1; i <= N; i++) { const [x, z] = path(t0 + dt * i), dd = Math.hypot(x - px, z - pz); k = dt > 0 ? kAt(dd / dt) : k;
     ph += Math.PI * dd / (2 * st * k * LK * s); px = x; pz = z; }               // phase advances by ground covered / step length
+  if (globalThis.STEPLOG && !o.nolog && t - t0 > 1 / 30) {                                  // v7.5 footstep log (render.js steps): a heel strike = ph crosses k*PI
+    const prev = walkAlong(t - 1 / 30, path, { ...o, nolog: true }).walk.ph; if (Math.floor(ph / Math.PI) > Math.floor(prev / Math.PI))
+      globalThis.STEPLOG.push({ t: globalThis.FRAME_T ?? t, id: o.id || '', foot: Math.floor(ph / Math.PI) % 2 ? 'L' : 'R', x: path(t)[0], z: path(t)[1], k: +k.toFixed(2) }); }
   return { walk: { ph, stride: st * k } };
 }

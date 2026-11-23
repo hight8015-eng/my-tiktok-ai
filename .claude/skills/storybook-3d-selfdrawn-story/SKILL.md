@@ -727,3 +727,13 @@ clip for them.⁠​​‌‌‌​​​‌​‌​‌‌​‌‌‌‌​‌
 - NEW `walkAlong(t, path, { stride, LK, s })` in acting.js: the phase comes from the ground covered. path(t) -> [x, z], the same function used for p. The stride shrinks as the character slows, so stops have no skate. Simulated slide is 0.02 m/s.
   - Usage: `import { LK } from './chars.js'; ...walkAlong(t, (u) => [0, AW(u)], { stride: .21, LK, s: C.spec.s })`
 - RULE: every walk in a new shot uses walkAlong with the SAME path as p. Use the old walk() only for walking in place (treadmill/camera-locked).
+
+### v7.5 Footsteps land on the contact frame automatically
+- walkAlong logs every heel strike (ph crossing k*PI) when `globalThis.STEPLOG` is on. Pass `id: 'aren'` to tag the character.
+- `node src/render.js steps out/steps.json [t0 t1]` runs only the shots' pose code once per video frame (no rendering, a few seconds) and writes [{t, id, foot, x, z, k, shot}].
+- `python3 tools/footsteps.py out/steps.json aud/steps.wav <end_s> [lib.wav] [gain_db]` builds a stereo footstep track:
+  - Grains are cut from sfx_library/steps_m01.wav and played round-robin.
+  - Each hit varies by +-1.5 dB and +-3% pitch. Left and right feet pan slightly apart.
+  - Hits are softer while the stride shrinks (stopping).
+  - The attack lands 0-9 ms after the contact frame (tested on 19 hits in ep3 W05-W07).
+- Mix aud/steps.wav into the SFX bus in audio.py about -4 dB under the VO. Do not hand-place footsteps any more.

@@ -360,4 +360,10 @@ window.refsheet = (o = {}) => {
 };
 const LEGY = .95;
 window.SHOTLIST = SHOTS.map(s => [s.id, s.t0, s.t1]);
+// v7.5 footstep times without rendering: run every shot's pose code once per video frame and collect walkAlong heel strikes
+window.steps = (t0 = 0, t1 = timing.end) => { globalThis.STEPLOG = []; const out = [];
+  for (let f = Math.round(t0 * 30); f <= Math.round(t1 * 30); f++) { const t = f / 30; let i = SHOTS.length - 1; for (let k = 0; k < SHOTS.length; k++) if (t < SHOTS[k].t1) { i = k; break; }
+    const sh = SHOTS[i]; globalThis.FRAME_T = t; const n = globalThis.STEPLOG.length; try { sh.fn(t - sh.t0, t); } catch (e) { }
+    for (const e of globalThis.STEPLOG.splice(n)) out.push({ ...e, t: +t.toFixed(3), shot: sh.id }); }
+  globalThis.STEPLOG = null; return out; };
 window.ready = true;
