@@ -356,7 +356,11 @@ export function pose(C, P = {}) {
     const dr = .012 * A; hR.y += dr * Math.sin(t * 2.3 + sd + .6); hL.y += dr * Math.sin(t * 2.3 + sd + 1.1);
     if (!P.hR && !w) hR.z += .018 * A * Math.sin(t * 1.15 + sd); if (!P.hL && !w) hL.z += .018 * A * Math.sin(t * 1.15 + sd + 2.1); } // v4.22 resting arms sway a little, never frozen
   C.handL = ik(C.aL, hL, AL, AL, P.pL || [-.3, -.45, -.85]); C.handR = ik(C.aR, hR, AL, AL, P.pR || [.3, -.45, -.85]); // v4.19 elbows bend down/back like a real arm, not out sideways
-  const bl = P.blink ?? (ANIM.on && !P.still ? blinkAt(ANIM.t, (seedOf(C) * 7) % 5) : false); // v4.22 everyone blinks on their own rhythm unless the shot says otherwise
+  { // v7.5 turn blink (animation rule: a character blinks as a fast head/body turn starts; it also hides the view swap)
+    const T_ = ANIM.t || 0, yw = (P.ry || 0) * D2R + C.torso.rotation.y + C.head.rotation.y, dt_ = T_ - (C._hyT ?? -9);
+    if (dt_ > 0 && dt_ < .1 && Math.abs(yw - C._hy) / dt_ > 3 && T_ > (C._tbEnd ?? -9) + .35) C._tbEnd = T_ + .1;
+    if (dt_ !== 0) { C._hy = yw; C._hyT = T_; } }
+  const bl = P.blink ?? (ANIM.on && !P.still ? blinkAt(ANIM.t, (seedOf(C) * 7) % 5) || ((ANIM.t || 0) < (C._tbEnd ?? -9) && (ANIM.t || 0) > (C._tbEnd ?? -9) - .11) : false); // v4.22 everyone blinks on their own rhythm unless the shot says otherwise
   C.walkPh = w && !P.still ? w.ph * Math.min(1, (w.stride ?? .22) / .22) : null;
   if (C.is2D) C.f2 = [P.ex || 'neutral', !!bl, P.talk || 0, P.look, P.eyeC || ''];
   else { const tex = faceTexFor(C.spec, P.ex || 'neutral', !!P.blink, P.talk || 0, P.look); if (C.faceM.map !== tex) { C.faceM.map = tex; C.faceM.needsUpdate = true; } }

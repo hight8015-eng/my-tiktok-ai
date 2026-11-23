@@ -756,3 +756,11 @@ clip for them.⁠​​‌‌‌​​​‌​‌​‌‌​‌‌‌‌​‌
   - Tested with 9 stills.
 - Walk inertia (walkAlong now also returns `lean`): the upper body follows the speed through an under-damped spring. It leans about 4 deg into a walk. On a stop it pitches forward to about 8 deg, rocks back to -2, then settles in about 0.8 s. The stride follows a smoothed speed, and the feet close over 0.3 s after he stops. Pass extra lean as `o.lean`, not as a separate `lean:`.
 - RULE: walk paths should ease in and out, not stop dead. A dead stop is caught by the spring, but it reads as a bump.
+
+### v7.5 Small life rules (automatic)
+- Turn blink: a head or body yaw faster than 3 rad/s starts a 0.1 s blink, at most once per 0.45 s. This animation rule also hides the head-view swap. It is automatic in chars.js pose(); `P.blink` still overrides it.
+- `breathAt(TM, t)` (chars.js) is for ON-SCREEN speakers only, not the narrator.
+  - Before a line that follows a pause of 0.4 s or more, the speaker inhales: the chest swells and the chin lifts a little. Peak 0.74, about 0.1 s before the first sound.
+  - The held breath eases out over 0.3 s once he speaks.
+  - After a long line (more than 2 s), a small exhale settles the body.
+  - Use: `live(lt, A, { ..., talk: lipAt(TM, t), inhale: breathAt(TM, t) })`. It needs `live` (the idle layer).

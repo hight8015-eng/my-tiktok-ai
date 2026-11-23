@@ -343,7 +343,7 @@ export function pose(C, P = {}) {
   let gR = [0, 0, 0], gL = [0, 0, 0], hd2 = [0, 0, 0];
   if (live) { // idle: breathing bob, slow weight shift, head drift; talking: nods + small hand gestures
     const br = Math.sin(t * 2.3 + sd), ta = tk > 0 ? 1 : 0;
-    C.hips.position.y += .009 * br * A; C.br = .016 * br * A;
+    C.hips.position.y += .009 * br * A; C.br = .016 * br * A + .05 * (P.inhale || 0); C.head.rotation.x -= .05 * Math.max(0, P.inhale || 0);
     C.torso.rotation.z += (.045 * noise1(t * .45 + sd) + .02 * ta * noise1(t * 3.1 + sd)) * A; C.torso.rotation.x += (.015 * br + .03 * ta * noise1(t * 2.7 + sd * 2)) * A;
     hd2 = [(.04 * noise1(t * .6 + sd * 3) + .12 * ta * Math.max(-.3, noise1(t * 5.2 + sd))) * A, .09 * noise1(t * .35 + sd * 5) * A, (.08 * noise1(t * .5 + sd * 7) + .05 * ta * noise1(t * 2.2 + sd)) * A];
     C.head.rotation.x += hd2[0]; C.head.rotation.y += hd2[1]; C.head.rotation.z += hd2[2];
@@ -356,7 +356,11 @@ export function pose(C, P = {}) {
     const dr = .012 * A; hR.y += dr * Math.sin(t * 2.3 + sd + .6); hL.y += dr * Math.sin(t * 2.3 + sd + 1.1);
     if (!P.hR && !w) hR.z += .018 * A * Math.sin(t * 1.15 + sd); if (!P.hL && !w) hL.z += .018 * A * Math.sin(t * 1.15 + sd + 2.1); } // v4.22 resting arms sway a little, never frozen
   C.handL = ik(C.aL, hL, AL, AL, P.pL || [-.3, -.45, -.85]); C.handR = ik(C.aR, hR, AL, AL, P.pR || [.3, -.45, -.85]); // v4.19 elbows bend down/back like a real arm, not out sideways
-  const bl = P.blink ?? (ANIM.on && !P.still ? blinkAt(ANIM.t, (seedOf(C) * 7) % 5) : false); // v4.22 everyone blinks on their own rhythm unless the shot says otherwise
+  { // v7.5 turn blink (animation rule: a character blinks as a fast head/body turn starts; it also hides the view swap)
+    const T_ = ANIM.t || 0, yw = (P.ry || 0) * D2R + C.torso.rotation.y + C.head.rotation.y, dt_ = T_ - (C._hyT ?? -9);
+    if (dt_ > 0 && dt_ < .1 && Math.abs(yw - C._hy) / dt_ > 3 && T_ > (C._tbEnd ?? -9) + .35) C._tbEnd = T_ + .1;
+    if (dt_ !== 0) { C._hy = yw; C._hyT = T_; } }
+  const bl = P.blink ?? (ANIM.on && !P.still ? blinkAt(ANIM.t, (seedOf(C) * 7) % 5) || ((ANIM.t || 0) < (C._tbEnd ?? -9) && (ANIM.t || 0) > (C._tbEnd ?? -9) - .11) : false); // v4.22 everyone blinks on their own rhythm unless the shot says otherwise
   C.walkPh = w && !P.still ? w.ph * Math.min(1, (w.stride ?? .22) / .22) : null;
   if (C.is2D) C.f2 = [P.ex || 'neutral', !!bl, P.talk || 0, P.look, P.eyeC || ''];
   else { const tex = faceTexFor(C.spec, P.ex || 'neutral', !!P.blink, P.talk || 0, P.look); if (C.faceM.map !== tex) { C.faceM.map = tex; C.faceM.needsUpdate = true; } }
@@ -535,6 +539,13 @@ export function hitStop(lt, at, frames = 4) { const d = frames / 30; return lt <
 //   Only the character who is speaking gets it; listeners keep talk 0 (their mouth = expression). o.k < .5 = mumble (A -> a, E -> a).
 export function lipAt(TM, t, o = {}) { const v = TM.vis; if (!v) return talkQ(TM.env || [], t); const c = v[Math.round(t * 30)] || 'X';
   return (o.k ?? 1) < .5 ? ({ A: 'a', E: 'a', O: 'a' }[c] || c) : c; }
+// v7.5 breathAt: speakers INHALE before a line (chest/shoulders rise, chin lifts a touch) when the line follows a pause >= .4 s,
+// and let the air out (small settle) when a long line ends. Returns -0.4..1; pass as P.inhale (put(..., { inhale: breathAt(TM, t) })).
+export function breathAt(TM, t) { let m = breath1(TM, Math.round(t * 30)); if (m >= 0) for (let k = 1; k <= 9; k++) m = Math.max(m, breath1(TM, Math.round(t * 30) - k) * (1 - k / 10)); return m; } // the held breath eases out over .3 s once he speaks
+function breath1(TM, f) { const v = TM.vis; if (!v) return 0; const sp = (c) => c && c !== 'X';
+  if (!sp(v[f])) { let n = 1; while (n <= 12 && !sp(v[f + n])) n++; if (n <= 12) { let q = 0; while (q < 12 && !sp(v[f - q - 1])) q++; if (q + n >= 14) { const u = 1 - (n - 1) / 12; return Math.sin(Math.PI * Math.min(1, u * 1.15)) * .5 + .5 * u; } }
+    let b = 0; while (b < 20 && !sp(v[f - b - 1]) && f - b - 1 >= 0) b++; if (b < 20) { let L = 0; while (L < 120 && sp(v[f - b - 1 - L])) L++; if (L > 60) return -.4 * Math.sin(Math.PI * b / 20); } }
+  return 0; }
 export function talkQ(env, t) { const f0 = Math.floor(t * 30 / 3) * 3; let e = 0; for (let k = -1; k < 3; k++) e += (env[f0 + k] || 0) * (k < 0 ? .5 : 1); e /= 3.5; return e > .5 ? 1 : e > .2 ? .5 : 0; }
 // auto blink helper: returns true during a 0.12 s blink every ~3.3 s (seeded)
 export function blinkAt(t, seed = 0) { const p = 3.1 + (seed % 3) * .4; const u = ((t + seed * 1.37) % p); return u < .12; }
