@@ -186,3 +186,31 @@ export function walkAlong(t, path, o = {}) {
   const vN = Math.hypot(...[0, 1].map(i => path(t)[i] - path(t - h)[i])) / h, lean = Math.max(-8, Math.min(10, 4 * Math.min(1, vN / vF) + (x - vN) * 7));
   return { walk: { ph, stride: st * k * Math.max(0, 1 - ts / .3) }, lean: (o.lean ?? 0) + lean };
 }
+
+// ================= v7.5 camera moves studied from Higgsfield presets (pure math; feed camX(pos, look, pos, look, 0, fov)) =================
+// dollyZoom (vertigo): the subject keeps its size while the background stretches/compresses. Shock, realisation, dread.
+//   dir 'in'  = dolly IN + fov WIDENS (background rushes away);  'out' = dolly OUT + fov narrows (background looms).
+//   subj = [x,y,z] look point, from = [x,y,z] start camera position, fov0 -> fov1 (deg). Returns { pos, look, fov }.
+export function dollyZoom(lt, at, dur, subj, from, fov0 = 40, fov1 = 70) {
+  const u = sm((lt - at) / dur), fov = fov0 + (fov1 - fov0) * u, d0 = Math.hypot(from[0] - subj[0], from[1] - subj[1], from[2] - subj[2]);
+  const d = d0 * Math.tan(fov0 * Math.PI / 360) / Math.tan(fov * Math.PI / 360), k = d / d0;
+  return { pos: subj.map((s, i) => s + (from[i] - s) * k), look: subj, fov };
+}
+// arcCam (orbit / lazy susan / 180 reveal): circle the subject at radius r, height h, from angle a0 to a1 (deg, 0 = +z side).
+// Ease in-out; ease = false for a constant-speed orbit (bullet-time style when the action is frozen / slowed).
+export function arcCam(lt, at, dur, subj, r, h, a0, a1, ease = true) {
+  const u = ease ? sm((lt - at) / dur) : cl((lt - at) / dur), a = (a0 + (a1 - a0) * u) * Math.PI / 180;
+  return { pos: [subj[0] + Math.sin(a) * r, subj[1] + h, subj[2] + Math.cos(a) * r], look: subj };
+}
+// snorricam: the camera rides on the character (chest rig) facing him; the world sways behind. Panic, drunk, running scared.
+//   C = the character (its world position + ry), dist in front, height. bob adds the step jolt (pass walk phase).
+export function snorriCam(p, ry, dist = .9, h = 1.25, ph = 0) {
+  const a = ry * Math.PI / 180, j = .02 * Math.abs(Math.sin(ph));
+  return { pos: [p[0] + Math.sin(a) * dist, p[1] + h + j, p[2] + Math.cos(a) * dist], look: [p[0], p[1] + h * .95 + j, p[2]] };
+}
+// throughCam: fly THROUGH an opening (window, bars, door gap) from one space into the next: links two nearby places
+// without a cut (rule 2). Quadratic path from A through the gap G to B, slow-fast-slow; look leads the path.
+export function throughCam(lt, at, dur, A, G, B, lookB) {
+  const u = sm((lt - at) / dur), q = (t) => [0, 1, 2].map(i => (1 - t) * (1 - t) * A[i] + 2 * (1 - t) * t * (2 * G[i] - (A[i] + B[i]) / 2) + t * t * B[i]);
+  const p = q(u), n = q(Math.min(1, u + .08)); return { pos: p, look: u > .85 ? lookB : n.map((v, i) => v + (n[i] - p[i]) * 6) };
+}

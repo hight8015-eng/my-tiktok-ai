@@ -781,3 +781,32 @@ Full study and set rules: projects/refs/BLENDER_SET_STUDY.md. Apply section 5 (s
 - captions not word-aligned
 - missing visemes
 - sitting without a seat height
+
+### v7.5 Screen safe zones (1080x1920; union of the TikTok, Reels and Shorts UI). Checked on ep3 at 4.6 s: OK.
+- Keep clear: the top 220 px (status bar, tabs); the bottom 480 px (caption, music, comment bar); the right 160 px between y 700 and 1440 (like/comment/share buttons). Keep text at least 60 px from the left edge.
+- Ours: captions centre at about y 1230 and the name label sits at x 70, y 1020-1100. Both are inside the safe area. Keep a 2-line caption above y 1440.
+- Key action (a face, a held prop, a hit) must not sit in the bottom 25% or behind the right-hand buttons. Proof image: projects/refs/study/safe_zones_ep3.jpg.
+
+### v7.5 Cover rules (study of our ep1-3 covers vs the reference grids)
+- GRID CROP: the TikTok and IG profile grids show only the centre 3:4 (IG 4:5) of the 9:16 cover, so about 240-285 px is cut top and bottom. Our series line "THE PUPPET MASTER" at y about 210 is CUT in the grid. Keep ALL cover text and the face within y 300-1620.
+- Problems in ep1-3: dark images (ep2/ep3); faces small, half-shadowed or cut by the title (Victor ep3); a calm expression (closed-eye smile) that sells no conflict.
+- Rules:
+  - The face is at least 35% of the width, with a strong emotion that matches the hook (fear, rage, smirk, shock).
+  - Rim light plus a bright subject on a darker background.
+  - One story object that raises a question: the gun, the 047 paper, the red thread.
+  - The episode title is 2-4 words. "ตอน N" stays in the same yellow at the same place.
+  - One accent colour per episode.
+  - The title never covers the face.
+- Optional: two faces in conflict (hero vs villain), split left/right.
+
+### v7.5 Camera moves from the Higgsfield preset study (acting.js, pure math -> camX(pos, look, pos, look, 0, fov))
+- The higgsfield.ai pages are blocked by this environment's network. The names come from search results and general knowledge of their preset library: Dolly In/Out, Crash Zoom, Dolly Zoom, Bullet Time, FPV Drone, 360 Orbit / Lazy Susan, Arc, Crane Up/Down, Snorricam, Robo Arm, Through Object, Whip Pan, Handheld, Rack Focus, Overhead, Hyperlapse.
+- They also have effect presets: disintegration, explosion, set on fire, levitation, melting, thunder.
+- ADDED, all tested numerically:
+  - `dollyZoom(lt, at, dur, subj, from, fov0, fov1)`: vertigo; the subject size stays constant. Use it for shock/realisation.
+  - `arcCam(lt, at, dur, subj, r, h, a0, a1, ease)`: orbit / 180 reveal. Use ease = false for bullet time on a frozen hit.
+  - `snorriCam(p, ry, dist, h, ph)`: chest-rig camera for panic or running.
+  - `throughCam(lt, at, dur, A, gap, B, lookB)`: fly through a window, bars or a door into the next space. This links places without a cut (rule 2).
+- We ALREADY had dolly/push, whip, handheld drift (camDrift), DOF and crane-like Bezier moves.
+- Crash zoom: NOT added. The user banned "zoom cut-ins". Ask before using one.
+- The effect presets map to the Blender VFX library (BLENDER_SET_STUDY.md section 4.5).
