@@ -109,3 +109,4 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
   list - write it as a table first.
 - Instagram monetisation flag 'บัญชีเป็นที่รู้จักและน่าเชื่อถือ' = account authenticity (identity/notability), not a
   video problem; user must verify identity / appeal in-app (once per 90 days). Keep content original.
+- RULE (user): EVERY episode gets place labels (each new location) + name labels (each key character's first appearance) in project.json 'labels' - never drop them when copying a project. Whisper-thought text whenever the script has a thought-sending beat.
