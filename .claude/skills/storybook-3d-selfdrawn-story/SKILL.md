@@ -714,3 +714,16 @@ clip for them.⁠​​‌‌‌​​​‌​‌​‌‌​‌‌‌‌​‌
 - Now chars.js picks `viewH` from the head bone (C.hc) yaw, at most 1 view from the body (neck limit), stepped >= 2 frames like the body. It also has its own mirror and turn squash. C.viewH is exposed.
 - So: to sell a turn, rotate the head first (gaze/turn on the head), then the body. Tested on pm3 W02 stills: no pop, head leads one view.
 - Still open: per-view hat art for hats drawn as separate layers (current hats are painted on the head sprite, so they turn with it).
+
+### v7.5 Walk: no more foot skating (walk study)
+- BUG found: +z is the character's forward, but the walk foot path had the LIFTED foot moving back and the planted foot moving forward (a moonwalk). The walk phase also came from time (`walk(t, rate)`), not from distance. Simulated planted-foot slide in ep3 W06: 2.83 m/s at a body speed of 1.45 m/s.
+- Fixes in chars.js:
+  - Sign: the swing foot now goes forward.
+  - The planted foot moves LINEARLY back (constant speed), and the swing keeps a smooth arc.
+  - Arms counter the legs at heel strike (`-cos(ph-.35)`), not 90 degrees off.
+  - Shoulders twist against the forward foot. The head counters the twist.
+  - The torso rocks over the PLANTED foot.
+  - Run was already correct and is unchanged.
+- NEW `walkAlong(t, path, { stride, LK, s })` in acting.js: the phase comes from the ground covered. path(t) -> [x, z], the same function used for p. The stride shrinks as the character slows, so stops have no skate. Simulated slide is 0.02 m/s.
+  - Usage: `import { LK } from './chars.js'; ...walkAlong(t, (u) => [0, AW(u)], { stride: .21, LK, s: C.spec.s })`
+- RULE: every walk in a new shot uses walkAlong with the SAME path as p. Use the old walk() only for walking in place (treadmill/camera-locked).

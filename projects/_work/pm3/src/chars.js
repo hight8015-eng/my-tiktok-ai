@@ -319,18 +319,21 @@ export function pose(C, P = {}) {
   C.torso.rotation.set((P.lean || 0) * D2R, (P.twist || 0) * D2R, (P.side || 0) * D2R, 'YXZ');
   const hd = P.head || [0, 0, 0]; C.head.rotation.set(hd[0] * D2R, hd[1] * D2R, hd[2] * D2R, 'YXZ');
   if (w && !P.still) { const ph = w.ph, k = Math.min(1, (w.stride ?? .22) / .22); // hips twist with the stride, body rocks side to side, head stays steady and lags the bob
-    C.torso.rotation.y += Math.sin(ph) * (w.run ? .2 : .14) * k; C.torso.rotation.z += Math.sin(ph) * .045 * k; C.torso.rotation.x += (w.run ? .24 * w.run : .06 * k);
-    C.head.rotation.y -= Math.sin(ph) * .1 * k; C.head.rotation.x += Math.sin(2 * ph - .7) * .035 * k; }
+    const tw = w.run ? Math.sin(ph) * .2 * k : Math.cos(ph) * .14 * k; C.torso.rotation.y += tw; C.torso.rotation.z += (w.run ? 1 : -1) * Math.sin(ph) * .045 * k; // v7.5 walk: shoulders counter the forward foot at heel strike, weight rocks over the planted foot C.torso.rotation.x += (w.run ? .24 * w.run : .06 * k);
+    C.head.rotation.y -= tw * .7; C.head.rotation.x += Math.sin(2 * ph - .7) * .035 * k; }
   let fL = P.fL, fR = P.fR;
   if (!fL) { if (P.sit) { const sh = (P.seat ?? .45) / s; fL = [-.14, -sh + .03, .5]; fR = [.14, -sh + .03, .5]; }
     else if (w && w.run) { const st = (w.stride ?? .3) * w.run * LK, ft = (a) => { const sw = Math.cos(a); // v4.3 run (model sheet 11-20): bent knees, back foot kicks high, front foot reaches
         return [-hy + .03 + Math.pow(Math.max(0, sw), 1.4) * .3 * LK * w.run + Math.max(0, -sw) * Math.max(0, Math.sin(a)) * .04, Math.sin(a) * st - Math.max(0, sw) * .08 * w.run]; };
       const L_ = ft(w.ph), R_ = ft(w.ph + Math.PI); fL = [-.11, L_[0], L_[1]]; fR = [.11, R_[0], R_[1]]; }
     else if (w) { const st = (w.stride ?? .22) * LK, lift = (x) => { const v = Math.max(0, x); return v * v * .13 * LK; }; // v4.22 stride/lift scale with leg length // smooth foot arcs (no hard corners at plant/lift)
-      fL = [-.12, -hy + .03 + lift(Math.sin(w.ph)), Math.sin(w.ph + Math.PI / 2) * st]; fR = [.12, -hy + .03 + lift(-Math.sin(w.ph)), -Math.sin(w.ph + Math.PI / 2) * st]; }
+      // v7.5 planted foot: while a foot is down (no lift) it moves LINEARLY back under the hips (constant speed = body speed when ph comes
+      // from distance, see acting.js walkAlong), so it does not skate; the swing keeps the smooth cosine arc.
+      const fz = (u) => { u = ((u % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI); return u < Math.PI ? Math.cos(u) : -1 + 2 * (u - Math.PI) / Math.PI; };
+      fL = [-.12, -hy + .03 + lift(Math.sin(w.ph)), -fz(w.ph) * st]; fR = [.12, -hy + .03 + lift(-Math.sin(w.ph)), -fz(w.ph + Math.PI) * st]; } // v7.5 sign fix: +z is forward, the lifted foot now swings FORWARD (it used to moonwalk)
     else { fL = [-.13, -hy + .03, .03]; fR = [.13, -hy + .03, .03]; } }
   ik(C.lL, new THREE.Vector3(...fL), LL, LL, [0, 0, 1]); ik(C.lR, new THREE.Vector3(...fR), LL, LL, [0, 0, 1]);
-  const sw = w ? Math.sin(w.ph - .35) * .16 * Math.min(1.4, (w.stride ?? .22) / .22) : 0; // arms trail the legs slightly
+  const sw = w ? -Math.cos(w.ph - .35) * .16 * Math.min(1.4, (w.stride ?? .22) / .22) : 0; // arms trail the legs slightly
   const live = ANIM.on && !P.still && (P.visible ?? true), t = ANIM.t, sd = seedOf(C), tk = P.talk || 0, A = ANIM.k;
   let gR = [0, 0, 0], gL = [0, 0, 0], hd2 = [0, 0, 0];
   if (live) { // idle: breathing bob, slow weight shift, head drift; talking: nods + small hand gestures

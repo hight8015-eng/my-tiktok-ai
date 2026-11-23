@@ -138,3 +138,17 @@ export const SITUATIONS = {
   'wins': ['fistPump', 'cheer'], 'mocks': ['armsCrossed', 'laugh'], 'begs': ['offer', 'heartbreak'], 'waits nervously': ['anxious'],
   'plans a scheme': ['chinRub', 'whisper'], 'gives up': ['exhausted', 'slump'], 'explains': ['explain'], 'refuses': ['stopHand', 'armsCrossed'],
 };
+
+// v7.5 walkAlong: walk phase from the DISTANCE actually travelled (not from time), so feet never skate when the
+// character speeds up, slows down or stops. path(t) -> [x, z] world position of the character at shot time t
+// (the same function the shot uses for p). s = character scale (spec.s), stride as in walk(), LK = leg factor (chars.js LK).
+// One walk cycle (2 steps) covers 4 * stride * LK * s of ground. Stops cleanly: no distance, no stepping.
+//   const path = (t) => [lerp(-2, 1, ease(t / 3)), 0]; put(C, SET, { p: [...], ...walkAlong(lt, path, { s: .6 }) })
+export function walkAlong(t, path, o = {}) {
+  const st = (o.stride ?? .22), LK = o.LK ?? 1, s = o.s ?? .6, t0 = o.t0 ?? 0, vF = o.vFull ?? .6, N = Math.max(8, Math.ceil((t - t0) * 60));
+  const kAt = (v) => Math.max(.25, Math.min(1, v / vF));                     // stride shrinks as he slows to a stop
+  let ph = 0, k = 1, [px, pz] = path(t0); const dt = (t - t0) / N;
+  for (let i = 1; i <= N; i++) { const [x, z] = path(t0 + dt * i), dd = Math.hypot(x - px, z - pz); k = dt > 0 ? kAt(dd / dt) : k;
+    ph += Math.PI * dd / (2 * st * k * LK * s); px = x; pz = z; }               // phase advances by ground covered / step length
+  return { walk: { ph, stride: st * k } };
+}

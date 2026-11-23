@@ -112,3 +112,4 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
 - RULE (user): EVERY episode gets place labels (each new location) + name labels (each key character's first appearance) in project.json 'labels' - never drop them when copying a project. Whisper-thought text whenever the script has a thought-sending beat.
 - User: characters STAY 2D. Blender (on the user's computer, later) = sets/props/atmosphere only.
 - v7.5 (study, no render): head sprite view now follows head yaw (hair/hat turn with head). See SKILL v7.5.
+- v7.5 walk fix: old walk moonwalked (feet slid 2.8 m/s). Use walkAlong(t, path) for every walk from ep4. See SKILL v7.5.
