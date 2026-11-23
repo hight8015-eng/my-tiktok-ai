@@ -186,3 +186,64 @@ export function walkAlong(t, path, o = {}) {
   const vN = Math.hypot(...[0, 1].map(i => path(t)[i] - path(t - h)[i])) / h, lean = Math.max(-8, Math.min(10, 4 * Math.min(1, vN / vF) + (x - vN) * 7));
   return { walk: { ph, stride: st * k * Math.max(0, 1 - ts / .3) }, lean: (o.lean ?? 0) + lean };
 }
+
+// ================= v7.5 camera moves studied from Higgsfield presets (pure math; feed camX(pos, look, pos, look, 0, fov)) =================
+// dollyZoom (vertigo): the subject keeps its size while the background stretches/compresses. Shock, realisation, dread.
+//   dir 'in'  = dolly IN + fov WIDENS (background rushes away);  'out' = dolly OUT + fov narrows (background looms).
+//   subj = [x,y,z] look point, from = [x,y,z] start camera position, fov0 -> fov1 (deg). Returns { pos, look, fov }.
+export function dollyZoom(lt, at, dur, subj, from, fov0 = 40, fov1 = 70) {
+  const u = sm((lt - at) / dur), fov = fov0 + (fov1 - fov0) * u, d0 = Math.hypot(from[0] - subj[0], from[1] - subj[1], from[2] - subj[2]);
+  const d = d0 * Math.tan(fov0 * Math.PI / 360) / Math.tan(fov * Math.PI / 360), k = d / d0;
+  return { pos: subj.map((s, i) => s + (from[i] - s) * k), look: subj, fov };
+}
+// arcCam (orbit / lazy susan / 180 reveal): circle the subject at radius r, height h, from angle a0 to a1 (deg, 0 = +z side).
+// Ease in-out; ease = false for a constant-speed orbit (bullet-time style when the action is frozen / slowed).
+export function arcCam(lt, at, dur, subj, r, h, a0, a1, ease = true) {
+  const u = ease ? sm((lt - at) / dur) : cl((lt - at) / dur), a = (a0 + (a1 - a0) * u) * Math.PI / 180;
+  return { pos: [subj[0] + Math.sin(a) * r, subj[1] + h, subj[2] + Math.cos(a) * r], look: subj };
+}
+// snorricam: the camera rides on the character (chest rig) facing him; the world sways behind. Panic, drunk, running scared.
+//   C = the character (its world position + ry), dist in front, height. bob adds the step jolt (pass walk phase).
+export function snorriCam(p, ry, dist = .9, h = 1.25, ph = 0) {
+  const a = ry * Math.PI / 180, j = .02 * Math.abs(Math.sin(ph));
+  return { pos: [p[0] + Math.sin(a) * dist, p[1] + h + j, p[2] + Math.cos(a) * dist], look: [p[0], p[1] + h * .95 + j, p[2]] };
+}
+// throughCam: fly THROUGH an opening (window, bars, door gap) from one space into the next: links two nearby places
+// without a cut (rule 2). Quadratic path from A through the gap G to B, slow-fast-slow; look leads the path.
+export function throughCam(lt, at, dur, A, G, B, lookB) {
+  const u = sm((lt - at) / dur), q = (t) => [0, 1, 2].map(i => (1 - t) * (1 - t) * A[i] + 2 * (1 - t) * t * (2 * G[i] - (A[i] + B[i]) / 2) + t * t * B[i]);
+  const p = q(u), n = q(Math.min(1, u + .08)); return { pos: p, look: u > .85 ? lookB : n.map((v, i) => v + (n[i] - p[i]) * 6) };
+}
+// otsPair (over-the-shoulder shot / reverse shot, 180-degree rule kept): A and B = [x,y,z] floor positions of the two speakers.
+// Returns { a: cam over A's shoulder looking at B, b: the reverse over B's shoulder looking at A }. Both cameras stay on the SAME
+// side of the A-B line (side = +1 / -1 picks which side), so eyelines match and nobody jumps across the screen.
+// The near shoulder/head fills one edge, dark and out of focus (set DOF focus on the far face). h = eye height, back/off in metres.
+export function otsPair(A, B, side = 1, h = 1.35, back = .7, off = .42, up = .12) {
+  const dx = B[0] - A[0], dz = B[2] - A[2], L = Math.hypot(dx, dz) || 1, fx = dx / L, fz = dz / L, px = -fz * side, pz = fx * side;
+  const cam = (P, f, look) => ({ pos: [P[0] - f[0] * back + px * off, P[1] + h + up, P[2] - f[1] * back + pz * off], look: [look[0], look[1] + h * .97, look[2]] });
+  return { a: cam(A, [fx, fz], B), b: cam(B, [-fx, -fz], A) };
+}
+
+// ================= v7.5 close-up acting beats (from the drama-short study: faces carry the scene in CU / ECU) =================
+// sob(lt, k, o): crying that MOVES (refs: quivering open mouth, wet eyes, breath hitches), not a frozen sad face.
+//  - lip quiver: the mouth flicks between shapes 6-8 times a second (o.talk wins if the character is speaking)
+//  - sob hitches: irregular sharp inhales (chest jerks up, head tips back) every .7-1.3 s, then a shaky release
+//  - head tremor: a small fast shake; tears rise with k. Spread into put(): { ...base, ...sob(lt, .8) }
+export function sob(lt, k = 1, o = {}) {
+  const s = o.seed || 0, h = (x) => { const v = Math.sin(x * 12.9898 + s * 78.233) * 43758.5453; return v - Math.floor(v); };
+  let t0 = 0, i = 0; while (t0 + .7 + .6 * h(i) <= lt && i < 999) { t0 += .7 + .6 * h(i); i++; }
+  const u = lt - t0, hitch = u < .12 ? Math.sin(Math.PI * u / .12) : 0, rel = u >= .12 && u < .5 ? Math.exp(-(u - .12) * 8) : 0;
+  const q = Math.floor(lt * 14 + s) % 4, mouth = ['a', 'E', 'a', 'M'][q];
+  return { ex: o.ex || 'despair', tears: Math.min(1, .35 + .65 * k), talk: o.talk ?? mouth, inhale: .9 * hitch * k,
+    head: [-(6 * hitch - 2 * rel) * k + (o.head ? o.head[0] : 0), (o.head ? o.head[1] : 0) + 1.2 * k * Math.sin(lt * 31 + s), (o.head ? o.head[2] : 0) + 1.5 * k * Math.sin(lt * 23 + s * 2)],
+    hipY: .012 * hitch * k, lean: (o.lean || 0) + 3 * k - 4 * hitch * k };
+}
+// listen(lt, mood, o): the REACTION shot of the one who is not talking (refs cut to the listener as often as the speaker).
+//  mood 'hurt' | 'angry' | 'doubt' | 'shock': a held expression plus slow involuntary motion (brow knit, a swallow, a small
+//  head shake or nod, eyes dropping) so a 1-2 s close-up is never a still frame.
+export function listen(lt, mood = 'hurt', o = {}) {
+  const s = o.seed || 0, M = { hurt: ['hurt', 'despair', -1], angry: ['annoyedHard', 'coldFury', 0], doubt: ['skeptical', 'suspicious', 1], shock: ['surprised', 'dread', 0] }[mood] || ['stoic', 'stoic', 0];
+  const ex = exShift(lt, o.turnAt ?? .9, M[0], M[1]), shake = M[2] < 0 ? 0 : 1.6 * Math.sin(lt * 5.5 + s) * Math.exp(-((lt - 1.1) ** 2) * 6);
+  const drop = M[2] < 0 ? [ .3, .5 * sm((lt - .6) / .5)] : [0, 0];                                            // hurt: the eyes fall
+  return { ...ex, head: [(M[2] > 0 ? 2.5 * Math.sin(lt * 2.2 + s) : 1.5 * sm(lt / 1.2)), shake * 3, (M[2] > 0 ? 4 : 0)], look: drop, inhale: mood === 'shock' ? .8 * Math.exp(-((lt - .25) ** 2) * 30) : 0 };
+}

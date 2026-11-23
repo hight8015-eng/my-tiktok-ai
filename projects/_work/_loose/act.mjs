@@ -222,3 +222,27 @@ export function otsPair(A, B, side = 1, h = 1.35, back = .7, off = .42, up = .12
   const cam = (P, f, look) => ({ pos: [P[0] - f[0] * back + px * off, P[1] + h + up, P[2] - f[1] * back + pz * off], look: [look[0], look[1] + h * .97, look[2]] });
   return { a: cam(A, [fx, fz], B), b: cam(B, [-fx, -fz], A) };
 }
+
+// ================= v7.5 close-up acting beats (from the drama-short study: faces carry the scene in CU / ECU) =================
+// sob(lt, k, o): crying that MOVES (refs: quivering open mouth, wet eyes, breath hitches), not a frozen sad face.
+//  - lip quiver: the mouth flicks between shapes 6-8 times a second (o.talk wins if the character is speaking)
+//  - sob hitches: irregular sharp inhales (chest jerks up, head tips back) every .7-1.3 s, then a shaky release
+//  - head tremor: a small fast shake; tears rise with k. Spread into put(): { ...base, ...sob(lt, .8) }
+export function sob(lt, k = 1, o = {}) {
+  const s = o.seed || 0, h = (x) => { const v = Math.sin(x * 12.9898 + s * 78.233) * 43758.5453; return v - Math.floor(v); };
+  let t0 = 0, i = 0; while (t0 + .7 + .6 * h(i) <= lt && i < 999) { t0 += .7 + .6 * h(i); i++; }
+  const u = lt - t0, hitch = u < .12 ? Math.sin(Math.PI * u / .12) : 0, rel = u >= .12 && u < .5 ? Math.exp(-(u - .12) * 8) : 0;
+  const q = Math.floor(lt * 14 + s) % 4, mouth = ['a', 'E', 'a', 'M'][q];
+  return { ex: o.ex || 'despair', tears: Math.min(1, .35 + .65 * k), talk: o.talk ?? mouth, inhale: .9 * hitch * k,
+    head: [-(6 * hitch - 2 * rel) * k + (o.head ? o.head[0] : 0), (o.head ? o.head[1] : 0) + 1.2 * k * Math.sin(lt * 31 + s), (o.head ? o.head[2] : 0) + 1.5 * k * Math.sin(lt * 23 + s * 2)],
+    hipY: .012 * hitch * k, lean: (o.lean || 0) + 3 * k - 4 * hitch * k };
+}
+// listen(lt, mood, o): the REACTION shot of the one who is not talking (refs cut to the listener as often as the speaker).
+//  mood 'hurt' | 'angry' | 'doubt' | 'shock': a held expression plus slow involuntary motion (brow knit, a swallow, a small
+//  head shake or nod, eyes dropping) so a 1-2 s close-up is never a still frame.
+export function listen(lt, mood = 'hurt', o = {}) {
+  const s = o.seed || 0, M = { hurt: ['hurt', 'despair', -1], angry: ['annoyedHard', 'coldFury', 0], doubt: ['skeptical', 'suspicious', 1], shock: ['surprised', 'dread', 0] }[mood] || ['stoic', 'stoic', 0];
+  const ex = exShift(lt, o.turnAt ?? .9, M[0], M[1]), shake = M[2] < 0 ? 0 : 1.6 * Math.sin(lt * 5.5 + s) * Math.exp(-((lt - 1.1) ** 2) * 6);
+  const drop = M[2] < 0 ? [ .3, .5 * sm((lt - .6) / .5)] : [0, 0];                                            // hurt: the eyes fall
+  return { ...ex, head: [(M[2] > 0 ? 2.5 * Math.sin(lt * 2.2 + s) : 1.5 * sm(lt / 1.2)), shake * 3, (M[2] > 0 ? 4 : 0)], look: drop, inhale: mood === 'shock' ? .8 * Math.exp(-((lt - .25) ** 2) * 30) : 0 };
+}

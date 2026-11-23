@@ -827,3 +827,13 @@ Film grammar that makes these hold 100K+ likes, mapped to our 2D engine:
 7. **Caption: one KEY phrase highlighted in yellow per line** ("SIX YEARS", "THIRD MAJOR THING", "JAMES"). We have `*word*` highlight markers. Use one per line, on the hook phrase.
 8. **The hook line comes first, as a question or accusation** ("six years together, are you ever gonna marry me?"). The conflict is clear in 3 s.
 - Our characters stay 2D. Use OTS plus close-up escalation in every dialogue scene from ep4.
+- NEW close-up acting beats (acting.js), tested with 5 close-up stills (study/sob_listen_test.jpg):
+  - `sob(lt, k, { seed, ex, talk, head, lean })`: a crying face that moves.
+    - The lip quivers at about 14 shape flicks per second.
+    - Irregular sob hitches every 0.7-1.3 s: the chest jerks up, the head tips back, then a shaky release.
+    - A small head tremor, and tears scaled by k.
+  - `listen(lt, 'hurt'|'angry'|'doubt'|'shock', { seed, turnAt })`: the reaction shot of the listener.
+    - The expression shifts under a blink.
+    - Slow involuntary motion: a nod, eyes dropping, a small head shake, a shock inhale.
+    - A 1-2 s close-up is never a still frame.
+  - Use: `put(C, SET, live(lt, 1, { p, ry, ...sob(lt, .8) }))`
