@@ -123,3 +123,4 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
 - Drama-short study (4 clips 11-23): OTS shot/reverse (otsPair), cut per speaker, CU escalation, key-phrase yellow.
 - sob()/listen() CU acting beats added + tested stills.
 - v7.6 system: make_ep.sh (one-command episode) + qa.py (auto QA + contact sheet). ep3 QA pass.
+- v7.6: storyboard.py (auto shot table) + new_ep.sh (series library start). Flow in SKILL v7.6.

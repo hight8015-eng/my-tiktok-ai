@@ -848,3 +848,18 @@ Film grammar that makes these hold 100K+ likes, mapped to our 2D engine:
   - WARNINGS: picture frozen >= 2.5 s, audio silent >= 2 s, the cover grid-crop reminder.
   - It also writes out/qa_sheet.jpg: one frame every 2 s with the safe-zone lines.
   - ep3 passed in 44 s.
+- `python3 tools/storyboard.py <project>` turns the voice timing into out/storyboard.md (a shot table) and out/shots_skeleton.js (S() stubs).
+  - It runs automatically at the end of make_ep's timing stage.
+  - Built-in rules: the hook gets >= 5 framings in the first 10 s (long lines split at caption chunks).
+  - Shot sizes rotate. Cue words pick the size: emotion → CU, object/number → INSERT, place → WIDE, quotes → OTS, action → MED.
+  - Transitions vary on a place change; a time jump gets a dissolve.
+  - Hints are added for thought beats (whisperAt) and for place/name labels.
+  - It is a DRAFT: review the table, then write shots.js. On ep3 timing it gave 42 shots, 5 framings in the first 10 s.
+- `bash tools/new_ep.sh <last_episode> <new_dir>` is the series library. The next episode starts from the last one:
+  - It copies the cast, sprites, sets (zc.js), cover/post settings and the audio script (as tools/audio_ep.py), and keeps the old shots as shots_prev.js.
+  - It clears the timing/labels and refreshes the engine and tools from the skill only where the skill copy is newer.
+- Episode flow from ep4:
+  1. `new_ep.sh pm3 pm4`
+  2. `make_ep.sh pm4 "<name>" vo.mp3`, which stops after the storyboard
+  3. write src/shots.js
+  4. `make_ep.sh pm4 "<name>"`, which runs lint → render → audio → finish → cover → qa

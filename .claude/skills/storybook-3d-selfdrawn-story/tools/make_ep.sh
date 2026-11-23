@@ -35,7 +35,7 @@ run() { # name, command...
 }
 st_voice() { if [ -n "$VO" ]; then bash tools/tighten.sh "$VO" aud/vo.wav "$SPEED"; else [ -f aud/vo.wav ]; fi; }
 st_asr() { python3 tools/asr_words.py aud/vo.wav asr_fast.json > asr.txt && cat asr.txt; }
-st_timing() { python3 tools/align.py . asr_fast.json islands && python3 tools/timing.py . && python3 tools/align.py . asr_fast.json caps && python3 tools/lipsync.py .; }
+st_timing() { python3 tools/align.py . asr_fast.json islands && python3 tools/timing.py . && python3 tools/align.py . asr_fast.json caps && python3 tools/lipsync.py . && python3 tools/storyboard.py .; }
 st_lint() { [ -f src/shots.js ] || { log "src/shots.js missing: write the shots (storyboard) now, then rerun"; return 1; }; python3 tools/prelint.py .; }
 st_render() {
   F=$(python3 -c "import json;print(int(round(json.load(open('src/timing.json'))['end']*30)))"); SEG=100; NS=$(( (F + SEG - 1) / SEG )); mkdir -p out/seg
