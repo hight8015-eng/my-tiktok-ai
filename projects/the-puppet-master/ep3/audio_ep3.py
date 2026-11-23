@@ -59,7 +59,7 @@ def bed(name, t0, t1, rel=-28, xf=.9, pan=0.):                       # looped am
 bed('drone_dark_m01', 0, 7.3, -30); bed('drone_dark_m01', 14.3, 70.2, -30); bed('amb_fire_m01', 0, 7.3, -32); bed('amb_fire_m01', 14.3, 70.2, -31)
 bed('amb_rain_m01', 7.0, 14.7, -26); bed('amb_rain_m01', 69.8, END, -26); bed('neon_hum_m01', 7.0, 14.7, -34); bed('neon_hum_m01', 69.8, END, -34)
 # ---- footsteps from the walk cycle (heel strike every (k+.5)/(2*rate) s); the real frames' steps are not logged for walk(), so phase is derived
-def steps(t0, t1, rate, g_db=-20, stop=None):
+def steps(t0, t1, rate, g_db=-28, stop=None):
     st = []; k = int(np.ceil(t0 * 2 * rate - .5))
     while True:
         t = (k + .5) / (2 * rate); k += 1
@@ -67,8 +67,8 @@ def steps(t0, t1, rate, g_db=-20, stop=None):
         if t >= t0: st.append(t)
     for i, t in enumerate(st):
         sc = 1.0 if stop is None or t < stop else max(.35, 1 - (t - stop) * 1.5)
-        hit('steps_m01', t, 'small', pan=(-.12 if i % 2 else .12), dur=.22, fade=.06, jit=g_db + 18 + (np.random.RandomState(i).rand() - .5) * 2 + 20 * np.log10(sc) )
-steps(15.1, 23.62, 1.45); steps(67.2, 69.95, 1.45); steps(70.1, 73.9, 1.35); steps(74.2, 76.4, 1.35, stop=75.6); steps(84.0, 86.9, 1.0, g_db=-23)
+        hit('steps_m01', t, 'small', pan=(-.12 if i % 2 else .12), dur=.2, fade=.07, lpf_hz=2600, jit=g_db + 18 + (np.random.RandomState(i).rand() - .5) * 2 + 20 * np.log10(sc) )   # soft: low-passed, -27 dB (v2 at -20 was too much, user note)
+steps(15.1, 23.62, 1.45); steps(67.2, 69.95, 1.45); steps(70.1, 73.9, 1.35); steps(74.2, 76.4, 1.35, stop=75.6); steps(84.0, 86.9, 1.0, g_db=-31)
 # ---- story effects (t from the picture). Tiers: small -18 / mid -13 / big -8 rel. to the narration
 hit('heavy_hit_n01', 1.75, 'big', rev=.3, dip=True); hit('rock_crumble_m01', 1.85, 'small', pan=.15, dur=1.6)        # W01: Aren's fist breaks the right wall
 hit('whoosh_soft_n01', 3.55, 'small', dur=.7)                                                                          # blur into W02 (Victor)

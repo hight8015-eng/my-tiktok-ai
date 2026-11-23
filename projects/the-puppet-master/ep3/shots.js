@@ -221,6 +221,8 @@ S('W18', 47.2, 'blur', WAREHOUSE, (lt, t) => { whLight(); MIND = 2.6; Z.whPaper.
 // ---------------- 22-23 "เพราะคนที่ยืนใกล้คุณที่สุด / รู้ว่าจุดอ่อนคุณอยู่ตรงไหน" : ONE move from Aren to the men behind the king ----------------
 S('W19', 50.95, 'cut', WAREHOUSE, (lt, t) => { whLight(); MIND = 2.6; Z.whPaper.visible = true; put(VI(), WAREHOUSE, live(lt, 5, { p: [-.15, 0, -4.65], ry: 0, ex: 'stoic' }, .5));
   put(AR(), WAREHOUSE, live(lt, 1, { p: [.3, 0, -3.0], ry: 200, ex: 'sly', talk: talkAt(t) }, .4)); inner(lt, t, i => ['guilty', 'anxious', 'stoic', 'ashamed'][i]);
+  /* Aren's POWER (whisper line + text, the red/pink look is reserved for his power, user note): his words float into Victor's ear */
+  whisperAt(headW(AR(), .38), headW(VI(), .4), 'คนที่ยืนใกล้คุณที่สุด… รู้จุดอ่อนคุณ', clamp((lt - .15) / 2.6), t, { fs: 54, dy: 240 });
   const u = U(lt - .9, 2.9, eIO), bz = (A, C, B) => A.map((v, i) => (1 - u) ** 2 * v + 2 * u * (1 - u) * C[i] + u * u * B[i]), cp = bz([-1.6, 1.9, -6.9], [-1.6, 4.2, -4.6], [1.3, 3.4, -1.6]), ct = lp([.3, 1.62, -3.0], [0, 1.6, -8.0], u); camW(cp, ct, cp, ct, 0, 50); wEnd(t); }, { rain: false });
 // ---------------- 24 "รอยยิ้มของวิกเตอร์ค่อย ๆ หายไป" : slow push on the king's face as the smile drains ----------------
 S('W20', 55.0, 'cut', WAREHOUSE, (lt, t) => { whLight(); MIND = 2.2; put(VI(), WAREHOUSE, live(lt, 5, { p: [-.15, 0, -4.65], ry: 0, ...exShift(lt, 1.0, 'smug', 'stoic'), ...(lt > 1.8 ? exShift(lt, 1.8, 'stoic', 'dread') : {}) }, .4)); faceLight(VI());
@@ -266,7 +268,6 @@ S('W29', 80.5, 'cut', STREET, (lt, t) => { streetLight(lt); MIND = 2.4; put(CL()
 S('W30', 83.85, 'blur', STREET, (lt, t) => { streetLight(lt); MIND = 2.4; const z = -14.2 + 1.4 * U(lt - .3, 1.6, eIO);
   put(CL(), STREET, live(lt, 9, { p: [.15, .18, z], ry: 0, ex: 'veiled', talk: talkAt(t), ...(lt > .3 && lt < 1.9 ? walk(t, 1.0, .14) : {}) }, .3));
   put(AR(), STREET, live(lt, 1, { p: [0, .18, -10.6], ry: 180, ...exShift(lt, 1.6, 'stoic', 'focused') }, .3));
-  whisperAt(headW(CL(), .38), headW(AR(), .4), 'แกกำลังทำให้ทุกคนคิดว่าแกอ่อนแอ', clamp((lt - .2) / 2.4), t, { fs: 56, dy: 240 });
   camS([.8, 1.9, -15.6], [0, 1.65, -10.6], [.7, 1.88, -15.2], [0, 1.65, -10.6], U(lt, 3.1), 40); });
 // ---------------- 38 "ผมหยุดเดิน" : Aren frozen ----------------
 S('W31', 87.0, 'cut', STREET, (lt, t) => { streetLight(lt); MIND = 2.4; put(AR(), STREET, { p: [0, .18, -10.6], ry: 180, ...perform(lt, [[0, 'frozen']]), ex: 'realize', still: true });
