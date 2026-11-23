@@ -144,14 +144,45 @@ export const SITUATIONS = {
 // (the same function the shot uses for p). s = character scale (spec.s), stride as in walk(), LK = leg factor (chars.js LK).
 // One walk cycle (2 steps) covers 4 * stride * LK * s of ground. Stops cleanly: no distance, no stepping.
 //   const path = (t) => [lerp(-2, 1, ease(t / 3)), 0]; put(C, SET, { p: [...], ...walkAlong(lt, path, { s: .6 }) })
+// v7.5 sitMove: a real sit-down / stand-up (study: animator's survival kit + live-action ref).
+//  DOWN: glance/anticipation rise -> hips go BACK and down while the torso leans forward (~28 deg, counterweight)
+//        -> last 20% drops faster (gravity) -> contact squash -> torso settles back past upright, then rests.
+//  UP:   feet planted, torso leans forward until the nose is over the toes (weight over the feet) -> hands push on the
+//        thighs -> hips rise (ease-out) while the torso straightens LAST -> small overshoot on top.
+//  Use with p ON THE FLOOR in front of the seat (the hips land .47*s behind p); seat = seat height in world units.
+//  put(C, SET, { p: [x, 0, z], ry, ...sitMove(lt, 1.2, 1.1, 'down', { seat: .45 }) })
+export function sitMove(lt, at, dur = 1.1, dir = 'down', o = {}) {
+  const u = cl((lt - at) / dur), seat = o.seat ?? .45, R = { seat };
+  if (dir === 'down') {
+    const d = cl((u - .12) / .68), dk = d < .75 ? sm(d / .75) * .7 : .7 + .3 * Math.pow((d - .75) / .25, 1.6);    // descend, faster at the end
+    R.sitK = u < .12 ? 0 : dk; R.hipY = u < .12 ? .015 * Math.sin(Math.PI * u / .12) : 0;                         // anticipation: a small rise
+    const lean = 28 * Math.sin(Math.PI * Math.min(1, d * 1.05)) * (d < 1 ? 1 : 0), st = cl((u - .8) / .2);
+    R.lean = d < 1 ? lean : -5 * Math.sin(Math.PI * st) * (1 - st * .4);                                            // settle back past upright
+    R.squash = u >= .8 ? .12 * Math.exp(-st * 6) * Math.cos(st * 9) : 0;
+    if (o.hands !== false && d > .2 && d < 1) { const hk = Math.sin(Math.PI * cl((d - .2) / .8)); R.hL = [-.24, .3 + .05 * hk, .1 + .18 * hk]; R.hR = [.24, .3 + .05 * hk, .1 + .18 * hk]; }
+  } else {
+    const a = cl(u / .35), r = cl((u - .3) / .55), st = cl((u - .85) / .15);
+    R.sitK = 1 - (1 - Math.pow(1 - r, 2.2)); R.lean = 32 * sm(a) * (1 - sm(cl((r - .25) / .75))) - 3 * Math.sin(Math.PI * st);  // torso straightens last
+    R.hipY = .02 * Math.sin(Math.PI * st);                                                                          // overshoot on top
+    if (o.hands !== false && u > .15 && r < .7) { const hk = Math.sin(Math.PI * cl((u - .15) / .55)); R.hL = [-.2, .28, .22 * hk + .08]; R.hR = [.2, .28, .22 * hk + .08]; } // push on the thighs
+  }
+  return R;
+}
+
 export function walkAlong(t, path, o = {}) {
   const st = (o.stride ?? .22), LK = o.LK ?? 1, s = o.s ?? .6, t0 = o.t0 ?? 0, vF = o.vFull ?? .6, N = Math.max(8, Math.ceil((t - t0) * 60));
   const kAt = (v) => Math.max(.25, Math.min(1, v / vF));                     // stride shrinks as he slows to a stop
-  let ph = 0, k = 1, [px, pz] = path(t0); const dt = (t - t0) / N;
-  for (let i = 1; i <= N; i++) { const [x, z] = path(t0 + dt * i), dd = Math.hypot(x - px, z - pz); k = dt > 0 ? kAt(dd / dt) : k;
+  let ph = 0, k = 1, vs = vF, [px, pz] = path(t0); const dt = (t - t0) / N;
+  for (let i = 1; i <= N; i++) { const [x, z] = path(t0 + dt * i), dd = Math.hypot(x - px, z - pz); vs += dt > 0 ? (dd / dt - vs) * Math.min(1, dt / .15) : 0; k = kAt(vs);   // v7.5 stride follows a smoothed speed (no stride pop on a sudden stop)
     ph += Math.PI * dd / (2 * st * k * LK * s); px = x; pz = z; }               // phase advances by ground covered / step length
   if (globalThis.STEPLOG && !o.nolog && t - t0 > 1 / 30) {                                  // v7.5 footstep log (render.js steps): a heel strike = ph crosses k*PI
     const prev = walkAlong(t - 1 / 30, path, { ...o, nolog: true }).walk.ph; if (Math.floor(ph / Math.PI) > Math.floor(prev / Math.PI))
       globalThis.STEPLOG.push({ t: globalThis.FRAME_T ?? t, id: o.id || '', foot: Math.floor(ph / Math.PI) % 2 ? 'L' : 'R', x: path(t)[0], z: path(t)[1], k: +k.toFixed(2) }); }
-  return { walk: { ph, stride: st * k } };
+  // v7.5 inertia: the upper body follows the speed through an under-damped spring -> leans into the walk, overshoots
+  // forward when he stops, then rocks back to upright. Feet close (stride -> 0) over .3 s after he stops.
+  let x = 0, xv = 0, ts = 0; const W0 = 9, Z = .45, h = 1 / 60, ta = Math.max(t0, t - 1.2); let [qx, qz] = path(ta);
+  for (let tt = ta + h; tt <= t + 1e-6; tt += h) { const [nx, nz] = path(tt), v = Math.hypot(nx - qx, nz - qz) / h; qx = nx; qz = nz;
+    xv += (W0 * W0 * (v - x) - 2 * Z * W0 * xv) * h; x += xv * h; ts = v < .05 ? ts + h : 0; }
+  const vN = Math.hypot(...[0, 1].map(i => path(t)[i] - path(t - h)[i])) / h, lean = Math.max(-8, Math.min(10, 4 * Math.min(1, vN / vF) + (x - vN) * 7));
+  return { walk: { ph, stride: st * k * Math.max(0, 1 - ts / .3) }, lean: (o.lean ?? 0) + lean };
 }

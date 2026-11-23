@@ -737,3 +737,22 @@ clip for them.⁠​​‌‌‌​​​‌​‌​‌‌​‌‌‌‌​‌
   - Hits are softer while the stride shrinks (stopping).
   - The attack lands 0-9 ms after the contact frame (tested on 19 hits in ep3 W05-W07).
 - Mix aud/steps.wav into the SFX bus in audio.py about -4 dB under the VO. Do not hand-place footsteps any more.
+
+### v7.5 Weight: sit / stand / stop
+- Continuous sit: `P.sitK` 0..1 in chars.js. Put p ON THE FLOOR in front of the seat. The feet stay planted, and the hips go back .47*s and down to `seat` (world height). The old binary `sit: true` still works for static sitting.
+- `sitMove(lt, at, dur, 'down'|'up', { seat, hands })` (acting.js) follows real sit mechanics:
+  - Down:
+    1. Anticipation: a small rise.
+    2. The hips go back and down while the torso leans forward up to 28 deg as a counterweight.
+    3. The last 20% drops faster.
+    4. Contact squash.
+    5. The torso settles back 5 deg past upright.
+    6. Hands reach toward the thighs.
+  - Up:
+    1. Lean forward to 32 deg ("nose over toes").
+    2. Hands push on the thighs.
+    3. The hips rise with an ease-out. The torso straightens LAST.
+    4. A 0.02 hip overshoot on top.
+  - Tested with 9 stills.
+- Walk inertia (walkAlong now also returns `lean`): the upper body follows the speed through an under-damped spring. It leans about 4 deg into a walk. On a stop it pitches forward to about 8 deg, rocks back to -2, then settles in about 0.8 s. The stride follows a smoothed speed, and the feet close over 0.3 s after he stops. Pass extra lean as `o.lean`, not as a separate `lean:`.
+- RULE: walk paths should ease in and out, not stop dead. A dead stop is caught by the spring, but it reads as a bump.

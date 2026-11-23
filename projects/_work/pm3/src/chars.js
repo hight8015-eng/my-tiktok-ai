@@ -315,13 +315,18 @@ export function pose(C, P = {}) {
   const g = C.g, s = C.spec.s; if (P.p) g.position.set(...P.p); g.rotation.set(P.rx ? P.rx * D2R : 0, (P.ry || 0) * D2R, P.rz ? P.rz * D2R : 0);
   g.visible = P.visible ?? true;
   const w = P.walk; let hy = P.sit ? .04 + (P.hipY || 0) : LEG + (P.hipY || 0); if (w) hy += w.run ? (-.09 + (.5 - .5 * Math.cos(2 * w.ph + 1.2)) * .06) * w.run : (.5 - .5 * Math.cos(2 * w.ph)) * .035 - .02; // v4.1: two bobs per cycle, a touch of knee bend (run: deep crouch + flight bob)
-  C.hips.position.set(0, hy, 0); C.hips.rotation.set(0, 0, 0);
+  // v7.5 continuous sit (P.sitK 0..1, from acting.js sitMove): p stays ON THE FLOOR in front of the seat, the feet stay planted,
+  // the hips travel back (.47 * s) and down onto a seat of height P.seat (world units, default .45) behind p.
+  const SK_ = P.sitK != null && !P.sit && !w ? Math.max(0, Math.min(1, P.sitK)) : null, SB_ = .47;
+  if (SK_ != null) hy = LEG + ((P.seat ?? .45) / s + .04 - LEG) * SK_ + (P.hipY || 0);
+  C.hips.position.set(0, hy, SK_ != null ? -SB_ * SK_ : 0); C.hips.rotation.set(0, 0, 0);
   C.torso.rotation.set((P.lean || 0) * D2R, (P.twist || 0) * D2R, (P.side || 0) * D2R, 'YXZ');
   const hd = P.head || [0, 0, 0]; C.head.rotation.set(hd[0] * D2R, hd[1] * D2R, hd[2] * D2R, 'YXZ');
   if (w && !P.still) { const ph = w.ph, k = Math.min(1, (w.stride ?? .22) / .22); // hips twist with the stride, body rocks side to side, head stays steady and lags the bob
     const tw = w.run ? Math.sin(ph) * .2 * k : Math.cos(ph) * .14 * k; C.torso.rotation.y += tw; C.torso.rotation.z += (w.run ? 1 : -1) * Math.sin(ph) * .045 * k; // v7.5 walk: shoulders counter the forward foot at heel strike, weight rocks over the planted foot C.torso.rotation.x += (w.run ? .24 * w.run : .06 * k);
     C.head.rotation.y -= tw * .7; C.head.rotation.x += Math.sin(2 * ph - .7) * .035 * k; }
   let fL = P.fL, fR = P.fR;
+  if (!fL && SK_ != null) { const fz_ = .03 + SB_ * SK_; fL = [-.13 - .01 * SK_, -hy + .03, fz_]; fR = [.13 + .01 * SK_, -hy + .03, fz_]; }
   if (!fL) { if (P.sit) { const sh = (P.seat ?? .45) / s; fL = [-.14, -sh + .03, .5]; fR = [.14, -sh + .03, .5]; }
     else if (w && w.run) { const st = (w.stride ?? .3) * w.run * LK, ft = (a) => { const sw = Math.cos(a); // v4.3 run (model sheet 11-20): bent knees, back foot kicks high, front foot reaches
         return [-hy + .03 + Math.pow(Math.max(0, sw), 1.4) * .3 * LK * w.run + Math.max(0, -sw) * Math.max(0, Math.sin(a)) * .04, Math.sin(a) * st - Math.max(0, sw) * .08 * w.run]; };

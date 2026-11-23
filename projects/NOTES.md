@@ -114,3 +114,4 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
 - v7.5 (study, no render): head sprite view now follows head yaw (hair/hat turn with head). See SKILL v7.5.
 - v7.5 walk fix: old walk moonwalked (feet slid 2.8 m/s). Use walkAlong(t, path) for every walk from ep4. See SKILL v7.5.
 - v7.5 footsteps: render.js steps + tools/footsteps.py = auto footstep track synced to walkAlong strikes.
+- v7.5 weight: sitMove (sit/stand), walk inertia lean + feet close on stop.
