@@ -2,12 +2,12 @@
 import { THREE, canvasTex, setSmoothLight, scene, camera, clamp, lerp, sstep, eIO, eOut, eIn, eSine, D2R, noise1, rng, POST, mesh, rbox, toon, basic, group, cylBetween } from './engine.js';
 import * as Wd from './world.js';
 import * as ZC from './zc.js';
-import { perform, POSES } from './acting.js';
+import { perform, POSES, walkAlong } from './acting.js';
 import { bigWord } from './text3d.js';
 import { sparks, shatter } from './fxphys.js';
 import { turn, take, hitReact, hold, trauma } from './motion.js';
 import { gaze, exShift } from './acting.js';
-import { CHARS, OVL, lipAt, scribbleAt, headBall, beamAt, actPunch, actHit, impactAt, setRig, lightAt, pose, popAt, sparkAt, dustAt, debrisAt, smokeAt, tintAt, rainAt, shockAt, whisperAt, makeRope, updateRope } from './chars.js';
+import { LK, CHARS, OVL, lipAt, scribbleAt, headBall, beamAt, actPunch, actHit, impactAt, setRig, lightAt, pose, popAt, sparkAt, dustAt, debrisAt, smokeAt, tintAt, rainAt, shockAt, whisperAt, makeRope, updateRope } from './chars.js';
 const { TRUCK, GATE, STREET, ALLEY, ROOF, WAREHOUSE, Z } = ZC;
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 export const TM = { env: [] };
@@ -135,7 +135,7 @@ const ARX = (z) => ({ p: [0, .18, z], ry: 180 });
 /* ---------- FX: rain that parts around an invisible human shape ---------- */
 const GAPN = 900, gapG = new THREE.Group(), gapGeo = new THREE.BufferGeometry(), dotGeo = new THREE.BufferGeometry(), gapPos = new Float32Array(GAPN * 6), dotPos = new Float32Array(GAPN * 3);
 gapGeo.setAttribute('position', new THREE.BufferAttribute(gapPos, 3)); dotGeo.setAttribute('position', new THREE.BufferAttribute(dotPos, 3));
-const gapLines = new THREE.LineSegments(gapGeo, new THREE.LineBasicMaterial({ color: '#c4d8ff', transparent: true, opacity: .5, depthWrite: false, blending: THREE.AdditiveBlending }));
+const gapLines = new THREE.LineSegments(gapGeo, new THREE.LineBasicMaterial({ color: '#c4d8ff', transparent: true, opacity: .3, depthWrite: false, blending: THREE.AdditiveBlending }));
 const gapDots = new THREE.Points(dotGeo, new THREE.PointsMaterial({ color: '#f0f6ff', size: .055, transparent: true, opacity: .95, depthWrite: false, blending: THREE.AdditiveBlending }));
 [gapLines, gapDots].forEach(m => { m.frustumCulled = false; m.userData.noInk = true; gapG.add(m); });
 const gapTex = canvasTex(256, 512, (x, w, h) => { x.clearRect(0, 0, w, h); x.lineJoin = 'round'; x.lineCap = 'round'; x.strokeStyle = 'rgba(210,228,255,.9)'; x.lineWidth = 5; x.shadowColor = '#9fc4ff'; x.shadowBlur = 14;
@@ -147,10 +147,10 @@ function gapAt(set, x, z, k, t, h = 1.75) {
   gapG.visible = k > .01; if (!gapG.visible) return; gapG.position.set(x, 0, z);
   const R = .3 * k, RH = .17 * k; let n = 0, m = 0;
   for (let i = 0; i < GAPN; i++) {
-    const a = hs(i * 1.7 + 3), b = hs(i * 3.1 + 7), c = hs(i * 5.3 + 11), px = (a - .5) * 3.6, pz = (b - .5) * 3.6, sp = 11 + c * 4, top = 6.2;
-    const y0 = (((c * 9 - t * sp) % top) + top) % top, y1 = y0 + .5, r = Math.hypot(px, pz), surf = r < RH ? (h + .03) * k : r < R ? 1.45 * k : 0;
+    const a = hs(i * 1.7 + 3), b = hs(i * 3.1 + 7), c = hs(i * 5.3 + 11), px = (a - .5) * 2.2, pz = (b - .5) * 2.2, sp = 11 + c * 4, top = 6.2;
+    const y0 = (((c * 9 - t * sp) % top) + top) % top, y1 = y0 + .3, r = Math.hypot(px, pz), surf = r < RH ? (h + .03) * k : r < R ? 1.45 * k : 0;
     if (surf > 0) { if (y0 < surf + .02) { if (y1 > surf - .08 && y0 < surf + .6 && m < GAPN) { dotPos.set([px, surf, pz], m * 3); m++; } continue; } }
-    gapPos.set([px, y0, pz, px, y1, pz], n * 6); n++;
+    gapPos.set([px, y0, pz, px - .03, y1, pz], n * 6); n++;
   }
   gapGeo.setDrawRange(0, n * 2); gapGeo.attributes.position.needsUpdate = true; dotGeo.setDrawRange(0, m); dotGeo.attributes.position.needsUpdate = true;
   gapOutline.position.set(0, h * .5, 0); gapOutline.quaternion.copy(camera.quaternion); gapOutline.material.opacity = .26 * k;
@@ -160,7 +160,7 @@ const gapPoint = (set, x, z, up = 1.62) => { set.updateMatrixWorld(); return set
 function setAlpha(C, a) { const L = []; C.g.traverse(o => { if (o.material) L.push(o); }); [C.sb, C.sh].forEach(o => { if (o && o.material) L.push(o); });
   for (const o of L) for (const m of [].concat(o.material)) { if (!m.colorWrite) continue; m.transparent = a < .999; m.opacity = a; m.depthWrite = a > .98; m.needsUpdate = true; } }
 /* ---------- props ---------- */
-const KNIFE = group({ parent: scene }); mesh(new THREE.BoxGeometry(.03, .012, .26), basic('#eef4ff'), { p: [0, 0, .13], parent: KNIFE, cast: false }); mesh(new THREE.BoxGeometry(.036, .034, .11), basic('#241c26'), { p: [0, 0, -.055], parent: KNIFE, cast: false }); KNIFE.visible = false;
+const KNIFE = group({ parent: scene }); mesh(new THREE.BoxGeometry(.03, .012, .26), basic('#eef4ff'), { p: [0, 0, .13], parent: KNIFE, cast: false }); mesh(new THREE.BoxGeometry(.036, .034, .11), basic('#241c26'), { p: [0, 0, -.055], parent: KNIFE, cast: false }); KNIFE.scale.setScalar(2.2); KNIFE.visible = false;
 const KTRAIL = new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(6), 3)), new THREE.LineBasicMaterial({ color: '#dfeaff', transparent: true, opacity: .7, depthWrite: false, blending: THREE.AdditiveBlending })); KTRAIL.frustumCulled = false; KTRAIL.visible = false; scene.add(KTRAIL);
 const BAG = group({ parent: scene }); mesh(rbox(.46, .22, .3), toon('#5a3e28'), { p: [0, .11, 0], parent: BAG }); const BAGLID = group({ p: [0, .22, -.15], parent: BAG }); mesh(rbox(.46, .05, .32), toon('#6e4a30'), { p: [0, .02, .16], parent: BAGLID }); BAG.visible = false;
 const docTex = (fn, w = 1024, h = 1448) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); fn(x, w, h); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; };
@@ -198,10 +198,10 @@ const hz = (t) => Math.min(HOME(36.5), HOME(t));
 const NZ = -15.2;                                                // the invisible hunter's spot, ahead of Aren
 // ---- 0 hook: "คืนนี้มีคนรับงานฆ่าผม… และผมมองไม่เห็นเขา" : Aren, a rain gap forming out of focus behind him
 S('N01', 0, 'cut', STREET, (lt, t) => { p4reset(); streetLight(lt); MIND = 2.4; put(AR(), STREET, { p: [0, .18, -9.6], ...turn(lt, 2.4, .7, 12, -22), ex: pf(lt, [[0, 'calm'], [2.2, 'suspicious']]).ex, head: [0, 0, 0] });
-  gapAt(STREET, 1.5, -13.8, .12 + .5 * U(lt - 2.4, 1.4), t); camS([-.75, 1.5, -6.7], [0, 1.55, -9.6], [-.5, 1.55, -6.3], [0, 1.58, -9.6], U(lt, 4.3), 40); });
+  gapAt(STREET, 1.5, -13.8, .12 + .5 * U(lt - 2.4, 1.4), t); if (lt < 2.2) camS([-.75, 1.5, -6.7], [0, 1.55, -9.6], [-.5, 1.55, -6.3], [0, 1.58, -9.6], U(lt, 2.2), 40); else camS([.5, 1.55, -8.3], [0, 1.62, -9.6], [.35, 1.58, -8.0], [0, 1.64, -9.6], U(lt - 2.2, 2.2), 34); });
 // ---- "หลังจากคืนนั้น … ชื่อของผมเริ่มถูกพูดถึงในหมู่นักโทษ" : prisoners talk, Aren walks away in the distance
 S('N02', 4.36, 'blur', STREET, (lt, t) => { p4reset(); streetLight(lt); MIND = 2.6; put(P1(), STREET, { p: [-1.5, .18, -8.2], ry: 50, ...perform(lt, [[0, 'whisper'], [2.5, 'point']], { seed: 3 }) }); put(P2(), STREET, { p: [-.45, .18, -8.4], ry: -40, ...perform(lt, [[0, 'neutral'], [1.2, 'thinking'], [3.8, 'shrug']], { seed: 4 }) });
-  put(AR(), STREET, { p: [1.6, .18, SZ4(t)], ry: 180, ex: 'stoic', ...walk(t, 1.3, .2) }); camS([1.2, 1.65, -3.6], [-.9, 1.5, -9.6], [.9, 1.65, -4.0], [-1.0, 1.5, -9.8], U(lt, 5.6), 44); });
+  put(AR(), STREET, { p: [1.6, .18, SZ4(t)], ry: 180, ex: 'stoic', ...walkAlong(t, (u) => [1.6, SZ4(u)], { stride: .21, LK, s: AR().spec.s, t0: 4.36, id: 'aren' }) }); if (lt < 2.9) camS([1.2, 1.65, -3.6], [-.9, 1.5, -9.6], [.9, 1.65, -4.0], [-1.0, 1.5, -9.8], U(lt, 2.9), 44); else camS([.2, 1.6, -5.9], [-1.0, 1.55, -8.3], [-.1, 1.6, -5.6], [-1.0, 1.58, -8.3], U(lt - 2.9, 2.7), 36); });
 // ---- "บางคนบอกว่าผมเป็นนักเจรจา บางคนบอกว่าผมเป็นสายลับ" (typed labels carry the two guesses)
 S('N03', 9.96, 'cut', STREET, (lt, t) => { p4reset(); streetLight(lt); MIND = 2.6; put(P1(), STREET, { p: [-.5, .18, -9.6], ry: 70, ...perform(lt, [[0, 'whisper', { ex: 'suspicious' }], [2.3, 'accuse', { ex: 'smug' }]], { seed: 3 }) });
   put(P2(), STREET, { p: [.5, .18, -9.6], ry: -70, ...perform(lt, [[0, 'thinking'], [2.3, 'handsBehind', { ex: 'skeptical' }]], { seed: 4 }) }); camS([-.2, 1.55, -4.6], [0, 1.6, -9.6], [.1, 1.55, -4.3], [0, 1.6, -9.6], U(lt, 4.7), 46); });
@@ -218,12 +218,12 @@ S('N06', 21.3, 'blur', ROOF, (lt, t) => { p4reset(); alleyLight(); setRig(RIGS.a
 S('N07', 24.98, 'cut', STREET, (lt, t) => { p4reset(); streetLight(lt); MIND = 0; mesh(new THREE.CylinderGeometry(.16, .2, .1, 18), toon('#3a3a44'), { p: [0, .24, -9], parent: STREET, cast: false }); gapAt(STREET, .15 + .5 * U(lt, 1.6, eIO), -10.4, .85, t);
   camS([.3, .7, -6.2], [0, .6, -9.4], [.15, .75, -6.0], [0, .75, -9.8], U(lt, 3.0), 38); });
 // ---- "คืนนั้น ผมเดินกลับที่พักตามปกติ" : Aren walks home (place label)
-S('N08', 27.94, 'blur', STREET, (lt, t) => { p4reset(); streetLight(lt); MIND = 2.6; put(AR(), STREET, { p: [0, .18, hz(t)], ry: 180, ex: 'calm', ...walk(t, .95, .18) }); camS([1.5, 1.75, hz(t) + 3.8], [0, 1.55, hz(t) - 1.0], [1.35, 1.75, hz(t) + 3.5], [0, 1.58, hz(t) - 1.0], U(lt, 2.8), 44); });
+S('N08', 27.94, 'blur', STREET, (lt, t) => { p4reset(); streetLight(lt); MIND = 2.6; put(AR(), STREET, { p: [0, .18, hz(t)], ry: 180, ex: 'calm', ...walkAlong(t, (u) => [0, hz(u)], { stride: .21, LK, s: AR().spec.s, t0: 27.94, id: 'aren' }) }); camS([1.5, 1.75, hz(t) + 3.8], [0, 1.55, hz(t) - 1.0], [1.35, 1.75, hz(t) + 3.5], [0, 1.58, hz(t) - 1.0], U(lt, 2.8), 44); });
 // ---- "ไม่มีเสียงฝีเท้า ไม่มีเงา" : low shot, ripples under Aren's steps, none behind him
-S('N09', 30.78, 'cut', STREET, (lt, t) => { p4reset(); streetLight(lt); MIND = 0; put(AR(), STREET, { p: [0, .18, hz(t)], ry: 180, ex: 'calm', ...walk(t, .95, .18) }); ripples(STREET, t, .95, (ts) => hz(ts));
+S('N09', 30.78, 'cut', STREET, (lt, t) => { p4reset(); streetLight(lt); MIND = 0; put(AR(), STREET, { p: [0, .18, hz(t)], ry: 180, ex: 'calm', ...walkAlong(t, (u) => [0, hz(u)], { stride: .21, LK, s: AR().spec.s, t0: 27.94, id: 'aren' }) }); ripples(STREET, t, .95, (ts) => hz(ts));
   camS([.9, .55, hz(t) + 2.4], [0, .35, hz(t) - 1.2], [.7, .5, hz(t) + 2.2], [0, .45, hz(t) - 1.2], U(lt, 2.6), 36); });
 // ---- "แต่สายฝนตรงหน้า แหวกออกเป็นรูปคน" : the rain ahead of him parts into a human shape
-S('N10', 33.36, 'cut', STREET, (lt, t) => { p4reset(); streetLight(lt); MIND = 2.6; put(AR(), STREET, { p: [0, .18, hz(t)], ry: 180, ex: 'suspicious', ...walk(t, .95, .18 * (1 - U(lt - 2.7, .4))) }); gapAt(STREET, .05, NZ, U(lt - .3, 2.0, eIO), t);
+S('N10', 33.36, 'cut', STREET, (lt, t) => { p4reset(); streetLight(lt); MIND = 2.6; put(AR(), STREET, { p: [0, .18, hz(t)], ry: 180, ex: 'suspicious', ...walkAlong(t, (u) => [0, hz(u)], { stride: .21, LK, s: AR().spec.s, t0: 27.94, id: 'aren' }) }); gapAt(STREET, .05, NZ, U(lt - .3, 2.0, eIO), t);
   camS([1.3, 1.6, hz(t) + 3.2], [.1, 1.55, NZ + 2], [1.1, 1.55, hz(t) + 3.0], [.05, 1.6, NZ + 1], U(lt, 3.2), 40); });
 // ---- "ผมหยุดเดิน" : he freezes (only the camera moves)
 S('N11', 36.5, 'cut', STREET, (lt, t) => { p4reset(); streetLight(lt); MIND = 2.4; put(AR(), STREET, { p: [0, .18, HOME(36.5)], ry: 180, ...perform(lt, [[0, 'frozen']], { seed: 1 }), ex: 'realize', still: true }); gapAt(STREET, .05, NZ, 1, t);
@@ -231,17 +231,17 @@ S('N11', 36.5, 'cut', STREET, (lt, t) => { p4reset(); streetLight(lt); MIND = 2.
 // ---- "เสี้ยววินาทีต่อมา มีดเล่มหนึ่ง" : the knife leaves the gap (trail)
 const KA = [.1, 1.55, NZ], KB = [-.1, 1.52, HOME(36.5) - .15];
 S('N12', 37.76, 'cut', STREET, (lt, t) => { p4reset(); POLE.visible = true; streetLight(lt); MIND = 2.4; put(AR(), STREET, { p: [0, .18, HOME(36.5)], ry: 180, ex: 'stoic', ...perform(lt, [[0, 'frozen']], { seed: 1 }), still: true }); gapAt(STREET, .05, NZ, 1, t);
-  const u = clamp((lt - .55) / 1.6); KNIFE.visible = u > 0; if (u > 0) { const q = kn(KA, KB, eIn(u)); KNIFE.position.copy(STREET.localToWorld(V(...q))); KNIFE.lookAt(STREET.localToWorld(V(...KB))); KNIFE.rotateZ(u * 40);
+  const u = clamp((lt - .55) / 1.6); KNIFE.visible = u > 0; if (u > 0) { const q = kn(KA, KB, Math.pow(u, 1.35)); KNIFE.position.copy(STREET.localToWorld(V(...q))); KNIFE.lookAt(STREET.localToWorld(V(...KB))); KNIFE.rotateZ(u * 40);
     const tl = STREET.localToWorld(V(...kn(KA, KB, Math.max(0, eIn(u) - .1)))); const ar = KTRAIL.geometry.attributes.position; ar.set([tl.x, tl.y, tl.z, KNIFE.position.x, KNIFE.position.y, KNIFE.position.z]); ar.needsUpdate = true; KTRAIL.visible = true; }
   camS([-1.0, 1.55, HOME(36.5) - 3.2], [0, 1.55, NZ + 2], [-.8, 1.55, HOME(36.5) - 3.0], [0, 1.52, HOME(36.5) + .8], U(lt, 2.2), 40); });
 // ---- "พุ่งผ่านตรงที่คอผมเคยอยู่" : he leans his head aside (anticipation 3 f), the knife passes where his neck was and sticks in the wall behind
 const KW = [.1, 1.5, -5.9 - .14];
-S('N13', 39.94, 'cut', STREET, (lt, t) => { p4reset(); POLE.visible = true; streetLight(lt); MIND = 0; const lean = backOut(clamp((lt - .5) / .22));
-  put(AR(), STREET, { p: [0, .18, HOME(36.5)], ry: 150, ex: 'stoic', head: [0, 0, -16 * lean], side: -7 * lean, still: true }); const u = clamp((lt - .55) / .5);
-  KNIFE.visible = true; const q = kn([0, 1.52, HOME(36.5) - 1.6], KW, eIn(u)); KNIFE.position.copy(STREET.localToWorld(V(...q))); KNIFE.lookAt(STREET.localToWorld(V(...KW))); KNIFE.rotateZ(1.4 + (u >= 1 ? Math.sin((lt - 1.05) * 40) * .08 * Math.exp(-(lt - 1.05) * 5) : u * 20));
-  if (u > 0 && u < 1) { const tl = STREET.localToWorld(V(...kn([0, 1.52, HOME(36.5) - 1.6], KW, Math.max(0, eIn(u) - .18)))); const ar = KTRAIL.geometry.attributes.position; ar.set([tl.x, tl.y, tl.z, KNIFE.position.x, KNIFE.position.y, KNIFE.position.z]); ar.needsUpdate = true; KTRAIL.visible = true; }
-  if (lt > 1.05 && lt < 1.7) dustAt(STREET.localToWorld(V(...KW)), (lt - 1.05) / .65, .9);
-  camS([1.9, 1.5, HOME(36.5) + 1.2], [0, 1.5, HOME(36.5) + 2.0], [1.6, 1.5, HOME(36.5) + 1.5], [0, 1.5, HOME(36.5) + 2.4], U(lt, 1.9), 36); });
+S('N13', 39.94, 'cut', STREET, (lt, t) => { p4reset(); POLE.visible = true; streetLight(lt); MIND = 0; const lean = backOut(clamp((lt - 1.05) / .3));
+  put(AR(), STREET, { p: [0, .18, HOME(36.5)], ry: 150, ex: 'stoic', head: [0, 0, -16 * lean], side: -7 * lean, still: true }); const u = clamp((lt - .3) / 1.15);
+  KNIFE.visible = true; const q = kn([0, 1.52, HOME(36.5) - 1.6], KW, Math.pow(u, 1.3)); KNIFE.position.copy(STREET.localToWorld(V(...q))); KNIFE.lookAt(STREET.localToWorld(V(...KW))); KNIFE.rotateZ(1.4 + (u >= 1 ? Math.sin((lt - 1.45) * 40) * .08 * Math.exp(-(lt - 1.45) * 5) : u * 12));
+  if (u > 0 && u < 1) { const tl = STREET.localToWorld(V(...kn([0, 1.52, HOME(36.5) - 1.6], KW, Math.max(0, Math.pow(u, 1.3) - .22)))); const ar = KTRAIL.geometry.attributes.position; ar.set([tl.x, tl.y, tl.z, KNIFE.position.x, KNIFE.position.y, KNIFE.position.z]); ar.needsUpdate = true; KTRAIL.visible = true; }
+  if (lt > 1.45 && lt < 2.2) dustAt(STREET.localToWorld(V(...KW)), (lt - 1.45) / .75, .9);
+  { const cz = -10.6 + 4.0 * clamp((lt - .1) / 1.5, 0, 1) * clamp((lt - .1) / 1.5, 0, 1) * (3 - 2 * clamp((lt - .1) / 1.5, 0, 1)) + .0; camS([2.7, 1.55, cz - .3], [0, 1.52, cz + .5], [2.7, 1.55, cz - .3], [0, 1.52, cz + .5], 0, 38); } });
 // ---- "ผมไม่ได้ตกใจ เพราะผมรู้ว่าเขาต้องมา" : Aren calm, a blink (the knife stays in the wall)
 S('N14', 42.28, 'cut', STREET, (lt, t) => { p4reset(); streetLight(lt); MIND = 2.2; put(AR(), STREET, { p: [0, .18, HOME(36.5)], ry: 20, ...exShift(lt, 1.7, 'calm', 'sly'), head: [0, 0, 0] }); gapAt(STREET, .05, NZ, 1, t);
   camS([.6, 1.55, HOME(36.5) + 2.5], [0, 1.58, HOME(36.5)], [.35, 1.58, HOME(36.5) + 2.1], [0, 1.6, HOME(36.5)], U(lt, 3.2), 38); });

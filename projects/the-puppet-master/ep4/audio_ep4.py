@@ -67,13 +67,14 @@ def steps(t0, t1, rate, g_db=-31, stop=None):
     for i, t in enumerate(st):
         sc = 1.0 if stop is None or t < stop else max(.35, 1 - (t - stop) * 1.5)
         hit('steps_m01', t, 'small', pan=(-.12 if i % 2 else .12), dur=.2, fade=.07, lpf_hz=2600, jit=g_db + 18 + (np.random.RandomState(i).rand() - .5) * 2 + 20 * np.log10(sc))
-steps(28.0, 36.3, .95, stop=35.6)                         # Aren walks home (N08-N10); Noah / the invisible hunter make no sound
+for i, e in enumerate([e for e in json.load(open('out/steps.json')) if 27.9 <= e['t'] <= 36.6]):   # real heel strikes logged by walkAlong
+    sc = max(.35, min(1, e.get('k', 1))); hit('steps_m01', e['t'], 'small', pan=(-.12 if e['foot'] == 'L' else .12), dur=.2, fade=.07, lpf_hz=2600, jit=-13 + (np.random.RandomState(i).rand() - .5) * 2 + 20 * np.log10(sc))                         # Aren walks home (N08-N10); Noah / the invisible hunter make no sound
 hit('whoosh_soft_n01', 4.2, 'small', dur=.7); hit('whoosh_n01', 9.8, 'mid', dur=.8); hit('whoosh_n02', 14.5, 'mid', dur=.8)
 hit('whoosh_soft_n01', 18.8, 'small', dur=.6); hit('paper_n02', 19.4, 'small')                      # N05 poster
 hit('heartbeat_m01', 24.6, 'small', dur=3.0); hit('drip_m01', 30.9, 'small', dur=1.0)              # N07 hat / N09 ripples
 hit('suspense_hit_n01', 33.4, 'mid', dur=2.0)                                                       # rain parts into a person
-hit('whoosh_n02', 37.7, 'mid', pan=.2, dur=.6); hit('whip_n01', 39.9, 'mid', dur=.6)                 # N12/N13 knife
-hit('heavy_hit_m01', 40.15, 'big', pan=-.15, dip=True); hit('rock_crumble_m01', 40.2, 'small', pan=-.2, dur=1.6)   # knife passes the pole
+hit('whoosh_n02', 37.7, 'mid', pan=.2, dur=.6); hit('whip_n01', 40.2, 'mid', dur=.6)                 # N12/N13 knife
+hit('heavy_hit_m01', 41.4, 'big', pan=-.15, dip=True); hit('rock_crumble_m01', 41.45, 'small', pan=-.2, dur=1.6)   # knife passes the pole
 hit('suspense_hit_n01', 51.9, 'mid', dur=2.0); hit('heartbeat_m01', 54.1, 'small', dur=3.0)          # power / whisper cue
 hit('paper_n02', 62.6, 'small', pan=.1); hit('paper_n02', 80.3, 'small', pan=-.1)                    # contract / paper falls
 hit('heavy_hit_n01', 83.5, 'big', rev=.3, dip=True)                                                 # seal
@@ -86,7 +87,7 @@ nom = bus; wr('aud/nomusic.wav', nom)
 S = Score(END)
 S.cue('tension_pulse', 0, 14.6, bpm=92, key='D', k=.8)
 S.cue('mystery_pizz', 14.2, 20.0, key='D', k=.6, fadein=.9)
-S.cue('suspense_reveal', 33.2, 17.5, key='D', k=.7, fadein=.9); S.sting('hit_boom', 40.15, .8, 'D')
+S.cue('suspense_reveal', 33.2, 17.5, key='D', k=.7, fadein=.9); S.sting('hit_boom', 41.4, .8, 'D')
 S.cue('villain', 50.4, 33.0, bpm=72, key='D', k=.55, fadein=.9); S.sting('braam', 83.5, .6, 'D')
 S.cue('dark_ambient', 83.4, 12.1, key='D', k=.65, fadein=.5); S.sting('braam', 91.7, .7, 'D')
 S.duck(T['env'], depth=.35); S.voice_eq()
