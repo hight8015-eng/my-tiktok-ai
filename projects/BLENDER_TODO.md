@@ -8,7 +8,8 @@ Study: projects/refs/BLENDER_SET_STUDY.md (references, set recipes, rules). Tool
 - src/blendset.js (loadSet, blocked)
 
 ## 0. Bring-up (first run)
-- [ ] Find blender.exe. Run build_set.py on blender/warehouse_test.json (--samples 64 --res 512). Fix the script until it runs clean. It is untested.
+Local session progress (commits d78c61c, 46a0644): the script runs on Blender 5.3. It saves .blend and a cam_door preview PNG. cam_* orientation is fixed. Draco is dropped (our GLTFLoader has no Draco decoder). out/ is gitignored, so the preview and .glb are NOT in git yet: push them to projects/refs/blender/ (small files) so the cloud session can check them.
+- [x] (local PC session, Blender 5.3) Find blender.exe. Run build_set.py on blender/warehouse_test.json (--samples 64 --res 512). Fix the script until it runs clean. It is untested.
 - [ ] Load the .glb in a pm3 test shot with loadSet(). Check:
   - scale against the characters
   - baked light (no double lighting)
