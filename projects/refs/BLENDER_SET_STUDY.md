@@ -72,3 +72,18 @@ They are 2D-looking stick characters inside fully modelled 3D sets. These look l
 - An insert shot of every prop the narration names.
 - Something moving in the background in wide shots (rain, leaves, cars, extras, steam).
 - Signs are readable at phone size and in Thai where the story is local.
+
+## 6. Pacing / hook study (first 12 s of the roller-coaster and pink-prison refs, 1 frame/s: study/hook_first12s.jpg)
+- The framing changes about every 1.3-1.5 s in the first 12 s: 8-9 different framings. Automatic scene detection misses most of them because they use the same palette and soft moves. Ours (ep3) is median 2.7 s per shot.
+- Pattern: wide establishing → medium → BIG close-up on the emotional word ("it cost him everything") → prop insert → wide again. Never two of the same size in a row.
+- Explanation lives IN the world:
+  - a notice paper with the recipe ("P-618 BAKER-MILLER PINK, 1 PINT RED + 1 GALLON WHITE, EXACTLY!")
+  - a chalkboard with a diagram
+  - a sign over the door ("OPENING TOMORROW")
+  The viewer reads the fact instead of only hearing it.
+- Insert shots of process: paint pouring into the can, the measuring scale. Show the action the narration names (our rule 4).
+- Captions there are one word at a time. We keep our chunk + fade style (the user chose it). Only note it.
+- RULES for ep4:
+  - Hook (0-10 s): at least 5 framings, with every framing change about 1.5-2.5 s apart. A camera move inside a shot counts as a change only if the shot size changes.
+  - Push in to a close-up on the key emotional word of each line.
+  - At least one in-world "info prop" (paper, board, screen, sign) per episode for the key fact.

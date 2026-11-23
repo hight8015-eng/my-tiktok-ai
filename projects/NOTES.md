@@ -118,3 +118,4 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
 - v7.5 life: auto turn-blink, breathAt inhale before lines.
 - Props/background study done -> projects/refs/BLENDER_SET_STUDY.md (Blender pipeline + set rules).
 - prelint.py added: run before every render (ep3 passes except old walk() warnings).
+- Pacing study: refs change framing every ~1.5 s in the hook; ep4 rules in BLENDER_SET_STUDY.md section 6; prelint warns on a slow hook.

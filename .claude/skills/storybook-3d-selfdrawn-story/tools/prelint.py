@@ -33,6 +33,8 @@ lens = [shots[i + 1][2] - shots[i][2] for i in range(len(shots) - 1)] + ([T['end
 for (pos, sid, t0, tr, SET), L in zip(shots, lens):
     if L > 6: warn(f'{sid}: {L:.1f} s long, consider a cut or a camera move (pacing)')
     if L < .5: warn(f'{sid}: only {L:.2f} s (stutter risk)')
+h = [x for x in shots if x[2] < 10]
+if shots and len(h) < 4: warn(f'hook: only {len(h)} shots start in the first 10 s (refs change framing every ~1.5 s; aim >= 5 framings, camera size changes count)')
 # 3 labels (every episode: place + name labels), whisper thoughts, hook
 labs = P.get('labels', []) or T.get('labels', [])
 kinds = {l.get('type', l.get('kind', '')) for l in labs if isinstance(l, dict)}
