@@ -24,7 +24,24 @@ let MIND = 2.6;
 const keep = (p, t) => { const d = Math.hypot(p[0] - t[0], p[1] - t[1], p[2] - t[2]); if (d >= MIND || d < 1e-3) return p; const k = MIND / d; return p.map((v, i) => t[i] + (v - t[i]) * k); };
 const camO = (o) => (p0, t0, p1, t1, u, fov = 40, roll = 0) => { p0 = keep(p0, t0); p1 = keep(p1, t1); const [q0, q1] = ampl(p0, p1, t0, t1); look(V(...lp(q0, q1, u)).add(o.position), V(...lp(t0, t1, u)).add(o.position), fov, roll); };
 const camT = camO(TRUCK), camG = camO(GATE), camS = camO(STREET), camA = camO(ALLEY), camR = camO(ROOF), camW = camO(WAREHOUSE);
-function put(C, parent, P) { if (C.g.parent !== parent) parent.add(C.g); pose(C, P); }
+let NOW = 0;   /* world clock, set by S() each frame: idle motion is a function of world time so it never restarts at a cut */
+const hs = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+/* IDLE LAYER (user: movement looked unnatural; audit: Aren and the thugs were FROZEN 57-100% of W10-W32, head speed .02 m/s):
+   breathing, weight shift (side/twist), a new gaze target every ~1.9 s eased over .35 s, a small nod, hand fidgets + an occasional small hand lift.
+   Never on walkers, and the hands are left alone when the character holds a prop. Deterministic per (seed, world time). */
+const idle = (seed, P, t, k = 1) => {
+  if (P.walk || P.noIdle) return P;
+  const ph = seed * 1.7, br = Math.sin(t * 1.9 + ph), sw = Math.sin(t * 1.7 + ph * .6), sw2 = Math.sin(t * 1.7 + ph * .6 - .5);
+  const gx = t / 1.9 + seed * .13, gi = Math.floor(gx), ge = eIO(clamp((gx - gi) * 1.9 / .35)), yaw = lerp((hs(gi - 1 + seed) - .5) * 9, (hs(gi + seed) - .5) * 9, ge) * k;
+  const fd = (p2) => [.03 * Math.sin(t * 1.3 + ph + p2), .035 * Math.sin(t * 1.1 + ph * 1.3 + p2) + Math.max(0, Math.sin(t * 1.45 + ph + p2)) ** 5 * .07, .02 * Math.sin(t * .9 + ph * .7 + p2)].map(v => v * k);
+  const o = { ...P, side: (P.side || 0) + 3.2 * sw * k, twist: (P.twist || 0) + 2.2 * sw2 * k, lean: (P.lean || 0) + .6 * br * k, hipY: (P.hipY || 0) + .004 * br * k,
+    head: (P.head || [0, 0, 0]).map((v, i) => v + (i === 0 ? (2.2 * Math.sin(t * 2.3 + ph) + 1.2 * br) * k : i === 1 ? yaw : 1.8 * sw * k)) };
+  if (!P.hold) { const R = P.hR || [.3, .26, .07], Lh = P.hL || [-.3, .26, .07], dr = fd(0), dl = fd(2.1); o.hR = R.map((v, i) => v + dr[i]); o.hL = Lh.map((v, i) => v + dl[i]); }
+  o.__idle = 1; return o; };
+const idSeed = (C) => { const e = Object.entries(CHARS).find(([k, v]) => v === C); let h = 7; for (const ch of String(e ? e[0] : 'x')) h = (h * 31 + ch.charCodeAt(0)) % 997; return h; };   /* a different phase per character: no synchronised swaying */
+function put(C, parent, P) { if (C.g.parent !== parent) parent.add(C.g);
+  if (parent === WAREHOUSE && P.p && Math.abs(P.p[0]) < 2.45 && P.p[2] < -7.9 && P.p[2] > -11.3 && P.p[1] < .3) P = { ...P, p: [P.p[0], P.p[1] + .4, P.p[2]] };   /* the dais top is at y .4: stand on it, not in it */
+  if (!P.__idle) P = idle(idSeed(C), P, NOW, .9); pose(C, P); }
 const U = (lt, d, e = eIO) => e(clamp(lt / d));
 const AR = () => CHARS.aren, GU = () => CHARS.guard, FI = () => CHARS.fire, ST = () => CHARS.strong, T1 = () => CHARS.thug1, T2 = () => CHARS.thug2, T3 = () => CHARS.thug3, GM = () => CHARS.gunman, PX = (i) => CHARS['p' + i];
 /* expression changes behind a blink with a small head dip */
@@ -73,13 +90,13 @@ export const SHOTS = [];
 function reset(t) { SH.a = 0; SH.t = t; Object.values(CHARS).forEach(C => { C.g.visible = false; }); Wd.hideSets(); Wd.hideSea(); ZC.hideZC(); Wd.pts.forEach(l => { l.intensity = 0; });
   EYES.forEach(e => { e.material.opacity = 0; }); HF.visible = false; THREAD.visible = false; SEED.material.opacity = 0; ZC.laserAt([0, 0, 0], [0, 0, 1], 0);
   Z.car.position.set(3.2, 0, -14); Z.car.rotation.set(0, 0, 0); POST.sat = 1.05; POST.lift = 1; POST.vig = .45; MIND = 2.6; hideGuns(); }
-const S = (id, t0, tr, set, fn, o = {}) => { const sh = { id, t0, tr, ...o }; sh.fn = (lt, t) => { set.visible = true; ZC.zcAt(t * SP, camera); if (set === STREET) ZC.streetAt(t * SP); if (set === ALLEY) ZC.alleyAt(t * SP); if (set === GATE) ZC.gateAt(t * SP, 0); if (set === ROOF) ZC.roofAt(t);
+const S = (id, t0, tr, set, fn, o = {}) => { const sh = { id, t0, tr, ...o }; sh.fn = (lt, t) => { NOW = t; set.visible = true; ZC.zcAt(t * SP, camera); if (set === STREET) ZC.streetAt(t * SP); if (set === ALLEY) ZC.alleyAt(t * SP); if (set === GATE) ZC.gateAt(t * SP, 0); if (set === ROOF) ZC.roofAt(t);
   fn(lt * SP, t * SP); scene.updateMatrixWorld(); faceFires(camera); ZC.zcLate(t * SP, camera); if (o.rain !== false && set !== TRUCK) rainAt(t * SP, o.rain ?? .5); Wd.ambientAt(t, null); }; SHOTS.push(sh); };
 
 // ===================================================================== EP 3 SHOTS (rules: geography, moves for nearby beats, varied transitions,
 // natural acting, literal actions, framing incl. props, level camera on prop beats, lit faces for key characters)
 const VI = () => CHARS.strong, CL = () => CHARS.cloak;    // Victor = the strong man of ep 2, now in his king's coat
-const live = (lt, sd, P, k = .8) => { const h = hold(lt, sd, k); return { ...P, side: (P.side || 0) + h.side, twist: (P.twist || 0) + h.twist, head: (P.head || [0, 0, 0]).map((v, i) => v + h.head[i]) }; };
+const live = (lt, sd, P, k = .8) => { const h = hold(lt, sd, k); return idle(sd, { ...P, side: (P.side || 0) + h.side, twist: (P.twist || 0) + h.twist, head: (P.head || [0, 0, 0]).map((v, i) => v + h.head[i]) }, NOW, Math.min(1, k + .2)); };
 function hideGuns() { [PILLAR, HOLE, CRACK, HOLE2, CRACK2, DOORL, POUCH].forEach(m => { m.visible = false; }); }
 const PILLAR = mesh(rbox(1.2, 9, 1.2), toon('#4a3446'), { p: [0, 4.5, -1.9], parent: WAREHOUSE });
 const HOLE = Z.whHole.clone(), CRACK = Z.whCrack.clone(); [HOLE, CRACK].forEach((m, i) => { m.position.set(.45, 1.78, -2.52 - i * .005); m.rotation.set(0, Math.PI, 0); WAREHOUSE.add(m); }); HOLE.scale.setScalar(.6); CRACK.scale.setScalar(.7);
@@ -115,11 +132,28 @@ S('W03', 7.1, 'push', STREET, (lt, t) => { streetLight(lt); MIND = 2.6; put(T1()
   put(T2(), STREET, live(lt, 4, { p: [1.6, .18, -12.5], ry: -30, ex: 'evil' })); put(PX(2), STREET, { p: [0, .18, -15 + lt * .8], ry: 0, ex: 'scared', ...walk(lt, 1.8, .2) });
   camS([.4, 3.2, -3.4], [0, 1.6, -13], [.3, 2.4, -4.4], [0, 1.6, -13], U(lt, 2.9), 48); }, { dir: 'L' });
 // ---------------- 4-5 "คนอ่อนแอที่นั่น ต้องจ่ายส่วย / แลกกับการมีลมหายใจ" : a thug takes a pouch from a shaking man, pats his cheek ----------------
-S('W04', 9.95, 'cut', STREET, (lt, t) => { streetLight(lt); MIND = 2.6; const give = U(lt - .9, .6), pat = lt > 2.8;
-  put(PX(1), STREET, live(lt, 8, { p: [-.45, .18, -9.6], ry: 70, ...perform(lt, [[0, 'anxious'], [.8, 'offer', { ex: 'scared' }], [2.4, 'relief', { ex: 'hurt' }]], { seed: 8 }) }));
-  put(T1(), STREET, live(lt, 2, { p: [.55, .18, -9.6], ry: -70, ex: pat ? 'smug' : 'menace', hR: pat ? [.22, 1.25, .5] : lp([.3, .3, .1], [.24, .66, .5], give), pR: [1, -.5, 0] }));
-  POUCH.visible = true; scene.updateMatrixWorld(); POUCH.position.copy(give < 1 ? hw(PX(1), 1) : hw(T1(), 1));
-  camS([-.6, 1.6, -5.4], [0, 1.6, -9.6], [-.3, 1.6, -5.7], [0, 1.6, -9.6], U(lt, 4.2), 48); });
+S('W04', 9.95, 'cut', STREET, (lt, t) => { streetLight(lt); MIND = 2.6;
+  /* natural hand-over (user: the payment looked unnatural): thug waits hands on hips -> beckons -> the frightened man hesitates, offers -> thug takes it (the pouch FOLLOWS the real hands, no pop)
+     -> weighs it twice -> pats the man's cheek (smooth reach, two taps, the man flinches) -> waves him off. Keyframed hand path, every change eased. */
+  const kf = (K) => { if (lt <= K[0][0]) return K[0][1]; for (let i = 0; i < K.length - 1; i++) if (lt < K[i + 1][0]) return lp(K[i][1], K[i + 1][1], eIO((lt - K[i][0]) / (K[i + 1][0] - K[i][0]))); return K[K.length - 1][1]; };
+  const tap = Math.max(0, Math.sin((lt - 3.4) * 15)) * clamp((lt - 3.35) / .08) * (1 - clamp((lt - 4.0) / .12));            // two taps on the cheek
+  const hips = [.34, .5, -.05], tHand = kf([[0, hips], [.7, hips], [1.3, [.46, .9, .34]], [1.8, [.46, .9, .34]], [2.0, [.3, .56, .3]], [2.25, [.3, .74, .3]], [2.5, [.3, .5, .3]], [2.75, [.34, .46, .12]], [2.95, [.34, .46, .12]], [3.35, [.28, 1.18, .5]], [4.0, [.28, 1.18, .5]], [4.4, hips]]);   // ... weigh the pouch, pocket it, THEN pat with the same (near) hand
+  tHand[1] += tap * .05; tHand[2] += tap * .03;
+  const manHand = kf([[0, [.3, .52, .22]], [.8, [.3, .52, .22]], [1.15, [.46, .68, .42]], [1.9, [.46, .68, .42]], [2.3, [.3, .3, .07]]]);   // clutches the pouch -> reaches out -> drops the empty hand
+  const holdP = (lt < 1.05) ? { R: { obj: POUCH, off: [0, .02, .03], mass: .15 } } : null, holdT = (lt > 1.85 && lt < 2.9) ? { R: { obj: POUCH, off: [0, .04, .02], mass: .3 } } : null;
+  put(PX(1), STREET, live(lt, 8, { p: [-.45, .18, -9.6], ry: 70, hR: manHand, pR: [.6, -.8, 0], hold: holdP || undefined,
+    ...perform(lt, [[0, 'anxious'], [.7, 'offer', { ex: 'scared' }], [2.0, 'anxious', { ex: 'hurt' }], [4.0, 'relief', { ex: 'relieved' }]], { seed: 8 }), hR: manHand,
+    head: [6 + 9 * tap, 0, 0] }));
+  put(T1(), STREET, live(lt, 2, { p: [.55, .18, -9.6], ry: -70, hR: tHand, pR: [1, -.5, 0], hold: holdT || undefined,
+    ...perform(lt, [[0, 'handsOnHips', { ex: 'menace' }], [.7, 'beckon', { ex: 'sly' }], [2.1, 'proud', { ex: 'smug' }], [4.1, 'confident', { ex: 'smug' }]], { seed: 2 }), hR: tHand }));
+  POUCH.visible = lt < 2.9;   /* pocketed */
+  scene.updateMatrixWorld();
+  if (lt >= 1.05 && lt <= 1.85) {                                                                                   // transfer: hand to hand along a small arc
+    const u = eIO(clamp((lt - 1.05) / .8)), pa = PX(1).aR.hand.getWorldPosition(V()), pb = T1().aR.hand.getWorldPosition(V()); POUCH.position.lerpVectors(pa, pb, u); POUCH.position.y += Math.sin(Math.PI * u) * .07; }
+  /* camera: wide two-shot on the hands -> push to the pouch -> low angle up at the pat -> ease back for the man's relief */
+  const C0 = [[0, [-1.5, 1.5, -6.4], [0, 1.4, -9.6]], [1.9, [-1.1, 1.45, -6.9], [.05, 1.3, -9.6]], [3.0, [-.6, 1.3, -7.0], [.05, 1.3, -9.6]], [4.5, [-.9, 1.5, -6.2], [0, 1.45, -9.6]]];
+  let ci = 0; while (ci < C0.length - 2 && lt >= C0[ci + 1][0]) ci++; const cu = eIO(clamp((lt - C0[ci][0]) / (C0[ci + 1][0] - C0[ci][0])));
+  camS(C0[ci][1], C0[ci][2], C0[ci + 1][1], C0[ci + 1][2], cu, 52); });
 // ---------------- 6 "และผม… เดินเข้าไปในฐานของเขา คนเดียว" : the door opens, a lone figure in the light ----------------
 S('W05', 14.45, 'fgwipe', WAREHOUSE, (lt, t) => { whLight(); MIND = 2.6; DOORL.visible = true; DOORL.material.opacity = .9 * U(lt, .5);
   put(AR(), WAREHOUSE, live(lt, 1, { p: [0, 0, AW(t)], ry: 180, ex: 'stoic', ...walk(t, 1.45, .21) }, .3)); setRig(RIGS.silhouette);

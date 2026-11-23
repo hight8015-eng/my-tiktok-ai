@@ -3,16 +3,19 @@
 # The table, fire drums, hanging-lamp geometry, crowd, hole/crack and door-light plane stay in the engine (they animate); this file is the static room.
 # usage: python make_wh_pm3.py > warehouse_pm3.json
 import json, random
-R = random.Random(7); O = []; L = []
-def box(name, size, pos, color, group=None, emit=0, rot=None, rough=.7, nobevel=False):
+R = random.Random(7); O = []; L = []; FP = []                              # FP = footprints for the engine (x, z, w, d, h): crowd + walk paths must stay out of these
+def fp(x, z, w, d, h=2): FP.append([round(x, 2), round(z, 2), round(w, 2), round(d, 2), h])
+def box(name, size, pos, color, group=None, emit=0, rot=None, rough=.7, nobevel=False, tex=None):
     o = {'kind': 'box', 'name': name, 'size': size, 'pos': pos, 'color': color, 'rough': rough}
+    if tex: o['tex'] = tex
     if group: o['group'] = group
     if emit: o['emit'] = emit
     if rot: o['rot'] = rot
     if nobevel: o['nobevel'] = True
     O.append(o)
-def cyl(name, r, h, pos, color, axis='y', group=None, emit=0, seg=16):
+def cyl(name, r, h, pos, color, axis='y', group=None, emit=0, seg=16, tex=None):
     o = {'kind': 'cyl', 'name': name, 'r': r, 'h': h, 'pos': pos, 'color': color, 'axis': axis, 'seg': seg}
+    if tex: o['tex'] = tex
     if group: o['group'] = group
     if emit: o['emit'] = emit
     O.append(o)
@@ -28,30 +31,32 @@ def free(x, z, w, d):
     return True
 
 # ---- shell: floor, walls, roof with a broken skylight over the throne, columns, dado, windows
-box('floor', [16, .1, 24], [0, -.05, 0], '#34303f', rough=.9, nobevel=True)
-box('wall_back', [16.8, 9, .4], [0, 4.5, -12.2], '#5a5668', rough=.9); box('wall_front', [16.8, 9, .4], [0, 4.5, 12.2], '#5a5668', rough=.9)
-box('wall_left', [.4, 9, 24], [-8.2, 4.5, 0], '#5a5668', rough=.9); box('wall_right', [.4, 9, 24], [8.2, 4.5, 0], '#5a5668', rough=.9)
+box('floor', [16, .1, 24], [0, -.05, 0], '#2a2436', rough=.85, nobevel=True, tex='concrete')
+box('wall_back', [16.8, 9, .4], [0, 4.5, -12.2], '#5a3a40', rough=.9, tex='brick'); box('wall_front', [16.8, 9, .4], [0, 4.5, 12.2], '#5a3a40', rough=.9, tex='brick')
+box('wall_left', [.4, 9, 24], [-8.2, 4.5, 0], '#5a3a40', rough=.9, tex='brick'); box('wall_right', [.4, 9, 24], [8.2, 4.5, 0], '#5a3a40', rough=.9, tex='brick')
 # roof slabs around a 6 x 5 gap centred (0, -6)
 for nme, s, p in [('roof_a', [16.8, .3, 3.5], [0, 9.15, -10.25]), ('roof_b', [16.8, .3, 15.5], [0, 9.15, 4.25]), ('roof_c', [5, .3, 5], [-5.5, 9.15, -6]), ('roof_d', [5, .3, 5], [5.5, 9.15, -6])]:
     box(nme, s, p, '#3a3640', rough=.9)
 for x in (-7.7, 7.7):                                               # steel columns
     for z in (-10.5, -6, -1.5, 3, 7.5, 11):
-        box(nm('col'), [.55, 9, .55], [x, 4.5, z], '#3a3f58', group='steel')
-for z in range(-11, 12, 4): box(nm('beam'), [16, .4, .4], [0, 8.6, z], '#1f1c2a', group='steel')   # cross beams
-for x in (-6, 6): box(nm('girder'), [.5, .5, 24], [x, 8.4, 0], '#1f1c2a', group='steel')
+        fp(x, z, .75, .75, 9); box(nm('col'), [.55, 9, .55], [x, 4.5, z], '#3a3f58', group='steel', tex='metal')
+for z in range(-11, 12, 4): box(nm('beam'), [16, .4, .4], [0, 8.6, z], '#170f1c', group='steel')   # cross beams
+for x in (-6, 6): box(nm('girder'), [.5, .5, 24], [x, 8.4, 0], '#170f1c', group='steel')
 for sgn in (-1, 1):                                                  # dado (dark lower wall) + hazard band + high windows
-    box(nm('dado'), [.12, 2.2, 24], [sgn * 7.94, 1.1, 0], '#2c2a3c', group='walls', nobevel=True)
+    box(nm('dado'), [.12, 2.2, 24], [sgn * 7.94, 1.1, 0], '#2a1c2c', group='walls', nobevel=True)
     box(nm('haz'), [.14, .22, 24], [sgn * 7.93, 2.3, 0], '#a8861a', group='walls', nobevel=True)
-    for z in (-9, -3, 3, 9): box(nm('win'), [.1, 1.3, 2.4], [sgn * 7.96, 6.6, z], '#6a78ff', group='win', emit=1.4, nobevel=True)
-box('dado_back', [16, 2.2, .12], [0, 1.1, -11.94], '#2c2a3c', group='walls', nobevel=True); box('dado_front', [16, 2.2, .12], [0, 1.1, 11.94], '#2c2a3c', group='walls', nobevel=True)
+    for gz in range(-11, 12, 1):                                      # high band of small neon windows (the city outside, like the earlier eps' rooftops)
+        for gy in (5.6, 6.5, 7.4):
+            if R.random() < .42: box(nm('win'), [.08, .5, .62], [sgn * 7.96, gy, gz + .2], R.choice(['#ff4fa0', '#5ac8ff', '#ffb050', '#8a6aff', '#ff4fa0']), group='win', emit=1.6, nobevel=True)
+box('dado_back', [16, 2.2, .12], [0, 1.1, -11.94], '#2a1c2c', group='walls', nobevel=True); box('dado_front', [16, 2.2, .12], [0, 1.1, 11.94], '#2a1c2c', group='walls', nobevel=True)
 for x in (-3.8, 3.8): box(nm('lane'), [.14, .02, 20], [x, .01, 0], '#a8861a', group='floor_marks', nobevel=True)   # yellow walking-lane lines
 box('lane_end', [7.6, .02, .14], [0, .01, -7.4], '#a8861a', group='floor_marks', nobevel=True)
 # ---- door (the engine adds the glowing light plane) + frame + exit sign
-for sx in (-1.55, 1.55): box(nm('jamb'), [.3, 4.2, .4], [sx, 2.1, 11.85], '#1f1c2a', group='steel')
-box('lintel', [3.4, .3, .4], [0, 4.2, 11.85], '#1f1c2a', group='steel')
+for sx in (-1.55, 1.55): box(nm('jamb'), [.3, 4.2, .4], [sx, 2.1, 11.85], '#170f1c', group='steel')
+box('lintel', [3.4, .3, .4], [0, 4.2, 11.85], '#170f1c', group='steel')
 box('exit_sign', [1.3, .42, .12], [0, 4.85, 11.9], '#37e07a', group='signs', emit=2.2)
 # ---- throne dais, throne, drapes, banner
-box('dais', [4.8, .4, 3.4], [0, .2, -9.6], '#4a4658', group='throne'); box('dais_step', [3.2, .2, .8], [0, .1, -7.6], '#4a4658', group='throne')
+fp(0, -9.6, 4.9, 3.5, 5); box('dais', [4.8, .4, 3.4], [0, .2, -9.6], '#4a4658', group='throne'); box('dais_step', [3.2, .2, .8], [0, .1, -7.6], '#4a4658', group='throne')
 box('dais_trim', [4.9, .08, 3.5], [0, .42, -9.6], '#a8863a', group='throne', nobevel=True)
 box('seat', [1.7, .5, 1.3], [0, .85, -9.7], '#4a2f27', group='throne'); box('seat_cushion', [1.5, .15, 1.1], [0, 1.15, -9.65], '#8a1e28', group='throne')
 box('t_back', [1.9, 3.4, .3], [0, 2.6, -10.35], '#4a2f27', group='throne'); box('t_back_red', [1.5, 2.7, .08], [0, 2.55, -10.17], '#8a1e28', group='throne')
@@ -62,22 +67,23 @@ for s in (-1, 1):
 box('drape_rod', [7.6, .22, .22], [0, 8.7, -11.8], '#a8863a', group='drapes')
 box('banner', [4, 4.5, .1], [0, 5.9, -11.9], '#2a0610', group='drapes'); box('banner_emblem', [1.1, 1.6, .06], [0, 5.9, -11.82], '#a8861a', group='signs', emit=.5)
 for s in (-1, 1):                                                    # skulls-and-bones style wall braziers' brackets
-    box(nm('bracket'), [.3, .1, .5], [s * 5.2, 2.6, -11.75], '#1f1c2a', group='steel')
+    box(nm('bracket'), [.3, .1, .5], [s * 5.2, 2.6, -11.75], '#170f1c', group='steel')
 # ---- catwalk along the right wall (y 4.2) + rails + stair, and left-wall pipes
 box('catwalk', [2.2, .15, 13], [6.5, 4.2, -5.0], '#343848', group='catwalk')
-for z in range(-11, 2, 3): box(nm('cw_post'), [.18, 4.2, .18], [5.45, 2.1, z], '#272a38', group='catwalk')
+for z in range(-11, 2, 3): fp(5.45, z, .4, .4, 4.2); box(nm('cw_post'), [.18, 4.2, .18], [5.45, 2.1, z], '#272a38', group='catwalk')
 box('cw_rail_top', [.1, .1, 13], [5.45, 5.3, -5], '#a8861a', group='catwalk'); box('cw_rail_mid', [.08, .08, 13], [5.45, 4.75, -5], '#a8861a', group='catwalk')
 for z in range(-11, 2, 2): box(nm('cw_bal'), [.06, 1.1, .06], [5.45, 4.75, z], '#a8861a', group='catwalk')
 for sx in (-.28, .28): box(nm('ladder_rail'), [.07, 4.2, .07], [6.5 + sx, 2.1, 1.75], '#a8861a', group='catwalk')       # ladder at the catwalk's front end (clear of the right-wall punch spot)
 for k in range(13): box(nm('ladder_rung'), [.6, .05, .05], [6.5, .3 + k * .32, 1.75], '#a8861a', group='catwalk')
 for y, c in ((7.6, '#8a2a42'), (7.1, '#2a4a7a'), (6.6, '#8a8f9a')): cyl(nm('pipe'), .16, 22, [-7.5, y, 0], c, axis='z', group='pipes')
-for z in (-9, -3, 3, 9): box(nm('pipe_clamp'), [.5, 1.3, .12], [-7.5, 7.1, z], '#1f1c2a', group='pipes')
+for z in (-9, -3, 3, 9): box(nm('pipe_clamp'), [.5, 1.3, .12], [-7.5, 7.1, z], '#170f1c', group='pipes')
 # ---- chains + hooks hanging from the beams, a hoist
 for x, z in ((-4.5, -2), (4.2, -9), (-4.8, 6), (3.5, 5)):
     cyl(nm('chain'), .035, 4.2, [x, 6.4, z], '#2b2b30', group='chains', seg=6); box(nm('hook'), [.3, .3, .1], [x, 4.2, z], '#d4d6dc', group='chains')
     for k in range(7): box(nm('link'), [.14, .09, .06], [x, 4.4 + k * .27, z], '#6b6e78', group='chains', rot=[0, 90 if k % 2 else 0, 0])
 # ---- shelving racks (back corners) stocked with boxes
 def rack(cx, cz, w=3.2, d=1.1, h=4.2, tiers=3):
+    fp(cx, cz, w + .2, d + .2, h)
     for sx in (-w / 2, w / 2):
         for sz in (-d / 2, d / 2): box(nm('rk_post'), [.12, h, .12], [cx + sx, h / 2, cz + sz], '#26407a', group='racks')
     for t in range(tiers + 1):
@@ -93,28 +99,28 @@ def pallet(x, z, ry=0):
     box(nm('pal'), [1.2, .14, 1.0], [x, .22, z], '#6a5836', group='crates', rot=[0, ry, 0])
     for s in (-.45, 0, .45): box(nm('pal_f'), [.18, .15, 1.0], [x + s * (1 if not ry else 0), .075, z + (s if ry else 0)], '#54442a', group='crates')
 def stack(x, z, nx, nz, ny, s=.8, ry=0):
-    pallet(x, z, 0)
+    pallet(x, z, 0); fp(x, z, nx * s * 1.04 + .1, nz * s * 1.04 + .1, ny * s + .3)
     for iy in range(ny):
         for ix in range(nx):
             for iz in range(nz):
                 if R.random() < .12 and iy > 0: continue
                 bx, bz = x + (ix - (nx - 1) / 2) * s * 1.02, z + (iz - (nz - 1) / 2) * s * 1.02; h = s * (.85 + R.random() * .25)
-                box(nm('crate'), [s * .98, h, s * .98], [bx, .29 + iy * s + h / 2, bz], R.choice(WOOD), group='crates', rot=[0, R.uniform(-6, 6), 0])
+                box(nm('crate'), [s * .98, h, s * .98], [bx, .29 + iy * s + h / 2, bz], R.choice(WOOD), group='crates', rot=[0, R.uniform(-6, 6), 0], tex='wood')
 SP = [(-6.6, -8.2, 2, 2, 3), (-6.6, 1.4, 2, 1, 2), (-6.7, 8.2, 2, 2, 2), (6.7, -7.4, 2, 2, 3), (6.6, 9.2, 2, 2, 3), (-6.5, -11.1 + 3.4, 1, 1, 4), (4.9, 5.9, 1, 1, 3), (-5.0, 6.2, 1, 1, 2)]
 for (x, z, nx, nz, ny) in SP:
     if free(x, z, nx * .9 + .3, nz * .9 + .3): stack(x, z, nx, nz, ny)
 for _ in range(10):                                                  # loose scatter
     x, z = R.uniform(-7, 7), R.uniform(-11, 11)
-    if free(x, z, 1, 1) and abs(x) > 4.2: box(nm('crate'), [.6, .6, .6], [x, .3, z], R.choice(WOOD), group='crates', rot=[0, R.uniform(0, 90), 0])
+    if free(x, z, 1, 1) and abs(x) > 4.2: fp(x, z, .9, .9, .6); box(nm('crate'), [.6, .6, .6], [x, .3, z], R.choice(WOOD), group='crates', rot=[0, R.uniform(0, 90), 0])
 # ---- oil barrels, tyres
 for x, z, c in ((-4.8, -11.2, '#8a2a42'), (-4.4, -10.5, '#2a4a7a'), (7.2, -9.0, '#8a2a42'), (7.3, 6.9, '#2a6a4a'), (6.9, 7.6, '#8a2a42'), (-7.2, 10.6, '#2a4a7a'), (-6.8, 11.2, '#8a2a42'), (4.3, -11.1, '#2a4a7a')):
-    if free(x, z, .8, .8): cyl(nm('barrel'), .34, .9, [x, .45, z], c, group='barrels', seg=14); cyl(nm('ring'), .355, .06, [x, .6, z], '#222222', group='barrels', seg=14)
+    if free(x, z, .8, .8): fp(x, z, .8, .8, .9); cyl(nm('barrel'), .34, .9, [x, .45, z], c, group='barrels', seg=14); cyl(nm('ring'), .355, .06, [x, .6, z], '#222222', group='barrels', seg=14)
 # ---- forklift (right side, parked at a slant, facing the aisle)
-FX, FZ = 5.6, 7.4
-box('fk_body', [1.3, .8, 2.0], [FX, .75, FZ], '#c27a1a', group='forklift'); box('fk_hood', [1.2, .5, .9], [FX, 1.3, FZ + .6], '#c27a1a', group='forklift')
-box('fk_cw', [1.3, .9, .6], [FX, .9, FZ + 1.1], '#1f1c2a', group='forklift')
-for sx in (-.55, .55): box(nm('fk_cab'), [.07, 1.6, .07], [FX + sx, 2.0, FZ - .3], '#1f1c2a', group='forklift'); box(nm('fk_mast'), [.12, 2.8, .12], [FX + sx * .7, 1.6, FZ - 1.15], '#1f1c2a', group='forklift')
-box('fk_roof', [1.3, .07, 1.3], [FX, 2.8, FZ - .15], '#1f1c2a', group='forklift'); box('fk_seat', [.5, .12, .5], [FX, 1.2, FZ - .1], '#2a2a30', group='forklift')
+FX, FZ = 5.6, 7.4; fp(FX, FZ - .4, 1.7, 3.6, 2.8)
+box('fk_body', [1.3, .8, 2.0], [FX, .75, FZ], '#c27a1a', group='forklift', rough=.35); box('fk_hood', [1.2, .5, .9], [FX, 1.3, FZ + .6], '#c27a1a', group='forklift', rough=.35)
+box('fk_cw', [1.3, .9, .6], [FX, .9, FZ + 1.1], '#170f1c', group='forklift')
+for sx in (-.55, .55): box(nm('fk_cab'), [.07, 1.6, .07], [FX + sx, 2.0, FZ - .3], '#170f1c', group='forklift'); box(nm('fk_mast'), [.12, 2.8, .12], [FX + sx * .7, 1.6, FZ - 1.15], '#170f1c', group='forklift')
+box('fk_roof', [1.3, .07, 1.3], [FX, 2.8, FZ - .15], '#170f1c', group='forklift'); box('fk_seat', [.5, .12, .5], [FX, 1.2, FZ - .1], '#2a2a30', group='forklift')
 for sx in (-.4, .4): box(nm('fk_fork'), [.14, .06, 1.2], [FX + sx, .35, FZ - 1.7], '#6b6e78', group='forklift')
 for sx in (-.62, .62):
     for sz in (-.6, .75): cyl(nm('fk_wheel'), .32, .26, [FX + sx, .32, FZ + sz], '#17151a', axis='x', group='forklift', seg=14)
@@ -123,14 +129,36 @@ box('fk_light', [.5, .12, .12], [FX, 2.6, FZ - .75], '#fff1b0', group='signs', e
 box('sign_no7', [2.6, .8, .08], [-7.9 + .2, 5.2, -9.5], '#a8861a', group='signs', emit=.5, rot=[0, 90, 0])
 box('sign_danger', [1.8, .7, .08], [7.88, 3.4, -6.5], '#ff2e63', group='signs', emit=2.4, rot=[0, 90, 0])
 box('sign_stripe_back', [3.4, .3, .08], [-5.2, 4.8, -11.9], '#ff2e63', group='signs', emit=1.2)
+
+# ---- story props (the user's refs: every set tells the plot) : key board, red-string case board, ground clutter, cables, oil, cracks
+box('keyboard_board', [2.2, 1.4, .1], [-7.86, 2.9, 2.2], '#5a3a22', group='boards', rot=[0, 90, 0], tex='wood')
+for r_ in range(2):
+    for c_ in range(5): box(nm('key'), [.1, .3, .06], [-7.78, 3.25 - r_ * .6, 1.4 + c_ * .4], '#e8b830', group='keys', emit=.5, rot=[0, 90, 0], nobevel=True)
+box('case_board', [2.6, 1.7, .1], [7.86, 3.0, -3.4], '#6a5236', group='boards', rot=[0, 90, 0])
+for i_, (dz, dy) in enumerate([(-.9, .45), (-.2, .5), (.6, .35), (-.5, -.35), (.3, -.4)]):
+    box(nm('card'), [.07, .34, .26], [7.78, 3.0 + dy, -3.4 + dz], '#e8e0d0', group='cards', rot=[R.uniform(-8, 8), 90, 0], nobevel=True)
+for dz, dy, ln, ang in [(-.1, .1, 1.0, 20), (.2, -.05, 1.1, -25), (0, .2, .9, 70)]:
+    box(nm('string'), [.03, .03, ln], [7.76, 3.0 + dy, -3.4 + dz], '#e02848', group='cards', emit=.8, rot=[ang, 90, 0], nobevel=True)
+for _ in range(70):                                                    # pebbles, bolts, paper scraps, rubble
+    x, z = R.uniform(-7.5, 7.5), R.uniform(-11.5, 11.5); s = R.uniform(.05, .16)
+    if free(x, z, .3, .3) or abs(x) > 4: box(nm('peb'), [s, s * .7, s], [x, s * .35, z], R.choice(['#4a4658', '#3a3748', '#5a5468', '#d8d0c0']), group='debris', rot=[0, R.uniform(0, 90), 0])
+for _ in range(7):
+    x, z = R.uniform(-3, 3), R.uniform(-5, 10); box(nm('paper'), [.32, .01, .24], [x, .012, z], '#e8e0d0', group='debris', rot=[0, R.uniform(0, 180), 0], nobevel=True)
+for z_, x_ in ((8.6, -6.2), (-4, 6.9), (-9, -6.5)): cyl(nm('cable'), .045, 6, [x_, .05, z_], '#121018', axis='x', group='debris', seg=8)
+for x_, z_, w_, d_ in ((-2.5, 4.5, 1.6, 1.0), (2.8, -3.4, 1.3, .8), (-1.2, -9.3, 1.1, .7)): box(nm('oil'), [w_, .004, d_], [x_, .006, z_], '#0e0c18', group='oil', rough=.12, nobevel=True)
+for x_, z_, ln, ang in ((-1.5, 7.5, 2.2, 25), (2.3, 0, 1.8, -40), (-2.2, -4.5, 1.5, 70)): box(nm('crack'), [.05, .01, ln], [x_, .011, z_], '#14121c', group='oil', rot=[0, ang, 0], nobevel=True)
 # ---- lights: 5 hanging lamps (same spots as the engine lamps), two fire drums, the skylight sun
 LAMPS = [(-3, 6.2, -6), (3, 6.2, -6), (-3, 6.2, 1), (3, 6.2, 1), (0, 6.2, 7)]
-for i, (x, y, z) in enumerate(LAMPS): L.append({'name': f'lamp{i}', 'type': 'point', 'pos': [x, y, z], 'color': '#ffa24a', 'power': 190})
+for i, (x, y, z) in enumerate(LAMPS): L.append({'name': f'lamp{i}', 'type': 'point', 'pos': [x, y, z], 'color': '#ffa24a', 'power': 150})
 for i, x in enumerate((-2.6, 2.6)): L.append({'name': f'fire{i}', 'type': 'point', 'pos': [x, 1.4, -8.6], 'color': '#ff6a2a', 'power': 80})
-L.append({'name': 'sun', 'type': 'sun', 'rot': [18, 0, 0], 'color': '#7a8cff', 'power': 3.5})
+L.append({'name': 'sun', 'type': 'sun', 'rot': [18, 0, 0], 'color': '#8a5cff', 'power': 3})
+for i, (x, z) in enumerate(((-7.0, -6), (7.0, -6), (-7.0, 5), (7.0, 5))): L.append({'name': f'neon{i}', 'type': 'point', 'pos': [x, 5.2, z], 'color': '#ff2e6a', 'power': 160})
+L.append({'name': 'back_magenta', 'type': 'point', 'pos': [0, 6.5, -10.5], 'color': '#ff3a8a', 'power': 120})
 L.append({'name': 'door_glow', 'type': 'point', 'pos': [0, 2.2, 10.8], 'color': '#ffb070', 'power': 90})
 # ---- camera marks + colliders (walk paths must avoid these)
 C = [{'name': 'cam_door', 'pos': [0, 1.5, 11], 'look': [0, 1.4, -6]}, {'name': 'cam_throne', 'pos': [0, 1.6, -3.5], 'look': [0, 1.9, -9.7]}, {'name': 'cam_high', 'pos': [-6.5, 7.5, 10], 'look': [0, 1, -4]}]
 COL = [{'name': 'col_dais', 'size': [4.8, .8, 3.4], 'pos': [0, .4, -9.6]}, {'name': 'col_forklift', 'size': [1.6, 3, 3.4], 'pos': [5.6, 1.5, 6.9]},
        {'name': 'col_rack_bl', 'size': [3.2, 4.2, 1.2], 'pos': [-5.9, 2.1, -11]}, {'name': 'col_rack_br', 'size': [3.2, 4.2, 1.2], 'pos': [5.9, 2.1, -11]}]
-print(json.dumps({'name': 'warehouse_pm3', 'style': {'bevel': .025}, 'objects': O, 'lights': L, 'world': {'color': '#2a1a46', 'strength': .12}, 'cams': C, 'colliders': COL}, indent=0))
+import sys
+if len(sys.argv) > 1: json.dump({'footprints': FP}, open(sys.argv[1], 'w'))                    # python make_wh_pm3.py wh_pm3_colliders.json > warehouse_pm3.json
+print(json.dumps({'name': 'warehouse_pm3', 'style': {'bevel': .045}, 'lowres': ['keys', 'cards', 'debris', 'oil', 'boards', 'signs', 'win', 'floor_marks', 'chains', 'pipes'], 'objects': O, 'lights': L, 'world': {'color': '#4a1030', 'strength': .22}, 'cams': C, 'colliders': COL}, indent=0))

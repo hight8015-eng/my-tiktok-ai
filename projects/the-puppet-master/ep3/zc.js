@@ -357,9 +357,27 @@ import { loadSet } from './blendset.js';
       if (c.isGroup && Math.abs(c.position.x) < .01 && Math.abs(c.position.z + 9.6) < .01) c.visible = false; });                       // old throne group
     WAREHOUSE.add(S.root); Z.whColliders = S.colliders; Z.whBlender = S;
     S.root.traverse(n => { if (n.isMesh && n.material && n.material.color && !/^(signs|win|keys)/.test(n.name)) n.material.color.setRGB(.52, .44, .6); });   // night grade: darker + crimson/violet (matches ep1-2, mean luma ~.15-.2)
-    Z.whShaft = beam(WAREHOUSE, [0, 9.2, -6], [0, .05, -8.9], 2.3, '#9aa8ff', .2);                                                       // moonlight shaft through the broken skylight
+    Z.whShaft = beam(WAREHOUSE, [0, 9.2, -6], [0, .05, -8.9], 2.3, '#9aa8ff', .34);                                                       // moonlight shaft through the broken skylight
+    // prop footprints (blender/make_wh_pm3.py -> sets/wh_pm3_colliders.json): the crowd re-stands on free floor; Z.whFootprints is for walk-path checks
+    let FPS = []; try { FPS = (await (await fetch('sets/wh_pm3_colliders.json')).json()).footprints; } catch (e) { console.warn('no collider file', e && e.message); } Z.whFootprints = FPS;
+    const inFP = (x, z, r) => FPS.some(([fx, fz, w, d]) => Math.abs(x - fx) < w / 2 + r && Math.abs(z - fz) < d / 2 + r);
+    const badSpot = (x, z) => inFP(x, z, .4) || (Math.abs(x) < 3.9 && z > -8.2 && z < 12.4) || (x > 4.4 && z > 2.0 && z < 6.0) || (x < -4.4 && z > -5.0 && z < -1.0) || Math.abs(x) > 7.4 || z < -11.5 || z > 11.3;
+    Z.whCrowd.forEach((m, i) => { const Rr = rng(900 + i); let x = m.position.x, z = m.position.z, n = 0;
+      while (badSpot(x, z) && n++ < 80) { const side = (i + n) % 3, u = Rr(); if (side === 0) { x = -7.2 + Rr() * 2.6; z = -11 + u * 21; } else if (side === 1) { x = 7.2 - Rr() * 2.6; z = -11 + u * 21; } else { x = -7 + u * 14; z = -11.3 + Rr() * 1.6; } }
+      if (badSpot(x, z)) m.visible = false; else { m.position.x = x; m.position.z = z; } });
   } }
-export function warehouseAt(t, cam, look = 0) {   // look 0..1: the crowd turns to face the door (Aren)
+// ---- atmosphere: a visible moonlight shaft + floating dust motes inside it, and story signs (readable text on the set)
+const _wh = { dust: null };
+{ const n = 160, g = new THREE.BufferGeometry(), pos = new Float32Array(n * 3), seed = rng(77); for (let i = 0; i < n; i++) { pos[i * 3] = (seed() - .5) * 5; pos[i * 3 + 1] = seed() * 9; pos[i * 3 + 2] = -6 - (seed() * 3.2 + (9 - pos[i * 3 + 1]) * .32); }
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); const m = new THREE.PointsMaterial({ color: '#c8d0ff', size: .05, transparent: true, opacity: .7, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true });
+  _wh.dust = new THREE.Points(g, m); _wh.dust.userData.noInk = true; _wh.base = pos.slice(); _wh.dust.frustumCulled = false; WAREHOUSE.add(_wh.dust); }
+function signPlane(text, sub, col, p, ry, w = 2.6, h = .9) { const tex = canvasTex(512, 180, (x, W_, H_) => { x.fillStyle = 'rgba(8,4,12,.0)'; x.clearRect(0, 0, W_, H_); x.textAlign = 'center'; x.shadowColor = col; x.shadowBlur = 24; x.fillStyle = col; x.font = '700 78px Prompt'; x.fillText(text, W_ / 2, sub ? 92 : 112); if (sub) { x.shadowBlur = 12; x.font = '600 38px Prompt'; x.fillText(sub, W_ / 2, 150); } });
+  const m = mesh(new THREE.PlaneGeometry(w, h), basic('#ffffff', { transparent: true, map: tex, depthWrite: false }), { p, r: [0, ry, 0], parent: WAREHOUSE, cast: false }); m.renderOrder = 5; m.userData.noInk = true; return m; }
+signPlane('ฐานตะวันออก', 'EAST DISTRICT', '#ff3a7a', [0, 6.6, -11.6], 0, 4.2, 1.5);     // over the throne
+signPlane('ห้ามเข้า', 'NO ENTRY', '#ff4a5a', [-7.84, 3.4, 5.5], 90, 2.0, .7);          // left wall
+signPlane('คลัง 7', 'STORAGE 7', '#ffc040', [7.84, 3.7, -9.2], -90, 2.0, .7);           // right wall
+export function warehouseAt(t, cam, look = 0) {
+  if (_wh.dust) { const a = _wh.dust.geometry.attributes.position, b = _wh.base; for (let i = 0; i < a.count; i++) { a.array[i * 3] = b[i * 3] + Math.sin(t * .35 + i) * .25; a.array[i * 3 + 1] = (b[i * 3 + 1] - t * .12 * (.5 + (i % 5) * .15) % 9 + 9) % 9; a.array[i * 3 + 2] = b[i * 3 + 2] + Math.cos(t * .3 + i * .7) * .2; } a.needsUpdate = true; }   // look 0..1: the crowd turns to face the door (Aren)
   Z.whCrowd.forEach(m => { if (cam) { m.quaternion.copy(cam.quaternion); } m.position.x += Math.sin(t * 1.3 + m.userData.ph) * .0008; m.scale.y = 1 + .012 * Math.sin(t * 2.1 + m.userData.ph); });
   Z.whFires.forEach(g => g.userData.f.at(t, 1, cam, 0)); }
 export function hideWarehouse() { WAREHOUSE.visible = false; }

@@ -24,10 +24,24 @@ bpy.ops.wm.read_factory_settings(use_empty=True); sc = bpy.context.scene
 sc.render.engine = 'CYCLES'; sc.view_settings.view_transform = 'Standard'; sc.cycles.samples = SAMPLES; sc.cycles.device = 'GPU' if '--gpu' in argv else 'CPU'
 def nodes_on(d):                                                              # use_nodes is deprecated (default True in new Blenders): only set it where needed
     if bpy.app.version < (5, 0, 0): d.use_nodes = True
-def mat(name, color, emit=0, rough=.7):
-    m = bpy.data.materials.new(name); nodes_on(m); b = m.node_tree.nodes['Principled BSDF']
-    b.inputs['Base Color'].default_value = rgb(color); b.inputs['Roughness'].default_value = rough
-    if emit: b.inputs['Emission Color'].default_value = rgb(color); b.inputs['Emission Strength'].default_value = emit
+def shade(c, k): return tuple(min(1, v * k) for v in c[:3]) + (1,)
+def mat(name, color, emit=0, rough=.7, tex=None):                              # tex: None | 'concrete' | 'wood' | 'brick' | 'metal'  (procedural, baked into the lightmap)
+    m = bpy.data.materials.new(name); nodes_on(m); nt = m.node_tree; b = nt.nodes['Principled BSDF']; base = rgb(color)
+    b.inputs['Base Color'].default_value = base; b.inputs['Roughness'].default_value = rough
+    if tex:
+        tc = nt.nodes.new('ShaderNodeTexCoord')
+        if tex == 'brick':
+            br = nt.nodes.new('ShaderNodeTexBrick'); br.inputs['Color1'].default_value = shade(base, 1.15); br.inputs['Color2'].default_value = shade(base, .72)
+            br.inputs['Mortar'].default_value = shade(base, .35); br.inputs['Scale'].default_value = 2.2; br.inputs['Mortar Size'].default_value = .025; br.inputs['Brick Width'].default_value = .5; br.inputs['Row Height'].default_value = .25
+            nt.links.new(tc.outputs['Object'], br.inputs['Vector']); nt.links.new(br.outputs['Color'], b.inputs['Base Color'])
+        else:
+            nz = nt.nodes.new('ShaderNodeTexWave' if tex == 'wood' else 'ShaderNodeTexNoise'); rp = nt.nodes.new('ShaderNodeValToRGB')
+            if tex == 'wood': nz.inputs['Scale'].default_value = 5; nz.inputs['Distortion'].default_value = 6; nz.inputs['Detail'].default_value = 3
+            else: nz.inputs['Scale'].default_value = 9 if tex == 'concrete' else 22; nz.inputs['Detail'].default_value = 9
+            rp.color_ramp.elements[0].color = shade(base, .6); rp.color_ramp.elements[1].color = shade(base, 1.2)
+            nt.links.new(tc.outputs['Object'], nz.inputs['Vector']); nt.links.new(nz.outputs[0 if tex == 'wood' else 'Fac'], rp.inputs['Fac']); nt.links.new(rp.outputs['Color'], b.inputs['Base Color'])
+            if tex == 'metal': b.inputs['Metallic'].default_value = .55; b.inputs['Roughness'].default_value = .38
+    if emit: b.inputs['Emission Color'].default_value = base; b.inputs['Emission Strength'].default_value = emit
     return m
 objs = []; groups = {}
 for o in R.get('objects', []):
@@ -41,7 +55,7 @@ for o in R.get('objects', []):
         bpy.ops.object.transform_apply(scale=True, rotation=(o['kind'] == 'cyl'))
         if any(rot): ob.rotation_euler = Euler([math.radians(v) for v in (rot[0], -rot[2], rot[1])])   # engine (rx, ry, rz) -> Blender; yaw ry = Blender z
         if R.get('style', {}).get('bevel') and o['kind'] == 'box' and not o.get('nobevel'): bv = ob.modifiers.new('bevel', 'BEVEL'); bv.width = min(R['style']['bevel'], min(o['size']) / 3); bv.segments = 2
-        ob.data.materials.append(mat(o['name'] + '_m', o.get('color', '#808080'), o.get('emit', 0), o.get('rough', .7)))
+        ob.data.materials.append(mat(o['name'] + '_m', o.get('color', '#808080'), o.get('emit', 0), o.get('rough', .7), o.get('tex')))
         if o.get('group'): groups.setdefault(o['group'], []).append(ob)
     elif o['kind'] == 'asset':
         f = os.path.join(BASE, o['file']); before = set(bpy.data.objects)
@@ -101,7 +115,7 @@ for ob in objs:
     if ob.modifiers: bpy.ops.object.convert(target='MESH')
     bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.uv.smart_project(island_margin=.02); bpy.ops.object.mode_set(mode='OBJECT')
     res = RES if max(ob.dimensions) > 2 else RES // 2
-    if ob.name in groups: res = min(RES * 2, 4096)
+    if ob.name in groups: res = RES if ob.name in R.get('lowres', []) else min(RES * 2, 4096)   # recipe 'lowres': groups that need no detail (thin / emissive / scattered)
     img = bpy.data.images.new(ob.name + '_bake', res, res);
     for m in ob.data.materials:
         n = m.node_tree.nodes.new('ShaderNodeTexImage'); n.image = img; m.node_tree.nodes.active = n
