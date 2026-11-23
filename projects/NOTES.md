@@ -120,3 +120,4 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
 - prelint.py added: run before every render (ep3 passes except old walk() warnings).
 - Pacing study: refs change framing every ~1.5 s in the hook; ep4 rules in BLENDER_SET_STUDY.md section 6; prelint warns on a slow hook.
 - safe zones OK; cover rules (grid crop cuts series line!); camera helpers dollyZoom/arcCam/snorriCam/throughCam from Higgsfield study.
+- Drama-short study (4 clips 11-23): OTS shot/reverse (otsPair), cut per speaker, CU escalation, key-phrase yellow.

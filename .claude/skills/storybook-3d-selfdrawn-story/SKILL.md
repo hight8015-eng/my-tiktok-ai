@@ -810,3 +810,20 @@ Full study and set rules: projects/refs/BLENDER_SET_STUDY.md. Apply section 5 (s
 - We ALREADY had dolly/push, whip, handheld drift (camDrift), DOF and crane-like Bezier moves.
 - Crash zoom: NOT added. The user banned "zoom cut-ins". Ask before using one.
 - The effect presets map to the Blender VFX library (BLENDER_SET_STUDY.md section 4.5).
+
+### v7.5 Drama-short study (storiesbyloe / Higgsfield + Dreamina AI dramas, 4 clips 11-23; study/drama_ref_a.jpg, study/drama_ref_b.jpg)
+Film grammar that makes these hold 100K+ likes, mapped to our 2D engine:
+1. **Shot / reverse shot over the shoulder.** The near speaker's dark, blurred shoulder or head fills one edge, and the far face is sharp. Both cameras stay on one side of the line (180-degree rule), so the eyelines match.
+   - NEW `otsPair(A, B, side)` in acting.js gives both cameras (checked: same side of the line).
+   - Focus the DOF on the far face. The near character's head stays in frame as the dark foreground.
+2. **Cut on every speaker change, about 1-2 s per shot.** The listener's reaction shot is as important as the speaker's.
+3. **Escalate the shot size with the emotion:** wide two-shot (setup) → OTS → close-up → extreme close-up (the face fills about 80%: tears, trembling mouth, clenched jaw). Go back to the wide shot for a physical action (pleading hands, pointing, grabbing).
+4. **Faces carry it:** wet eyes and tears (our P.tears), a quivering open mouth, a jaw clench, brows knitting while listening. Keep the micro-motion on the close-ups: a breath, small head shakes, blinks.
+5. **Light:**
+   - a warm practical inside (pendant lamp, bedside lamp) against a blue night-city window with bokeh
+   - golden-hour backlight with a rim on the hair outdoors
+   - shallow DOF everywhere
+6. **Show the prop to the lens:** the phone screen turned to the camera, the ring, the car keys. Use an insert or a hold.
+7. **Caption: one KEY phrase highlighted in yellow per line** ("SIX YEARS", "THIRD MAJOR THING", "JAMES"). We have `*word*` highlight markers. Use one per line, on the hook phrase.
+8. **The hook line comes first, as a question or accusation** ("six years together, are you ever gonna marry me?"). The conflict is clear in 3 s.
+- Our characters stay 2D. Use OTS plus close-up escalation in every dialogue scene from ep4.

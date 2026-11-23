@@ -214,3 +214,12 @@ export function throughCam(lt, at, dur, A, G, B, lookB) {
   const u = sm((lt - at) / dur), q = (t) => [0, 1, 2].map(i => (1 - t) * (1 - t) * A[i] + 2 * (1 - t) * t * (2 * G[i] - (A[i] + B[i]) / 2) + t * t * B[i]);
   const p = q(u), n = q(Math.min(1, u + .08)); return { pos: p, look: u > .85 ? lookB : n.map((v, i) => v + (n[i] - p[i]) * 6) };
 }
+// otsPair (over-the-shoulder shot / reverse shot, 180-degree rule kept): A and B = [x,y,z] floor positions of the two speakers.
+// Returns { a: cam over A's shoulder looking at B, b: the reverse over B's shoulder looking at A }. Both cameras stay on the SAME
+// side of the A-B line (side = +1 / -1 picks which side), so eyelines match and nobody jumps across the screen.
+// The near shoulder/head fills one edge, dark and out of focus (set DOF focus on the far face). h = eye height, back/off in metres.
+export function otsPair(A, B, side = 1, h = 1.35, back = .7, off = .42, up = .12) {
+  const dx = B[0] - A[0], dz = B[2] - A[2], L = Math.hypot(dx, dz) || 1, fx = dx / L, fz = dz / L, px = -fz * side, pz = fx * side;
+  const cam = (P, f, look) => ({ pos: [P[0] - f[0] * back + px * off, P[1] + h + up, P[2] - f[1] * back + pz * off], look: [look[0], look[1] + h * .97, look[2]] });
+  return { a: cam(A, [fx, fz], B), b: cam(B, [-fx, -fz], A) };
+}
