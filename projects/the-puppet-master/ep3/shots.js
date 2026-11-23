@@ -4,7 +4,7 @@ import * as Wd from './world.js';
 import * as ZC from './zc.js';
 import { perform, POSES } from './acting.js';
 import { bigWord } from './text3d.js';
-import { sparks } from './fxphys.js';
+import { sparks, shatter } from './fxphys.js';
 import { turn, take, hitReact, hold, trauma } from './motion.js';
 import { gaze, exShift } from './acting.js';
 import { CHARS, OVL, lipAt, scribbleAt, headBall, beamAt, actPunch, actHit, impactAt, setRig, lightAt, pose, popAt, sparkAt, dustAt, debrisAt, smokeAt, tintAt, rainAt, shockAt, whisperAt, makeRope, updateRope } from './chars.js';
@@ -101,6 +101,9 @@ function hideGuns() { [PILLAR, HOLE, CRACK, HOLE2, CRACK2, DOORL, POUCH].forEach
 const PILLAR = mesh(rbox(1.2, 9, 1.2), toon('#4a3446'), { p: [0, 4.5, -1.9], parent: WAREHOUSE });
 const HOLE = Z.whHole.clone(), CRACK = Z.whCrack.clone(); [HOLE, CRACK].forEach((m, i) => { m.position.set(.45, 1.78, -2.52 - i * .005); m.rotation.set(0, Math.PI, 0); WAREHOUSE.add(m); }); HOLE.scale.setScalar(.6); CRACK.scale.setScalar(.7);
 const HOLE2 = Z.whHole.clone(), CRACK2 = Z.whCrack.clone(); [HOLE2, CRACK2].forEach((m, i) => { m.position.set(7.77 - i * .005, 1.6, 4); m.rotation.set(0, -Math.PI / 2, 0); WAREHOUSE.add(m); });
+/* wall-break debris (fxphys.shatter, fixed 1/240 s integration, deterministic): chunks burst out of the wall at the exact punch frame and stay as rubble. W01 hits the right wall at 1.75 s, W11 hits the pillar at 28.7 + 1.1 s */
+const _wb = (at, tBreak, dir, seed, power) => { const w = new THREE.Group(); WAREHOUSE.add(w); return shatter(WAREHOUSE, { kind: 'rock', whole: w, at, size: .5, tBreak, dir, power, n: 30, seed }); };
+const WB1 = _wb([7.55, 1.6, 4], 1.75, [-1, .25, 0], 31, 3.4), WB2 = _wb([.45, 1.78, -2.55], 29.8, [0, .2, -1], 32, 3.2);
 const DOORL = mesh(new THREE.PlaneGeometry(2.8, 3.8), basic('#ffd8b0', { transparent: true, opacity: .9 }), { p: [0, 1.95, 11.45], r: [0, 180, 0], parent: WAREHOUSE, cast: false }); DOORL.material.depthWrite = false; DOORL.renderOrder = 2;
 const POUCH = mesh(new THREE.SphereGeometry(.09, 14, 10), toon('#8a6a3a'), { parent: scene });
 const TABLE = Z.whPaper.parent; TABLE.position.set(1.7, 0, -3.4); TABLE.rotation.y = Math.PI / 2;
@@ -109,11 +112,13 @@ function canvasTexP() { const c = document.createElement('canvas'); c.width = 25
   x.font = '600 24px Prompt'; [['ดำ', '12,000'], ['เสือ', '8,500'], ['ไบค์', '21,000'], ['หมาป่า', '6,000']].forEach(([n, v], i) => { x.fillStyle = '#2a2230'; x.fillText(n, 24, 104 + i * 58); x.fillStyle = '#c0202a'; x.fillText(v, 150, 104 + i * 58); });
   x.strokeStyle = '#c0202a'; x.lineWidth = 3; x.beginPath(); x.ellipse(190, 200, 64, 26, 0, 0, 7); x.stroke(); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; }
 for (const l of Z.whLamps) l.visible = true; Z.whCrowd.forEach(m => { m.scale.set(1.25, 1.25, 1); m.position.y *= 1.25; });
-function whLight(o = {}) { PILLAR.visible = true; Z.whPaper.visible = false; setRig({ ...RIGS.alley, key: ['#ffc88a', .42], fill: ['#7080c0', .18], rim: ['#ff9a50', .55], base: 1.0 }); nightCity({ hemiI: 1.6, sunI: .7, fog: '#1c1612', fogN: 12, fogF: 45, stars: 0, moon: 0, ...o });
+function whLight(o = {}) { WB1.at(NOW); WB2.at(NOW); PILLAR.visible = true; Z.whPaper.visible = false; setRig({ ...RIGS.alley, key: ['#ffc88a', .42], fill: ['#7080c0', .18], rim: ['#ff9a50', .55], base: 1.0 }); nightCity({ hemiI: 1.6, sunI: .7, fog: '#1c1612', fogN: 12, fogF: 45, stars: 0, moon: 0, ...o });
   Wd.setShadowFocus(-600, 1, 600, 12); neonPt(0, WAREHOUSE.localToWorld(V(0, 6, -3)), '#ffcc88', 7, 14); neonPt(1, WAREHOUSE.localToWorld(V(0, 2, -8.6)), '#ff9a40', 5, 9); neonPt(2, WAREHOUSE.localToWorld(V(0, 6, 5)), '#ffcc88', 5, 12); }
 const faceLight = (C, col = '#ffd0a8', side = 1) => { const h = WAREHOUSE.worldToLocal(headW(C, .45)); neonPt(3, WAREHOUSE.localToWorld(V(h.x + side * .9, h.y + .4, h.z + 1.1)), col, 4, 4); };
 const wEnd = (t, look = 1) => { ZC.warehouseAt(t, camera); Z.whCrowd.forEach((m, i) => { const k = clamp(look * 1.6 - (i % 9) * .07); m.scale.x = .3 + .7 * k; }); };
 const AW = (t) => Math.max(-3.0, 9.5 - Math.max(0, t - 15.0) * 1.45);   // Aren walks in from the door along x = 0 and stops in front of the pillar
+/* Aren walks AROUND the pillar (x 0, z -1.9, 1.2 m wide): he sidesteps left while passing it - the old straight path went THROUGH it (user screen recording 16:18) */
+const AX = (z) => -1.05 * eIO(clamp((1.4 - z) / 1.3));   /* sidestep left of the pillar's edge (x -.6) with room for his body, and stay there: W08 cuts to Victor right after */
 const LT = [[T1, [-2.0, .4, -8.3], 20], [T2, [2.0, .4, -8.3], -20], [T3, [-3.2, 0, -7.2], 30], [GU, [3.2, 0, -7.2], -30]];   // Victor's inner circle
 function inner(lt, t, ex = 'smug', P = {}) { LT.forEach(([f, p, ry], i) => put(f(), WAREHOUSE, live(lt, 11 + i, { p, ry, ex: typeof ex === 'function' ? ex(i) : ex, ...P }, .6))); }
 // ---------------- 0 "ชายคนนี้ทุบกำแพงคอนกรีตพังได้ ด้วยหมัดเดียว" : the wind-up, the punch, the wall breaks (cracks, chips, dust) ----------------
@@ -156,13 +161,13 @@ S('W04', 9.95, 'cut', STREET, (lt, t) => { streetLight(lt); MIND = 2.6;
   camS(C0[ci][1], C0[ci][2], C0[ci + 1][1], C0[ci + 1][2], cu, 52); });
 // ---------------- 6 "และผม… เดินเข้าไปในฐานของเขา คนเดียว" : the door opens, a lone figure in the light ----------------
 S('W05', 14.45, 'fgwipe', WAREHOUSE, (lt, t) => { whLight(); MIND = 2.6; DOORL.visible = true; DOORL.material.opacity = .9 * U(lt, .5);
-  put(AR(), WAREHOUSE, live(lt, 1, { p: [0, 0, AW(t)], ry: 180, ex: 'stoic', ...walk(t, 1.45, .21) }, .3)); setRig(RIGS.silhouette);
+  put(AR(), WAREHOUSE, live(lt, 1, { p: [AX(AW(t)), 0, AW(t)], ry: 180, ex: 'stoic', ...walk(t, 1.45, .21) }, .3)); setRig(RIGS.silhouette);
   camW([.9, 1.4, 2.5], [0, 1.5, 9.5], [.7, 1.4, 2.9], [0, 1.5, 8.5], U(lt, 3.9), 44); wEnd(t, 0); }, { rain: false });
 // ---------------- 7 "ทันทีที่ก้าวเข้าไป" : his steps on the concrete, the crowd still turned away ----------------
-S('W06', 18.35, 'cut', WAREHOUSE, (lt, t) => { whLight(); MIND = 0; put(AR(), WAREHOUSE, { p: [0, 0, AW(t)], ry: 180, ex: 'stoic', ...walk(t, 1.45, .21) });
+S('W06', 18.35, 'cut', WAREHOUSE, (lt, t) => { whLight(); MIND = 0; put(AR(), WAREHOUSE, { p: [AX(AW(t)), 0, AW(t)], ry: 180, ex: 'stoic', ...walk(t, 1.45, .21) });
   camW([-1.4, .45, AW(t) - 2.4], [0, .5, AW(t)], [-1.3, .5, AW(t) - 2.2], [0, .6, AW(t)], U(lt, 1.4), 46); wEnd(t, 0); }, { rain: false });
 // ---------------- 8-9 "คนของวิกเตอร์กว่าห้าสิบคน หันมามองผมพร้อมกัน" : the camera pans along the walls as every head turns, a wave ----------------
-S('W07', 19.75, 'cut', WAREHOUSE, (lt, t) => { whLight(); MIND = 2.6; put(AR(), WAREHOUSE, live(lt, 1, { p: [0, 0, AW(t)], ry: 180, ex: 'calm', ...walk(t, 1.45, .21) }, .3));
+S('W07', 19.75, 'cut', WAREHOUSE, (lt, t) => { whLight(); MIND = 2.6; put(AR(), WAREHOUSE, live(lt, 1, { p: [AX(AW(t)), 0, AW(t)], ry: 180, ex: 'calm', ...walk(t, 1.45, .21) }, .3));
   const u = U(lt, 3.8, eIO); camW(lp([4.6, 2.2, 4.0], [-4.0, 2.4, 3.5], u), lp([-6.0, 1.4, -2.0], [6.0, 1.4, -4.0], u), lp([4.6, 2.2, 4.0], [-4.0, 2.4, 3.5], u), lp([-6.0, 1.4, -2.0], [6.0, 1.4, -4.0], u), 0, 52);
   ZC.warehouseAt(t, camera); Z.whCrowd.forEach((m, i) => { const k = clamp((lt - .3 - (i % 12) * .12) / .35); m.scale.x = .3 + .7 * eOut(k); }); }, { rain: false });
 // ---------------- 10 "แกมาจากไหน" : Victor, in front of his throne, lit by the fire drums ----------------
@@ -261,6 +266,7 @@ S('W29', 80.5, 'cut', STREET, (lt, t) => { streetLight(lt); MIND = 2.4; put(CL()
 S('W30', 83.85, 'blur', STREET, (lt, t) => { streetLight(lt); MIND = 2.4; const z = -14.2 + 1.4 * U(lt - .3, 1.6, eIO);
   put(CL(), STREET, live(lt, 9, { p: [.15, .18, z], ry: 0, ex: 'veiled', talk: talkAt(t), ...(lt > .3 && lt < 1.9 ? walk(t, 1.0, .14) : {}) }, .3));
   put(AR(), STREET, live(lt, 1, { p: [0, .18, -10.6], ry: 180, ...exShift(lt, 1.6, 'stoic', 'focused') }, .3));
+  whisperAt(headW(CL(), .38), headW(AR(), .4), 'แกกำลังทำให้ทุกคนคิดว่าแกอ่อนแอ', clamp((lt - .2) / 2.4), t, { fs: 56, dy: 240 });
   camS([.8, 1.9, -15.6], [0, 1.65, -10.6], [.7, 1.88, -15.2], [0, 1.65, -10.6], U(lt, 3.1), 40); });
 // ---------------- 38 "ผมหยุดเดิน" : Aren frozen ----------------
 S('W31', 87.0, 'cut', STREET, (lt, t) => { streetLight(lt); MIND = 2.4; put(AR(), STREET, { p: [0, .18, -10.6], ry: 180, ...perform(lt, [[0, 'frozen']]), ex: 'realize', still: true });
