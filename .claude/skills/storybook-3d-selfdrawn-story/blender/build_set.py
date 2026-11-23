@@ -1,5 +1,5 @@
 # v7.6 Blender set builder (runs on the user's computer):  blender -b -P blender/build_set.py -- <recipe.json> <out.glb> [--samples 128] [--res 1024]
-# UNTESTED until the user's Blender is connected: run it once on the computer and fix what the log says before using it for an episode.
+# Tested on Blender 5.3 with warehouse_test.json. Also writes <out>.blend and <out>_preview.png (lit render from cam_door; --no-preview skips it).
 # Builds a set from a JSON recipe (boxes/planes/props + CC0 .glb/.blend assets + lights + camera marks + colliders), lights it in Cycles,
 # BAKES light+colour into one texture per object, and exports a .glb that src/blendset.js loads (characters stay our 2D sprites).
 # Recipe (metres, y-up like our engine; Blender is z-up, converted here):
@@ -14,7 +14,7 @@
 #   "colliders": [ {"name": "col_pillar", "size": [.8, 4, .8], "pos": [0, 2, -1.9]} ] }
 import bpy, bmesh, json, sys, math, os
 from mathutils import Vector, Euler
-argv = sys.argv[sys.argv.index('--') + 1:]; RECIPE, OUT = argv[0], argv[1]
+argv = sys.argv[sys.argv.index('--') + 1:]; RECIPE, OUT = argv[0], os.path.abspath(argv[1]); os.makedirs(os.path.dirname(OUT), exist_ok=True)   # abspath: render.filepath misresolves relative paths
 SAMPLES = int(argv[argv.index('--samples') + 1]) if '--samples' in argv else 128
 RES = int(argv[argv.index('--res') + 1]) if '--res' in argv else 1024
 R = json.load(open(RECIPE, encoding='utf-8')); BASE = os.path.dirname(os.path.abspath(RECIPE))
@@ -22,8 +22,10 @@ yz = lambda p: Vector((p[0], -p[2], p[1]))                                  # ou
 def rgb(h): h = h.lstrip('#'); return tuple(int(h[i:i + 2], 16) / 255 for i in (0, 2, 4)) + (1,)
 bpy.ops.wm.read_factory_settings(use_empty=True); sc = bpy.context.scene
 sc.render.engine = 'CYCLES'; sc.cycles.samples = SAMPLES; sc.cycles.device = 'GPU' if '--gpu' in argv else 'CPU'
+def nodes_on(d):                                                              # use_nodes is deprecated (default True in new Blenders): only set it where needed
+    if bpy.app.version < (5, 0, 0): d.use_nodes = True
 def mat(name, color, emit=0, rough=.7):
-    m = bpy.data.materials.new(name); m.use_nodes = True; b = m.node_tree.nodes['Principled BSDF']
+    m = bpy.data.materials.new(name); nodes_on(m); b = m.node_tree.nodes['Principled BSDF']
     b.inputs['Base Color'].default_value = rgb(color); b.inputs['Roughness'].default_value = rough
     if emit: b.inputs['Emission Color'].default_value = rgb(color); b.inputs['Emission Strength'].default_value = emit
     return m
@@ -61,12 +63,21 @@ for L in R.get('lights', []):
         e['type'] = L['type']; e['color'] = L.get('color', '#ffffff'); e['power'] = L.get('engine_power', 1.5)
 for cm in R.get('cams', []):
     e = bpy.data.objects.new(cm['name'], None); sc.collection.objects.link(e); e.location = yz(cm['pos'])
-    d = yz(cm['look']) - e.location; e.rotation_euler = d.to_track_quat('-Z', 'Y').to_euler()
-W = R.get('world', {}); wd = bpy.data.worlds.new('w'); sc.world = wd; wd.use_nodes = True; bg = wd.node_tree.nodes['Background']
+    d = yz(cm['look']) - e.location; e.rotation_euler = d.to_track_quat('Y', 'Z').to_euler()   # glTF export rotates empties' axes: Blender +Y -> glTF -Z, which blendset.js reads as "forward"
+W = R.get('world', {}); wd = bpy.data.worlds.new('w'); sc.world = wd; nodes_on(wd); bg = wd.node_tree.nodes['Background']
 if W.get('hdri'):
     env = wd.node_tree.nodes.new('ShaderNodeTexEnvironment'); env.image = bpy.data.images.load(os.path.join(BASE, W['hdri'])); wd.node_tree.links.new(env.outputs[0], bg.inputs[0])
 else: bg.inputs[0].default_value = rgb(W.get('color', '#202020'))
 bg.inputs[1].default_value = W.get('strength', .5)
+# ---- preview: lit Cycles render from the first cam mark (cam_door) through a real camera -> <out>.png ; use --no-preview to skip
+STEM = os.path.splitext(OUT)[0]
+if R.get('cams') and '--no-preview' not in argv:
+    pc = [c for c in R['cams'] if c['name'] == 'cam_door'] or R['cams'][:1]; pc = pc[0]
+    cd = bpy.data.cameras.new('preview_cam'); cd.lens = 28; co = bpy.data.objects.new('preview_cam', cd); sc.collection.objects.link(co)
+    co.location = yz(pc['pos']); co.rotation_euler = (yz(pc['look']) - co.location).to_track_quat('-Z', 'Y').to_euler(); sc.camera = co
+    sc.render.resolution_x = RES; sc.render.resolution_y = int(RES * 9 / 16); sc.render.filepath = STEM + '_preview.png'; sc.render.image_settings.file_format = 'PNG'
+    bpy.ops.render.render(write_still=True); print('PREVIEW', sc.render.filepath, 'from', pc['name'])
+    bpy.data.objects.remove(co); bpy.data.cameras.remove(cd)               # keep the exported glb free of the helper camera
 # ---- bake: smart UV per object -> COMBINED (light + colour) into one image -> swap the material for that image
 sc.cycles.bake_type = 'COMBINED'; sc.render.bake.use_pass_direct = True; sc.render.bake.use_pass_indirect = True; sc.render.bake.margin = 8
 for ob in objs:
@@ -79,8 +90,9 @@ for ob in objs:
     for m in ob.data.materials:
         n = m.node_tree.nodes.new('ShaderNodeTexImage'); n.image = img; m.node_tree.nodes.active = n
     bpy.ops.object.bake(type='COMBINED'); img.pack()
-    bm = bpy.data.materials.new(ob.name + '_baked'); bm.use_nodes = True; nt = bm.node_tree; b = nt.nodes['Principled BSDF']
+    bm = bpy.data.materials.new(ob.name + '_baked'); nodes_on(bm); nt = bm.node_tree; b = nt.nodes['Principled BSDF']
     t = nt.nodes.new('ShaderNodeTexImage'); t.image = img; nt.links.new(t.outputs[0], b.inputs['Base Color'])
     ob.data.materials.clear(); ob.data.materials.append(bm); print('baked', ob.name, res)
-bpy.ops.export_scene.gltf(filepath=OUT, export_format='GLB', export_extras=True, export_lights=False, export_draco_mesh_compression_enable=True, export_yup=True)
+bpy.ops.wm.save_as_mainfile(filepath=STEM + '.blend', compress=True); print('BLEND', STEM + '.blend')
+bpy.ops.export_scene.gltf(filepath=OUT, export_format='GLB', export_extras=True, export_lights=False, export_draco_mesh_compression_enable=False,export_yup=True)
 print('SET OK', OUT, len(objs), 'objects')
