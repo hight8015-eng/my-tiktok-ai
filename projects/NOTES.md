@@ -125,3 +125,4 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
 - v7.6 system: make_ep.sh (one-command episode) + qa.py (auto QA + contact sheet). ep3 QA pass.
 - v7.6: storyboard.py (auto shot table) + new_ep.sh (series library start). Flow in SKILL v7.6.
 - Blender bridge written (build_set.py + blendset.js + test recipe), untested: waiting for the user's computer folder.
+- !!! BLENDER: when Blender is reachable, do projects/BLENDER_TODO.md in order (bring-up, CC0 assets, 6 ZERO CITY sets with props, sign kit, VFX). Remote folder E:\Claude Animate on DESKTOP-2H0OUSI is not yet served to cloud sessions (Windows app version).

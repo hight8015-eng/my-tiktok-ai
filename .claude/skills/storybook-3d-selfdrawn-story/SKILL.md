@@ -873,3 +873,5 @@ Film grammar that makes these hold 100K+ likes, mapped to our 2D engine:
     - `cam_*` marks become camX targets. `col_*` boxes become colliders; use `blocked(S, x, z)` for walk paths.
   - GLTFLoader r169 is vendored in src/lib/three/examples/jsm/loaders.
   - First job on the computer: run warehouse_test.json, load it in a pm3 test shot, and compare it with the hand-built warehouse.
+
+> BLENDER TODO: projects/BLENDER_TODO.md (sets + props + VFX), to do as soon as Blender is reachable.
