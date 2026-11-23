@@ -113,6 +113,25 @@ def hair_noah(d,view='F'):
     hl(d,[(CX+10,340),(CX+110,352),(CX+160,390),(CX+70,376)],hexc('#f4f6fb'))
     strands(d,[[(CX-80,350),(CX-86,440),(CX-96,540)],[(CX+30,330),(CX+40,420),(CX+50,490)],[(CX+150,350),(CX+170,430),(CX+176,500)],[(CX-200,440),(CX-210,520),(CX-206,570)]],hexc('#8f93a6'),4)
 
+# ---- Prisoner p1 (C10, ep4): brown curly mop, ONE connected bumpy outline that sits on the skull (the gossip scene needs a silhouette
+#      that differs from the beanie thug: round curly cloud vs a flat cuffed dome) ----
+def _curls(cx, cy, rx, ry, a0, a1, n, amp):
+    pts = []
+    for i in range(n + 1):
+        t = math.radians(a0 + (a1 - a0) * i / n); k = 1 + (amp if i % 2 else 0)
+        pts.append((cx + rx * k * math.cos(t), cy + ry * k * math.sin(t)))
+    return pts
+def hair_curly(d, view='F'):
+    c = hexc('#6b4630')
+    if view == 'B':
+        poly(d, cr(_curls(CX, 520, 262, 250, 0, 360, 22, .07)[:-1], 5), c); return
+    top = _curls(CX, 470, 268, 215, 192, 348, 14, .08)                     # bumpy crown from the left temple over to the right temple
+    fringe = [(CX + 246, 520), (CX + 190, 500), (CX + 150, 452), (CX + 96, 486), (CX + 40, 440), (CX - 20, 482), (CX - 80, 444), (CX - 140, 490), (CX - 196, 462), (CX - 250, 528)]
+    poly(d, cr(top + fringe, 5), c)
+    hl(d, [(CX - 120, 345), (CX - 40, 318), (CX + 30, 330), (CX - 50, 352)], c)
+    for x, y in [(CX - 150, 390), (CX - 60, 360), (CX + 40, 372), (CX + 130, 396), (CX - 100, 430), (CX + 90, 436)]:
+        line(d, arc(x, y, 26, 20, 200, 340, 8), lw=4 * K, col=shade(c, .62))
+
 # ---------- registry (v8 M3): what charsheet.py shows as the Hair Library. silhouette = the outline family (characters in one scene
 # must differ by SILHOUETTE, not only colour - SKILL.md "HAIR LIBRARY" rule); back = how the B view is drawn.
 HAIR = {
@@ -124,6 +143,7 @@ HAIR = {
     'beanie':        dict(fn=hat_beanie,  name='หมวกไหมพรม พับขอบ ปอมปอม',     silhouette='dome-cuff',    back='own'),
     'bandana':       dict(fn=hat_bandana, name='หัวโล้น ผ้าโพกแดง ปมข้าง',      silhouette='bald-wrap',    back='own'),
     'hood':          dict(fn=hood,        name='ฮู้ดลึก หน้าอยู่ในเงา',         silhouette='hood',         back='back_hood'),
+    'curly':         dict(fn=hair_curly,  name='ผมหยิกฟูสีน้ำตาล',              silhouette='curly-cloud',  back='own'),
     'noah_swept':    dict(fn=hair_noah,   name='ผมเงินหวีเสย ปอยหน้าซ้าย',      silhouette='swept-spikes', back='own'),
     'boater':        dict(fn=hat_boater,  name='หมวกฟางปีกแบน (LAST VILLAIN)', silhouette='flat-brim',    back='none', args='band'),
     'cone':          dict(fn=hat_cone,    name='หมวกงอบ (LAST VILLAIN)',       silhouette='cone',         back='none', args='band'),

@@ -11,7 +11,8 @@ CH={'C01':(hair_aren,villager,(hexc('#1b1820'),)),'C02':(cap_guard,villager,(hex
     'C03':(hair_fire,villager,(hexc('#c8bfa8'),)),'C04':(hair_buzz,villager,(hexc('#6a5a4a'),)),
     'C05':(hair_mohawk,villager,(hexc('#2a2a30'),)),'C06':(hat_beanie,villager,(hexc('#4a4038'),)),
     'C07':(hat_bandana,villager,(hexc('#38404a'),)),'C08':(hood,villager,(hexc('#3a3448'),),back_hood),
-    'C09':(hair_noah,villager,(hexc('#222a38'),))}
+    'C09':(hair_noah,villager,(hexc('#222a38'),)),
+    'C10':(hair_curly,villager,(hexc('#8a5a34'),))}
 for cid,spec in CH.items():
     hat,cos,args=spec[:3]; back=spec[3] if len(spec)>3 else None
     for v in 'FQSB':

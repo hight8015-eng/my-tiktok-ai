@@ -109,8 +109,15 @@
   },
   {
    "id": "p1",
-   "sprite": "C06",
-   "s": 0.78
+   "sprite": "C10",
+   "s": 0.78,
+   "uniform": {
+    "shape": "torso",
+    "base": "#8a5a34",
+    "collar": "round",
+    "pants": "#34303a",
+    "belt": "#1c1a20"
+   }
   },
   {
    "id": "p2",
