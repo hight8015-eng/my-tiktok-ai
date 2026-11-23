@@ -366,4 +366,4 @@ window.steps = (t0 = 0, t1 = timing.end) => { globalThis.STEPLOG = []; const out
     const sh = SHOTS[i]; globalThis.FRAME_T = t; const n = globalThis.STEPLOG.length; try { sh.fn(t - sh.t0, t); } catch (e) { }
     for (const e of globalThis.STEPLOG.splice(n)) out.push({ ...e, t: +t.toFixed(3), shot: sh.id }); }
   globalThis.STEPLOG = null; return out; };
-window.ready = true;
+window.__CHARS = CHARS; window.ready = true;

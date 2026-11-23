@@ -2,3 +2,8 @@ output/
 .autosave.log
 .autosave.lock
 out/
+
+# studio v8 (2026-11-23): work folders and installs stay out of git
+render/
+backups/
+remotion/node_modules/
