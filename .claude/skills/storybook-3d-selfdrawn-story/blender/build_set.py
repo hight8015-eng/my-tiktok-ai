@@ -22,8 +22,10 @@ yz = lambda p: Vector((p[0], -p[2], p[1]))                                  # ou
 def rgb(h): h = h.lstrip('#'); return tuple(int(h[i:i + 2], 16) / 255 for i in (0, 2, 4)) + (1,)
 bpy.ops.wm.read_factory_settings(use_empty=True); sc = bpy.context.scene
 sc.render.engine = 'CYCLES'; sc.cycles.samples = SAMPLES; sc.cycles.device = 'GPU' if '--gpu' in argv else 'CPU'
+def nodes_on(d):                                                              # use_nodes is deprecated (default True in new Blenders): only set it where needed
+    if bpy.app.version < (5, 0, 0): d.use_nodes = True
 def mat(name, color, emit=0, rough=.7):
-    m = bpy.data.materials.new(name); m.use_nodes = True; b = m.node_tree.nodes['Principled BSDF']
+    m = bpy.data.materials.new(name); nodes_on(m); b = m.node_tree.nodes['Principled BSDF']
     b.inputs['Base Color'].default_value = rgb(color); b.inputs['Roughness'].default_value = rough
     if emit: b.inputs['Emission Color'].default_value = rgb(color); b.inputs['Emission Strength'].default_value = emit
     return m
@@ -61,8 +63,8 @@ for L in R.get('lights', []):
         e['type'] = L['type']; e['color'] = L.get('color', '#ffffff'); e['power'] = L.get('engine_power', 1.5)
 for cm in R.get('cams', []):
     e = bpy.data.objects.new(cm['name'], None); sc.collection.objects.link(e); e.location = yz(cm['pos'])
-    d = yz(cm['look']) - e.location; e.rotation_euler = d.to_track_quat('-Z', 'Y').to_euler()
-W = R.get('world', {}); wd = bpy.data.worlds.new('w'); sc.world = wd; wd.use_nodes = True; bg = wd.node_tree.nodes['Background']
+    d = yz(cm['look']) - e.location; e.rotation_euler = d.to_track_quat('Y', 'Z').to_euler()   # glTF export rotates empties' axes: Blender +Y -> glTF -Z, which blendset.js reads as "forward"
+W = R.get('world', {}); wd = bpy.data.worlds.new('w'); sc.world = wd; nodes_on(wd); bg = wd.node_tree.nodes['Background']
 if W.get('hdri'):
     env = wd.node_tree.nodes.new('ShaderNodeTexEnvironment'); env.image = bpy.data.images.load(os.path.join(BASE, W['hdri'])); wd.node_tree.links.new(env.outputs[0], bg.inputs[0])
 else: bg.inputs[0].default_value = rgb(W.get('color', '#202020'))
@@ -88,9 +90,9 @@ for ob in objs:
     for m in ob.data.materials:
         n = m.node_tree.nodes.new('ShaderNodeTexImage'); n.image = img; m.node_tree.nodes.active = n
     bpy.ops.object.bake(type='COMBINED'); img.pack()
-    bm = bpy.data.materials.new(ob.name + '_baked'); bm.use_nodes = True; nt = bm.node_tree; b = nt.nodes['Principled BSDF']
+    bm = bpy.data.materials.new(ob.name + '_baked'); nodes_on(bm); nt = bm.node_tree; b = nt.nodes['Principled BSDF']
     t = nt.nodes.new('ShaderNodeTexImage'); t.image = img; nt.links.new(t.outputs[0], b.inputs['Base Color'])
     ob.data.materials.clear(); ob.data.materials.append(bm); print('baked', ob.name, res)
 bpy.ops.wm.save_as_mainfile(filepath=STEM + '.blend', compress=True); print('BLEND', STEM + '.blend')
-bpy.ops.export_scene.gltf(filepath=OUT, export_format='GLB', export_extras=True, export_lights=False, export_draco_mesh_compression_enable=True, export_yup=True)
+bpy.ops.export_scene.gltf(filepath=OUT, export_format='GLB', export_extras=True, export_lights=False, export_draco_mesh_compression_enable=False,export_yup=True)
 print('SET OK', OUT, len(objs), 'objects')
