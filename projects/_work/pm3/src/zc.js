@@ -316,8 +316,7 @@ export const WAREHOUSE = group({ p: [-600, 0, 600], parent: scene });
   Z.whFires = [-2.6, 2.6].map((x, i) => { const g = group({ p: [x, 0, -8.6], parent: W }); mesh(new THREE.CylinderGeometry(.35, .35, .9, 24), toon('#4a3a30'), { p: [0, .45, 0], parent: g }); const f = makeFire(g, { w: .6, h: .8, seed: 11 + i, embers: 6 }); f.group = g; g.position.y = 0; g.userData.f = f; glow(g, [0, 1.2, 0], '#ff9a40', 3, .35); return g; });
   // table with the paper (Z.whPaper shows when Aren puts it down)
   const tb = group({ p: [0, 0, -6.2], parent: W }); mesh(rbox(2.2, .1, 1.1), toon('#5a3e2a'), { p: [0, .95, 0], parent: tb }); for (const [x, z] of [[-1, -.45], [1, -.45], [-1, .45], [1, .45]]) mesh(rbox(.1, .9, .1), dk, { p: [x, .45, z], parent: tb });
-  Z.whPaper = mesh(new THREE.PlaneGeometry(.42, .58), toon('#f2ece0', { side: THREE.DoubleSide }), { p: [.1, 1.01, .05], r: [-90, 0, 12], parent: tb, cast: false });
-  for (let i = 0; i < 9; i++) mesh(rbox(.3, .012, .012), basic('#3a3440'), { p: [.1, 1.012, -.18 + i * .045], r: [0, 12, 0], parent: tb, cast: false });
+  Z.whPaper = mesh(new THREE.PlaneGeometry(.42, .58), toon('#f2ece0', { side: THREE.DoubleSide }), { p: [.1, 1.016, .05], r: [-90, 0, 12], parent: tb, cast: false });
   // crates + the punched wall section (left wall, x -7.8): cracks + a dark hole revealed on impact
   for (let i = 0; i < 14; i++) crate(W, [(R() < .5 ? -1 : 1) * (5.2 + R() * 2), 0, -10 + R() * 18], .7 + R() * .5, R() * 40);
   Z.whHole = mesh(new THREE.CircleGeometry(.75, 18), basic('#0c0a10'), { p: [-7.78, 1.75, -3], r: [0, 90, 0], parent: W, cast: false }); Z.whHole.visible = false;

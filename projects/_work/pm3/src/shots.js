@@ -204,9 +204,9 @@ S('W24', 63.45, 'cut', WAREHOUSE, (lt, t) => { whLight(); MIND = 2.2; put(AR(), 
 // ---------------- 29 "ผมเดินออกจากฐานมาโดยไม่มีใครกล้าขวาง" : he walks to the door; the men step out of his way ----------------
 const OZ = (t) => -3.0 + Math.max(0, t - 67.2) * 1.45;
 S('W25', 66.95, 'sweep', WAREHOUSE, (lt, t) => { whLight(); MIND = 2.6; DOORL.visible = true; DOORL.material.opacity = .6;
-  put(AR(), WAREHOUSE, { p: [.3, 0, OZ(t)], ry: 0, ex: 'calm', ...walk(t, 1.45, .21) }); put(VI(), WAREHOUSE, live(lt, 5, { p: [-.15, 0, -4.65], ry: 0, ex: 'dread' }, .5));
+  put(AR(), WAREHOUSE, { p: [.3 + .9 * clamp(1 - Math.abs(OZ(t) + 1.9) / 2.0), 0, OZ(t)], ry: 0, ex: 'calm', ...walk(t, 1.45, .21) }); put(VI(), WAREHOUSE, live(lt, 5, { p: [-.15, 0, -4.65], ry: 0, ex: 'dread' }, .5));
   Z.whCrowd.forEach(m => { m.userData.x0 ??= m.position.x; const near = Math.abs(m.position.z - OZ(t)) < 2.5 ? 1 : 0; m.position.x = m.userData.x0 + Math.sign(m.userData.x0) * .4 * near; });
-  camW([-1.6, 2.4, -6.2], [.3, 1.4, OZ(t) + 2], [-1.6, 2.6, -6.4], [.3, 1.4, OZ(t) + 2], U(lt, 3.0), 50); wEnd(t); Z.whCrowd.forEach(m => { m.position.x = m.userData.x0; }); }, { rain: false });
+  camW([.9, 1.75, 4.8], [.7, 1.5, OZ(t)], [.8, 1.75, 5.6], [.5, 1.5, OZ(t)], U(lt, 3.0), 46); wEnd(t); Z.whCrowd.forEach(m => { m.position.x = m.userData.x0; }); }, { rain: false });
 // ---------------- 30-31 "ทุกอย่างเป็นไปตามแผน / อย่างน้อย ผมก็คิดแบบนั้น" : WHIP to the street; he walks, pleased with himself ----------------
 const SZ = (t) => -4.5 - Math.max(0, t - 70.0) * 1.3;
 S('W26', 69.95, 'whip', STREET, (lt, t) => { streetLight(lt); MIND = 2.6; put(AR(), STREET, live(lt, 1, { p: [0, .18, SZ(t)], ry: 180, ...exShift(lt, 2.3, 'sly', 'calm'), ...walk(t, 1.35, .2) }, .3));

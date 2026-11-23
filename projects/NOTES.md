@@ -96,3 +96,16 @@ This folder keeps the stories: scripts, episode sources, the character drawings 
 - User LIKES and wants to KEEP: (1) the documentary place label (title + white underline + sub line, top-left) and (2) the whisper-thought text floating from Aren to the target (whisperAt, pink-red glow). Use them every episode where they fit.
 - (ep3) Never put a // comment in the middle of a one-line statement that continues after it (it swallowed '}, { rain: false });'); check shots.js with node --check on a .mjs copy (module syntax), not .js.
 - Skills added (text-only SKILL.md, no hooks/scripts run): caveman (+ultracave, megacave, caveman-compress) from JuliusBrussee/caveman; ponytail (+audit, debt, gain, help, review) from dietrichgebert/ponytail. User wants token saving.
+- (ep3 review) Aren walked THROUGH the pillar on the way out; the paper's 3D text bars stuck up through the sheet and the
+  sheet sank into the table. Fixed (detour around the pillar, paper texture only, paper 1.6 cm above the top).
+  RULE: decals/paper = texture on a plane lifted >= 1 cm; never 3D bars for text.
+- STUDY (user refs, 2026-11-23): storiesbyloe (164K, Pixar-style 3D drama, 0.2-1.4M views/clip) = the quality bar:
+  expressive faces, real gestures, cinematic light. ChatGPT review of our clip, adopt from ep4:
+  1 hook that raises a question in sec 1; 2 visible events, not narration-only; 3 vary pace (fast beats / held silences);
+  4 a real event before the cliffhanger; 5 body acting (look-back, flinch, stumble, hands); 6 camera grammar: dolly-in =
+  suspicion, quick push = shock (no zoom cut-ins), OTS = dialogue, tracking = walking, wide = new place, dutch = only
+  when something is wrong (never on prop beats); 7 sound: footsteps, rain, whoosh on turns, impact on shock, hit on reveal,
+  silence before key moments; 8 per-shot spec before code (character/camera/set/animation/light/sound/edit) = our shot
+  list - write it as a table first.
+- Instagram monetisation flag 'บัญชีเป็นที่รู้จักและน่าเชื่อถือ' = account authenticity (identity/notability), not a
+  video problem; user must verify identity / appeal in-app (once per 90 days). Keep content original.

@@ -84,7 +84,7 @@ function hideGuns() { [PILLAR, HOLE, CRACK, HOLE2, CRACK2, DOORL, POUCH].forEach
 const PILLAR = mesh(rbox(1.2, 9, 1.2), toon('#8a8690'), { p: [0, 4.5, -1.9], parent: WAREHOUSE });
 const HOLE = Z.whHole.clone(), CRACK = Z.whCrack.clone(); [HOLE, CRACK].forEach((m, i) => { m.position.set(.45, 1.78, -2.52 - i * .005); m.rotation.set(0, Math.PI, 0); WAREHOUSE.add(m); }); HOLE.scale.setScalar(.6); CRACK.scale.setScalar(.7);
 const HOLE2 = Z.whHole.clone(), CRACK2 = Z.whCrack.clone(); [HOLE2, CRACK2].forEach((m, i) => { m.position.set(7.77 - i * .005, 1.6, 4); m.rotation.set(0, -Math.PI / 2, 0); WAREHOUSE.add(m); });
-const DOORL = mesh(new THREE.PlaneGeometry(2.8, 3.8), basic('#ffd8b0', { transparent: true, opacity: .9 }), { p: [0, 1.95, 11.7], r: [0, 180, 0], parent: WAREHOUSE, cast: false });
+const DOORL = mesh(new THREE.PlaneGeometry(2.8, 3.8), basic('#ffd8b0', { transparent: true, opacity: .9 }), { p: [0, 1.95, 11.45], r: [0, 180, 0], parent: WAREHOUSE, cast: false }); DOORL.material.depthWrite = false; DOORL.renderOrder = 2;
 const POUCH = mesh(new THREE.SphereGeometry(.09, 14, 10), toon('#8a6a3a'), { parent: scene });
 const TABLE = Z.whPaper.parent; TABLE.position.set(1.7, 0, -3.4); TABLE.rotation.y = Math.PI / 2;
 Z.whPaper.material.map = canvasTexP(); Z.whPaper.material.needsUpdate = true; Z.whPaper.rotation.z -= Math.PI / 2;
@@ -182,7 +182,7 @@ S('W18', 47.2, 'blur', WAREHOUSE, (lt, t) => { whLight(); MIND = 2.6; Z.whPaper.
 // ---------------- 22-23 "เพราะคนที่ยืนใกล้คุณที่สุด / รู้ว่าจุดอ่อนคุณอยู่ตรงไหน" : ONE move from Aren to the men behind the king ----------------
 S('W19', 50.95, 'cut', WAREHOUSE, (lt, t) => { whLight(); MIND = 2.6; Z.whPaper.visible = true; put(VI(), WAREHOUSE, live(lt, 5, { p: [-.15, 0, -4.65], ry: 0, ex: 'stoic' }, .5));
   put(AR(), WAREHOUSE, live(lt, 1, { p: [.3, 0, -3.0], ry: 200, ex: 'sly', talk: talkAt(t) }, .4)); inner(lt, t, i => ['guilty', 'anxious', 'stoic', 'ashamed'][i]);
-  const u = U(lt - 1.2, 1.8, eIO); camW(lp([-1.6, 1.9, -6.9], [1.3, 3.4, -1.6], u), lp([.3, 1.62, -3.0], [0, 1.6, -8.0], u), lp([-1.6, 1.9, -6.9], [1.3, 3.4, -1.6], u), lp([.3, 1.62, -3.0], [0, 1.6, -8.0], u), 0, 46); wEnd(t); }, { rain: false });
+  const u = U(lt - .9, 2.9, eIO), bz = (A, C, B) => A.map((v, i) => (1 - u) ** 2 * v + 2 * u * (1 - u) * C[i] + u * u * B[i]), cp = bz([-1.6, 1.9, -6.9], [-1.6, 4.2, -4.6], [1.3, 3.4, -1.6]), ct = lp([.3, 1.62, -3.0], [0, 1.6, -8.0], u); camW(cp, ct, cp, ct, 0, 50); wEnd(t); }, { rain: false });
 // ---------------- 24 "รอยยิ้มของวิกเตอร์ค่อย ๆ หายไป" : slow push on the king's face as the smile drains ----------------
 S('W20', 55.0, 'cut', WAREHOUSE, (lt, t) => { whLight(); MIND = 2.2; put(VI(), WAREHOUSE, live(lt, 5, { p: [-.15, 0, -4.65], ry: 0, ...exShift(lt, 1.0, 'smug', 'stoic'), ...(lt > 1.8 ? exShift(lt, 1.8, 'stoic', 'dread') : {}) }, .4)); faceLight(VI());
   camW([-.2, 2.05, -2.0], [-.15, 2.05, -4.65], [-.18, 2.05, -2.35], [-.15, 2.05, -4.65], U(lt, 2.6), 36); wEnd(t); }, { rain: false });
@@ -204,9 +204,9 @@ S('W24', 63.45, 'cut', WAREHOUSE, (lt, t) => { whLight(); MIND = 2.2; put(AR(), 
 // ---------------- 29 "ผมเดินออกจากฐานมาโดยไม่มีใครกล้าขวาง" : he walks to the door; the men step out of his way ----------------
 const OZ = (t) => -3.0 + Math.max(0, t - 67.2) * 1.45;
 S('W25', 66.95, 'sweep', WAREHOUSE, (lt, t) => { whLight(); MIND = 2.6; DOORL.visible = true; DOORL.material.opacity = .6;
-  put(AR(), WAREHOUSE, { p: [.3, 0, OZ(t)], ry: 0, ex: 'calm', ...walk(t, 1.45, .21) }); put(VI(), WAREHOUSE, live(lt, 5, { p: [-.15, 0, -4.65], ry: 0, ex: 'dread' }, .5));
+  put(AR(), WAREHOUSE, { p: [.3 + .9 * clamp(1 - Math.abs(OZ(t) + 1.9) / 2.0), 0, OZ(t)], ry: 0, ex: 'calm', ...walk(t, 1.45, .21) }); put(VI(), WAREHOUSE, live(lt, 5, { p: [-.15, 0, -4.65], ry: 0, ex: 'dread' }, .5));
   Z.whCrowd.forEach(m => { m.userData.x0 ??= m.position.x; const near = Math.abs(m.position.z - OZ(t)) < 2.5 ? 1 : 0; m.position.x = m.userData.x0 + Math.sign(m.userData.x0) * .4 * near; });
-  camW([-1.6, 2.4, -6.2], [.3, 1.4, OZ(t) + 2], [-1.6, 2.6, -6.4], [.3, 1.4, OZ(t) + 2], U(lt, 3.0), 50); wEnd(t); Z.whCrowd.forEach(m => { m.position.x = m.userData.x0; }); }, { rain: false });
+  camW([.9, 1.75, 4.8], [.7, 1.5, OZ(t)], [.8, 1.75, 5.6], [.5, 1.5, OZ(t)], U(lt, 3.0), 46); wEnd(t); Z.whCrowd.forEach(m => { m.position.x = m.userData.x0; }); }, { rain: false });
 // ---------------- 30-31 "ทุกอย่างเป็นไปตามแผน / อย่างน้อย ผมก็คิดแบบนั้น" : WHIP to the street; he walks, pleased with himself ----------------
 const SZ = (t) => -4.5 - Math.max(0, t - 70.0) * 1.3;
 S('W26', 69.95, 'whip', STREET, (lt, t) => { streetLight(lt); MIND = 2.6; put(AR(), STREET, live(lt, 1, { p: [0, .18, SZ(t)], ry: 180, ...exShift(lt, 2.3, 'sly', 'calm'), ...walk(t, 1.35, .2) }, .3));
@@ -233,15 +233,15 @@ S('W31', 87.0, 'cut', STREET, (lt, t) => { streetLight(lt); MIND = 2.4; put(AR()
   camS([.35, 1.62, -12.9], [0, 1.62, -10.6], [.3, 1.62, -12.75], [0, 1.62, -10.6], U(lt, 1.2), 36); });
 // ---------------- 39-40 "เป็นครั้งแรก… ที่มีคนมองออกว่าผมกำลังเล่นเกม" : slow push into his eyes; the cloak's smile in the background ----------------
 S('W32', 88.2, 'cut', STREET, (lt, t) => { streetLight(lt); MIND = 2.0; put(AR(), STREET, live(lt, 1, { p: [0, .18, -10.6], ry: 180, ...exShift(lt, 2.2, 'realize', 'focused'), look: gaze(lt, 'stare') }, .3));
-  put(CL(), STREET, live(lt, 9, { p: [.15, .18, -12.8], ry: 0, ex: 'veiled' }, .3)); bigWord(STREET, 'GAME', [0, 3.6, -20], { h: 1.6, k: (lt - 1.6) / .8, col: '#ff2a3a', op: .8 });
-  camS([.3, 1.66, -13.6], [0, 1.64, -10.6], [.22, 1.65, -12.9], [0, 1.64, -10.6], U(lt, 5.3, eOut), 36); });
+  put(CL(), STREET, live(lt, 9, { p: [.95, .18, -12.9], ry: -15, ex: 'veiled' }, .3)); bigWord(STREET, 'GAME', [0, 3.6, -20], { h: 1.6, k: (lt - 1.6) / .8, col: '#ff2a3a', op: .8 });
+  camS([-.15, 1.66, -14.0], [0, 1.64, -10.6], [-.08, 1.65, -12.5], [0, 1.64, -10.6], U(lt, 5.3, eOut), 36); });
 
 export function initShots(timing) { TM.env = timing.env; TM.vis = timing.vis; for (let i = 0; i < SHOTS.length; i++) SHOTS[i].t1 = i + 1 < SHOTS.length ? SHOTS[i + 1].t0 : timing.end; }
 export function runShot(sh, t) { reset(t); sh.fn(t - sh.t0, t); }
 export const WHITEK = { k: 0 };
-export const COVER = { id: 'COVER', t0: 0, fn: (lt, t, o = {}) => { reset(10); ALLEY.visible = true; alleyLight(); ZC.alleyAt(10, 0);
-  put(AR(), ALLEY, { p: [-1.2, 0, -7.4], ry: 30, ex: 'sinister' }); redEyes(AR(), .9, 10);
-  const cm = o.cam || [.9, 1.45, -4.6], g = o.tgt || [-1.1, 1.75, -7.4]; MIND = 0; camA(cm, g, cm, g, 0, o.fov || 44); } };
+export const COVER = { id: 'COVER', t0: 0, fn: (lt, t, o = {}) => { reset(30); WAREHOUSE.visible = true; whLight(); HOLE.visible = CRACK.visible = true; PILLAR.visible = true;
+  put(VI(), WAREHOUSE, { p: [-.15, 0, -4.65], ry: 0, ex: 'angry', hR: [.42, 1.5, .95], pR: [1, -.4, -.2], hL: [-.3, .4, .2] }); put(AR(), WAREHOUSE, { p: [0, 0, -3.0], ry: 180, ex: 'sinister' }); redEyes(AR(), .8, 30); faceLight(AR(), '#ffd0a8', -1);
+  MIND = 0; const cm = o.cam || [-1.3, 2.0, -7.6], g = o.tgt || [.1, 2.0, -3.0]; camW(cm, g, cm, g, 0, o.fov || 44); ZC.warehouseAt(30, camera); } };
 export const BENCH = { id: 'BENCH', t0: 0, fn: (lt, t, o = {}) => { reset(0); if (o.roof) { ZC.ROOF.visible = true; ZC.roofAt(3); alleyLight(); setRig(RIGS.alley); put(GM(), ZC.ROOF, { p: [0, 0, -6.2], ry: 180, ex: 'evil' }); const c = o.cam, g = o.tgt; look(V(...c).add(ZC.ROOF.position), V(...g).add(ZC.ROOF.position), o.fov || 50); ZC.zcLate(3, camera); return; } STREET.visible = true; streetLight(0); if (o.rig) setRig({ ...RIGS.street, ...o.rig }); const ids = ['aren', 'guard', 'fire', 'strong', 'thug1', 'thug2', 'thug3', 'gunman'];
   if (o.act) { const L = o.act, n = L.length, sp = o.sp ?? .85; ids.forEach((id) => put(CHARS[id], STREET, { p: [0, -50, -30], visible: false }));
     L.forEach((a, i) => { const id = o.who ? o.who[i % o.who.length] : ids[i % ids.length]; const pz = o.beats ? perform(o.lt, o.beats, { seed: i }) : typeof a === 'string' && POSES[a] && !o.faceOnly ? perform(5, [[0, a]], { seed: i, still: true }) : a.includes('|') ? { ex: a.split('|')[0], talk: a.split('|')[1] } : { ex: a };
