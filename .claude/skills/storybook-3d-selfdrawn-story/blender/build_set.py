@@ -1,4 +1,4 @@
-# v7.6 Blender set builder (runs on the user's computer):  blender -b -P blender/build_set.py -- <recipe.json> <out.glb> [--samples 128] [--res 1024]
+﻿# v7.6 Blender set builder (runs on the user's computer):  blender -b -P blender/build_set.py -- <recipe.json> <out.glb> [--samples 128] [--res 1024]
 # Tested on Blender 5.3 with warehouse_test.json. Also writes <out>.blend and <out>_preview.png (lit render from cam_door; --no-preview skips it).
 # Builds a set from a JSON recipe (boxes/planes/props + CC0 .glb/.blend assets + lights + camera marks + colliders), lights it in Cycles,
 # BAKES light+colour into one texture per object, and exports a .glb that src/blendset.js loads (characters stay our 2D sprites).
@@ -17,11 +17,11 @@ from mathutils import Vector, Euler
 argv = sys.argv[sys.argv.index('--') + 1:]; RECIPE, OUT = argv[0], os.path.abspath(argv[1]); os.makedirs(os.path.dirname(OUT), exist_ok=True)   # abspath: render.filepath misresolves relative paths
 SAMPLES = int(argv[argv.index('--samples') + 1]) if '--samples' in argv else 128
 RES = int(argv[argv.index('--res') + 1]) if '--res' in argv else 1024
-R = json.load(open(RECIPE, encoding='utf-8')); BASE = os.path.dirname(os.path.abspath(RECIPE))
+R = json.load(open(RECIPE, encoding='utf-8-sig')); BASE = os.path.dirname(os.path.abspath(RECIPE))
 yz = lambda p: Vector((p[0], -p[2], p[1]))                                  # our (x, y-up, z) -> Blender (x, -z, y)
 def rgb(h): h = h.lstrip('#'); return tuple(int(h[i:i + 2], 16) / 255 for i in (0, 2, 4)) + (1,)
 bpy.ops.wm.read_factory_settings(use_empty=True); sc = bpy.context.scene
-sc.render.engine = 'CYCLES'; sc.cycles.samples = SAMPLES; sc.cycles.device = 'GPU' if '--gpu' in argv else 'CPU'
+sc.render.engine = 'CYCLES'; sc.view_settings.view_transform = 'Standard'; sc.cycles.samples = SAMPLES; sc.cycles.device = 'GPU' if '--gpu' in argv else 'CPU'
 def nodes_on(d):                                                              # use_nodes is deprecated (default True in new Blenders): only set it where needed
     if bpy.app.version < (5, 0, 0): d.use_nodes = True
 def mat(name, color, emit=0, rough=.7):
@@ -29,13 +29,20 @@ def mat(name, color, emit=0, rough=.7):
     b.inputs['Base Color'].default_value = rgb(color); b.inputs['Roughness'].default_value = rough
     if emit: b.inputs['Emission Color'].default_value = rgb(color); b.inputs['Emission Strength'].default_value = emit
     return m
-objs = []
+objs = []; groups = {}
 for o in R.get('objects', []):
-    if o['kind'] == 'box':
-        bpy.ops.mesh.primitive_cube_add(size=1, location=yz(o['pos'])); ob = bpy.context.object; s = o['size']; ob.scale = (s[0], s[2], s[1])
-        bpy.ops.object.transform_apply(scale=True)
-        if R.get('style', {}).get('bevel'): bv = ob.modifiers.new('bevel', 'BEVEL'); bv.width = R['style']['bevel']; bv.segments = 2
-        ob.data.materials.append(mat(o['name'] + '_m', o.get('color', '#808080'), o.get('emit', 0)))
+    if o['kind'] in ('box', 'cyl'):
+        rot = o.get('rot', [0, 0, 0])
+        if o['kind'] == 'box':
+            bpy.ops.mesh.primitive_cube_add(size=1, location=yz(o['pos'])); ob = bpy.context.object; s = o['size']; ob.scale = (s[0], s[2], s[1])
+        else:                                                                     # cylinder: r, h along engine axis 'y' (default) | 'x' | 'z'
+            bpy.ops.mesh.primitive_cylinder_add(vertices=o.get('seg', 20), radius=o['r'], depth=o['h'], location=yz(o['pos'])); ob = bpy.context.object
+            ax = o.get('axis', 'y'); ob.rotation_euler = {'y': (0, 0, 0), 'x': (0, math.pi / 2, 0), 'z': (math.pi / 2, 0, 0)}[ax]
+        bpy.ops.object.transform_apply(scale=True, rotation=(o['kind'] == 'cyl'))
+        if any(rot): ob.rotation_euler = Euler([math.radians(v) for v in (rot[0], -rot[2], rot[1])])   # engine (rx, ry, rz) -> Blender; yaw ry = Blender z
+        if R.get('style', {}).get('bevel') and o['kind'] == 'box' and not o.get('nobevel'): bv = ob.modifiers.new('bevel', 'BEVEL'); bv.width = min(R['style']['bevel'], min(o['size']) / 3); bv.segments = 2
+        ob.data.materials.append(mat(o['name'] + '_m', o.get('color', '#808080'), o.get('emit', 0), o.get('rough', .7)))
+        if o.get('group'): groups.setdefault(o['group'], []).append(ob)
     elif o['kind'] == 'asset':
         f = os.path.join(BASE, o['file']); before = set(bpy.data.objects)
         if f.endswith(('.glb', '.gltf')): bpy.ops.import_scene.gltf(filepath=f)
@@ -50,6 +57,14 @@ for o in R.get('objects', []):
         ob.scale = [o.get('scale', 1)] * 3
     else: continue
     ob.name = o['name']; objs.append(ob)
+for gname, members in groups.items():                                          # "group": props that share one baked texture (fewer bakes, one draw call each)
+    bpy.ops.object.select_all(action='DESELECT')
+    for x in members:
+        if x.modifiers:
+            bpy.context.view_layer.objects.active = x; x.select_set(True); bpy.ops.object.convert(target='MESH')
+        x.select_set(True)
+    bpy.context.view_layer.objects.active = members[0]; bpy.ops.object.join(); j = bpy.context.object; j.name = gname
+    objs = [x for x in objs if x not in members] + [j]
 for c in R.get('colliders', []):
     bpy.ops.mesh.primitive_cube_add(size=1, location=yz(c['pos'])); ob = bpy.context.object; s = c['size']; ob.scale = (s[0], s[2], s[1]); ob.name = c['name']; ob.hide_render = True
 for L in R.get('lights', []):
@@ -86,6 +101,7 @@ for ob in objs:
     if ob.modifiers: bpy.ops.object.convert(target='MESH')
     bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='SELECT'); bpy.ops.uv.smart_project(island_margin=.02); bpy.ops.object.mode_set(mode='OBJECT')
     res = RES if max(ob.dimensions) > 2 else RES // 2
+    if ob.name in groups: res = min(RES * 2, 4096)
     img = bpy.data.images.new(ob.name + '_bake', res, res);
     for m in ob.data.materials:
         n = m.node_tree.nodes.new('ShaderNodeTexImage'); n.image = img; m.node_tree.nodes.active = n
