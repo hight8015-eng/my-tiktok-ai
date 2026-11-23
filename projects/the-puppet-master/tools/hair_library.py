@@ -125,9 +125,12 @@ def hair_curly(d, view='F'):
     c = hexc('#6b4630')
     if view == 'B':
         poly(d, cr(_curls(CX, 520, 262, 250, 0, 360, 22, .07)[:-1], 5), c); return
-    top = _curls(CX, 470, 268, 215, 192, 348, 14, .08)                     # bumpy crown from the left temple over to the right temple
-    fringe = [(CX + 246, 520), (CX + 190, 500), (CX + 150, 452), (CX + 96, 486), (CX + 40, 440), (CX - 20, 482), (CX - 80, 444), (CX - 140, 490), (CX - 196, 462), (CX - 250, 528)]
-    poly(d, cr(top + fringe, 5), c)
+    # user rule 2026-11-23: hair flows down the sides and JOINS the head (curly sideburns to the ear line), never a cap sitting on top
+    left = [(CX - 232, 628), (CX - 262, 566), (CX - 248, 512), (CX - 276, 452)]
+    top = _curls(CX, 470, 268, 215, 196, 344, 14, .08)                     # bumpy crown from the left temple over to the right temple
+    right = [(CX + 276, 452), (CX + 248, 512), (CX + 264, 566), (CX + 234, 628)]
+    fringe = [(CX + 206, 592), (CX + 196, 520), (CX + 150, 470), (CX + 96, 500), (CX + 40, 456), (CX - 20, 496), (CX - 80, 458), (CX - 140, 502), (CX - 194, 522), (CX - 206, 592)]
+    poly(d, cr(left + top + right + fringe, 5), c)
     hl(d, [(CX - 120, 345), (CX - 40, 318), (CX + 30, 330), (CX - 50, 352)], c)
     for x, y in [(CX - 150, 390), (CX - 60, 360), (CX + 40, 372), (CX + 130, 396), (CX - 100, 430), (CX + 90, 436)]:
         line(d, arc(x, y, 26, 20, 200, 340, 8), lw=4 * K, col=shade(c, .62))
