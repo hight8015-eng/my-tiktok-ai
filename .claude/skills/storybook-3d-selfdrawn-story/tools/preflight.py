@@ -25,6 +25,10 @@ if sj.exists():
     S = json.loads(sj.read_text(encoding='utf-8')); miss = [k for k, v in S.items() if 'ballH' not in v]
     g(not miss, 'sprites have head masks (headmask.py ran)', ', '.join(miss[:6]))
 else: g(False, 'src/sprites/sprites.json present')
+if (R / 'chars' / 'LOCK.json').exists():                                            # v8 M3: only approved characters go into shots
+    r = subprocess.run([sys.executable, str(Path(__file__).with_name('charlock.py')), 'check', str(R)], capture_output=True, text=True)
+    g(r.returncode == 0, 'characters approved (LOCK.json)', r.stdout.strip())
+else: g(None, 'characters approved (LOCK.json)', 'no LOCK.json yet: approve the sheets from tools/charsheet.py')
 try:
     import psutil; ram = psutil.virtual_memory().available / 1e9; g(True if ram >= a.workers * 1.2 else None, f'RAM for {a.workers} workers', f'{ram:.1f} GB available, ~1.2 GB per worker')
 except ImportError: pass

@@ -4,6 +4,7 @@ import * as Wd from './world.js';
 import { makeCast, makeChar, pose, CHARS, loadSprites, updateSprites, SPRG, ANIM, OVL, applySmooth, attachHeld, headBall } from './chars.js';
 import { SHOTS, initShots, runShot, COVER, BENCH } from './shots.js';
 import { bigWordsReset } from './text3d.js';
+import { POSES } from './acting.js';
 const timing = await (await fetch('timing.json')).json(), project = await (await fetch('project.json')).json();
 await E.fontsReady; await loadSprites(project.cast); E.scene.add(SPRG); makeCast(project.cast); initShots(timing); Wd.redrawSign();
 const out = document.getElementById('out'), X = out.getContext('2d');
@@ -366,6 +367,31 @@ window.steps = (t0 = 0, t1 = timing.end) => { globalThis.STEPLOG = []; const out
     const sh = SHOTS[i]; globalThis.FRAME_T = t; const n = globalThis.STEPLOG.length; try { sh.fn(t - sh.t0, t); } catch (e) { }
     for (const e of globalThis.STEPLOG.splice(n)) out.push({ ...e, t: +t.toFixed(3), shot: sh.id }); }
   globalThis.STEPLOG = null; return out; };
+// v8.1 charpose (M3, Character Approval Studio): ONE cast member (project.json cast id) alone on a flat background, drawn by the same
+// sprite + rig code the shots use, so what is approved is what appears on screen. o = { id, ry: yaw deg (0 = facing camera),
+// ex: expression, pose: POSES name, frame: 'body' | 'head', bg: '#hex', light: 'studio' | 'night' }. Returns a PNG data URL.
+const CP_LIGHT = { studio: { top: '#3a3542', mid: '#3a3542', hor: '#3a3542', glowAmt: 0, sunDir: [-.6, .7, 1], sunC: '#fff3e2', sunI: 2.3, hemiS: '#ffffff', hemiG: '#d9cfc2', hemiI: 2.4, fogN: 900, fogF: 2500, stars: 0, moon: 0 },
+  night: { top: '#1a1424', mid: '#1a1424', hor: '#1a1424', glowAmt: 0, sunDir: [.5, .6, .8], sunC: '#b9a8ff', sunI: 1.2, hemiS: '#6b5a8a', hemiG: '#2a2030', hemiI: 1.4, fogN: 900, fogF: 2500, stars: 0, moon: 0 } };
+let cpHidden = null;
+window.charpose = (o = {}) => {
+  reset0();
+  E.scene.children.forEach(c => { if (!c.isLight && c !== Wd.sky && c !== SPRG && c.visible) { c.visible = false; (cpHidden ||= []).push(c); } }); SPRG.visible = true;
+  const bg = o.bg || '#3a3542', L = { ...(CP_LIGHT[o.light] || CP_LIGHT.studio), top: bg, mid: bg, hor: bg, fog: bg };
+  Wd.applyLight('dusk', L);
+  const C = CHARS[o.id]; if (!C) throw new Error('charpose: no cast id ' + o.id);
+  Object.values(CHARS).forEach(c => { c.g.visible = false; });
+  if (C.g.parent !== E.scene) E.scene.add(C.g);
+  for (const k of ['_vw', '_vf', '_vft', '_hvw', '_hvf', '_hvft', '_acc', '_trail', '_roots', '_hy', '_hyT', '_hold']) delete C[k];   // view hysteresis + smoothing caches: every sheet image stands alone
+  C.g.visible = true; const P = { ...(o.pose ? POSES[o.pose] : {}), p: [0, 0, 0], ry: o.ry || 0, ex: o.ex || 'neutral', head: o.head || [0, 0, 0], noBlink: true };
+  pose(C, P); E.scene.updateMatrixWorld(true);
+  // frame from the real head: first a provisional camera so the sprites are placed, then aim at the head ball / whole figure
+  E.camera.position.set(0, 1, 9); E.camera.fov = 20; E.camera.updateProjectionMatrix(); E.camera.up.set(0, 1, 0); E.camera.lookAt(0, 1, 0); E.camera.updateMatrixWorld(); updateSprites(E.camera);
+  const B = headBall(C), hy = B ? B.c.y : 1.6, hr = B ? B.r : .3, top = hy + hr * 1.5, cy = o.span ? o.cy ?? o.span / 2 : o.frame === 'head' ? hy : top / 2, span = o.span || (o.frame === 'head' ? hr * 3.4 : top * 1.18);   // o.span (+ o.cy) = one fixed frame for a line-up
+  E.camera.position.set(0, cy, 9); E.camera.fov = 2 * Math.atan(span / 2 / 9) * 180 / Math.PI; E.camera.updateProjectionMatrix(); E.camera.lookAt(0, cy, 0);
+  E.camera.updateMatrixWorld(); updateSprites(E.camera); Wd.setShadowFocus(0, cy, 0, 3);
+  Object.assign(E.POST, { dof: 0, mblur: [0, 0], vig: 0, leak: 0, grain: 0, focus: 9 });
+  Wd.updateSky(0); E.render(); X.drawImage(E.glc, 0, 0); return out.toDataURL('image/png');
+};
 // v8.0 camdump (M2): the camera and the cast of every frame WITHOUT rendering (seconds for a whole episode), for tools/film_check.py.
 // Per frame: shot id + transition, camera position / forward / fov, screen speed of the picture in px per frame at 720x1280 (a 3x3 grid of
 // points at the focus distance, seen by the last frame's camera, projected through this frame's camera), and every visible character's

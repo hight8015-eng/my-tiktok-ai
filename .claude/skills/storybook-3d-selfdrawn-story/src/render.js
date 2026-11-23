@@ -21,6 +21,9 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.ttf': 'font/ttf
     for (const id of ['C01', 'C02', 'C03', 'C04', 'C05', 'C06']) for (const [v, ry] of [['F', 0], ['Q', -45], ['S', -90], ['B', 180]]) {
       const d = await p.evaluate((o) => window.refsheet(o), { id, ry }); fs.writeFileSync(`${out}/${id}-${v}.png`, Buffer.from(d.split(',')[1], 'base64')); console.log(id, v); }
   } else if (mode === 'steps') { fs.writeFileSync(out, JSON.stringify(await p.evaluate(([a, b]) => window.steps(a == null ? 0 : +a, b == null ? undefined : +b), rest), null, 0)); console.log('steps ->', out);
+  } else if (mode === 'charpose') { fs.mkdirSync(out, { recursive: true }); const L = JSON.parse(fs.readFileSync(rest[0], 'utf-8'));   // v8.1: [{ file, id, ry, ex, pose, frame, bg, light }]
+    for (const o of L) { const d = await p.evaluate((o) => window.charpose(o), o); fs.writeFileSync(path.join(out, o.file), Buffer.from(d.split(',')[1], 'base64')); }
+    console.log('charpose', L.length, '->', out);
   } else if (mode === 'camdump') { fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true }); fs.writeFileSync(out, JSON.stringify(await p.evaluate(([a, b]) => window.camdump(a == null ? 0 : +a, b == null ? undefined : +b), rest))); console.log('camdump ->', out);   // v8.0: camera + cast per frame, no rendering
   } else if (mode === 'list') { console.log(JSON.stringify(await p.evaluate(() => window.SHOTLIST))); }
   else {
